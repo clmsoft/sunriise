@@ -1,0 +1,30 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.le.sunriise</groupId>
+  <artifactId>sunriise</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <name>sunriise</name>
+  <description>sunriise</description>
+  <dependencies>
+  	<dependency>
+  		<groupId>com.healthmarketscience.jackcess</groupId>
+  		<artifactId>jackcess-encrypt</artifactId>
+  		<version>1.0.0</version>
+  		<type>jar</type>
+  		<scope>compile</scope>
+  	</dependency>
+  	<dependency>
+  		<groupId>log4j</groupId>
+  		<artifactId>log4j</artifactId>
+  		<version>1.2.14</version>
+  		<type>jar</type>
+  		<scope>compile</scope>
+  	</dependency>
+  </dependencies>
+  <distributionManagement>
+    <site>
+      <id>sunriise-build-site</id>
+      <url>scp://shell.sourceforge.net/home/groups/s/su/sunriise/htdocs</url>
+    </site>    
+  </distributionManagement>  
+</project>
