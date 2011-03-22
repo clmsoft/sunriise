@@ -23,218 +23,237 @@ import com.healthmarketscience.jackcess.Table;
 import com.healthmarketscience.jackcess.query.Query;
 
 public class DumpMsIsamDb {
-	private static final Logger log = Logger.getLogger(DumpMsIsamDb.class);
+    private static final Logger log = Logger.getLogger(DumpMsIsamDb.class);
 
-	private File dbFile = null;
-	private Database db = null;
+    private Database db = null;
 
-	public DumpMsIsamDb(File inFile, String password) throws IOException {
-		CodecProvider cryptCodecProvider = new CryptCodecProvider(password);
-		boolean readOnly = true;
-		boolean autoSync = true;
-		Charset charset = null;
-		TimeZone timeZone = null;
-		this.dbFile = inFile;
-		this.db = Database.open(inFile, readOnly, autoSync, charset, timeZone,
-				cryptCodecProvider);
-	}
+    public Database openDb(File inFile, String password) throws IOException {
+        CodecProvider cryptCodecProvider = new CryptCodecProvider(password);
+        boolean readOnly = true;
+        boolean autoSync = true;
+        Charset charset = null;
+        TimeZone timeZone = null;
+        return Database.open(inFile, readOnly, autoSync, charset, timeZone, cryptCodecProvider);
+    }
 
-	private void exportAll(File dir) throws IOException {
-		ExportUtil.exportAll(db, dir, "csv", true);
-	}
+    public void writeToDir(File outDir) throws IOException {
+        PrintWriter writer = null;
+        startExport(outDir);
+        try {
+            File file = new File(outDir, "db.txt");
+            writer = new PrintWriter(new BufferedWriter(new FileWriter(file)));
+            // writer.println("file=" + dbFile);
+            // writer.println("fileFormat: " + db.getFileFormat());
+            writer.println(db.toString());
 
-	private void writeToDir(File outDir) throws IOException {
-		PrintWriter writer = null;
-		try {
-			File file = new File(outDir, "db.txt");
-			writer = new PrintWriter(new BufferedWriter(new FileWriter(file)));
-			// writer.println("file=" + dbFile);
-			// writer.println("fileFormat: " + db.getFileFormat());
-			writer.println(db.toString());
+            writer.println("");
+            List<Query> queries = db.getQueries();
+            writer.println("getQueries, " + queries.size());
+            for (Query query : queries) {
+                writer.println(query.toSQLString());
+            }
+            Set<String> tableNames = db.getTableNames();
+            // writer.println("tableNames.size: " + tableNames.size());
+            int count = 0;
+            startExportTables(tableNames.size());
+            try {
+                for (String tableName : tableNames) {
+                    try {
+                        log.info("tableName=" + tableName);
+                        if (! exportedTable(tableName, count)) {
+                            break;
+                        }
+                        writeTableInfo(db, tableName, outDir);
+                        count++;
+                    } catch (IOException e) {
+                        log.warn("Cannot write table info for tableName=" + tableName);
+                    } 
+                }
+            } finally {
+                endExportTables(count);
+            }
+        } finally {
+            if (writer != null) {
+                writer.close();
+            }
+            writer = null;
+            endExport(outDir);
+        }
+    }
 
-			writer.println("");
-			List<Query> queries = db.getQueries();
-			writer.println("getQueries, " + queries.size());
-			for (Query query : queries) {
-				writer.println(query.toSQLString());
-			}
-			Set<String> tableNames = db.getTableNames();
-			// writer.println("tableNames.size: " + tableNames.size());
-			for (String tableName : tableNames) {
-				try {
-					log.info("tableName=" + tableName);
-					writeTableInfo(tableName, outDir);
-				} catch (IOException e) {
-					log.warn("Cannot write table info for tableName="
-							+ tableName);
-				}
-			}
-		} finally {
-			if (writer != null) {
-				writer.close();
-			}
-			writer = null;
-		}
-	}
 
-	private void writeTableInfo(String tableName, File outDir)
-			throws IOException {
-		File dir = new File(outDir, tableName);
-		if ((!dir.exists()) && (!dir.mkdirs())) {
-			throw new IOException("Cannot create directory, dir=" + dir);
-		}
+    protected void startExport(File outDir) {
+    }
 
-		Table table = db.getTable(tableName);
+    protected void endExport(File outDir) {
+    }
 
-		File file = new File(dir, "table.txt");
-		PrintWriter writer = null;
-		try {
-			writer = new PrintWriter(new BufferedWriter(new FileWriter(file)));
-			writer.println(table.toString());
-		} finally {
-			if (writer != null) {
-				writer.close();
-				writer = null;
-			}
-		}
+    protected void startExportTables(int size) {
+    }
 
-		writeColumnsInfo(table, dir);
+    protected boolean exportedTable(String tableName, int count) {
+        return true;
+    }
 
-		writeRowsInfo(table, dir);
-	}
+    protected void endExportTables(int count) {
+    }
 
-	private void writeColumnsInfo(Table table, File dir) throws IOException {
-		// Table table = db.getTable(tableName);
-		File columnsFile = null;
-		// columnsFile = new File(dir, "columns.txt");
-		if (columnsFile != null) {
-			PrintWriter writer = null;
-			try {
-				writer = new PrintWriter(new BufferedWriter(new FileWriter(
-						columnsFile)));
-				writer.println("#name: " + table.getName());
-				writer.println("#columns: " + table.getColumnCount());
-				writer.println("");
-				List<Column> columns = table.getColumns();
-				for (Column column : columns) {
-					writer.println(column.getName() + ","
-							+ column.getType().toString());
-				}
-			} finally {
-				if (writer != null) {
-					writer.close();
-					writer = null;
-				}
-			}
-		}
+    private static void writeTableInfo(Database db, String tableName, File outDir) throws IOException {
+        File dir = new File(outDir, tableName);
+        if ((!dir.exists()) && (!dir.mkdirs())) {
+            throw new IOException("Cannot create directory, dir=" + dir);
+        }
 
-		File columnsDir = new File(dir, "columns.d");
-		if ((!columnsDir.exists()) && (!columnsDir.mkdirs())) {
-			throw new IOException("Cannot create directory, dir=" + columnsDir);
-		}
-		List<Column> columns = table.getColumns();
-		for (Column column : columns) {
-			writeColumnsInfo(columnsDir, column);
-		}
-	}
+        Table table = db.getTable(tableName);
 
-	private void writeColumnsInfo(File columnsDir, Column column)
-			throws IOException {
-		File file = new File(columnsDir, column.getName() + ".txt");
-		PrintWriter writer = null;
-		try {
-			writer = new PrintWriter(new BufferedWriter(new FileWriter(file)));
-			writer.println(column.toString());
-		} finally {
-			if (writer != null) {
-				writer.close();
-				writer = null;
-			}
-		}
-	}
+        File file = new File(dir, "table.txt");
+        PrintWriter writer = null;
+        try {
+            writer = new PrintWriter(new BufferedWriter(new FileWriter(file)));
+            writer.println(table.toString());
+        } finally {
+            if (writer != null) {
+                writer.close();
+                writer = null;
+            }
+        }
 
-	private void writeRowsInfo(Table table, File dir) throws IOException {
-		File file = new File(dir, "rows.csv");
-		BufferedWriter writer = null;
-		try {
-			writer = new BufferedWriter(new FileWriter(file));
-			ExportFilter filter = SimpleExportFilter.INSTANCE;
-			ExportUtil.exportWriter(db, table.getName(), writer, true,
-					ExportUtil.DEFAULT_DELIMITER,
-					ExportUtil.DEFAULT_QUOTE_CHAR, filter);
-		} finally {
-			if (writer != null) {
-				writer.close();
-				writer = null;
-			}
-		}
+        writeColumnsInfo(table, dir);
 
-	}
+        writeRowsInfo(db, table, dir);
+    }
 
-	private void close() {
-		if (db != null) {
-			try {
-				db.close();
-			} catch (IOException e) {
-				log.warn(e);
-			} finally {
-				db = null;
-			}
-		}
-	}
+    private static void writeColumnsInfo(Table table, File dir) throws IOException {
+        // Table table = db.getTable(tableName);
+        File columnsFile = null;
+        // columnsFile = new File(dir, "columns.txt");
+        if (columnsFile != null) {
+            PrintWriter writer = null;
+            try {
+                writer = new PrintWriter(new BufferedWriter(new FileWriter(columnsFile)));
+                writer.println("#name: " + table.getName());
+                writer.println("#columns: " + table.getColumnCount());
+                writer.println("");
+                List<Column> columns = table.getColumns();
+                for (Column column : columns) {
+                    writer.println(column.getName() + "," + column.getType().toString());
+                }
+            } finally {
+                if (writer != null) {
+                    writer.close();
+                    writer = null;
+                }
+            }
+        }
 
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		String inFileName = null;
-		String outDirName = null;
-		String password = null;
-		if (args.length == 2) {
-			inFileName = args[0];
-			outDirName = args[1];
-			password = null;
-		} else if (args.length == 3) {
-			inFileName = args[0];
-			outDirName = args[1];
-			password = args[2];
-		} else {
-			Class clz = DumpMsIsamDb.class;
-			System.out.println("Usage: " + clz.getName()
-					+ " sample.mny outDir [password]");
-			System.exit(1);
-		}
+        File columnsDir = new File(dir, "columns.d");
+        if ((!columnsDir.exists()) && (!columnsDir.mkdirs())) {
+            throw new IOException("Cannot create directory, dir=" + columnsDir);
+        }
+        List<Column> columns = table.getColumns();
+        for (Column column : columns) {
+            writeColumnsInfo(columnsDir, column);
+        }
+    }
 
-		File inFile = new File(inFileName);
-		File outDir = new File(outDirName);
+    private static void writeColumnsInfo(File columnsDir, Column column) throws IOException {
+        File file = new File(columnsDir, column.getName() + ".txt");
+        PrintWriter writer = null;
+        try {
+            writer = new PrintWriter(new BufferedWriter(new FileWriter(file)));
+            writer.println(column.toString());
+        } finally {
+            if (writer != null) {
+                writer.close();
+                writer = null;
+            }
+        }
+    }
 
-		log.info("inFile=" + inFile);
-		log.info("outDir=" + outDir);
+    private static void writeRowsInfo(Database db, Table table, File dir) throws IOException {
+        File file = new File(dir, table.getName() + "-" + "rows.csv");
+        BufferedWriter writer = null;
+        try {
+            writer = new BufferedWriter(new FileWriter(file));
+            ExportFilter filter = SimpleExportFilter.INSTANCE;
+            ExportUtil.exportWriter(db, table.getName(), writer, true, ExportUtil.DEFAULT_DELIMITER, ExportUtil.DEFAULT_QUOTE_CHAR, filter);
+        } finally {
+            if (writer != null) {
+                writer.close();
+                writer = null;
+            }
+        }
 
-		DumpMsIsamDb dbHelper = null;
-		try {
-			if (!inFile.exists()) {
-				throw new IOException("File="
-						+ inFile.getAbsoluteFile().getAbsolutePath()
-						+ " does not exist.");
-			}
-			dbHelper = new DumpMsIsamDb(inFile, password);
-			if ((!outDir.exists()) && (!outDir.mkdirs())) {
-				throw new IOException("Cannot create directory, outDir="
-						+ outDir);
-			}
-			dbHelper.writeToDir(outDir);
-			// dbHelper.exportAll(outDir);
-		} catch (IllegalStateException e) {
-			// java.lang.IllegalStateException: Incorrect password provided
-			log.error(e);
-		} catch (IOException e) {
-			log.error(e);
-		} finally {
-			if (dbHelper != null) {
-				dbHelper.close();
-			}
-		}
-		log.info("< DONE");
-	}
+    }
+
+    private void close() {
+        if (db != null) {
+            try {
+                db.close();
+            } catch (IOException e) {
+                log.warn(e);
+            } finally {
+                db = null;
+            }
+        }
+    }
+
+    /**
+     * @param args
+     */
+    public static void main(String[] args) {
+        String inFileName = null;
+        String outDirName = null;
+        String password = null;
+        if (args.length == 2) {
+            inFileName = args[0];
+            outDirName = args[1];
+            password = null;
+        } else if (args.length == 3) {
+            inFileName = args[0];
+            outDirName = args[1];
+            password = args[2];
+        } else {
+            Class clz = DumpMsIsamDb.class;
+            System.out.println("Usage: " + clz.getName() + " sample.mny outDir [password]");
+            System.exit(1);
+        }
+
+        File inFile = new File(inFileName);
+        File outDir = new File(outDirName);
+
+        log.info("inFile=" + inFile);
+        log.info("outDir=" + outDir);
+
+        DumpMsIsamDb dbHelper = null;
+        try {
+            if (!inFile.exists()) {
+                throw new IOException("File=" + inFile.getAbsoluteFile().getAbsolutePath() + " does not exist.");
+            }
+            dbHelper = new DumpMsIsamDb();
+            dbHelper.setDb(dbHelper.openDb(inFile, password));
+            if ((!outDir.exists()) && (!outDir.mkdirs())) {
+                throw new IOException("Cannot create directory, outDir=" + outDir);
+            }
+            dbHelper.writeToDir(outDir);
+        } catch (IllegalStateException e) {
+            // java.lang.IllegalStateException: Incorrect password provided
+            log.error(e);
+        } catch (IOException e) {
+            log.error(e);
+        } finally {
+            if (dbHelper != null) {
+                dbHelper.close();
+            }
+        }
+        log.info("< DONE");
+    }
+
+    public Database getDb() {
+        return db;
+    }
+
+    public void setDb(Database db) {
+        this.db = db;
+    }
 }
