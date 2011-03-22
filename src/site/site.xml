@@ -4,15 +4,12 @@
   <body>
     <menu name="Sunriise">
       <item name="About" href="index.html" />
-      <item name="Downloads" href="https://sourceforge.net/projects/sunriise/files/" />
       <item name="SourceForge Project" href="http://sourceforge.net/projects/sunriise/" />
-      <item name="Jackcess" href="http://jackcess.sourceforge.net/" />
-      <item name="Jackcess Encrypt" href="https://sourceforge.net/projects/jackcessencrypt/" />
-
     </menu>
-
+    <menu name="Libraries">
+      <item name="Jackcess" href="http://jackcess.sourceforge.net/" />
+      <item name="Jackcess Encrypt" href="http://jackcessencrypt.sourceforge.net/" />
+    </menu>
     <menu ref="reports" />
-
   </body>
-
 </project>

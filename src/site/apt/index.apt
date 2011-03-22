@@ -1,6 +1,89 @@
 About
 
-  *sunriise* goal is to provide read/write support for Microsoft Money *.mny file.
+  <<sunriise>> goal is to provide read/write support for Microsoft Money *.mny file.
   
+  <<sunriise>> depends on the following libraries for MS Access databases support
   
+    * {{{http://jackcess.sourceforge.net/}Jackcess}}
+    
+    * {{{http://jackcessencrypt.sourceforge.net/}Jackcess Encrypt}}
+    
+    []
+    
+News - 2011/03/22
+    
+  We have our first build. 
   
+[images/image_001.jpg] Simple *.mny viewer
+  
+  If you want to just jump right into it:
+        
+        [[1]] Download the *.jar file: file <<sunriise-0.0.1-SNAPSHOT-jar-with-dependencies.jar >> {{{https://sourceforge.net/projects/sunriise/files/}from this link}}
+        
+        
+        [[1]]  Run: double click on <<sunriise-0.0.1-SNAPSHOT-jar-with-dependencies.jar>> to start. If that does not work, try open a command-line window and run
+        
+----
+java -jar sunriise-0.0.1-SNAPSHOT-jar-with-dependencies.jar
+---- 
+        
+        [[1]]  Open an existing *.mny file, use menu item. <<Tip:>> samples.mny is a good candidate.
+        
+----
+File -> Open
+----        
+        
+        [[1]]  Browse table(s): The left side view has a list of table names. The right side has a table showing the table's content.
+        
+        [[1]]  Export to CSV files: to export the database content to a set of *.csv files (can be later opened by Excel). You will have to choose a directory where to store the
+export contents. You can create new directory in the file chooser.
+        
+----
+File -> Export -> To CSV file
+----        
+
+        [[1]]  Export to *.mdb file: to export the database content to a *.mdb file that can be opened by Access. The exported *.mdb file has no password.
+        
+----
+File -> Export -> To *.mdb file
+----         
+   
+        []
+           
+    The primary goals for this build
+  
+      * To get the project started.
+  
+      * To create a simple "client" to demonstrate that we can parse the content of a *.mny file
+  
+      * It is also becoming apparent that we need to better understand the relationship between the tables. To that ends, I add some functionality to export the content to other formats which has
+better tool support for viewing/analyzing: *.csv (Excel), *.mdb (Access).
+
+      * You can think of this build as a equivalent of <<MoneyLink>> but with unlimited access to all data. 
+ 
+   []
+     
+What can you do to help?
+
+  * If you are a <<user>>: provide developers with feature request. Think of things that are not working with MM right now (for example: exchange rate not being updated). Log bugs, feature
+request at {{{https://sourceforge.net/tracker/?group_id=404853&atid=1677385}the project 'tracker'}}. You can start discussing ideas at
+{{{https://sourceforge.net/projects/sunriise/forums}the project forum}}. 
+  
+  * If you are a <<database>> person: help us document the table model: what is its content? how does table1 related to table2? Ultimately, we want to know: for example, to
+update currency exchange rate, which table(s), column(s) needed to be updated.
+  
+  * If you are a <<developer>>: set up your dev environment. Familiarize yourself with the tool set: Subversion (source code control), Eclipse (IDE), Maven (build tool), Java. Three
+concrete features I want to get to in the near future:
+
+    * Update currency exchange rate
+    
+    * Update quote prices
+    
+    * Some of the fields in the investor page are calculated, see if it is possible to update them.
+    
+    []
+    
+
+    
+
+        
