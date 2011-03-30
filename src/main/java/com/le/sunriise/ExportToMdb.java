@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -26,8 +25,6 @@ import com.healthmarketscience.jackcess.CryptCodecProvider;
 import com.healthmarketscience.jackcess.Cursor;
 import com.healthmarketscience.jackcess.DataType;
 import com.healthmarketscience.jackcess.Database;
-import com.healthmarketscience.jackcess.ImportFilter;
-import com.healthmarketscience.jackcess.SimpleImportFilter;
 import com.healthmarketscience.jackcess.Table;
 
 public class ExportToMdb {
@@ -72,7 +69,7 @@ public class ExportToMdb {
         Database destDb = null;
 
         try {
-            srcDb = openSrcDb(srcFile, srcPassword);
+            srcDb = Utils.openDbReadOnly(srcFile, srcPassword);
             destDb = export(srcDb, destFile);
         } finally {
             if (srcDb != null) {
@@ -110,7 +107,7 @@ public class ExportToMdb {
         try {
             for (String tableName : tableNames) {
                 Table table = srcDb.getTable(tableName);
-                if (! copyTable(table, destDb)) {
+                if (!copyTable(table, destDb)) {
                     break;
                 }
                 addedCount++;
@@ -134,7 +131,7 @@ public class ExportToMdb {
     }
 
     private boolean copyTable(Table srcTable, Database destDb) throws IOException {
-        if (! startCopyTable(srcTable.getName())) {
+        if (!startCopyTable(srcTable.getName())) {
             return false;
         }
         try {
@@ -157,7 +154,7 @@ public class ExportToMdb {
                 List<Object[]> rows = new ArrayList<Object[]>(batchSize);
                 StopWatch stopWatch = new StopWatch();
                 int rowCount = srcTable.getRowCount();
-                if (! startAddingRows(rowCount)) {
+                if (!startAddingRows(rowCount)) {
                     return false;
                 }
                 Cursor cursor = null;
@@ -171,7 +168,7 @@ public class ExportToMdb {
                             destTable.addRows(rows);
                             count += rows.size();
                             rows.clear();
-                            if (! addedRow(count)) {
+                            if (!addedRow(count)) {
                                 break;
                             }
                         }
@@ -193,7 +190,7 @@ public class ExportToMdb {
         } finally {
             endCopyTable(srcTable.getName());
         }
-        
+
         return true;
     }
 
@@ -281,7 +278,7 @@ public class ExportToMdb {
         }
     }
 
-    private Database openSrcDb(File mdbFile, String password) throws IOException {
+    private Database openSrcDbX(File mdbFile, String password) throws IOException {
         Database db = null;
 
         boolean readOnly = true;

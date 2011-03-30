@@ -5,16 +5,12 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Set;
-import java.util.TimeZone;
 
 import org.apache.log4j.Logger;
 
-import com.healthmarketscience.jackcess.CodecProvider;
 import com.healthmarketscience.jackcess.Column;
-import com.healthmarketscience.jackcess.CryptCodecProvider;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.ExportFilter;
 import com.healthmarketscience.jackcess.ExportUtil;
@@ -26,15 +22,6 @@ public class DumpMsIsamDb {
     private static final Logger log = Logger.getLogger(DumpMsIsamDb.class);
 
     private Database db = null;
-
-    public Database openDb(File inFile, String password) throws IOException {
-        CodecProvider cryptCodecProvider = new CryptCodecProvider(password);
-        boolean readOnly = true;
-        boolean autoSync = true;
-        Charset charset = null;
-        TimeZone timeZone = null;
-        return Database.open(inFile, readOnly, autoSync, charset, timeZone, cryptCodecProvider);
-    }
 
     public void writeToDir(File outDir) throws IOException {
         PrintWriter writer = null;
@@ -60,14 +47,14 @@ public class DumpMsIsamDb {
                 for (String tableName : tableNames) {
                     try {
                         log.info("tableName=" + tableName);
-                        if (! exportedTable(tableName, count)) {
+                        if (!exportedTable(tableName, count)) {
                             break;
                         }
                         writeTableInfo(db, tableName, outDir);
                         count++;
                     } catch (IOException e) {
                         log.warn("Cannot write table info for tableName=" + tableName);
-                    } 
+                    }
                 }
             } finally {
                 endExportTables(count);
@@ -80,7 +67,6 @@ public class DumpMsIsamDb {
             endExport(outDir);
         }
     }
-
 
     protected void startExport(File outDir) {
     }
@@ -231,7 +217,7 @@ public class DumpMsIsamDb {
                 throw new IOException("File=" + inFile.getAbsoluteFile().getAbsolutePath() + " does not exist.");
             }
             dbHelper = new DumpMsIsamDb();
-            dbHelper.setDb(dbHelper.openDb(inFile, password));
+            dbHelper.setDb(Utils.openDbReadOnly(inFile, password));
             if ((!outDir.exists()) && (!outDir.mkdirs())) {
                 throw new IOException("Cannot create directory, outDir=" + outDir);
             }

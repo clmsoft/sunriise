@@ -6,18 +6,23 @@ import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseListener;
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.nio.ByteBuffer;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.swing.AbstractAction;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -27,6 +32,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JSplitPane;
@@ -41,6 +47,10 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 
 import org.apache.log4j.Logger;
@@ -52,9 +62,8 @@ import org.jdesktop.beansbinding.ELProperty;
 import org.jdesktop.swingbinding.JListBinding;
 import org.jdesktop.swingbinding.SwingBindings;
 
-import com.healthmarketscience.jackcess.ByteUtil;
 import com.healthmarketscience.jackcess.Column;
-import com.healthmarketscience.jackcess.Cursor;
+import com.healthmarketscience.jackcess.DataType;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.PageChannel;
 import com.healthmarketscience.jackcess.Table;
@@ -67,7 +76,7 @@ import com.le.sunriise.ExportToMdb;
 import com.le.sunriise.model.bean.DataModel;
 
 public class MnyViewer {
-    private static final Logger log = Logger.getLogger(OpenDbDialog.class);
+    static final Logger log = Logger.getLogger(OpenDbDialog.class);
 
     private JFrame frame;
     protected File dbFile;
@@ -76,13 +85,170 @@ public class MnyViewer {
     private DataModel dataModel = new DataModel();
     private JList list;
     private JTable table;
+    private MnyTableModel tableModel;
+
     private JTextField textField;
+
+    boolean dbReadOnly = true;
 
     private Pattern tableNamePattern = Pattern.compile("^(.*) \\([0-9]+\\)$");
     private JTextArea textArea;
     private JTextArea headerTextArea;
 
+    private JMenuItem duplicateMenuItem;
+    private JMenuItem deleteMenuItem;
+
     private static final Executor threadPool = Executors.newCachedThreadPool();
+
+    private final class ExportToMdbAction implements ActionListener {
+        private JFileChooser fc = null;
+
+        public void actionPerformed(ActionEvent event) {
+            final Component source = (Component) event.getSource();
+            if (fc == null) {
+                fc = new JFileChooser(new File("."));
+                fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
+            }
+            if (fc.showSaveDialog(source) == JFileChooser.CANCEL_OPTION) {
+                return;
+            }
+            final File destFile = fc.getSelectedFile();
+            log.info("Export as *.mdb to file=" + destFile);
+
+            source.setEnabled(false);
+            Component parentComponent = MnyViewer.this.frame;
+            Object message = "Exporting to *.mdb ...";
+            String note = "";
+            int min = 0;
+            int max = 100;
+            final ProgressMonitor progressMonitor = new ProgressMonitor(parentComponent, message, note, min, max);
+            progressMonitor.setProgress(0);
+
+            Runnable command = new Runnable() {
+                public void run() {
+                    Database srcDb = null;
+                    Database destDb = null;
+                    Exception exception = null;
+
+                    try {
+                        srcDb = db;
+                        ExportToMdb exporter = new ExportToMdb() {
+                            private int progressCount = 0;
+                            private int maxCount = 0;
+                            private String currentTable = null;
+                            private int maxRows;
+
+                            protected void startCopyTables(int maxCount) {
+                                if (progressMonitor.isCanceled()) {
+                                    return;
+                                }
+                                this.maxCount = maxCount;
+                                Runnable doRun = new Runnable() {
+                                    public void run() {
+                                        progressMonitor.setProgress(0);
+                                    }
+                                };
+                                SwingUtilities.invokeLater(doRun);
+                            }
+
+                            protected void endCopyTables(int count) {
+                                Runnable doRun = new Runnable() {
+                                    public void run() {
+                                        progressMonitor.setProgress(100);
+                                    }
+                                };
+                                SwingUtilities.invokeLater(doRun);
+                            }
+
+                            protected boolean startCopyTable(String name) {
+                                super.startCopyTable(name);
+
+                                if (progressMonitor.isCanceled()) {
+                                    return false;
+                                }
+                                this.currentTable = name;
+                                Runnable doRun = new Runnable() {
+                                    public void run() {
+                                        progressMonitor.setNote("Table: " + currentTable);
+                                    }
+                                };
+                                SwingUtilities.invokeLater(doRun);
+                                return true;
+                            }
+
+                            protected void endCopyTable(String name) {
+                                progressCount++;
+                                Runnable doRun = new Runnable() {
+                                    public void run() {
+                                        progressMonitor.setProgress((progressCount * 100) / maxCount);
+                                    }
+                                };
+                                SwingUtilities.invokeLater(doRun);
+                            }
+
+                            protected boolean startAddingRows(int max) {
+                                if (progressMonitor.isCanceled()) {
+                                    return false;
+                                }
+                                this.maxRows = max;
+                                return true;
+                            }
+
+                            protected boolean addedRow(int count) {
+                                if (progressMonitor.isCanceled()) {
+                                    return false;
+                                }
+                                final String str = " (Copying rows: " + ((count * 100) / this.maxRows) + "%" + ")";
+                                Runnable doRun = new Runnable() {
+                                    public void run() {
+                                        progressMonitor.setNote("Table: " + currentTable + str);
+                                    }
+                                };
+                                SwingUtilities.invokeLater(doRun);
+                                return true;
+                            }
+
+                            protected void endAddingRows(int count, long delta) {
+                                super.endAddingRows(count, delta);
+                            }
+
+                        };
+                        destDb = exporter.export(srcDb, destFile);
+                    } catch (IOException e) {
+                        log.error(e);
+                        exception = e;
+                    } finally {
+                        if (destDb != null) {
+                            try {
+                                destDb.close();
+                            } catch (IOException e1) {
+                                log.warn(e1);
+                            } finally {
+                                destDb = null;
+                            }
+                        }
+                        log.info("< DONE, exported to file=" + destFile);
+                        final Exception exception2 = exception;
+                        Runnable doRun = new Runnable() {
+                            public void run() {
+                                if (exception2 != null) {
+                                    Component parentComponent = JOptionPane.getFrameForComponent(source);
+                                    String message = exception2.toString();
+                                    String title = "Error export to *.mdb file";
+                                    JOptionPane.showMessageDialog(parentComponent, message, title, JOptionPane.ERROR_MESSAGE);
+                                }
+                                if (source != null) {
+                                    source.setEnabled(true);
+                                }
+                            }
+                        };
+                        SwingUtilities.invokeLater(doRun);
+                    }
+                }
+            };
+            threadPool.execute(command);
+        }
+    }
 
     private final class ExportToCsvAction implements ActionListener {
         private JFileChooser fc = null;
@@ -101,7 +267,7 @@ public class MnyViewer {
             if (source != null) {
                 source.setEnabled(false);
             }
-            Component parentComponent = (source != null) ? source : frame;
+            Component parentComponent = frame;
             Object message = "Exporting to CSV files ...";
             int min = 0;
             int max = 100;
@@ -116,6 +282,7 @@ public class MnyViewer {
                     try {
                         DumpMsIsamDb exporter = new DumpMsIsamDb() {
                             private int maxTables = 0;
+
                             @Override
                             protected void startExport(File outDir) {
                                 super.startExport(outDir);
@@ -161,8 +328,7 @@ public class MnyViewer {
                             protected void endExportTables(int count) {
                                 super.endExportTables(count);
                             }
-                            
-                            
+
                         };
                         exporter.setDb(db);
                         exporter.writeToDir(dir);
@@ -190,61 +356,6 @@ public class MnyViewer {
                 }
             };
             threadPool.execute(command);
-        }
-    }
-
-    private final class MnyTableModel extends AbstractTableModel {
-        private final Table t;
-        private int currentRow = 0;
-        private Cursor c;
-        private Map<String, Object> data = null;
-
-        private MnyTableModel(Table t) throws IOException {
-            this.t = t;
-            this.c = Cursor.createCursor(t);
-            this.c.reset();
-            this.c.moveToNextRow();
-        }
-
-        public int getRowCount() {
-            return t.getRowCount();
-        }
-
-        public int getColumnCount() {
-            return t.getColumnCount();
-        }
-
-        public Object getValueAt(int rowIndex, int columnIndex) {
-            int delta = rowIndex - currentRow;
-            currentRow = rowIndex;
-            try {
-                if (delta == 0) {
-                    if (data == null) {
-                        data = c.getCurrentRow();
-                    }
-                } else if (delta < 0) {
-                    c.movePreviousRows(-delta);
-                    data = c.getCurrentRow();
-                } else {
-                    c.moveNextRows(delta);
-                    data = c.getCurrentRow();
-                }
-            } catch (IOException e) {
-                log.warn(e);
-            }
-
-            // String label = "" + rowIndex + ", " + columnIndex + ", " + delta;
-            Object value = data.get(getColumnName(columnIndex));
-            if (value instanceof byte[]) {
-                value = ByteUtil.toHexString((byte[]) value);
-            }
-
-            return value;
-        }
-
-        public String getColumnName(int column) {
-            List<Column> cols = t.getColumns();
-            return cols.get(column).getName();
         }
     }
 
@@ -329,7 +440,9 @@ public class MnyViewer {
         mntmNewMenuItem_1.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent event) {
                 Component component = (Component) event.getSource();
-                OpenDbDialog dialog = OpenDbDialog.showDialog(JOptionPane.getFrameForComponent(component), db, dbFile);
+                Component locationRelativeTo = JOptionPane.getFrameForComponent(component);
+                locationRelativeTo = MnyViewer.this.frame;
+                OpenDbDialog dialog = OpenDbDialog.showDialog(locationRelativeTo, db, dbFile);
                 if (!dialog.isCancel()) {
                     db = dialog.getDb();
                     dbFile = dialog.getDbFile();
@@ -352,6 +465,13 @@ public class MnyViewer {
                     } catch (IOException e) {
                         log.warn(e);
                     }
+                    dbReadOnly = dialog.getReadOnlyCheckBox().isSelected();
+                    if (duplicateMenuItem != null) {
+                        duplicateMenuItem.setEnabled(!dbReadOnly);
+                    }
+                    if (deleteMenuItem != null) {
+                        deleteMenuItem.setEnabled(!dbReadOnly);
+                    }
                     MnyViewer.this.dataModel.setTables(tables);
                 }
             }
@@ -366,155 +486,7 @@ public class MnyViewer {
         mnNewMenu_1.add(mntmNewMenuItem_3);
 
         JMenuItem mntmNewMenuItem_4 = new JMenuItem("To *.mdb");
-        mntmNewMenuItem_4.addActionListener(new ActionListener() {
-            private JFileChooser fc = null;
-
-            public void actionPerformed(ActionEvent event) {
-                final Component source = (Component) event.getSource();
-                if (fc == null) {
-                    fc = new JFileChooser(new File("."));
-                    fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
-                }
-                if (fc.showSaveDialog(source) == JFileChooser.CANCEL_OPTION) {
-                    return;
-                }
-                final File destFile = fc.getSelectedFile();
-                log.info("Export as *.mdb to file=" + destFile);
-
-                source.setEnabled(false);
-                Component parentComponent = source;
-                Object message = "Exporting to *.mdb ...";
-                String note = "";
-                int min = 0;
-                int max = 100;
-                final ProgressMonitor progressMonitor = new ProgressMonitor(parentComponent, message, note, min, max);
-                progressMonitor.setProgress(0);
-
-                Runnable command = new Runnable() {
-                    public void run() {
-                        Database srcDb = null;
-                        Database destDb = null;
-                        Exception exception = null;
-
-                        try {
-                            srcDb = db;
-                            ExportToMdb exporter = new ExportToMdb() {
-                                private int progressCount = 0;
-                                private int maxCount = 0;
-                                private String currentTable = null;
-                                private int maxRows;
-
-                                protected void startCopyTables(int maxCount) {
-                                    if (progressMonitor.isCanceled()) {
-                                        return;
-                                    }
-                                    this.maxCount = maxCount;
-                                    Runnable doRun = new Runnable() {
-                                        public void run() {
-                                            progressMonitor.setProgress(0);
-                                        }
-                                    };
-                                    SwingUtilities.invokeLater(doRun);
-                                }
-
-                                protected void endCopyTables(int count) {
-                                    Runnable doRun = new Runnable() {
-                                        public void run() {
-                                            progressMonitor.setProgress(100);
-                                        }
-                                    };
-                                    SwingUtilities.invokeLater(doRun);
-                                }
-
-                                protected boolean startCopyTable(String name) {
-                                    super.startCopyTable(name);
-
-                                    if (progressMonitor.isCanceled()) {
-                                        return false;
-                                    }
-                                    this.currentTable = name;
-                                    Runnable doRun = new Runnable() {
-                                        public void run() {
-                                            progressMonitor.setNote("Table: " + currentTable);
-                                        }
-                                    };
-                                    SwingUtilities.invokeLater(doRun);
-                                    return true;
-                                }
-
-                                protected void endCopyTable(String name) {
-                                    progressCount++;
-                                    Runnable doRun = new Runnable() {
-                                        public void run() {
-                                            progressMonitor.setProgress((progressCount * 100) / maxCount);
-                                        }
-                                    };
-                                    SwingUtilities.invokeLater(doRun);
-                                }
-
-                                protected boolean startAddingRows(int max) {
-                                    if (progressMonitor.isCanceled()) {
-                                        return false;
-                                    }
-                                    this.maxRows = max;
-                                    return true;
-                                }
-
-                                protected boolean addedRow(int count) {
-                                    if (progressMonitor.isCanceled()) {
-                                        return false;
-                                    }
-                                    final String str = " (Copying rows: " + ((count * 100) / this.maxRows) + "%" + ")";
-                                    Runnable doRun = new Runnable() {
-                                        public void run() {
-                                            progressMonitor.setNote("Table: " + currentTable + str);
-                                        }
-                                    };
-                                    SwingUtilities.invokeLater(doRun);
-                                    return true;
-                                }
-
-                                protected void endAddingRows(int count, long delta) {
-                                    super.endAddingRows(count, delta);
-                                }
-
-                            };
-                            destDb = exporter.export(srcDb, destFile);
-                        } catch (IOException e) {
-                            log.error(e);
-                            exception = e;
-                        } finally {
-                            if (destDb != null) {
-                                try {
-                                    destDb.close();
-                                } catch (IOException e1) {
-                                    log.warn(e1);
-                                } finally {
-                                    destDb = null;
-                                }
-                            }
-                            log.info("< DONE, exported to file=" + destFile);
-                            final Exception exception2 = exception;
-                            Runnable doRun = new Runnable() {
-                                public void run() {
-                                    if (exception2 != null) {
-                                        Component parentComponent = JOptionPane.getFrameForComponent(source);
-                                        String message = exception2.toString();
-                                        String title = "Error export to *.mdb file";
-                                        JOptionPane.showMessageDialog(parentComponent, message, title, JOptionPane.ERROR_MESSAGE);
-                                    }
-                                    if (source != null) {
-                                        source.setEnabled(true);
-                                    }
-                                }
-                            };
-                            SwingUtilities.invokeLater(doRun);
-                        }
-                    }
-                };
-                threadPool.execute(command);
-            }
-        });
+        mntmNewMenuItem_4.addActionListener(new ExportToMdbAction());
         mnNewMenu_1.add(mntmNewMenuItem_4);
 
         JSeparator separator_1 = new JSeparator();
@@ -556,13 +528,14 @@ public class MnyViewer {
                 }
                 String tableName = m.group(1);
                 try {
-                    final Table t = db.getTable(tableName);
-                    dataModel.setTable(t);
+                    final Table table = db.getTable(tableName);
+                    dataModel.setTable(table);
                     dataModel.setTableName(tableName);
-                    dataModel.setTableMetaData(t.toString());
-                    dataModel.setHeaderInfo(parseHeaderInfo(t));
-                    AbstractTableModel model = new MnyTableModel(t);
-                    dataModel.setTableModel(model);
+                    dataModel.setTableMetaData(table.toString());
+                    dataModel.setHeaderInfo(parseHeaderInfo(table));
+                    tableModel = new MnyTableModel(table);
+                    tableModel.setDbReadOnly(dbReadOnly);
+                    dataModel.setTableModel(tableModel);
                 } catch (IOException e1) {
                     log.error(e1);
                 }
@@ -578,16 +551,9 @@ public class MnyViewer {
         JPanel panel_1 = new JPanel();
         panel.add(panel_1, BorderLayout.NORTH);
         // panel_1.setPreferredSize(new Dimension(100, 100));
-        panel_1.setLayout(new FormLayout(new ColumnSpec[] {
-                FormFactory.UNRELATED_GAP_COLSPEC,
-                FormFactory.DEFAULT_COLSPEC,
-                FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
-                ColumnSpec.decode("default:grow"),
-                FormFactory.UNRELATED_GAP_COLSPEC,},
-            new RowSpec[] {
-                FormFactory.RELATED_GAP_ROWSPEC,
-                FormFactory.DEFAULT_ROWSPEC,
-                FormFactory.RELATED_GAP_ROWSPEC,}));
+        panel_1.setLayout(new FormLayout(new ColumnSpec[] { FormFactory.UNRELATED_GAP_COLSPEC, FormFactory.DEFAULT_COLSPEC,
+                FormFactory.LABEL_COMPONENT_GAP_COLSPEC, ColumnSpec.decode("default:grow"), FormFactory.UNRELATED_GAP_COLSPEC, }, new RowSpec[] {
+                FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC, }));
 
         JLabel lblNewLabel = new JLabel("Table Name");
         panel_1.add(lblNewLabel, "2, 2, right, default");
@@ -608,14 +574,54 @@ public class MnyViewer {
             @Override
             public void setModel(TableModel dataModel) {
                 super.setModel(dataModel);
-                int cols = this.getColumnModel().getColumnCount();
+                TableColumnModel columnModel = this.getColumnModel();
+                int cols = columnModel.getColumnCount();
                 for (int i = 0; i < cols; i++) {
-                    StripedTableRenderer renderer = new StripedTableRenderer();
-                    this.getColumnModel().getColumn(i).setCellRenderer(renderer);
+                    TableColumn column = columnModel.getColumn(i);
+                    StripedTableRenderer renderer = new StripedTableRenderer(column.getCellRenderer());
+                    TableCellEditor cellEditor = new MyTableCellEditor();
+                    column.setCellRenderer(renderer);
+                    // column.setCellEditor(cellEditor);
                 }
             }
 
         };
+        table.setDefaultRenderer(Date.class, new DefaultTableCellRenderer() {
+            // private DateFormat formatter = new
+            // SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+            private DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSS");
+
+            public void setValue(Object value) {
+                if (formatter == null) {
+                    formatter = DateFormat.getDateInstance();
+                }
+                setText((value == null) ? "" : formatter.format(value));
+            }
+        });
+        JPopupMenu popupMenu = new JPopupMenu();
+        JMenuItem menuItem = null;
+        menuItem = new JMenuItem(new AbstractAction("Duplicate") {
+            public void actionPerformed(ActionEvent e) {
+                int rowIndex = table.getSelectedRow();
+                duplicateRow(rowIndex);
+            }
+        });
+        popupMenu.add(menuItem);
+        this.duplicateMenuItem = menuItem;
+        
+        popupMenu.addSeparator();
+        
+        menuItem = new JMenuItem(new AbstractAction("Delete") {
+            public void actionPerformed(ActionEvent e) {
+                int rowIndex = table.getSelectedRow();
+                deleteRow(rowIndex);
+            }
+        });
+        popupMenu.add(menuItem);
+        this.deleteMenuItem = menuItem;
+        
+        MouseListener popupListener = new PopupListener(popupMenu);
+        table.addMouseListener(popupListener);
         table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
         scrollPane_1.setViewportView(table);
 
@@ -639,6 +645,18 @@ public class MnyViewer {
         headerTextArea = new JTextArea();
         scrollPane_3.setViewportView(headerTextArea);
         initDataBindings();
+    }
+
+    protected void deleteRow(int rowIndex) {
+        if (tableModel != null) {
+            tableModel.deleteRow(rowIndex);
+        }
+    }
+
+    protected void duplicateRow(int rowIndex) {
+        if (tableModel != null) {
+            tableModel.duplicateRow(rowIndex);
+        }
     }
 
     protected void initDataBindings() {
@@ -673,5 +691,45 @@ public class MnyViewer {
         AutoBinding<DataModel, String, JTextArea, String> autoBinding_3 = Bindings.createAutoBinding(UpdateStrategy.READ, dataModel, dataModelBeanProperty_2,
                 headerTextArea, jTextAreaBeanProperty_1);
         autoBinding_3.bind();
+    }
+
+    public static Class getColumnJavaClass(Column column) {
+        Class clz = null;
+        DataType type = column.getType();
+        if (type == DataType.BOOLEAN) {
+            clz = Boolean.class;
+        } else if (type == DataType.BYTE) {
+            clz = Byte.class;
+        } else if (type == DataType.INT) {
+            clz = Integer.class;
+        } else if (type == DataType.LONG) {
+            clz = Long.class;
+        } else if (type == DataType.DOUBLE) {
+            clz = Double.class;
+        } else if (type == DataType.FLOAT) {
+            clz = Float.class;
+        } else if (type == DataType.SHORT_DATE_TIME) {
+            clz = Date.class;
+        } else if (type == DataType.BINARY) {
+            clz = byte[].class;
+        } else if (type == DataType.TEXT) {
+            clz = String.class;
+        } else if (type == DataType.MONEY) {
+            clz = BigDecimal.class;
+        } else if (type == DataType.OLE) {
+            clz = byte[].class;
+        } else if (type == DataType.MEMO) {
+            clz = String.class;
+        } else if (type == DataType.NUMERIC) {
+            clz = BigDecimal.class;
+        } else if (type == DataType.GUID) {
+            clz = String.class;
+        } else if ((type == DataType.UNKNOWN_0D) || (type == DataType.UNKNOWN_11)) {
+            clz = Object.class;
+        } else {
+            clz = Object.class;
+            log.warn("Unrecognized data type: " + type);
+        }
+        return clz;
     }
 }

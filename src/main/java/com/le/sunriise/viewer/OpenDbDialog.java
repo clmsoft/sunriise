@@ -3,7 +3,6 @@ package com.le.sunriise.viewer;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.FlowLayout;
-import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -52,12 +51,12 @@ public class OpenDbDialog extends JDialog {
     private File dbFile;
     private JCheckBox encryptedCheckBox;
 
-    public static OpenDbDialog showDialog(Frame frame, Database db, File dbFile) {
+    public static OpenDbDialog showDialog(Component locationRealativeTo, Database db, File dbFile) {
         OpenDbDialog dialog = new OpenDbDialog(db, dbFile);
         dialog.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
         dialog.setModalityType(ModalityType.APPLICATION_MODAL);
         dialog.pack();
-        dialog.setLocationRelativeTo(frame);
+        dialog.setLocationRelativeTo(locationRealativeTo);
         dialog.setVisible(true);
         return dialog;
     }
@@ -230,12 +229,18 @@ public class OpenDbDialog extends JDialog {
         ByteBuffer buffer = pageChannel.createPageBuffer();
         int ENCRYPTION_FLAGS_OFFSET = 0x298;
         byte flag = buffer.get(ENCRYPTION_FLAGS_OFFSET);
-        log.info("ENCRYPTION_FLAGS=0x" + String.format("%x", flag));
+        if (log.isDebugEnabled()) {
+            log.debug("ENCRYPTION_FLAGS=0x" + String.format("%x", flag));
+        }
         int NEW_ENCRYPTION = 0x6;
         if ((flag & NEW_ENCRYPTION) != 0) {
-            log.info("NEW_ENCRYPTION - MSISAMCryptCodecHandler");
+            if (log.isDebugEnabled()) {
+                log.debug("NEW_ENCRYPTION - MSISAMCryptCodecHandler");
+            }
         } else {
-            log.info("OLD_ENCRYPTION - JetCryptCodecHandler");
+            if (log.isDebugEnabled()) {
+                log.debug("OLD_ENCRYPTION - JetCryptCodecHandler");
+            }
         }
     }
 
@@ -253,6 +258,10 @@ public class OpenDbDialog extends JDialog {
 
     public File getDbFile() {
         return dbFile;
+    }
+
+    public JCheckBox getReadOnlyCheckBox() {
+        return readOnlyCheckBox;
     }
 
 }
