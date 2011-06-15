@@ -1,10 +1,9 @@
 package com.le.sunriise.viewer;
 
+import java.awt.Component;
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.swing.table.AbstractTableModel;
 
@@ -13,19 +12,20 @@ import org.apache.log4j.Logger;
 import com.healthmarketscience.jackcess.ByteUtil;
 import com.healthmarketscience.jackcess.Column;
 import com.healthmarketscience.jackcess.Cursor;
-import com.healthmarketscience.jackcess.Index;
-import com.healthmarketscience.jackcess.IndexData.ColumnDescriptor;
+import com.healthmarketscience.jackcess.DataType;
 import com.healthmarketscience.jackcess.Table;
+import com.le.sunriise.index.IndexLookup;
 
-final class MnyTableModel extends AbstractTableModel {
+public class MnyTableModel extends AbstractTableModel {
     private static final Logger log = Logger.getLogger(MnyTableModel.class);
+    
     private final Table table;
     private int currentRow = 0;
     private Cursor cursor;
     private Map<String, Object> data = null;
     private boolean dbReadOnly = false;
 
-    MnyTableModel(Table table) throws IOException {
+    public MnyTableModel(Table table) throws IOException {
         this.table = table;
         this.cursor = Cursor.createCursor(table);
         this.cursor.reset();
@@ -139,7 +139,7 @@ final class MnyTableModel extends AbstractTableModel {
         }
     }
 
-    public void duplicateRow(int rowIndex) {
+    public void duplicateRow(int rowIndex, Component locationRealativeTo) {
         log.info("> duplicateRow rowIndex=" + rowIndex);
         if (dbReadOnly) {
             return;
@@ -147,23 +147,34 @@ final class MnyTableModel extends AbstractTableModel {
         try {
             moveCursorToRow(rowIndex);
             Table table = cursor.getTable();
-            Set<Integer> uniqueColumnIndex = new HashSet<Integer>();
-            List<Index> indexes = table.getIndexes();
-            for(Index index: indexes) {
-                if (! index.isUnique()) {
-                    continue;
-                }
-                List<ColumnDescriptor> columns = index.getColumns();
-                for(ColumnDescriptor column: columns) {
-                    uniqueColumnIndex.add(column.getColumnIndex());
-                }
-            }
+//            Set<Integer> uniqueColumnIndex = new HashSet<Integer>();
+//            List<Index> indexes = table.getIndexes();
+//            for(Index index: indexes) {
+//                if (! index.isUnique()) {
+//                    continue;
+//                }
+//                List<ColumnDescriptor> columns = index.getColumns();
+//                for(ColumnDescriptor column: columns) {
+//                    uniqueColumnIndex.add(column.getColumnIndex());
+//                }
+//            }
+//            NewRowDialog dialog = NewRowDialog.showDialog(data, uniqueColumnIndex, locationRealativeTo);
+//            if (dialog.isCancel()) {
+//                return;
+//            }
+
+            IndexLookup indexLooker = new IndexLookup();
+            List<Column> columns = table.getColumns();
             Object[] dataArray = data.values().toArray();
             for(int i = 0; i < dataArray.length; i++) {
-                if(uniqueColumnIndex.contains(i)) {
-                    dataArray[i] = "";
+                Column column = columns.get(i);
+                if (indexLooker.isPrimaryKeyColumn(column)) {
+                    Long max = indexLooker.getMax(column);
+                    max = max + 1;
+                    dataArray[i] = max.toString();
                 }
             }
+            
             int rowCount = table.getRowCount();
             table.addRow(dataArray);
             currentRow = 0;
@@ -173,6 +184,23 @@ final class MnyTableModel extends AbstractTableModel {
             fireTableRowsInserted(rowCount, rowCount);
         } catch (IOException e) {
             log.error(e, e);
+        }
+    }
+
+    public boolean columnIsDateType(int i) {
+        List<Column> columns = table.getColumns();
+        if (columns == null) {
+            return false;
+        }
+        if (i >= columns.size()) {
+            return false;
+        }
+        Column column = columns.get(i);
+        DataType dataType = column.getType();
+        if (dataType == DataType.SHORT_DATE_TIME) {
+            return true;
+        } else {
+            return false;
         }
     }
 }

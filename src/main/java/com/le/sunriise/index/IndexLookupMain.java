@@ -1,4 +1,4 @@
-package com.le.sunriise;
+package com.le.sunriise.index;
 
 import java.io.File;
 import java.io.IOException;
@@ -7,14 +7,13 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
+import com.healthmarketscience.jackcess.Column;
 import com.healthmarketscience.jackcess.Database;
-import com.healthmarketscience.jackcess.Index;
-import com.healthmarketscience.jackcess.IndexData.ColumnDescriptor;
 import com.healthmarketscience.jackcess.Table;
+import com.le.sunriise.Utils;
 
-public class GetIndexes {
-
-    private static final Logger log = Logger.getLogger(GetRelationships.class);
+public class IndexLookupMain {
+    private static final Logger log = Logger.getLogger(IndexLookupMain.class);
 
     /**
      * @param args
@@ -25,28 +24,30 @@ public class GetIndexes {
         File dbFile = new File(dbFileName);
         String password = null;
         log.info("dbFile=" + dbFile);
+
         try {
             db = Utils.openDbReadOnly(dbFile, password);
+            IndexLookup indexLookup = new IndexLookup();
             Set<String> tableNames = db.getTableNames();
             for (String tableName : tableNames) {
                 Table table = db.getTable(tableName);
                 if (table == null) {
+                    log.warn("Cannot find table=" + tableName);
                     continue;
                 }
-                List<Index> indexes = table.getIndexes();
-                for (Index index : indexes) {
-                    String name = index.getName();
-//                    if (! name.equals("PrimaryKey")) {
-//                        continue;
-//                    }
-                    if (! index.isUnique()) {
-                        continue;
+                log.info("### table=" + table.getName());
+                for (Column column : table.getColumns()) {
+                    if (indexLookup.isPrimaryKeyColumn(column)) {
+                        log.info("(PK) " + table.getName() + "." + column.getName() + ", " + indexLookup.getMax(column));
                     }
-                    List<ColumnDescriptor> columns = index.getColumns();
-                    log.info(table.getName() + ", " + name + " (" + columns.size() + ")");
-                    log.info("  " + index.isUnique());
-                    for(ColumnDescriptor column: columns) {
-                        log.info("  " + column.getName());
+                    List<Column> referencing = indexLookup.getReferencing(column);
+                    for (Column col : referencing) {
+                        log.info("(referencing-FK) " + col.getTable().getName() + "." + col.getName());
+                    }
+
+                    List<Column> referenced = indexLookup.getReferencedColumns(column);
+                    for (Column col : referenced) {
+                        log.info("(FK) " + table.getName() + "." + column.getName() + " -> " + col.getTable().getName() + "." + col.getName());
                     }
                 }
             }
@@ -57,7 +58,7 @@ public class GetIndexes {
                 try {
                     db.close();
                 } catch (IOException e) {
-                    log.warn(e);
+                    log.warn(e, e);
                 } finally {
                     db = null;
                 }

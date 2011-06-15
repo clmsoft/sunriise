@@ -14,25 +14,25 @@ import javax.swing.table.TableCellRenderer;
 
 import org.apache.log4j.Logger;
 
-public class StripedTableRenderer extends DefaultTableCellRenderer {
-    private static final Logger log = Logger.getLogger(StripedTableRenderer.class);
+public class MyTableRenderer extends DefaultTableCellRenderer {
+    private static final Logger log = Logger.getLogger(MyTableRenderer.class);
     
     private final Color evenRowsColor;
     private final Color oddRowsColor;
     private TableCellRenderer parentCellRenderer = null;
 
-    private StripedTableRenderer(TableCellRenderer cellRenderer, Color evenRowsColor, Color oddRowsColor) {
+    private MyTableRenderer(TableCellRenderer cellRenderer, Color evenRowsColor, Color oddRowsColor) {
         super();
         this.parentCellRenderer = cellRenderer;
         this.evenRowsColor = evenRowsColor;
         this.oddRowsColor = oddRowsColor;
     }
 
-    public StripedTableRenderer() {
+    public MyTableRenderer() {
         this(null);
     }
 
-    public StripedTableRenderer(TableCellRenderer cellRenderer) {
+    public MyTableRenderer(TableCellRenderer cellRenderer) {
         this(cellRenderer, new Color(204, 255, 204), Color.WHITE);
     }
 

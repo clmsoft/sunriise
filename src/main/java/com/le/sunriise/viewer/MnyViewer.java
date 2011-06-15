@@ -6,6 +6,8 @@ import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseListener;
 import java.io.File;
 import java.io.IOException;
@@ -19,6 +21,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.prefs.Preferences;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -46,7 +49,6 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableColumn;
@@ -76,8 +78,9 @@ import com.le.sunriise.ExportToMdb;
 import com.le.sunriise.model.bean.DataModel;
 
 public class MnyViewer {
-    static final Logger log = Logger.getLogger(OpenDbDialog.class);
-
+    private static final Logger log = Logger.getLogger(MnyViewer.class);
+    private static final Preferences prefs = Preferences.userNodeForPackage(MnyViewer.class);
+    
     private JFrame frame;
     protected File dbFile;
     protected Database db;
@@ -89,7 +92,7 @@ public class MnyViewer {
 
     private JTextField textField;
 
-    boolean dbReadOnly = true;
+    private boolean dbReadOnly = true;
 
     private Pattern tableNamePattern = Pattern.compile("^(.*) \\([0-9]+\\)$");
     private JTextArea textArea;
@@ -442,7 +445,16 @@ public class MnyViewer {
                 Component component = (Component) event.getSource();
                 Component locationRelativeTo = JOptionPane.getFrameForComponent(component);
                 locationRelativeTo = MnyViewer.this.frame;
-                OpenDbDialog dialog = OpenDbDialog.showDialog(locationRelativeTo, db, dbFile);
+                List<String> recentOpenFileNames = new ArrayList<String>();
+                int size = prefs.getInt("recentOpenFileNames_size", 0);
+                size = Math.min(size, 10);
+                for(int i = 0; i < size;i++){
+                    String value = prefs.get("recentOpenFileNames_" + i, null);
+                    if(value != null) {
+                        recentOpenFileNames.add(value);
+                    }
+                }
+                OpenDbDialog dialog = OpenDbDialog.showDialog(db, dbFile, recentOpenFileNames, locationRelativeTo);
                 if (!dialog.isCancel()) {
                     db = dialog.getDb();
                     dbFile = dialog.getDbFile();
@@ -473,6 +485,15 @@ public class MnyViewer {
                         deleteMenuItem.setEnabled(!dbReadOnly);
                     }
                     MnyViewer.this.dataModel.setTables(tables);
+
+                    size  = recentOpenFileNames.size();
+                    size = Math.min(size, 10);
+                    log.info("prefs: recentOpenFileNames_size=" + size);
+                    prefs.putInt("recentOpenFileNames_size", size);
+                    for(int i = 0; i < size;i++){
+                        log.info("prefs: recentOpenFileNames_" + i + ", value=" + recentOpenFileNames.get(i));
+                        prefs.put("recentOpenFileNames_" + i, recentOpenFileNames.get(i));
+                    }                    
                 }
             }
         });
@@ -576,12 +597,23 @@ public class MnyViewer {
                 super.setModel(dataModel);
                 TableColumnModel columnModel = this.getColumnModel();
                 int cols = columnModel.getColumnCount();
+                
+                MnyTableModel mnyTableModel = MnyViewer.this.tableModel;
+                
                 for (int i = 0; i < cols; i++) {
                     TableColumn column = columnModel.getColumn(i);
-                    StripedTableRenderer renderer = new StripedTableRenderer(column.getCellRenderer());
-                    TableCellEditor cellEditor = new MyTableCellEditor();
+                    MyTableRenderer renderer = new MyTableRenderer(column.getCellRenderer());
                     column.setCellRenderer(renderer);
-                    // column.setCellEditor(cellEditor);
+
+                    if (mnyTableModel.columnIsDateType(i)) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("columnIsDateType, i=" + i);
+                        }
+//                        TableCellEditor cellEditor = new TableCellDateEditor();
+//                        TableCellEditor cellEditor = new DatePickerTableEditor();
+                        TableCellEditor cellEditor = new DialogCellEditor();
+                        column.setCellEditor(cellEditor);
+                    }
                 }
             }
 
@@ -589,13 +621,23 @@ public class MnyViewer {
         table.setDefaultRenderer(Date.class, new DefaultTableCellRenderer() {
             // private DateFormat formatter = new
             // SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
-            private DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSS");
-
+//            private DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSS");
+//            private DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd");
+            private DateFormat formatter = new SimpleDateFormat("MMM dd, yyyy HH:mm");
+            
             public void setValue(Object value) {
+                if (log.isDebugEnabled()) {
+                    log.debug("cellRenderer: value=" + value + ", " + value.getClass().getName());
+                }
                 if (formatter == null) {
                     formatter = DateFormat.getDateInstance();
                 }
-                setText((value == null) ? "" : formatter.format(value));
+                String renderedValue = (value == null) ? "" : formatter.format(value);
+                if (log.isDebugEnabled()) {
+                    log.debug("cellRenderer: renderedValue=" + renderedValue);
+                }
+
+                setText(renderedValue);
             }
         });
         JPopupMenu popupMenu = new JPopupMenu();
@@ -655,7 +697,7 @@ public class MnyViewer {
 
     protected void duplicateRow(int rowIndex) {
         if (tableModel != null) {
-            tableModel.duplicateRow(rowIndex);
+            tableModel.duplicateRow(rowIndex, this.frame);
         }
     }
 
