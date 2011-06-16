@@ -10,6 +10,88 @@ About
     
     []
     
+News - 2011/06/15
+
+  Release sunriise-0.0.2-SNAPSHOT.
+  
+  This is still experimental at best. Not ready for end-user. You should have some background in database and at least some understanding of join to have any hope to make sense of this stuff.
+
+  If you want to just jump right into it:
+        
+        [[1]] Download the *.jar file: file <<sunriise-0.0.2-SNAPSHOT-jar-with-dependencies.jar >> {{{https://sourceforge.net/projects/sunriise/files/}from this link}}
+        
+        
+        [[1]]  Run: double click on <<sunriise-0.0.2-SNAPSHOT-jar-with-dependencies.jar>> to start. If that does not work, try open a command-line window and run
+        
+----
+java -jar sunriise-0.0.2-SNAPSHOT-jar-with-dependencies.jar
+---- 
+        
+        [[1]]  Open an existing *.mny file, use menu item. <<Tip:>> samples.mny is a good candidate.
+        
+----
+File -> Open
+----        
+
+        [[1]]  No real documentation at this point, read older news for features added in previous releases.
+
+  Significant changes in this release
+  
+      * Enable write. You can now modify the data in the *.mny file directly. <<Important>>: do NOT do this on your primary *.mny file. Make a copy and use the copy.
+  
+      * Display key information: primary key(s), foreign key(s). In the table header, primary key is colored as RED, foreign key is colored as BLUE. You can also see the key information in the "Keys" tab. 
+      
+---
+# Primary keys:
+(PK) SEC.hsec, 197
+    (referencing-FK) SOQ.hsec
+    (referencing-FK) SP.hsec
+    (referencing-FK) TRN.hsec
+    (referencing-FK) LOT.hsec
+    (referencing-FK) PORT_REC.hsec
+    (referencing-FK) SEC.hsecLink
+    (referencing-FK) XMAPSEC.hsec
+
+# Foreign keys:
+(FK) SEC.hcrnc -> CRNC.hcrnc
+(FK) SEC.hcntry -> CNTRY.hcntry
+(FK) SEC.hsecLink -> SEC.hsec
+(FK) SEC.hcrncQuote -> CRNC.hcrnc
+---
+
+      * The reason I mention about "keys" is that there are  a lot of tables joining, so you will have to work out the keys relationship to see meaningful data. For example table "SP" has stock price but you 
+will need to join with table "SEC" to get the security name.
+      
+      * To edit a cell, make sure you open the *.mny file with "Read only" unchecked. Then double-click on the cell to edit (hit "Escape" to discard changes) . For the cell of type "Date", single-click to bring up a date picker (click on "Cancel" button to 
+discard changes.
+
+      * A concrete example: let's set a security <<Dividend Yield rate>>. Choose a security (look for value in columns: szFull, szSymbol), find column "dDividendYield" (column 45 in Sunset version - I know it is kind of pain to find the column for now. I will see what can  done to 
+make that easier), double-click to edit, change the value ("Escape" to discard changes, "Return" to commit changes). Note this value is actually a percentage so keep it under 100.     
+     
+         * Quit
+       
+---
+File -> Exit
+---
+
+        * Open the just edit *.mny file in MSMoney, open Porfolio Manager view, edit column to include the "Dividend Yield (rate)" column, you should see the number you entered for he selected security.       
+            
+        []
+       
+      * To add new row, select an existing one and use popup menu "Duplicate".
+      
+      * Hope this will give you enough pointer to go to explore for yourself. One caveat: changes sometimes will not get reflected when you re-open the edited *.mny file in MSMoney, that often means that
+        
+        * there are related rows in other tables needed to be updated also
+        
+        * there are values in certain columns (in same table or in other tables) needed to be related in a meaningful ways but are not. Sorry I can't be more specific than that. One way to thing about this: a particular logical data structure such as price quotes (secname, price, updateOn ...)
+may spanned multiple table. Editing a column in a row in a table is not sufficient to "change the data".
+
+        []
+  
+   []
+    
+    
 News - 2011/03/22
     
   We have our first build. 
