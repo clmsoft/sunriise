@@ -18,8 +18,8 @@ import com.healthmarketscience.jackcess.SimpleExportFilter;
 import com.healthmarketscience.jackcess.Table;
 import com.healthmarketscience.jackcess.query.Query;
 
-public class DumpMsIsamDb {
-    private static final Logger log = Logger.getLogger(DumpMsIsamDb.class);
+public class ExportToCsv {
+    private static final Logger log = Logger.getLogger(ExportToCsv.class);
 
     private Database db = null;
 
@@ -200,7 +200,7 @@ public class DumpMsIsamDb {
             outDirName = args[1];
             password = args[2];
         } else {
-            Class clz = DumpMsIsamDb.class;
+            Class clz = ExportToCsv.class;
             System.out.println("Usage: " + clz.getName() + " sample.mny outDir [password]");
             System.exit(1);
         }
@@ -211,12 +211,12 @@ public class DumpMsIsamDb {
         log.info("inFile=" + inFile);
         log.info("outDir=" + outDir);
 
-        DumpMsIsamDb dbHelper = null;
+        ExportToCsv dbHelper = null;
         try {
             if (!inFile.exists()) {
                 throw new IOException("File=" + inFile.getAbsoluteFile().getAbsolutePath() + " does not exist.");
             }
-            dbHelper = new DumpMsIsamDb();
+            dbHelper = new ExportToCsv();
             dbHelper.setDb(Utils.openDbReadOnly(inFile, password));
             if ((!outDir.exists()) && (!outDir.mkdirs())) {
                 throw new IOException("Cannot create directory, outDir=" + outDir);

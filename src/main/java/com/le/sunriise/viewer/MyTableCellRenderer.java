@@ -14,25 +14,25 @@ import javax.swing.table.TableCellRenderer;
 
 import org.apache.log4j.Logger;
 
-public class MyTableRenderer extends DefaultTableCellRenderer {
-    private static final Logger log = Logger.getLogger(MyTableRenderer.class);
+public class MyTableCellRenderer extends DefaultTableCellRenderer {
+    private static final Logger log = Logger.getLogger(MyTableCellRenderer.class);
     
     private final Color evenRowsColor;
     private final Color oddRowsColor;
     private TableCellRenderer parentCellRenderer = null;
 
-    private MyTableRenderer(TableCellRenderer cellRenderer, Color evenRowsColor, Color oddRowsColor) {
+    private MyTableCellRenderer(TableCellRenderer cellRenderer, Color evenRowsColor, Color oddRowsColor) {
         super();
         this.parentCellRenderer = cellRenderer;
         this.evenRowsColor = evenRowsColor;
         this.oddRowsColor = oddRowsColor;
     }
 
-    public MyTableRenderer() {
+    public MyTableCellRenderer() {
         this(null);
     }
 
-    public MyTableRenderer(TableCellRenderer cellRenderer) {
+    public MyTableCellRenderer(TableCellRenderer cellRenderer) {
         this(cellRenderer, new Color(204, 255, 204), Color.WHITE);
     }
 
@@ -72,6 +72,7 @@ public class MyTableRenderer extends DefaultTableCellRenderer {
                 rendererComponent.setBackground(oddRowsColor);
             }
         }
+        
         setCellHorizontalAlignment(rendererComponent, column, value);
 
         return rendererComponent;

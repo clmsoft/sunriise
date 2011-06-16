@@ -24,6 +24,7 @@ public class MnyTableModel extends AbstractTableModel {
     private Cursor cursor;
     private Map<String, Object> data = null;
     private boolean dbReadOnly = false;
+    private IndexLookup indexLookup = new IndexLookup();
 
     public MnyTableModel(Table table) throws IOException {
         this.table = table;
@@ -202,5 +203,17 @@ public class MnyTableModel extends AbstractTableModel {
         } else {
             return false;
         }
+    }
+    
+    public boolean isPrimaryKeyColumn(int i) {
+        List<Column> columns = table.getColumns();
+        if (columns == null) {
+            return false;
+        }
+        if (i >= columns.size()) {
+            return false;
+        }
+        Column column = columns.get(i);
+        return indexLookup.isPrimaryKeyColumn(column);
     }
 }

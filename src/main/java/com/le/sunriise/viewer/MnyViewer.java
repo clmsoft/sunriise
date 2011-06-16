@@ -1,6 +1,7 @@
 package com.le.sunriise.viewer;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.EventQueue;
@@ -26,7 +27,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.swing.AbstractAction;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -44,13 +44,12 @@ import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
-import javax.swing.ProgressMonitor;
 import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
@@ -73,17 +72,19 @@ import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
-import com.le.sunriise.DumpMsIsamDb;
-import com.le.sunriise.ExportToMdb;
+import com.le.sunriise.index.IndexLookup;
 import com.le.sunriise.model.bean.DataModel;
 
 public class MnyViewer {
     private static final Logger log = Logger.getLogger(MnyViewer.class);
+    
     private static final Preferences prefs = Preferences.userNodeForPackage(MnyViewer.class);
     
+    private static final Executor threadPool = Executors.newCachedThreadPool();
+    
     private JFrame frame;
-    protected File dbFile;
-    protected Database db;
+    private File dbFile;
+    private Database db;
 
     private DataModel dataModel = new DataModel();
     private JList list;
@@ -101,267 +102,6 @@ public class MnyViewer {
     private JMenuItem duplicateMenuItem;
     private JMenuItem deleteMenuItem;
 
-    private static final Executor threadPool = Executors.newCachedThreadPool();
-
-    private final class ExportToMdbAction implements ActionListener {
-        private JFileChooser fc = null;
-
-        public void actionPerformed(ActionEvent event) {
-            final Component source = (Component) event.getSource();
-            if (fc == null) {
-                fc = new JFileChooser(new File("."));
-                fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
-            }
-            if (fc.showSaveDialog(source) == JFileChooser.CANCEL_OPTION) {
-                return;
-            }
-            final File destFile = fc.getSelectedFile();
-            log.info("Export as *.mdb to file=" + destFile);
-
-            source.setEnabled(false);
-            Component parentComponent = MnyViewer.this.frame;
-            Object message = "Exporting to *.mdb ...";
-            String note = "";
-            int min = 0;
-            int max = 100;
-            final ProgressMonitor progressMonitor = new ProgressMonitor(parentComponent, message, note, min, max);
-            progressMonitor.setProgress(0);
-
-            Runnable command = new Runnable() {
-                public void run() {
-                    Database srcDb = null;
-                    Database destDb = null;
-                    Exception exception = null;
-
-                    try {
-                        srcDb = db;
-                        ExportToMdb exporter = new ExportToMdb() {
-                            private int progressCount = 0;
-                            private int maxCount = 0;
-                            private String currentTable = null;
-                            private int maxRows;
-
-                            protected void startCopyTables(int maxCount) {
-                                if (progressMonitor.isCanceled()) {
-                                    return;
-                                }
-                                this.maxCount = maxCount;
-                                Runnable doRun = new Runnable() {
-                                    public void run() {
-                                        progressMonitor.setProgress(0);
-                                    }
-                                };
-                                SwingUtilities.invokeLater(doRun);
-                            }
-
-                            protected void endCopyTables(int count) {
-                                Runnable doRun = new Runnable() {
-                                    public void run() {
-                                        progressMonitor.setProgress(100);
-                                    }
-                                };
-                                SwingUtilities.invokeLater(doRun);
-                            }
-
-                            protected boolean startCopyTable(String name) {
-                                super.startCopyTable(name);
-
-                                if (progressMonitor.isCanceled()) {
-                                    return false;
-                                }
-                                this.currentTable = name;
-                                Runnable doRun = new Runnable() {
-                                    public void run() {
-                                        progressMonitor.setNote("Table: " + currentTable);
-                                    }
-                                };
-                                SwingUtilities.invokeLater(doRun);
-                                return true;
-                            }
-
-                            protected void endCopyTable(String name) {
-                                progressCount++;
-                                Runnable doRun = new Runnable() {
-                                    public void run() {
-                                        progressMonitor.setProgress((progressCount * 100) / maxCount);
-                                    }
-                                };
-                                SwingUtilities.invokeLater(doRun);
-                            }
-
-                            protected boolean startAddingRows(int max) {
-                                if (progressMonitor.isCanceled()) {
-                                    return false;
-                                }
-                                this.maxRows = max;
-                                return true;
-                            }
-
-                            protected boolean addedRow(int count) {
-                                if (progressMonitor.isCanceled()) {
-                                    return false;
-                                }
-                                final String str = " (Copying rows: " + ((count * 100) / this.maxRows) + "%" + ")";
-                                Runnable doRun = new Runnable() {
-                                    public void run() {
-                                        progressMonitor.setNote("Table: " + currentTable + str);
-                                    }
-                                };
-                                SwingUtilities.invokeLater(doRun);
-                                return true;
-                            }
-
-                            protected void endAddingRows(int count, long delta) {
-                                super.endAddingRows(count, delta);
-                            }
-
-                        };
-                        destDb = exporter.export(srcDb, destFile);
-                    } catch (IOException e) {
-                        log.error(e);
-                        exception = e;
-                    } finally {
-                        if (destDb != null) {
-                            try {
-                                destDb.close();
-                            } catch (IOException e1) {
-                                log.warn(e1);
-                            } finally {
-                                destDb = null;
-                            }
-                        }
-                        log.info("< DONE, exported to file=" + destFile);
-                        final Exception exception2 = exception;
-                        Runnable doRun = new Runnable() {
-                            public void run() {
-                                if (exception2 != null) {
-                                    Component parentComponent = JOptionPane.getFrameForComponent(source);
-                                    String message = exception2.toString();
-                                    String title = "Error export to *.mdb file";
-                                    JOptionPane.showMessageDialog(parentComponent, message, title, JOptionPane.ERROR_MESSAGE);
-                                }
-                                if (source != null) {
-                                    source.setEnabled(true);
-                                }
-                            }
-                        };
-                        SwingUtilities.invokeLater(doRun);
-                    }
-                }
-            };
-            threadPool.execute(command);
-        }
-    }
-
-    private final class ExportToCsvAction implements ActionListener {
-        private JFileChooser fc = null;
-
-        public void actionPerformed(ActionEvent event) {
-            final Component source = (Component) event.getSource();
-            if (fc == null) {
-                fc = new JFileChooser(new File("."));
-                fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-            }
-            if (fc.showSaveDialog(source) == JFileChooser.CANCEL_OPTION) {
-                return;
-            }
-            final File dir = fc.getSelectedFile();
-            log.info("Export as CSV to directory=" + dir);
-            if (source != null) {
-                source.setEnabled(false);
-            }
-            Component parentComponent = frame;
-            Object message = "Exporting to CSV files ...";
-            int min = 0;
-            int max = 100;
-            String note = "";
-
-            final ProgressMonitor progressMonitor = new ProgressMonitor(parentComponent, message, note, min, max);
-            progressMonitor.setProgress(0);
-
-            Runnable command = new Runnable() {
-                public void run() {
-                    Exception exception = null;
-                    try {
-                        DumpMsIsamDb exporter = new DumpMsIsamDb() {
-                            private int maxTables = 0;
-
-                            @Override
-                            protected void startExport(File outDir) {
-                                super.startExport(outDir);
-                                SwingUtilities.invokeLater(new Runnable() {
-                                    public void run() {
-                                        progressMonitor.setProgress(progressMonitor.getMinimum());
-                                    }
-                                });
-                            }
-
-                            @Override
-                            protected void endExport(File outDir) {
-                                super.endExport(outDir);
-                                SwingUtilities.invokeLater(new Runnable() {
-                                    public void run() {
-                                        progressMonitor.setProgress(progressMonitor.getMaximum());
-                                    }
-                                });
-                            }
-
-                            @Override
-                            protected void startExportTables(int size) {
-                                super.startExportTables(size);
-                                maxTables = size;
-                            }
-
-                            @Override
-                            protected boolean exportedTable(final String tableName, final int count) {
-                                super.exportedTable(tableName, count);
-                                if (progressMonitor.isCanceled()) {
-                                    return false;
-                                }
-                                SwingUtilities.invokeLater(new Runnable() {
-                                    public void run() {
-                                        progressMonitor.setNote("Table: " + tableName);
-                                        progressMonitor.setProgress((count * 100) / maxTables);
-                                    }
-                                });
-                                return true;
-                            }
-
-                            @Override
-                            protected void endExportTables(int count) {
-                                super.endExportTables(count);
-                            }
-
-                        };
-                        exporter.setDb(db);
-                        exporter.writeToDir(dir);
-                    } catch (IOException e) {
-                        log.error(e);
-                        exception = e;
-                    } finally {
-                        final Exception exception2 = exception;
-                        Runnable swingRun = new Runnable() {
-                            public void run() {
-                                if (exception2 != null) {
-                                    Component parentComponent = source;
-                                    String message = exception2.toString();
-                                    String title = "Error export to CSV file";
-                                    JOptionPane.showMessageDialog(parentComponent, message, title, JOptionPane.ERROR_MESSAGE);
-                                }
-                                if (source != null) {
-                                    source.setEnabled(true);
-                                }
-                            }
-                        };
-                        SwingUtilities.invokeLater(swingRun);
-                        log.info("< Export CSV DONE");
-                    }
-                }
-            };
-            threadPool.execute(command);
-        }
-    }
-
     /**
      * Launch the application.
      */
@@ -370,8 +110,8 @@ public class MnyViewer {
             public void run() {
                 try {
                     MnyViewer window = new MnyViewer();
-                    window.frame.setLocationRelativeTo(null);
-                    window.frame.setVisible(true);
+                    window.getFrame().setLocationRelativeTo(null);
+                    window.getFrame().setVisible(true);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -413,12 +153,12 @@ public class MnyViewer {
      * Initialize the contents of the frame.
      */
     private void initialize() {
-        frame = new JFrame();
-        frame.setBounds(100, 100, 800, 600);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setFrame(new JFrame());
+        getFrame().setBounds(100, 100, 800, 600);
+        getFrame().setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         JMenuBar menuBar = new JMenuBar();
-        frame.setJMenuBar(menuBar);
+        getFrame().setJMenuBar(menuBar);
 
         JMenu mnNewMenu = new JMenu("File");
         menuBar.add(mnNewMenu);
@@ -426,13 +166,13 @@ public class MnyViewer {
         JMenuItem mntmNewMenuItem = new JMenuItem("Exit");
         mntmNewMenuItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent event) {
-                if (db != null) {
+                if (getDb() != null) {
                     try {
-                        db.close();
+                        getDb().close();
                     } catch (IOException e) {
                         log.warn(e);
                     } finally {
-                        db = null;
+                        setDb(null);
                     }
                 }
                 System.exit(1);
@@ -444,7 +184,7 @@ public class MnyViewer {
             public void actionPerformed(ActionEvent event) {
                 Component component = (Component) event.getSource();
                 Component locationRelativeTo = JOptionPane.getFrameForComponent(component);
-                locationRelativeTo = MnyViewer.this.frame;
+                locationRelativeTo = MnyViewer.this.getFrame();
                 List<String> recentOpenFileNames = new ArrayList<String>();
                 int size = prefs.getInt("recentOpenFileNames_size", 0);
                 size = Math.min(size, 10);
@@ -454,21 +194,21 @@ public class MnyViewer {
                         recentOpenFileNames.add(value);
                     }
                 }
-                OpenDbDialog dialog = OpenDbDialog.showDialog(db, dbFile, recentOpenFileNames, locationRelativeTo);
+                OpenDbDialog dialog = OpenDbDialog.showDialog(getDb(), dbFile, recentOpenFileNames, locationRelativeTo);
                 if (!dialog.isCancel()) {
-                    db = dialog.getDb();
+                    setDb(dialog.getDb());
                     dbFile = dialog.getDbFile();
                     if (dbFile != null) {
-                        frame.setTitle(dbFile.getAbsolutePath());
+                        getFrame().setTitle(dbFile.getAbsolutePath());
                     } else {
-                        frame.setTitle("No opened db");
+                        getFrame().setTitle("No opened db");
                     }
                     List<Table> tables = new ArrayList<Table>();
                     try {
-                        Set<String> names = db.getTableNames();
+                        Set<String> names = getDb().getTableNames();
                         for (String name : names) {
                             try {
-                                Table t = db.getTable(name);
+                                Table t = getDb().getTable(name);
                                 tables.add(t);
                             } catch (IOException e) {
                                 log.warn(e);
@@ -503,11 +243,11 @@ public class MnyViewer {
         mnNewMenu.add(mnNewMenu_1);
 
         JMenuItem mntmNewMenuItem_3 = new JMenuItem("To CSV");
-        mntmNewMenuItem_3.addActionListener(new ExportToCsvAction());
+        mntmNewMenuItem_3.addActionListener(new ExportToCsvAction(this));
         mnNewMenu_1.add(mntmNewMenuItem_3);
 
         JMenuItem mntmNewMenuItem_4 = new JMenuItem("To *.mdb");
-        mntmNewMenuItem_4.addActionListener(new ExportToMdbAction());
+        mntmNewMenuItem_4.addActionListener(new ExportToMdbAction(this));
         mnNewMenu_1.add(mntmNewMenuItem_4);
 
         JSeparator separator_1 = new JSeparator();
@@ -517,7 +257,7 @@ public class MnyViewer {
         JSplitPane splitPane = new JSplitPane();
         splitPane.setResizeWeight(0.33);
         splitPane.setDividerLocation(0.33);
-        frame.getContentPane().add(splitPane, BorderLayout.CENTER);
+        getFrame().getContentPane().add(splitPane, BorderLayout.CENTER);
 
         JPanel leftView = new JPanel();
         leftView.setPreferredSize(new Dimension(80, -1));
@@ -549,7 +289,7 @@ public class MnyViewer {
                 }
                 String tableName = m.group(1);
                 try {
-                    final Table table = db.getTable(tableName);
+                    final Table table = getDb().getTable(tableName);
                     dataModel.setTable(table);
                     dataModel.setTableName(tableName);
                     dataModel.setTableMetaData(table.toString());
@@ -599,10 +339,11 @@ public class MnyViewer {
                 int cols = columnModel.getColumnCount();
                 
                 MnyTableModel mnyTableModel = MnyViewer.this.tableModel;
+                IndexLookup indexLookup = new IndexLookup();
                 
                 for (int i = 0; i < cols; i++) {
                     TableColumn column = columnModel.getColumn(i);
-                    MyTableRenderer renderer = new MyTableRenderer(column.getCellRenderer());
+                    MyTableCellRenderer renderer = new MyTableCellRenderer(column.getCellRenderer());
                     column.setCellRenderer(renderer);
 
                     if (mnyTableModel.columnIsDateType(i)) {
@@ -613,6 +354,17 @@ public class MnyViewer {
 //                        TableCellEditor cellEditor = new DatePickerTableEditor();
                         TableCellEditor cellEditor = new DialogCellEditor();
                         column.setCellEditor(cellEditor);
+                    }
+                    
+                    if (mnyTableModel.isPrimaryKeyColumn(i)) {
+                        TableCellRenderer headerRenderer = new DefaultTableCellRenderer() {
+                            public Component getTableCellRendererComponent(JTable jtable, Object obj, boolean flag, boolean flag1, int i, int j) {
+                                setText(obj.toString());
+//                                setForeground(Color.RED);
+                                return this;
+                            }
+                        };
+                        column.setHeaderRenderer(headerRenderer);
                     }
                 }
             }
@@ -697,7 +449,7 @@ public class MnyViewer {
 
     protected void duplicateRow(int rowIndex) {
         if (tableModel != null) {
-            tableModel.duplicateRow(rowIndex, this.frame);
+            tableModel.duplicateRow(rowIndex, this.getFrame());
         }
     }
 
@@ -773,5 +525,25 @@ public class MnyViewer {
             log.warn("Unrecognized data type: " + type);
         }
         return clz;
+    }
+
+    public void setDb(Database db) {
+        this.db = db;
+    }
+
+    public Database getDb() {
+        return db;
+    }
+
+    public void setFrame(JFrame frame) {
+        this.frame = frame;
+    }
+
+    public JFrame getFrame() {
+        return frame;
+    }
+
+    public static Executor getThreadPool() {
+        return threadPool;
     }
 }
