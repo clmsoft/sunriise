@@ -7,8 +7,6 @@ import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.awt.event.MouseListener;
 import java.io.File;
 import java.io.IOException;
@@ -77,11 +75,11 @@ import com.le.sunriise.model.bean.DataModel;
 
 public class MnyViewer {
     private static final Logger log = Logger.getLogger(MnyViewer.class);
-    
+
     private static final Preferences prefs = Preferences.userNodeForPackage(MnyViewer.class);
-    
+
     private static final Executor threadPool = Executors.newCachedThreadPool();
-    
+
     private JFrame frame;
     private File dbFile;
     private Database db;
@@ -101,6 +99,7 @@ public class MnyViewer {
 
     private JMenuItem duplicateMenuItem;
     private JMenuItem deleteMenuItem;
+    private JTextArea keyInfoTextArea;
 
     /**
      * Launch the application.
@@ -131,9 +130,12 @@ public class MnyViewer {
 
         sb.append("Header info");
         sb.append("\n");
+        sb.append("\n");
 
         sb.append("Table: " + t.getName());
-
+        sb.append("\n");
+        sb.append("\n");
+        
         Database db = t.getDatabase();
 
         PageChannel pageChannel = db.getPageChannel();
@@ -146,6 +148,48 @@ public class MnyViewer {
         // SALT_OFFSET 0x72 4
         // ENCRYPTION_FLAGS_OFFSET 0x298 1
 
+        return sb.toString();
+    }
+
+    private String parseKeyInfo(Table t) throws IOException {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("Key info");
+        sb.append("\n");
+        sb.append("\n");
+
+        sb.append("Table: " + t.getName());
+        sb.append("\n");
+        sb.append("\n");
+
+        sb.append("# Primary keys:");
+        sb.append("\n");
+        IndexLookup indexLookup = new IndexLookup();
+        for (Column column : t.getColumns()) {
+            if (indexLookup.isPrimaryKeyColumn(column)) {
+                sb.append("(PK) " + t.getName() + "." + column.getName() + ", " + indexLookup.getMax(column));
+                sb.append("\n");
+
+                List<Column> referencing = indexLookup.getReferencing(column);
+                for (Column col : referencing) {
+                    sb.append("    (referencing-FK) " + col.getTable().getName() + "." + col.getName());
+                    sb.append("\n");
+                }
+            }
+        }
+        sb.append("\n");
+        
+        sb.append("# Foreign keys:");
+        sb.append("\n");
+        for (Column column : t.getColumns()) {
+            List<Column> referenced = indexLookup.getReferencedColumns(column);
+            for (Column col : referenced) {
+                sb.append("(FK) " + t.getName() + "." + column.getName() + " -> " + col.getTable().getName() + "." + col.getName());
+                sb.append("\n");
+            }
+        }
+        sb.append("\n");
+        
         return sb.toString();
     }
 
@@ -188,9 +232,9 @@ public class MnyViewer {
                 List<String> recentOpenFileNames = new ArrayList<String>();
                 int size = prefs.getInt("recentOpenFileNames_size", 0);
                 size = Math.min(size, 10);
-                for(int i = 0; i < size;i++){
+                for (int i = 0; i < size; i++) {
                     String value = prefs.get("recentOpenFileNames_" + i, null);
-                    if(value != null) {
+                    if (value != null) {
                         recentOpenFileNames.add(value);
                     }
                 }
@@ -226,14 +270,14 @@ public class MnyViewer {
                     }
                     MnyViewer.this.dataModel.setTables(tables);
 
-                    size  = recentOpenFileNames.size();
+                    size = recentOpenFileNames.size();
                     size = Math.min(size, 10);
                     log.info("prefs: recentOpenFileNames_size=" + size);
                     prefs.putInt("recentOpenFileNames_size", size);
-                    for(int i = 0; i < size;i++){
+                    for (int i = 0; i < size; i++) {
                         log.info("prefs: recentOpenFileNames_" + i + ", value=" + recentOpenFileNames.get(i));
                         prefs.put("recentOpenFileNames_" + i, recentOpenFileNames.get(i));
-                    }                    
+                    }
                 }
             }
         });
@@ -294,6 +338,7 @@ public class MnyViewer {
                     dataModel.setTableName(tableName);
                     dataModel.setTableMetaData(table.toString());
                     dataModel.setHeaderInfo(parseHeaderInfo(table));
+                    dataModel.setKeyInfo(parseKeyInfo(table));
                     tableModel = new MnyTableModel(table);
                     tableModel.setDbReadOnly(dbReadOnly);
                     dataModel.setTableModel(tableModel);
@@ -337,10 +382,10 @@ public class MnyViewer {
                 super.setModel(dataModel);
                 TableColumnModel columnModel = this.getColumnModel();
                 int cols = columnModel.getColumnCount();
-                
+
                 MnyTableModel mnyTableModel = MnyViewer.this.tableModel;
                 IndexLookup indexLookup = new IndexLookup();
-                
+
                 for (int i = 0; i < cols; i++) {
                     TableColumn column = columnModel.getColumn(i);
                     MyTableCellRenderer renderer = new MyTableCellRenderer(column.getCellRenderer());
@@ -350,20 +395,20 @@ public class MnyViewer {
                         if (log.isDebugEnabled()) {
                             log.debug("columnIsDateType, i=" + i);
                         }
-//                        TableCellEditor cellEditor = new TableCellDateEditor();
-//                        TableCellEditor cellEditor = new DatePickerTableEditor();
+                        // TableCellEditor cellEditor = new
+                        // TableCellDateEditor();
+                        // TableCellEditor cellEditor = new
+                        // DatePickerTableEditor();
                         TableCellEditor cellEditor = new DialogCellEditor();
                         column.setCellEditor(cellEditor);
                     }
-                    
+
                     if (mnyTableModel.isPrimaryKeyColumn(i)) {
-                        TableCellRenderer headerRenderer = new DefaultTableCellRenderer() {
-                            public Component getTableCellRendererComponent(JTable jtable, Object obj, boolean flag, boolean flag1, int i, int j) {
-                                setText(obj.toString());
-//                                setForeground(Color.RED);
-                                return this;
-                            }
-                        };
+                        TableCellRenderer headerRenderer = new MyTabletHeaderRenderer(table, column.getHeaderRenderer(), Color.RED);
+                        column.setHeaderRenderer(headerRenderer);
+                    }
+                    if (mnyTableModel.isForeignKeyColumn(i)) {
+                        TableCellRenderer headerRenderer = new MyTabletHeaderRenderer(table, column.getHeaderRenderer(), Color.BLUE);
                         column.setHeaderRenderer(headerRenderer);
                     }
                 }
@@ -373,10 +418,12 @@ public class MnyViewer {
         table.setDefaultRenderer(Date.class, new DefaultTableCellRenderer() {
             // private DateFormat formatter = new
             // SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
-//            private DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSS");
-//            private DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd");
+            // private DateFormat formatter = new
+            // SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSS");
+            // private DateFormat formatter = new
+            // SimpleDateFormat("yyyy/MM/dd");
             private DateFormat formatter = new SimpleDateFormat("MMM dd, yyyy HH:mm");
-            
+
             public void setValue(Object value) {
                 if (log.isDebugEnabled()) {
                     log.debug("cellRenderer: value=" + value + ", " + value.getClass().getName());
@@ -402,9 +449,9 @@ public class MnyViewer {
         });
         popupMenu.add(menuItem);
         this.duplicateMenuItem = menuItem;
-        
+
         popupMenu.addSeparator();
-        
+
         menuItem = new JMenuItem(new AbstractAction("Delete") {
             public void actionPerformed(ActionEvent e) {
                 int rowIndex = table.getSelectedRow();
@@ -413,7 +460,7 @@ public class MnyViewer {
         });
         popupMenu.add(menuItem);
         this.deleteMenuItem = menuItem;
-        
+
         MouseListener popupListener = new PopupListener(popupMenu);
         table.addMouseListener(popupListener);
         table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
@@ -438,6 +485,17 @@ public class MnyViewer {
 
         headerTextArea = new JTextArea();
         scrollPane_3.setViewportView(headerTextArea);
+
+        JPanel panel_4 = new JPanel();
+        tabbedPane.addTab("Keys", null, panel_4, null);
+        panel_4.setLayout(new BorderLayout(0, 0));
+
+        JScrollPane scrollPane_4 = new JScrollPane();
+        panel_4.add(scrollPane_4, BorderLayout.CENTER);
+
+        keyInfoTextArea = new JTextArea();
+        scrollPane_4.setViewportView(keyInfoTextArea);
+
         initDataBindings();
     }
 
@@ -451,40 +509,6 @@ public class MnyViewer {
         if (tableModel != null) {
             tableModel.duplicateRow(rowIndex, this.getFrame());
         }
-    }
-
-    protected void initDataBindings() {
-        BeanProperty<DataModel, List<Table>> listOfTablesBeanProperty = BeanProperty.create("tables");
-        JListBinding<Table, DataModel, JList> jListBinding = SwingBindings.createJListBinding(UpdateStrategy.READ, dataModel, listOfTablesBeanProperty, list);
-        //
-        ELProperty<Table, Object> tableEvalutionProperty = ELProperty.create("${name} (${rowCount})");
-        jListBinding.setDetailBinding(tableEvalutionProperty);
-        //
-        jListBinding.bind();
-        //
-        BeanProperty<DataModel, TableModel> dataModelBeanProperty = BeanProperty.create("tableModel");
-        ELProperty<JTable, Object> jTableEvalutionProperty = ELProperty.create("${model}");
-        AutoBinding<DataModel, TableModel, JTable, Object> autoBinding = Bindings.createAutoBinding(UpdateStrategy.READ, dataModel, dataModelBeanProperty,
-                table, jTableEvalutionProperty);
-        autoBinding.bind();
-        //
-        BeanProperty<DataModel, String> dataModelBeanProperty_1 = BeanProperty.create("tableName");
-        BeanProperty<JTextField, String> jTextFieldBeanProperty_1 = BeanProperty.create("text");
-        AutoBinding<DataModel, String, JTextField, String> autoBinding_2 = Bindings.createAutoBinding(UpdateStrategy.READ, dataModel, dataModelBeanProperty_1,
-                textField, jTextFieldBeanProperty_1);
-        autoBinding_2.bind();
-        //
-        ELProperty<DataModel, Object> dataModelEvalutionProperty = ELProperty.create("${tableMetaData}");
-        BeanProperty<JTextArea, String> jTextAreaBeanProperty = BeanProperty.create("text");
-        AutoBinding<DataModel, Object, JTextArea, String> autoBinding_1 = Bindings.createAutoBinding(UpdateStrategy.READ, dataModel,
-                dataModelEvalutionProperty, textArea, jTextAreaBeanProperty);
-        autoBinding_1.bind();
-        //
-        BeanProperty<DataModel, String> dataModelBeanProperty_2 = BeanProperty.create("headerInfo");
-        BeanProperty<JTextArea, String> jTextAreaBeanProperty_1 = BeanProperty.create("text");
-        AutoBinding<DataModel, String, JTextArea, String> autoBinding_3 = Bindings.createAutoBinding(UpdateStrategy.READ, dataModel, dataModelBeanProperty_2,
-                headerTextArea, jTextAreaBeanProperty_1);
-        autoBinding_3.bind();
     }
 
     public static Class getColumnJavaClass(Column column) {
@@ -545,5 +569,45 @@ public class MnyViewer {
 
     public static Executor getThreadPool() {
         return threadPool;
+    }
+
+    protected void initDataBindings() {
+        BeanProperty<DataModel, List<Table>> listOfTablesBeanProperty = BeanProperty.create("tables");
+        JListBinding<Table, DataModel, JList> jListBinding = SwingBindings.createJListBinding(UpdateStrategy.READ, dataModel, listOfTablesBeanProperty, list);
+        //
+        ELProperty<Table, Object> tableEvalutionProperty = ELProperty.create("${name} (${rowCount})");
+        jListBinding.setDetailBinding(tableEvalutionProperty);
+        //
+        jListBinding.bind();
+        //
+        BeanProperty<DataModel, TableModel> dataModelBeanProperty = BeanProperty.create("tableModel");
+        ELProperty<JTable, Object> jTableEvalutionProperty = ELProperty.create("${model}");
+        AutoBinding<DataModel, TableModel, JTable, Object> autoBinding = Bindings.createAutoBinding(UpdateStrategy.READ, dataModel, dataModelBeanProperty,
+                table, jTableEvalutionProperty);
+        autoBinding.bind();
+        //
+        BeanProperty<DataModel, String> dataModelBeanProperty_1 = BeanProperty.create("tableName");
+        BeanProperty<JTextField, String> jTextFieldBeanProperty_1 = BeanProperty.create("text");
+        AutoBinding<DataModel, String, JTextField, String> autoBinding_2 = Bindings.createAutoBinding(UpdateStrategy.READ, dataModel, dataModelBeanProperty_1,
+                textField, jTextFieldBeanProperty_1);
+        autoBinding_2.bind();
+        //
+        ELProperty<DataModel, Object> dataModelEvalutionProperty = ELProperty.create("${tableMetaData}");
+        BeanProperty<JTextArea, String> jTextAreaBeanProperty = BeanProperty.create("text");
+        AutoBinding<DataModel, Object, JTextArea, String> autoBinding_1 = Bindings.createAutoBinding(UpdateStrategy.READ, dataModel,
+                dataModelEvalutionProperty, textArea, jTextAreaBeanProperty);
+        autoBinding_1.bind();
+        //
+        BeanProperty<DataModel, String> dataModelBeanProperty_2 = BeanProperty.create("headerInfo");
+        BeanProperty<JTextArea, String> jTextAreaBeanProperty_1 = BeanProperty.create("text");
+        AutoBinding<DataModel, String, JTextArea, String> autoBinding_3 = Bindings.createAutoBinding(UpdateStrategy.READ, dataModel, dataModelBeanProperty_2,
+                headerTextArea, jTextAreaBeanProperty_1);
+        autoBinding_3.bind();
+        //
+        BeanProperty<DataModel, String> dataModelBeanProperty_3 = BeanProperty.create("keyInfo");
+        BeanProperty<JTextArea, String> jTextAreaBeanProperty_2 = BeanProperty.create("text");
+        AutoBinding<DataModel, String, JTextArea, String> autoBinding_4 = Bindings.createAutoBinding(UpdateStrategy.READ, dataModel, dataModelBeanProperty_3,
+                keyInfoTextArea, jTextAreaBeanProperty_2);
+        autoBinding_4.bind();
     }
 }

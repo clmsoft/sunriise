@@ -146,7 +146,9 @@ public class IndexLookup {
             try {
                 currentValue = Long.valueOf(value);
             } catch (NumberFormatException e) {
-                log.warn(e);
+                if (log.isDebugEnabled()) {
+                    log.warn(e);
+                }
                 continue;
             }
             if (currentValue == null) {

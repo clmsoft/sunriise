@@ -18,7 +18,7 @@ import com.le.sunriise.index.IndexLookup;
 
 public class MnyTableModel extends AbstractTableModel {
     private static final Logger log = Logger.getLogger(MnyTableModel.class);
-    
+
     private final Table table;
     private int currentRow = 0;
     private Cursor cursor;
@@ -104,8 +104,8 @@ public class MnyTableModel extends AbstractTableModel {
         }
         try {
             moveCursorToRow(rowIndex);
-//            data.put(getColumnName(columnIndex), aValue);
-//            cursor.updateCurrentRow(data.values().toArray());
+            // data.put(getColumnName(columnIndex), aValue);
+            // cursor.updateCurrentRow(data.values().toArray());
             cursor.setCurrentRowValue(table.getColumn(getColumnName(columnIndex)), aValue);
             data = cursor.getCurrentRow();
             fireTableCellUpdated(rowIndex, columnIndex);
@@ -148,26 +148,27 @@ public class MnyTableModel extends AbstractTableModel {
         try {
             moveCursorToRow(rowIndex);
             Table table = cursor.getTable();
-//            Set<Integer> uniqueColumnIndex = new HashSet<Integer>();
-//            List<Index> indexes = table.getIndexes();
-//            for(Index index: indexes) {
-//                if (! index.isUnique()) {
-//                    continue;
-//                }
-//                List<ColumnDescriptor> columns = index.getColumns();
-//                for(ColumnDescriptor column: columns) {
-//                    uniqueColumnIndex.add(column.getColumnIndex());
-//                }
-//            }
-//            NewRowDialog dialog = NewRowDialog.showDialog(data, uniqueColumnIndex, locationRealativeTo);
-//            if (dialog.isCancel()) {
-//                return;
-//            }
+            // Set<Integer> uniqueColumnIndex = new HashSet<Integer>();
+            // List<Index> indexes = table.getIndexes();
+            // for(Index index: indexes) {
+            // if (! index.isUnique()) {
+            // continue;
+            // }
+            // List<ColumnDescriptor> columns = index.getColumns();
+            // for(ColumnDescriptor column: columns) {
+            // uniqueColumnIndex.add(column.getColumnIndex());
+            // }
+            // }
+            // NewRowDialog dialog = NewRowDialog.showDialog(data,
+            // uniqueColumnIndex, locationRealativeTo);
+            // if (dialog.isCancel()) {
+            // return;
+            // }
 
             IndexLookup indexLooker = new IndexLookup();
             List<Column> columns = table.getColumns();
             Object[] dataArray = data.values().toArray();
-            for(int i = 0; i < dataArray.length; i++) {
+            for (int i = 0; i < dataArray.length; i++) {
                 Column column = columns.get(i);
                 if (indexLooker.isPrimaryKeyColumn(column)) {
                     Long max = indexLooker.getMax(column);
@@ -175,7 +176,7 @@ public class MnyTableModel extends AbstractTableModel {
                     dataArray[i] = max.toString();
                 }
             }
-            
+
             int rowCount = table.getRowCount();
             table.addRow(dataArray);
             currentRow = 0;
@@ -204,7 +205,7 @@ public class MnyTableModel extends AbstractTableModel {
             return false;
         }
     }
-    
+
     public boolean isPrimaryKeyColumn(int i) {
         List<Column> columns = table.getColumns();
         if (columns == null) {
@@ -216,4 +217,27 @@ public class MnyTableModel extends AbstractTableModel {
         Column column = columns.get(i);
         return indexLookup.isPrimaryKeyColumn(column);
     }
+
+    public boolean isForeignKeyColumn(int i) {
+        List<Column> columns = table.getColumns();
+        if (columns == null) {
+            return false;
+        }
+        if (i >= columns.size()) {
+            return false;
+        }
+        Column column = columns.get(i);
+        List<Column> referenced = null;
+
+        try {
+            referenced = indexLookup.getReferencedColumns(column);
+        } catch (IOException e) {
+            log.warn(e);
+        }
+        if (referenced == null) {
+            return false;
+        }
+        return referenced.size() > 0;
+    }
+
 }

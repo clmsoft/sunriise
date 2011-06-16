@@ -19,6 +19,8 @@ public class DataModel {
     private String tableMetaData;
 
     private String headerInfo;
+    
+    private String keyInfo;
 
     public List<Table> getTables() {
         return tables;
@@ -66,5 +68,13 @@ public class DataModel {
 
     public void setHeaderInfo(String headerInfo) {
         this.headerInfo = headerInfo;
+    }
+
+    public String getKeyInfo() {
+        return keyInfo;
+    }
+
+    public void setKeyInfo(String keyInfo) {
+        this.keyInfo = keyInfo;
     }
 }
