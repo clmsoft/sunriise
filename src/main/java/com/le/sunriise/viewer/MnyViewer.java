@@ -415,6 +415,7 @@ public class MnyViewer {
             }
 
         };
+//        table.setAutoCreateRowSorter(true);
         table.setDefaultRenderer(Date.class, new DefaultTableCellRenderer() {
             // private DateFormat formatter = new
             // SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
