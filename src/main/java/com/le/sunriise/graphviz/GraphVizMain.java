@@ -22,6 +22,7 @@ public class GraphVizMain {
     public static void main(String[] args) {
         Database db = null;
         String dbFileName = "C:/Users/Hung Le/Documents/Microsoft Money/2007/temp/My Money - Copy.mny";
+        dbFileName = "./misc/2005UK/copy of sample.mny";
         File dbFile = new File(dbFileName);
         String password = null;
         log.info("dbFile=" + dbFile);
@@ -36,23 +37,11 @@ public class GraphVizMain {
                     continue;
                 }
                 File d = new File("target");
-                File f = new File(d, table.getName() + ".dot");
-                PrintWriter writer = null;
-                try {
-                    writer = new PrintWriter(new BufferedWriter(new FileWriter(f)));
-                    GenGraphViz genGraphViz = new GenGraphViz();
-                    genGraphViz.gen(table, writer);
-                } finally {
-                    if (writer != null) {
-                        try {
-                            writer.close();
-                        } finally {
-                            if (writer != null) {
-                                writer = null;
-                            }
-                        }
-                    }
-                }
+                d = new File(d, "graphviz");
+                d.mkdirs();
+                File outFile = new File(d, table.getName() + ".dot");
+                GenGraphViz genGraphViz = new GenGraphViz();
+                genGraphViz.gen(table, outFile);
             }
         } catch (IOException e) {
             log.error(e, e);
