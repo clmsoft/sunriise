@@ -1,10 +1,7 @@
 package com.le.sunriise.graphviz;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
@@ -21,8 +18,16 @@ public class GraphVizMain {
      */
     public static void main(String[] args) {
         Database db = null;
-        String dbFileName = "C:/Users/Hung Le/Documents/Microsoft Money/2007/temp/My Money - Copy.mny";
-        dbFileName = "./misc/2005UK/copy of sample.mny";
+        String dbFileName = null;
+
+        if (args.length == 1) {
+            dbFileName = args[0];
+        } else {
+            Class clz = GraphVizMain.class;
+            System.out.println("Usage: java " + clz.getName() + " file.mny");
+            System.exit(1);
+        }
+
         File dbFile = new File(dbFileName);
         String password = null;
         log.info("dbFile=" + dbFile);
