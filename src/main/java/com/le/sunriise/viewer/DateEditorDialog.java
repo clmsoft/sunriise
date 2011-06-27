@@ -16,6 +16,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerDateModel;
+import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.TableCellEditor;
 
@@ -45,7 +46,7 @@ public class DateEditorDialog extends JDialog {
     public static void main(String[] args) {
         try {
             DateEditorDialog dialog = new DateEditorDialog();
-            dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+            dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
             dialog.setVisible(true);
         } catch (Exception e) {
             e.printStackTrace();
@@ -56,7 +57,7 @@ public class DateEditorDialog extends JDialog {
      * Create the dialog.
      */
     public DateEditorDialog() {
-        setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+        setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         addWindowListener(new WindowAdapter() {
 
             @Override

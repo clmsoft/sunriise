@@ -45,18 +45,19 @@ public class ExportToMdbAction implements ActionListener {
         }
 
         public void run() {
-            Database srcDb = null;
+            OpenedDb srcDb = null;
             Database destDb = null;
             Exception exception = null;
 
             try {
-                srcDb = ExportToMdbAction.this.mnyViewer.getDb();
+                srcDb = ExportToMdbAction.this.mnyViewer.getOpenedDb();
                 ExportToMdb exporter = new ExportToMdb() {
                     private int progressCount = 0;
                     private int maxCount = 0;
                     private String currentTable = null;
                     private int maxRows;
 
+                    @Override
                     protected void startCopyTables(int maxCount) {
                         if (progressMonitor.isCanceled()) {
                             return;
@@ -70,6 +71,7 @@ public class ExportToMdbAction implements ActionListener {
                         SwingUtilities.invokeLater(doRun);
                     }
 
+                    @Override
                     protected void endCopyTables(int count) {
                         Runnable doRun = new Runnable() {
                             public void run() {
@@ -79,6 +81,7 @@ public class ExportToMdbAction implements ActionListener {
                         SwingUtilities.invokeLater(doRun);
                     }
 
+                    @Override
                     protected boolean startCopyTable(String name) {
                         super.startCopyTable(name);
 
@@ -95,6 +98,7 @@ public class ExportToMdbAction implements ActionListener {
                         return true;
                     }
 
+                    @Override
                     protected void endCopyTable(String name) {
                         progressCount++;
                         Runnable doRun = new Runnable() {
@@ -105,6 +109,7 @@ public class ExportToMdbAction implements ActionListener {
                         SwingUtilities.invokeLater(doRun);
                     }
 
+                    @Override
                     protected boolean startAddingRows(int max) {
                         if (progressMonitor.isCanceled()) {
                             return false;
@@ -113,6 +118,7 @@ public class ExportToMdbAction implements ActionListener {
                         return true;
                     }
 
+                    @Override
                     protected boolean addedRow(int count) {
                         if (progressMonitor.isCanceled()) {
                             return false;
@@ -127,6 +133,7 @@ public class ExportToMdbAction implements ActionListener {
                         return true;
                     }
 
+                    @Override
                     protected void endAddingRows(int count, long delta) {
                         super.endAddingRows(count, delta);
                     }

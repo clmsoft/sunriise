@@ -10,6 +10,7 @@ import org.apache.log4j.Logger;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Relationship;
 import com.healthmarketscience.jackcess.Table;
+import com.le.sunriise.viewer.OpenedDb;
 
 public class GetRelationships {
     private static final Logger log = Logger.getLogger(GetRelationships.class);
@@ -18,13 +19,23 @@ public class GetRelationships {
      * @param args
      */
     public static void main(String[] args) {
-        Database db = null;
-        String dbFileName = "C:/Users/Hung Le/Documents/Microsoft Money/2007/temp/My Money - Copy.mny";
+        OpenedDb openedDb = null;
+        String dbFileName = null;
+        
+        if (args.length == 1) {
+            dbFileName = args[0];
+        } else {
+            Class clz = GetRelationships.class;
+            System.out.println("Usage: java " + clz.getName() + " file.mny");
+            System.exit(1);
+        }
+        
         File dbFile = new File(dbFileName);
         String password = null;
         log.info("dbFile=" + dbFile);
         try {
-            db = Utils.openDbReadOnly(dbFile, password);
+            openedDb = Utils.openDbReadOnly(dbFile, password);
+            Database db = openedDb.getDb();
             Set<String> tableNames = db.getTableNames();
             String[] tableNameArray = new String[tableNames.size()];
             int i = 0;
@@ -46,13 +57,11 @@ public class GetRelationships {
         } catch (IOException e) {
             log.error(e, e);
         } finally {
-            if (db != null) {
+            if (openedDb != null) {
                 try {
-                    db.close();
-                } catch (IOException e) {
-                    log.warn(e);
+                    openedDb.close();
                 } finally {
-                    db = null;
+                    openedDb = null;
                 }
             }
             log.info("< DONE");

@@ -11,6 +11,7 @@ import com.healthmarketscience.jackcess.Column;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Table;
 import com.le.sunriise.Utils;
+import com.le.sunriise.viewer.OpenedDb;
 
 public class IndexLookupMain {
     private static final Logger log = Logger.getLogger(IndexLookupMain.class);
@@ -19,15 +20,24 @@ public class IndexLookupMain {
      * @param args
      */
     public static void main(String[] args) {
-        Database db = null;
-        String dbFileName = "C:/Users/Hung Le/Documents/Microsoft Money/2007/temp/My Money - Copy.mny";
+        String dbFileName = null;;
+
+        if (args.length == 1) {
+            dbFileName = args[0];
+        } else {
+            Class clz = IndexLookupMain.class;
+            System.out.println("Usage: java " + clz.getName() + " file.mny");
+            System.exit(1);
+        }
+        OpenedDb openedDb = null;
         File dbFile = new File(dbFileName);
         String password = null;
         log.info("dbFile=" + dbFile);
 
         try {
-            db = Utils.openDbReadOnly(dbFile, password);
+            openedDb = Utils.openDbReadOnly(dbFile, password);
             IndexLookup indexLookup = new IndexLookup();
+            Database db = openedDb.getDb();
             Set<String> tableNames = db.getTableNames();
             for (String tableName : tableNames) {
                 Table table = db.getTable(tableName);
@@ -54,13 +64,11 @@ public class IndexLookupMain {
         } catch (IOException e) {
             log.error(e, e);
         } finally {
-            if (db != null) {
+            if (openedDb != null) {
                 try {
-                    db.close();
-                } catch (IOException e) {
-                    log.warn(e, e);
+                    openedDb.close();
                 } finally {
-                    db = null;
+                    openedDb = null;
                 }
             }
             log.info("< DONE");

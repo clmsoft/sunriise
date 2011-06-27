@@ -12,9 +12,7 @@ import org.apache.log4j.Logger;
 import com.healthmarketscience.jackcess.Column;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Index;
-import com.healthmarketscience.jackcess.IndexData;
 import com.healthmarketscience.jackcess.Index.ForeignKeyReference;
-import com.healthmarketscience.jackcess.IndexCursor;
 import com.healthmarketscience.jackcess.IndexData.ColumnDescriptor;
 import com.healthmarketscience.jackcess.Table;
 
@@ -50,6 +48,7 @@ public class MyWalkIndexes extends WalkIndexes {
     // return true;
     // }
 
+    @Override
     protected void walk(Index idx, Table table) throws IOException {
 //        String indexName = idx.getName();
 //        log.info("");
@@ -182,6 +181,7 @@ if(otherCursor.findRowByEntry(entryKey)) {
         return uniqueIndexes;
     }
 
+    @Override
     protected void walk(Table table) throws IOException {
         primaryKeyIndexes = new HashSet<Integer>();
         foreignKeyIndexes = new HashSet<Integer>();

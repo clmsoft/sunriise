@@ -2,9 +2,6 @@ package com.le.sunriise.sql;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.Iterator;
-import java.util.List;
-
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserManager;
 import net.sf.jsqlparser.statement.select.Select;

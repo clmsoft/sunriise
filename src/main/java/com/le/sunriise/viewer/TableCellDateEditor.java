@@ -3,13 +3,10 @@ package com.le.sunriise.viewer;
 import java.awt.Component;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.util.Date;
-
 import javax.swing.AbstractCellEditor;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JTable;
-import javax.swing.JTextField;
 import javax.swing.table.TableCellEditor;
 
 import org.apache.log4j.Logger;

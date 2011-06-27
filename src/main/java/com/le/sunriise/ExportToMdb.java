@@ -1,36 +1,25 @@
 package com.le.sunriise;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.charset.Charset;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TimeZone;
 
 import org.apache.log4j.Logger;
 
-import com.healthmarketscience.jackcess.CodecProvider;
 import com.healthmarketscience.jackcess.Column;
-import com.healthmarketscience.jackcess.CryptCodecProvider;
 import com.healthmarketscience.jackcess.Cursor;
 import com.healthmarketscience.jackcess.DataType;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Table;
+import com.le.sunriise.viewer.OpenedDb;
 
 public class ExportToMdb {
     private static final Logger log = Logger.getLogger(ExportToMdb.class);
-    private static String EMPTY_FILE = "empty-db.mdb";
-
     /**
      * @param args
      */
@@ -65,7 +54,7 @@ public class ExportToMdb {
     }
 
     public void export(File srcFile, String srcPassword, File destFile) throws IOException {
-        Database srcDb = null;
+        OpenedDb srcDb = null;
         Database destDb = null;
 
         try {
@@ -75,8 +64,6 @@ public class ExportToMdb {
             if (srcDb != null) {
                 try {
                     srcDb.close();
-                } catch (IOException e) {
-                    log.warn(e);
                 } finally {
                     srcDb = null;
                 }
@@ -93,9 +80,9 @@ public class ExportToMdb {
         }
     }
 
-    public Database export(Database srcDb, File destFile) throws IOException {
-        Database destDb = createEmptyDb(destFile);
-        copyDb(srcDb, destDb);
+    public Database export(OpenedDb srcDb, File destFile) throws IOException {
+        Database destDb = Utils.createEmptyDb(destFile);
+        copyDb(srcDb.getDb(), destDb);
         return destDb;
     }
 
@@ -209,93 +196,6 @@ public class ExportToMdb {
 
     protected void endAddingRows(int count, long delta) {
         log.info("Added rows=" + count + ", ms=" + delta);
-    }
-
-    private static Database createEmptyDb(InputStream emptyDbTemplateStream, File destFile) throws IOException {
-        copyStreamToFile(emptyDbTemplateStream, destFile);
-
-        boolean readOnly = false;
-        boolean autoSync = true;
-        Charset charset = null;
-        TimeZone timeZone = null;
-        CodecProvider provider = null;
-
-        Database db = Database.open(destFile, readOnly, autoSync, charset, timeZone, provider);
-
-        return db;
-    }
-
-    private static Database createEmptyDb(File file) throws IOException {
-        Database db = null;
-        InputStream in = null;
-        try {
-            String resource = EMPTY_FILE;
-            in = Thread.currentThread().getContextClassLoader().getResourceAsStream(resource);
-            if (in == null) {
-                throw new IOException("Cannot find resource=" + resource);
-            }
-            in = new BufferedInputStream(in);
-            db = createEmptyDb(in, file);
-        } finally {
-            if (in != null) {
-                try {
-                    in.close();
-                } catch (IOException e) {
-                    log.warn(e);
-                } finally {
-                    in = null;
-                }
-            }
-        }
-        return db;
-    }
-
-    private static void copyStreamToFile(InputStream srcIn, File destFile) throws FileNotFoundException, IOException {
-        OutputStream out = null;
-        try {
-            out = new BufferedOutputStream(new FileOutputStream(destFile));
-            copyStream(srcIn, out);
-        } finally {
-
-            if (out != null) {
-                try {
-                    out.close();
-                } catch (IOException e) {
-                    log.warn(e);
-                } finally {
-                    out = null;
-                }
-            }
-        }
-    }
-
-    private static void copyStream(InputStream in, OutputStream out) throws IOException {
-        int bufSize = 1024;
-        byte[] buffer = new byte[bufSize];
-        int n = 0;
-        while ((n = in.read(buffer, 0, bufSize)) != -1) {
-            out.write(buffer, 0, n);
-        }
-    }
-
-    private Database openSrcDbX(File mdbFile, String password) throws IOException {
-        Database db = null;
-
-        boolean readOnly = true;
-        boolean autoSync = true;
-        Charset charset = null;
-        TimeZone timeZone = null;
-        CodecProvider provider = null;
-
-        if (password != null) {
-            provider = new CryptCodecProvider(password);
-        } else {
-            provider = new CryptCodecProvider();
-        }
-
-        db = Database.open(mdbFile, readOnly, autoSync, charset, timeZone, provider);
-
-        return db;
     }
 
     private static void importColumns(List<Column> srcColumns, Database db, String tableName, boolean useExistingTable) throws SQLException, IOException {

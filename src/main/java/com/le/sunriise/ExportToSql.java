@@ -13,6 +13,7 @@ import org.apache.log4j.Logger;
 import com.healthmarketscience.jackcess.Column;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Table;
+import com.le.sunriise.viewer.OpenedDb;
 
 public class ExportToSql {
     private static final Logger log = Logger.getLogger(ExportToSql.class);
@@ -51,7 +52,7 @@ public class ExportToSql {
     }
 
     private void export(File srcFile, String srcPassword, File destFile) throws IOException {
-        Database srcDb = null;
+        OpenedDb srcDb = null;
 
         try {
             srcDb = Utils.openDbReadOnly(srcFile, srcPassword);
@@ -60,8 +61,6 @@ public class ExportToSql {
             if (srcDb != null) {
                 try {
                     srcDb.close();
-                } catch (IOException e) {
-                    log.warn(e);
                 } finally {
                     srcDb = null;
                 }
@@ -69,7 +68,7 @@ public class ExportToSql {
         }
     }
 
-    private void export(Database srcDb, File destFile) throws IOException {
+    private void export(OpenedDb srcDb, File destFile) throws IOException {
         PrintWriter writer = null;
         try {
             writer = new PrintWriter(new BufferedWriter(new FileWriter(destFile)));
@@ -81,9 +80,9 @@ public class ExportToSql {
         }
     }
 
-    private void export(Database srcDb, PrintWriter writer) throws IOException {
-        createTables(srcDb, writer);
-        populateTables(srcDb, writer);
+    private void export(OpenedDb srcDb, PrintWriter writer) throws IOException {
+        createTables(srcDb.getDb(), writer);
+        populateTables(srcDb.getDb(), writer);
     }
 
     private void populateTables(Database srcDb, PrintWriter writer) throws IOException {

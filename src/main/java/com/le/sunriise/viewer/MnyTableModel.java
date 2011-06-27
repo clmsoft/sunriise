@@ -72,6 +72,7 @@ public class MnyTableModel extends AbstractTableModel {
         }
     }
 
+    @Override
     public String getColumnName(int column) {
         List<Column> cols = table.getColumns();
         return cols.get(column).getName();

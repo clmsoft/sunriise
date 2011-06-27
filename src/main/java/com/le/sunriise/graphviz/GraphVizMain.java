@@ -9,6 +9,7 @@ import org.apache.log4j.Logger;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Table;
 import com.le.sunriise.Utils;
+import com.le.sunriise.viewer.OpenedDb;
 
 public class GraphVizMain {
     private static final Logger log = Logger.getLogger(GraphVizMain.class);
@@ -17,23 +18,30 @@ public class GraphVizMain {
      * @param args
      */
     public static void main(String[] args) {
-        Database db = null;
+        OpenedDb openedDb = null;
         String dbFileName = null;
+        File outDir = new File("target/graphviz");
 
         if (args.length == 1) {
             dbFileName = args[0];
+        } else if (args.length == 2) {
+            dbFileName = args[0];
+            outDir = new File(args[1]);
         } else {
             Class clz = GraphVizMain.class;
-            System.out.println("Usage: java " + clz.getName() + " file.mny");
+            System.out.println("Usage: java " + clz.getName() + " file.mny [outDir]");
             System.exit(1);
         }
-
+        outDir.mkdirs();
+        log.info("outDir=" + outDir);
+        
         File dbFile = new File(dbFileName);
         String password = null;
         log.info("dbFile=" + dbFile);
 
         try {
-            db = Utils.openDbReadOnly(dbFile, password);
+            openedDb = Utils.openDbReadOnly(dbFile, password);
+            Database db = openedDb.getDb();
             Set<String> tableNames = db.getTableNames();
             for (String tableName : tableNames) {
                 Table table = db.getTable(tableName);
@@ -41,25 +49,21 @@ public class GraphVizMain {
                     log.warn("Cannot find table=" + tableName);
                     continue;
                 }
-                File d = new File("target");
-                d = new File(d, "graphviz");
-                d.mkdirs();
-                File outFile = new File(d, table.getName() + ".dot");
+                File outFile = new File(outDir, table.getName() + ".dot");
                 GenGraphViz genGraphViz = new GenGraphViz();
                 genGraphViz.gen(table, outFile);
             }
         } catch (IOException e) {
             log.error(e, e);
         } finally {
-            if (db != null) {
+            if (openedDb != null) {
                 try {
-                    db.close();
-                } catch (IOException e) {
-                    log.warn(e, e);
+                    openedDb.close();
                 } finally {
-                    db = null;
+                    openedDb = null;
                 }
             }
+            log.info("outDir=" + outDir);
             log.info("< DONE");
         }
     }

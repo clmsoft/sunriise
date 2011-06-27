@@ -81,9 +81,10 @@ public class MnyViewer {
     private static final Executor threadPool = Executors.newCachedThreadPool();
 
     private JFrame frame;
-    private File dbFile;
-    private Database db;
-
+//    private File dbFile;
+//    private Database db;
+    private OpenedDb openedDb = new OpenedDb();
+    
     private DataModel dataModel = new DataModel();
     private JList list;
     private JTable table;
@@ -238,10 +239,12 @@ public class MnyViewer {
                         recentOpenFileNames.add(value);
                     }
                 }
-                OpenDbDialog dialog = OpenDbDialog.showDialog(getDb(), dbFile, recentOpenFileNames, locationRelativeTo);
+                OpenDbDialog dialog = OpenDbDialog.showDialog(openedDb, recentOpenFileNames, locationRelativeTo);
                 if (!dialog.isCancel()) {
-                    setDb(dialog.getDb());
-                    dbFile = dialog.getDbFile();
+//                    setDb(dialog.getDb());
+//                    dbFile = dialog.getDbFile();
+                    openedDb = dialog.getOpendDb();
+                    File dbFile = openedDb.getDbFile();
                     if (dbFile != null) {
                         getFrame().setTitle(dbFile.getAbsolutePath());
                     } else {
@@ -272,10 +275,14 @@ public class MnyViewer {
 
                     size = recentOpenFileNames.size();
                     size = Math.min(size, 10);
-                    log.info("prefs: recentOpenFileNames_size=" + size);
+                    if (log.isDebugEnabled()) {
+                        log.debug("prefs: recentOpenFileNames_size=" + size);
+                    }
                     prefs.putInt("recentOpenFileNames_size", size);
                     for (int i = 0; i < size; i++) {
-                        log.info("prefs: recentOpenFileNames_" + i + ", value=" + recentOpenFileNames.get(i));
+                        if (log.isDebugEnabled()) {
+                            log.debug("prefs: recentOpenFileNames_" + i + ", value=" + recentOpenFileNames.get(i));
+                        }
                         prefs.put("recentOpenFileNames_" + i, recentOpenFileNames.get(i));
                     }
                 }
@@ -425,6 +432,7 @@ public class MnyViewer {
             // SimpleDateFormat("yyyy/MM/dd");
             private DateFormat formatter = new SimpleDateFormat("MMM dd, yyyy HH:mm");
 
+            @Override
             public void setValue(Object value) {
                 if (log.isDebugEnabled()) {
                     log.debug("cellRenderer: value=" + value + ", " + value.getClass().getName());
@@ -553,11 +561,11 @@ public class MnyViewer {
     }
 
     public void setDb(Database db) {
-        this.db = db;
+        openedDb.setDb(db);
     }
 
     public Database getDb() {
-        return db;
+        return openedDb.getDb();
     }
 
     public void setFrame(JFrame frame) {
@@ -610,5 +618,13 @@ public class MnyViewer {
         AutoBinding<DataModel, String, JTextArea, String> autoBinding_4 = Bindings.createAutoBinding(UpdateStrategy.READ, dataModel, dataModelBeanProperty_3,
                 keyInfoTextArea, jTextAreaBeanProperty_2);
         autoBinding_4.bind();
+    }
+
+    public OpenedDb getOpenedDb() {
+        return openedDb;
+    }
+
+    public void setOpenedDb(OpenedDb openedDb) {
+        this.openedDb = openedDb;
     }
 }

@@ -9,6 +9,7 @@ import java.util.Date;
 
 import javax.swing.JLabel;
 import javax.swing.JTable;
+import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 
@@ -83,7 +84,7 @@ public class MyTableCellRenderer extends DefaultTableCellRenderer {
         if ((value != null) && (value instanceof Date)) {
             if (rendererComponent instanceof JLabel) {
                 JLabel label = (JLabel) rendererComponent;
-                label.setHorizontalAlignment(JLabel.RIGHT);
+                label.setHorizontalAlignment(SwingConstants.RIGHT);
             }
         }
     }

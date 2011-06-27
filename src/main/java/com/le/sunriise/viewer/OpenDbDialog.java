@@ -9,10 +9,7 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.File;
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
 import java.util.List;
-import java.util.TimeZone;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -33,14 +30,11 @@ import org.jdesktop.beansbinding.BeanProperty;
 import org.jdesktop.swingbinding.JComboBoxBinding;
 import org.jdesktop.swingbinding.SwingBindings;
 
-import com.healthmarketscience.jackcess.CodecProvider;
-import com.healthmarketscience.jackcess.CryptCodecProvider;
-import com.healthmarketscience.jackcess.Database;
-import com.healthmarketscience.jackcess.PageChannel;
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
+import com.le.sunriise.Utils;
 import com.le.sunriise.model.bean.OpenDbDialogDataModel;
 
 public class OpenDbDialog extends JDialog {
@@ -53,20 +47,16 @@ public class OpenDbDialog extends JDialog {
     private JPasswordField passwordField;
 
     private JCheckBox readOnlyCheckBox;
-
-    private Database db;
-
-    private File dbFile;
     
     private JCheckBox encryptedCheckBox;
     
     private OpenDbDialogDataModel dataModel = new OpenDbDialogDataModel();
     private JComboBox dbFileNames;
 
-    private File dbLockFile;
+    private OpenedDb opendDb;
 
-    public static OpenDbDialog showDialog(Database db, File dbFile, List<String> recentOpenFileNames, Component locationRealativeTo) {
-        OpenDbDialog dialog = new OpenDbDialog(db, dbFile, recentOpenFileNames);
+    public static OpenDbDialog showDialog(OpenedDb opendDb, List<String> recentOpenFileNames, Component locationRealativeTo) {
+        OpenDbDialog dialog = new OpenDbDialog(opendDb, recentOpenFileNames);
         dialog.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
         dialog.setModalityType(ModalityType.APPLICATION_MODAL);
         dialog.pack();
@@ -77,15 +67,11 @@ public class OpenDbDialog extends JDialog {
 
     /**
      * Create the dialog.
-     * 
-     * @param dbFile
-     * @param db
      */
-    public OpenDbDialog(final Database db, final File dbFile, final List<String> recentOpenFileNames) {
+    public OpenDbDialog(OpenedDb opendDb, final List<String> recentOpenFileNames) {
         setTitle("Open");
         // setModalityType(ModalityType.APPLICATION_MODAL);
-        this.db = db;
-        this.dbFile = dbFile;
+        this.opendDb = opendDb;
         this.dataModel.setRecentOpenFileNames(recentOpenFileNames);
         // setBounds(100, 100, 450, 300);
         getContentPane().setLayout(new BorderLayout());
@@ -211,27 +197,17 @@ public class OpenDbDialog extends JDialog {
                             return;
                         }
                         try {
-                            if (OpenDbDialog.this.db != null) {
-                                try {
-                                    OpenDbDialog.this.db.close();
-                                } catch (IOException e) {
-                                    log.warn(e);
-                                } finally {
-                                    OpenDbDialog.this.db = null;
-                                    if (dbLockFile != null) {
-                                        if (! dbLockFile.delete()) {
-                                            log.warn("Could NOT delete db lock file=" + dbLockFile);
-                                        }
-                                    }
-                                }
+                            if (OpenDbDialog.this.opendDb != null) {
+                                OpenDbDialog.this.opendDb.close();
                             }
-                            openDb(dbFileName, passwordField.getPassword(), readOnlyCheckBox.isSelected(), encryptedCheckBox.isSelected());
+
+                            OpenDbDialog.this.opendDb = Utils.openDb(dbFileName, passwordField.getPassword(), readOnlyCheckBox.isSelected(), encryptedCheckBox.isSelected());
                         } catch (IOException e) {
                             log.error(e);
                             JOptionPane.showMessageDialog(dbFileNames, dbFileName + " \n" + e.toString(), "Error open db file", JOptionPane.ERROR_MESSAGE);
                             return;
                         }
-                        File file = getDbFile();
+                        File file = OpenDbDialog.this.opendDb.getDbFile();
                         if (file != null) {
                             List<String> list = dataModel.getRecentOpenFileNames();
                             if (list.contains(file.getAbsolutePath())) {
@@ -268,81 +244,6 @@ public class OpenDbDialog extends JDialog {
         initDataBindings();
     }
 
-    protected void openDb(String dbFileName, char[] passwordChars, boolean readOnly, boolean encrypted) throws IOException {
-        CodecProvider cryptCodecProvider = null;
-        String password = null;
-        if ((passwordChars != null) && (passwordChars.length > 0)) {
-            password = new String(passwordChars);
-        }
-        cryptCodecProvider = new CryptCodecProvider(password);
-        if (!encrypted) {
-            cryptCodecProvider = null;
-        }
-        boolean autoSync = true;
-        Charset charset = null;
-        TimeZone timeZone = null;
-        this.dbFile = new File(dbFileName);
-        try {
-            log.info("> Database.open, dbFile=" + dbFile);
-            if ((! readOnly) && (dbFileName.endsWith(".mny"))) {
-                dbLockFile = null;
-                if((dbLockFile = lockDb(dbFile)) == null) {
-                    throw new IOException("Cannot lock dbFile=" + dbFileName);
-                } else {
-                    log.info("Created db lock file=" + dbLockFile);
-                }
-            }
-            this.db = Database.open(dbFile, readOnly, autoSync, charset, timeZone, cryptCodecProvider);
-
-            printEncryptionInfo();
-        } finally {
-            log.info("< Database.open, dbFile=" + dbFile);
-        }
-    }
-
-    protected File lockDb(File dbFile) throws IOException {
-        File parentDir = dbFile.getParentFile().getAbsoluteFile();
-        String name = dbFile.getName();
-        int i = name.lastIndexOf('.');
-        if (i <= 0) {
-            log.warn("Cannot lock dbFile=" + name + ". Cannot find suffix");
-            return null;
-        }
-        name = name.substring(0, i);
-        File lockFile = new File(parentDir, name + ".lrd");
-        if (lockFile.exists()) {
-            log.warn("Cannot lock dbFile=" + name + ". Lock file exists");
-            return null;
-        }
-        
-        if(lockFile.createNewFile()) {
-            lockFile.deleteOnExit();
-            return lockFile;
-        } else {
-            return null;
-        }
-    }
-
-    private void printEncryptionInfo() {
-        PageChannel pageChannel = db.getPageChannel();
-        ByteBuffer buffer = pageChannel.createPageBuffer();
-        int ENCRYPTION_FLAGS_OFFSET = 0x298;
-        byte flag = buffer.get(ENCRYPTION_FLAGS_OFFSET);
-        if (log.isDebugEnabled()) {
-            log.debug("ENCRYPTION_FLAGS=0x" + String.format("%x", flag));
-        }
-        int NEW_ENCRYPTION = 0x6;
-        if ((flag & NEW_ENCRYPTION) != 0) {
-            if (log.isDebugEnabled()) {
-                log.debug("NEW_ENCRYPTION - MSISAMCryptCodecHandler");
-            }
-        } else {
-            if (log.isDebugEnabled()) {
-                log.debug("OLD_ENCRYPTION - JetCryptCodecHandler");
-            }
-        }
-    }
-
     public boolean isCancel() {
         return cancel;
     }
@@ -351,13 +252,13 @@ public class OpenDbDialog extends JDialog {
         this.cancel = cancel;
     }
 
-    public Database getDb() {
-        return db;
-    }
-
-    public File getDbFile() {
-        return dbFile;
-    }
+//    public Database getDb() {
+//        return opendDb.getDb();
+//    }
+//
+//    public File getDbFile() {
+//        return opendDb.getDbFile();
+//    }
 
     public JCheckBox getReadOnlyCheckBox() {
         return readOnlyCheckBox;
@@ -367,5 +268,9 @@ public class OpenDbDialog extends JDialog {
         BeanProperty<OpenDbDialogDataModel, List<String>> openDbDialogDataModelBeanProperty = BeanProperty.create("recentOpenFileNames");
         JComboBoxBinding<String, OpenDbDialogDataModel, JComboBox> jComboBinding = SwingBindings.createJComboBoxBinding(UpdateStrategy.READ, dataModel, openDbDialogDataModelBeanProperty, dbFileNames);
         jComboBinding.bind();
+    }
+
+    public OpenedDb getOpendDb() {
+        return opendDb;
     }
 }

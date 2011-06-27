@@ -17,11 +17,12 @@ import com.healthmarketscience.jackcess.ExportUtil;
 import com.healthmarketscience.jackcess.SimpleExportFilter;
 import com.healthmarketscience.jackcess.Table;
 import com.healthmarketscience.jackcess.query.Query;
+import com.le.sunriise.viewer.OpenedDb;
 
 public class ExportToCsv {
     private static final Logger log = Logger.getLogger(ExportToCsv.class);
 
-    private Database db = null;
+    private OpenedDb openedDb = null;
 
     public void writeToDir(File outDir) throws IOException {
         PrintWriter writer = null;
@@ -31,6 +32,7 @@ public class ExportToCsv {
             writer = new PrintWriter(new BufferedWriter(new FileWriter(file)));
             // writer.println("file=" + dbFile);
             // writer.println("fileFormat: " + db.getFileFormat());
+            Database db = openedDb.getDb();
             writer.println(db.toString());
 
             writer.println("");
@@ -173,13 +175,11 @@ public class ExportToCsv {
     }
 
     private void close() {
-        if (db != null) {
+        if (openedDb != null) {
             try {
-                db.close();
-            } catch (IOException e) {
-                log.warn(e);
+                openedDb.close();
             } finally {
-                db = null;
+                openedDb = null;
             }
         }
     }
@@ -217,7 +217,7 @@ public class ExportToCsv {
                 throw new IOException("File=" + inFile.getAbsoluteFile().getAbsolutePath() + " does not exist.");
             }
             dbHelper = new ExportToCsv();
-            dbHelper.setDb(Utils.openDbReadOnly(inFile, password));
+            dbHelper.setOpenedDb(Utils.openDbReadOnly(inFile, password));
             if ((!outDir.exists()) && (!outDir.mkdirs())) {
                 throw new IOException("Cannot create directory, outDir=" + outDir);
             }
@@ -235,11 +235,11 @@ public class ExportToCsv {
         log.info("< DONE");
     }
 
-    public Database getDb() {
-        return db;
+    public OpenedDb getOpenedDb() {
+        return openedDb;
     }
 
-    public void setDb(Database db) {
-        this.db = db;
+    public void setOpenedDb(OpenedDb openedDb) {
+        this.openedDb = openedDb;
     }
 }

@@ -10,8 +10,8 @@ import java.util.concurrent.CyclicBarrier;
 
 import org.apache.log4j.Logger;
 
-import com.healthmarketscience.jackcess.Database;
 import com.le.sunriise.Utils;
+import com.le.sunriise.viewer.OpenedDb;
 
 public abstract class AbstractPasswordConsumer implements Runnable {
     private static final Logger log = Logger.getLogger(AbstractPasswordConsumer.class);
@@ -59,7 +59,7 @@ public abstract class AbstractPasswordConsumer implements Runnable {
                 log.debug("  consumed count=" + count);
             }
         }
-        Database db = null;
+        OpenedDb openedDb = null;
         try {
             PasswordItem workItem = passwordQueue.take();
             if (workItem.isEndOfWork()) {
@@ -68,8 +68,8 @@ public abstract class AbstractPasswordConsumer implements Runnable {
             }
             String password = workItem.getPassword();
             if (password != null) {
-                db = Utils.openDbReadOnly(dbFile, password);
-                if (db != null) {
+                openedDb = Utils.openDbReadOnly(dbFile, password);
+                if (openedDb != null) {
                     notifyFoundPassword(password);
                     Collection<PasswordItem> leftOver = new ArrayList<PasswordItem>();
                     passwordQueue.drainTo(leftOver);
@@ -89,13 +89,11 @@ public abstract class AbstractPasswordConsumer implements Runnable {
             log.warn(e);
             return false;
         } finally {
-            if (db != null) {
+            if (openedDb != null) {
                 try {
-                    db.close();
-                } catch (IOException e) {
-                    log.warn(e);
+                    openedDb.close();
                 } finally {
-                    db = null;
+                    openedDb = null;
                 }
             }
         }

@@ -1,14 +1,13 @@
 package com.le.sunriise.password;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.Callable;
 
 import org.apache.log4j.Logger;
 
-import com.healthmarketscience.jackcess.Database;
 import com.le.sunriise.Utils;
+import com.le.sunriise.viewer.OpenedDb;
 
 public class CheckPasswordTask implements Callable<String> {
     private static final Logger log = Logger.getLogger(CheckPasswordTask.class);
@@ -28,12 +27,12 @@ public class CheckPasswordTask implements Callable<String> {
 
     public String call() throws Exception {
         String rv = null;
-        Database db = null;
+        OpenedDb openedDb = null;
         try {
             rv = null;
             for (String password : passwords) {
-                db = Utils.openDbReadOnly(dbFile, password);
-                if (db != null) {
+                openedDb = Utils.openDbReadOnly(dbFile, password);
+                if (openedDb != null) {
                     rv = password;
                     break;
                 }
@@ -43,13 +42,11 @@ public class CheckPasswordTask implements Callable<String> {
                 log.error(e);
             }
         } finally {
-            if (db != null) {
+            if (openedDb != null) {
                 try {
-                    db.close();
-                } catch (IOException e) {
-                    log.warn(e);
+                    openedDb.close();
                 } finally {
-                    db = null;
+                    openedDb = null;
                 }
             }
         }

@@ -13,13 +13,14 @@ import org.apache.log4j.Logger;
 import com.healthmarketscience.jackcess.Column;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Table;
+import com.le.sunriise.viewer.OpenedDb;
 
 public class FindMatchingColumns {
     private static final Logger log = Logger.getLogger(FindMatchingColumns.class);
-    private Database db;
+    private OpenedDb openedDb;
 
     public FindMatchingColumns(File dbFile, String password) throws IOException {
-        db = Utils.openDbReadOnly(dbFile, password);
+        openedDb = Utils.openDbReadOnly(dbFile, password);
     }
 
     /**
@@ -27,7 +28,16 @@ public class FindMatchingColumns {
      */
     public static void main(String[] args) {
         Database db = null;
-        String dbFileName = "C:/Users/Hung Le/Documents/Microsoft Money/2007/temp/My Money - Copy.mny";
+        String dbFileName = null;
+        
+        if (args.length == 1) {
+            dbFileName = args[0];
+        } else {
+            Class clz = FindMatchingColumns.class;
+            System.out.println("Usage: java " + clz.getName() + " file.mny");
+            System.exit(1);
+        }
+        
         File dbFile = new File(dbFileName);
         String password = null;
         log.info("dbFile=" + dbFile);
@@ -68,7 +78,7 @@ public class FindMatchingColumns {
 
     public Map<String, Map<Column, List<Table>>> find() throws IOException {
         Map<String, Map<Column, List<Table>>> r = new LinkedHashMap<String, Map<Column, List<Table>>>();
-        Set<String> tableNames = db.getTableNames();
+        Set<String> tableNames = openedDb.getDb().getTableNames();
         for (String tableName : tableNames) {
             Map<Column, List<Table>> results = find(tableName);
             if ((results != null) && (results.size() > 0)) {
@@ -88,7 +98,7 @@ public class FindMatchingColumns {
 
     public Map<Column, List<Table>> find(String tableName) throws IOException {
         Map<Column, List<Table>> results = new LinkedHashMap<Column, List<Table>>();
-        Table table = db.getTable(tableName);
+        Table table = openedDb.getDb().getTable(tableName);
         if (table != null) {
             results = find(table);
         }
@@ -115,6 +125,7 @@ public class FindMatchingColumns {
             log.debug(targetTableName);
             log.debug("  " + targetColumn.getName() + ", " + targetColumn.getType());
         }
+        Database db = openedDb.getDb();
         Set<String> tableNames = db.getTableNames();
         for (String tableName : tableNames) {
             List<Column> matchedColumns = null;
@@ -163,8 +174,8 @@ public class FindMatchingColumns {
     }
 
     public void close() throws IOException {
-        if (db != null) {
-            db.close();
+        if (openedDb != null) {
+            openedDb.close();
         }
     }
 

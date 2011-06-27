@@ -13,19 +13,20 @@ import com.healthmarketscience.jackcess.Index;
 import com.healthmarketscience.jackcess.IndexData.ColumnDescriptor;
 import com.healthmarketscience.jackcess.Table;
 import com.le.sunriise.Utils;
+import com.le.sunriise.viewer.OpenedDb;
 
 public class WalkIndexes {
     protected static final Logger log = Logger.getLogger(WalkIndexes.class);
 
-    private Database db;
+    private OpenedDb openedDb;
 
     public WalkIndexes(File dbFile, String password) throws IOException {
-        this.db = Utils.openDbReadOnly(dbFile, password);
+        this.openedDb = Utils.openDbReadOnly(dbFile, password);
     }
 
     protected void walk() throws IOException {
-        if (db != null) {
-            walk(db);
+        if (openedDb != null) {
+            walk(openedDb.getDb());
         }
     }
 
@@ -76,19 +77,17 @@ public class WalkIndexes {
     }
 
     public void close() {
-        if (db != null) {
+        if (openedDb != null) {
             try {
-                db.close();
-            } catch (IOException e) {
-                log.warn(e);
+                openedDb.close();
             } finally {
-                db = null;
+                openedDb = null;
             }
         }
 
     }
 
     public Database getDb() {
-        return db;
+        return openedDb.getDb();
     }
 }

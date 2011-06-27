@@ -96,7 +96,7 @@ public class ExportToCsvAction implements ActionListener {
                     }
 
                 };
-                exporter.setDb(ExportToCsvAction.this.mnyViewer.getDb());
+                exporter.setOpenedDb(ExportToCsvAction.this.mnyViewer.getOpenedDb());
                 exporter.writeToDir(dir);
             } catch (IOException e) {
                 log.error(e);
