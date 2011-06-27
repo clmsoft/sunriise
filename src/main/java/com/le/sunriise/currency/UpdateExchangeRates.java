@@ -136,12 +136,15 @@ public class UpdateExchangeRates {
                 // log.info(crncRow);
                 Double newRate = fxTable.getRateString(hcrncFromStr, hcrncToStr);
 
-                log.info("");
                 if (newRate == null) {
-                    log.info("# NO NEW FX RATE");
-                    log.info("  CURRENT: " + hcrncFromStr + " -> " + hcrncToStr + ", " + rate + ", (" + hcrncFromName + " -> " + hcrncToName + ")");
-                    log.info("  NEW: " + hcrncFromStr + " -> " + hcrncToStr + ", " + newRate);
+                    if (log.isDebugEnabled()) {
+                        log.debug("");
+                        log.debug("# NO NEW FX RATE");
+                        log.debug("  CURRENT: " + hcrncFromStr + " -> " + hcrncToStr + ", " + rate + ", (" + hcrncFromName + " -> " + hcrncToName + ")");
+                        log.debug("  NEW: " + hcrncFromStr + " -> " + hcrncToStr + ", " + newRate);
+                    }
                 } else {
+                    log.info("");
                     log.info("# YES NEW FX RATE");
                     log.info("  CURRENT: " + hcrncFromStr + " -> " + hcrncToStr + ", " + rate + ", (" + hcrncFromName + " -> " + hcrncToName + ")");
                     log.info("  NEW: " + hcrncFromStr + " -> " + hcrncToStr + ", " + newRate);

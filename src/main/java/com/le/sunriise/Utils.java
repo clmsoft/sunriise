@@ -38,7 +38,7 @@ public class Utils {
     }
 
     public static File lockDb(File dbFile) throws IOException {
-        File parentDir = dbFile.getParentFile().getAbsoluteFile();
+        File parentDir = dbFile.getAbsoluteFile().getParentFile().getAbsoluteFile();
         String name = dbFile.getName();
         int i = name.lastIndexOf('.');
         if (i <= 0) {
