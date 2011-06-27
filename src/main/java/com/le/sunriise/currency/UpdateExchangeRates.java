@@ -21,16 +21,16 @@ public class UpdateExchangeRates {
      * @param args
      */
     public static void main(String[] args) {
-        String exchangeRatesFieName = null;
+        String exchangeRatesFileName = null;
         String inFileName = null;
         String password = null;
 
         if (args.length == 2) {
-            exchangeRatesFieName = args[0];
+            exchangeRatesFileName = args[0];
             inFileName = args[1];
             password = null;
         } else if (args.length == 3) {
-            exchangeRatesFieName = args[0];
+            exchangeRatesFileName = args[0];
             inFileName = args[1];
             password = args[2];
         } else {
@@ -39,7 +39,7 @@ public class UpdateExchangeRates {
             System.exit(1);
         }
 
-        File fxFile = new File(exchangeRatesFieName);
+        File fxFile = new File(exchangeRatesFileName);
         File inFile = new File(inFileName);
 
         log.info("fxFile=" + fxFile);
