@@ -8,7 +8,7 @@ import javax.swing.table.TableModel;
 import com.healthmarketscience.jackcess.Table;
 
 public class DataModel {
-    private List<Table> tables;
+    private List<TableListItem> tables;
 
     private Table table;
 
@@ -21,12 +21,14 @@ public class DataModel {
     private String headerInfo;
     
     private String keyInfo;
+    
+    private String indexInfo;
 
-    public List<Table> getTables() {
+    public List<TableListItem> getTables() {
         return tables;
     }
 
-    public void setTables(List<Table> tables) {
+    public void setTables(List<TableListItem> tables) {
         this.tables = tables;
     }
 
@@ -76,5 +78,13 @@ public class DataModel {
 
     public void setKeyInfo(String keyInfo) {
         this.keyInfo = keyInfo;
+    }
+
+    public String getIndexInfo() {
+        return indexInfo;
+    }
+
+    public void setIndexInfo(String indexInfo) {
+        this.indexInfo = indexInfo;
     }
 }

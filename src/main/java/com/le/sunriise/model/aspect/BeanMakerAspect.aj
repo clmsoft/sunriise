@@ -4,7 +4,11 @@ import java.beans.Introspector;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
+import org.apache.log4j.Logger;
+
 public aspect BeanMakerAspect {
+    private static final Logger log = Logger.getLogger(BeanMakerAspect.class);
+    
     declare parents: com.le.sunriise.model.bean.* implements BeanSupport;
     private transient PropertyChangeSupport BeanSupport.propertyChangeSupport;
 
@@ -29,7 +33,11 @@ public aspect BeanMakerAspect {
         } else {
             String methodName = thisJoinPointStaticPart.getSignature().getName();
             String propertyName = Introspector.decapitalize(methodName.substring(3));
+            if (log.isDebugEnabled()) {
+                log.debug("> around, methodName=" + methodName + ", propertyName=" + propertyName);
+            }
             proceed(bean, newValue);
+
             bean.propertyChangeSupport.firePropertyChange(propertyName, null, newValue);
         }
     }
