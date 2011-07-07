@@ -60,26 +60,6 @@ public class Utils {
         }
     }
 
-    public static void printEncryptionInfo(OpenedDb opendDb) {
-        PageChannel pageChannel = opendDb.getDb().getPageChannel();
-        ByteBuffer buffer = pageChannel.createPageBuffer();
-        int ENCRYPTION_FLAGS_OFFSET = 0x298;
-        byte flag = buffer.get(ENCRYPTION_FLAGS_OFFSET);
-        if (log.isDebugEnabled()) {
-            log.debug("ENCRYPTION_FLAGS=0x" + String.format("%x", flag));
-        }
-        int NEW_ENCRYPTION = 0x6;
-        if ((flag & NEW_ENCRYPTION) != 0) {
-            if (log.isDebugEnabled()) {
-                log.debug("NEW_ENCRYPTION - MSISAMCryptCodecHandler");
-            }
-        } else {
-            if (log.isDebugEnabled()) {
-                log.debug("OLD_ENCRYPTION - JetCryptCodecHandler");
-            }
-        }
-    }
-
     public static OpenedDb openDb(String dbFileName, char[] passwordChars, boolean readOnly, boolean encrypted) throws IOException {
         String password = null;
         if ((passwordChars != null) && (passwordChars.length > 0)) {
@@ -94,8 +74,8 @@ public class Utils {
     }
 
     private static OpenedDb openDb(File dbFile, String password, boolean readOnly, boolean encrypted) throws IOException {
-        OpenedDb opendDb = new OpenedDb();
-        opendDb.setDbFile(dbFile);
+        OpenedDb openedDb = new OpenedDb();
+        openedDb.setDbFile(dbFile);
 
         CodecProvider cryptCodecProvider = null;
 
@@ -114,22 +94,21 @@ public class Utils {
                 } else {
                     log.info("Created db lock file=" + dbLockFile);
                 }
-                opendDb.setDbLockFile(dbLockFile);
+                openedDb.setDbLockFile(dbLockFile);
             }
             boolean autoSync = true;
             Charset charset = null;
             TimeZone timeZone = null;
             Database db = Database.open(dbFile, readOnly, autoSync, charset, timeZone, cryptCodecProvider);
-            opendDb.setDb(db);
-
-            if (log.isDebugEnabled()) {
-                printEncryptionInfo(opendDb);
-            }
+            openedDb.setDb(db);
+            openedDb.setPassword(password);
+        } catch (UnsupportedOperationException e) {
+            throw new IOException(e);
         } finally {
             log.info("< Database.open, dbFile=" + dbFile);
         }
 
-        return opendDb;
+        return openedDb;
     }
 
     private static boolean isMnyFile(File dbFile) {

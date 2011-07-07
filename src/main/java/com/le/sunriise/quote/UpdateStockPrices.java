@@ -22,6 +22,8 @@ import com.csvreader.CsvReader;
 import com.healthmarketscience.jackcess.Column;
 import com.healthmarketscience.jackcess.Cursor;
 import com.healthmarketscience.jackcess.Database;
+import com.healthmarketscience.jackcess.Index;
+import com.healthmarketscience.jackcess.IndexCursor;
 import com.healthmarketscience.jackcess.Table;
 import com.le.sunriise.Utils;
 import com.le.sunriise.index.IndexLookup;
@@ -172,7 +174,13 @@ public class UpdateStockPrices {
 
         Table tSP = db.getTable("SP");
         Cursor cSP = Cursor.createCursor(tSP);
-
+        Index index = tSP.getIndex("HsecDateSrcSp");
+        index = null;
+        if (index != null) {
+            log.info("Has index=" + "HsecDateSrcSp");
+            cSP = IndexCursor.createCursor(tSP, index);
+        }
+        
         Map<String, Object> rowPattern = new HashMap<String, Object>();
         Map<String, Object> row = null;
 
@@ -189,6 +197,7 @@ public class UpdateStockPrices {
             log.info("Will duplicate one");
             row = getLastRow(cSP, hsec);
             log.info("Last price date " + row.get("dt"));
+            
             IndexLookup indexLookup = new IndexLookup();
             Column column = tSP.getColumn("hsp");
             Long value = indexLookup.getMax(column);

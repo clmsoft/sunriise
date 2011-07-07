@@ -12,9 +12,11 @@ import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -53,6 +55,9 @@ import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 
 import org.apache.log4j.Logger;
+import org.bouncycastle.crypto.Digest;
+import org.bouncycastle.crypto.digests.MD5Digest;
+import org.bouncycastle.crypto.digests.SHA1Digest;
 import org.jdesktop.beansbinding.AutoBinding;
 import org.jdesktop.beansbinding.AutoBinding.UpdateStrategy;
 import org.jdesktop.beansbinding.BeanProperty;
@@ -61,10 +66,14 @@ import org.jdesktop.beansbinding.ELProperty;
 import org.jdesktop.swingbinding.JListBinding;
 import org.jdesktop.swingbinding.SwingBindings;
 
+import com.healthmarketscience.jackcess.BigIndexData;
+import com.healthmarketscience.jackcess.ByteUtil;
 import com.healthmarketscience.jackcess.Column;
 import com.healthmarketscience.jackcess.DataType;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Index;
+import com.healthmarketscience.jackcess.IndexData;
+import com.healthmarketscience.jackcess.JetFormat;
 import com.healthmarketscience.jackcess.IndexData.ColumnDescriptor;
 import com.healthmarketscience.jackcess.PageChannel;
 import com.healthmarketscience.jackcess.Table;
@@ -72,6 +81,7 @@ import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
+import com.le.sunriise.encryption.EncryptionUtils;
 import com.le.sunriise.index.IndexLookup;
 import com.le.sunriise.model.bean.DataModel;
 import com.le.sunriise.model.bean.TableListItem;
@@ -98,7 +108,7 @@ public class MnyViewer {
 
     private boolean dbReadOnly = true;
 
-    private Pattern tableNamePattern = Pattern.compile("^(.*) \\([0-9]+\\)$");
+//    private Pattern tableNamePattern = Pattern.compile("^(.*) \\([0-9]+\\)$");
     private JTextArea textArea;
     private JTextArea headerTextArea;
 
@@ -149,6 +159,48 @@ public class MnyViewer {
         ByteBuffer buffer = pageChannel.createPageBuffer();
         pageChannel.readPage(buffer, 0);
 
+        JetFormat format = pageChannel.getFormat();
+        sb.append("format=" + format.toString());
+        sb.append("\n");
+        
+        if (format.CODEC_TYPE == format.CODEC_TYPE.MSISAM) {
+            sb.append("codecHandlerName=" + EncryptionUtils.getCodecHandlerName(buffer));
+            sb.append("\n");
+
+            Digest digest = EncryptionUtils.getDigest(buffer);
+            sb.append("digest=" + digest.getAlgorithmName());
+            sb.append("\n");
+            sb.append("\n");
+            
+            byte[] salt = EncryptionUtils.getSalt(buffer);
+            sb.append("salt=" + ByteUtil.toHexString(salt));
+            sb.append("\n");
+            
+            String password = openedDb.getPassword();
+            Charset charset = openedDb.getDb().getCharset();
+            byte[] pwdDigest = EncryptionUtils.createPasswordDigest(buffer, password, charset);
+            sb.append("pwdDigest=" + ByteUtil.toHexString(pwdDigest));
+            sb.append("\n");
+            
+            final int SALT_LENGTH = 0x4;
+            byte[] baseSalt = Arrays.copyOf(salt, SALT_LENGTH);
+            byte[] testEncodingKey = EncryptionUtils.concat(pwdDigest, salt);
+            sb.append("testEncodingKey=" + ByteUtil.toHexString(testEncodingKey));
+            sb.append("\n");
+            
+            byte[] encrypted4BytesCheck = EncryptionUtils.getPasswordTestBytes(buffer);
+            sb.append("encrypted4BytesCheck=" + ByteUtil.toHexString(encrypted4BytesCheck));
+            sb.append("\n");
+            
+            byte[] decrypted4BytesCheck = EncryptionUtils.getDecrypted4BytesCheck(encrypted4BytesCheck, testEncodingKey);
+            sb.append("decrypted4BytesCheck=" + ByteUtil.toHexString(decrypted4BytesCheck));
+            sb.append(" / ");
+            
+            byte[] testBytes = baseSalt;
+            sb.append("testBytes=" + ByteUtil.toHexString(testBytes));
+            sb.append("\n");
+        }
+        
         // 0x00 4
         // ENGINE_NAME_OFFSET 0x04 15
         // OFFSET_VERSION 20 1
@@ -217,6 +269,18 @@ public class MnyViewer {
         sb.append("\n");
 
         for(Index index : indexes) {
+            IndexData indexData = index.getIndexData();
+            sb.append("    type=" + indexData.getClass().getName());
+            sb.append("\n");
+            sb.append("    uniqueEntryCount=" + index.getUniqueEntryCount());
+            sb.append("\n");
+            // isUnique
+            sb.append("    unique=" + index.isUnique());
+            sb.append("\n");
+            sb.append("    shouldIgnoreNulls=" + index.shouldIgnoreNulls());
+            sb.append("\n");
+            
+
             List<ColumnDescriptor> columns = index.getColumns();
             sb.append("    " + index.getName() + " (" + columns.size() + ")");
             sb.append("\n");
@@ -367,19 +431,21 @@ public class MnyViewer {
                 }
                 try {
                     TableListItem item = (TableListItem) list.getSelectedValue();
-                    final Table table = item.getTable();
-                    String tableName = table.getName();
-                    dataModel.setTable(table);
-                    dataModel.setTableName(tableName);
-                    dataModel.setTableMetaData(table.toString());
-                    dataModel.setHeaderInfo(parseHeaderInfo(table));
-                    dataModel.setKeyInfo(parseKeyInfo(table));
-                    dataModel.setIndexInfo(parseIndexInfo(table));
-                    
-                    tableModel = new MnyTableModel(table);
-                    tableModel.setDbReadOnly(dbReadOnly);
-                    
-                    dataModel.setTableModel(tableModel);
+                    if (item != null) {
+                        final Table table = item.getTable();
+                        String tableName = table.getName();
+                        dataModel.setTable(table);
+                        dataModel.setTableName(tableName);
+                        dataModel.setTableMetaData(table.toString());
+                        dataModel.setHeaderInfo(parseHeaderInfo(table));
+                        dataModel.setKeyInfo(parseKeyInfo(table));
+                        dataModel.setIndexInfo(parseIndexInfo(table));
+
+                        tableModel = new MnyTableModel(table);
+                        tableModel.setDbReadOnly(dbReadOnly);
+
+                        dataModel.setTableModel(tableModel);
+                    }
                 } catch (IOException e) {
                     log.error(e);
                 }

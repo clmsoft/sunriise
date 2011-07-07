@@ -14,7 +14,7 @@ import javax.swing.SwingUtilities;
 import org.apache.log4j.Logger;
 
 import com.healthmarketscience.jackcess.Database;
-import com.le.sunriise.ExportToMdb;
+import com.le.sunriise.export.ExportToMdb;
 
 public class ExportToMdbAction implements ActionListener {
     private static final Logger log = Logger.getLogger(ExportToMdbAction.class);

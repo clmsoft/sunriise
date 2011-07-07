@@ -13,6 +13,7 @@ public class OpenedDb {
     private File dbFile;
     private File dbLockFile;
     private Database db;
+    private String password;
 
     public File getDbFile() {
         return dbFile;
@@ -55,5 +56,13 @@ public class OpenedDb {
                 }
             }
         }
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 }
