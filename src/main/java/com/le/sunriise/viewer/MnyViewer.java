@@ -3,7 +3,6 @@ package com.le.sunriise.viewer;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
@@ -25,9 +24,11 @@ import java.util.concurrent.Executors;
 import java.util.prefs.Preferences;
 
 import javax.swing.AbstractAction;
+import javax.swing.AbstractButton;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JCheckBox;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -127,9 +128,9 @@ public class MnyViewer {
     private JTextArea indexInfoTextArea;
     private JTextField filterTextField;
 
-    protected TableRowSorter<TableModel> sorter;
-    
-    private boolean allowTableSorting = true;
+    private TableRowSorter<TableModel> sorter;
+
+    private boolean allowTableSorting = false;
 
     private JCheckBox filterOnSelectedColumnCheckBox;
 
@@ -389,11 +390,11 @@ public class MnyViewer {
         JSeparator separator_1 = new JSeparator();
         mnNewMenu.add(separator_1);
         mnNewMenu.add(mntmNewMenuItem);
-        
+
         JPanel statusPane = new JPanel();
         frame.getContentPane().add(statusPane, BorderLayout.SOUTH);
         statusPane.setLayout(new BorderLayout(0, 0));
-        
+
         rightStatusLabel = new JLabel("...");
         statusPane.add(rightStatusLabel, BorderLayout.EAST);
 
@@ -423,7 +424,7 @@ public class MnyViewer {
                         final Table table = item.getTable();
                         String tableName = table.getName();
                         log.info("> new table is selected, table=" + tableName);
-                        
+
                         dataModel.setTable(table);
                         dataModel.setTableName(tableName);
                         dataModel.setTableMetaData(table.toString());
@@ -431,87 +432,35 @@ public class MnyViewer {
                         dataModel.setKeyInfo(parseKeyInfo(table));
                         dataModel.setIndexInfo(parseIndexInfo(table));
 
-                        log.info("clearing old filter text ...");
+                        if (log.isDebugEnabled()) {
+                            log.debug("clearing old filter text ...");
+                        }
                         filterTextField.setText("");
                         if (tableModel != null) {
                             try {
                                 tableModel.close();
                             } finally {
-                                tableModel= null;
+                                tableModel = null;
                             }
                         }
-                        
-                        log.info("creating new tableModel ...");
+
+                        if (log.isDebugEnabled()) {
+                            log.debug("creating new tableModel ...");
+                        }
                         tableModel = new MnyTableModel(table);
                         tableModel.setDbReadOnly(dbReadOnly);
 
-                        if (allowTableSorting) {
-                            filterTextField.setEnabled(true);
-                            filterTextField.setText("");
-                            filterOnSelectedColumnCheckBox.setEnabled(true);
+                        toggleTableSorting();
 
-                            log.info("creating new sorter ...");
-                            sorter = createTableRowSorter(tableModel);
-
-                            log.info("setting new sorter ...");
-                            MnyViewer.this.table.setRowSorter(sorter);
-                        } else {
-                            filterTextField.setEnabled(false);
-                            filterTextField.setText("Filter is disable");
-                            filterOnSelectedColumnCheckBox.setEnabled(false);
+                        if (log.isDebugEnabled()) {
+                            log.debug("setting new tableModel ...");
                         }
-                        
-                        log.info("setting new tableModel ...");
                         dataModel.setTableModel(tableModel);
                         rightStatusLabel.setText("open table=" + table.getName());
                     }
                 } catch (IOException e) {
                     log.error(e);
                 }
-            }
-
-            private TableRowSorter<TableModel> createTableRowSorter(MnyTableModel tableModel) {
-                TableRowSorter<TableModel> sorter = new TableRowSorter<TableModel>(tableModel) {
-                    @Override
-                    public void toggleSortOrder(int column) {
-                        StopWatch stopWatch = new StopWatch();
-                        log.info("> toggleSortOrder, count=" + getViewRowCount() + ", column=" + column);
-                        try {
-//                            JOptionPane.showConfirmDialog(MnyViewer.this.frame, "Hello");
-                            super.toggleSortOrder(column);
-                        } finally {
-                            long delta = stopWatch.click();
-                            rightStatusLabel.setText("sort: rows=" + getViewRowCount() + ", millisecond=" +
-                                    delta);
-                            log.info("< toggleSortOrder, delta=" + delta);
-                        }                        
-                    }
-                };
-                RowSorterListener listener = new RowSorterListener() {
-                    private long startTime = -1L;
-                    public void sorterChanged(RowSorterEvent event) {
-                        log.info("> sorterChanged");
-                        Type type = event.getType();
-                        log.info("  " + type);
-                        switch (type) {
-                        case SORT_ORDER_CHANGED:
-                            startTime = System.currentTimeMillis();
-                            break;
-                        case SORTED:
-                            if (startTime > 0) {
-                                long now = System.currentTimeMillis();
-                                long delta = now - startTime;
-                                startTime = -1L;
-                                log.info("sorterChanged, delta=" + delta);
-                            }
-                            break;
-                        default:
-                            break;
-                        }
-                    }
-                };
-                sorter.addRowSorterListener(listener);
-                return sorter;
             }
         });
         list.setVisibleRowCount(-1);
@@ -538,7 +487,7 @@ public class MnyViewer {
 
         JTabbedPane tabbedPane = new JTabbedPane(SwingConstants.TOP);
         panel.add(tabbedPane, BorderLayout.CENTER);
-        JPopupMenu popupMenu = new JPopupMenu();
+        JPopupMenu tablePopupMenu = new JPopupMenu();
         JMenuItem menuItem = null;
         menuItem = new JMenuItem(new AbstractAction("Duplicate") {
             public void actionPerformed(ActionEvent e) {
@@ -546,10 +495,10 @@ public class MnyViewer {
                 duplicateRow(rowIndex);
             }
         });
-        popupMenu.add(menuItem);
+        tablePopupMenu.add(menuItem);
         this.duplicateMenuItem = menuItem;
 
-        popupMenu.addSeparator();
+        tablePopupMenu.addSeparator();
 
         menuItem = new JMenuItem(new AbstractAction("Delete") {
             public void actionPerformed(ActionEvent e) {
@@ -557,10 +506,10 @@ public class MnyViewer {
                 deleteRow(rowIndex);
             }
         });
-        popupMenu.add(menuItem);
+        tablePopupMenu.add(menuItem);
         this.deleteMenuItem = menuItem;
 
-        popupMenu.addSeparator();
+        tablePopupMenu.addSeparator();
 
         menuItem = new JMenuItem(new AbstractAction("Copy Column") {
             public void actionPerformed(ActionEvent e) {
@@ -569,164 +518,177 @@ public class MnyViewer {
                 copyColumn(rowIndex, columnIndex);
             }
         });
-        popupMenu.add(menuItem);
+        tablePopupMenu.add(menuItem);
 
-        MouseListener popupListener = new PopupListener(popupMenu);
-        
+        MouseListener tablePopupListener = new PopupListener(tablePopupMenu);
+
         JPanel panel_6 = new JPanel();
         tabbedPane.addTab("Rows", null, panel_6, null);
-                panel_6.setLayout(new BorderLayout(0, 0));
-        
-                JScrollPane scrollPane_1 = new JScrollPane();
-                panel_6.add(scrollPane_1);
-                
-                        table = new JTable() {
-                
-                            @Override
-                            public void setModel(TableModel dataModel) {
-                                super.setModel(dataModel);
-                                TableColumnModel columnModel = this.getColumnModel();
-                                int cols = columnModel.getColumnCount();
-                
-                                MnyTableModel mnyTableModel = MnyViewer.this.tableModel;
-                                // IndexLookup indexLookup = new IndexLookup();
-                
-                                for (int i = 0; i < cols; i++) {
-                                    TableColumn column = columnModel.getColumn(i);
-                                    MyTableCellRenderer renderer = new MyTableCellRenderer(column.getCellRenderer());
-                                    column.setCellRenderer(renderer);
-                
-                                    if (mnyTableModel.columnIsDateType(i)) {
-                                        if (log.isDebugEnabled()) {
-                                            log.debug("columnIsDateType, i=" + i);
-                                        }
-                                        // TableCellEditor cellEditor = new
-                                        // TableCellDateEditor();
-                                        // TableCellEditor cellEditor = new
-                                        // DatePickerTableEditor();
-                                        TableCellEditor cellEditor = new DialogCellEditor();
-                                        column.setCellEditor(cellEditor);
-                                    }
-                
-                                    if (mnyTableModel.isPrimaryKeyColumn(i)) {
-                                        TableCellRenderer headerRenderer = new MyTabletHeaderRenderer(table, column.getHeaderRenderer(), Color.RED);
-                                        column.setHeaderRenderer(headerRenderer);
-                                    }
-                                    if (mnyTableModel.isForeignKeyColumn(i)) {
-                                        TableCellRenderer headerRenderer = new MyTabletHeaderRenderer(table, column.getHeaderRenderer(), Color.BLUE);
-                                        column.setHeaderRenderer(headerRenderer);
-                                    }
-                                }
-                            }
-                
-                        };
-                        // table.setAutoCreateRowSorter(true);
-                        // RowSorter<TableModel> sorter = new
-                        // TableRowSorter<TableModel>(tableModel);
-                        // table.setRowSorter(sorter);
+        panel_6.setLayout(new BorderLayout(0, 0));
 
-                        table.setDefaultRenderer(Date.class, new DefaultTableCellRenderer() {
-                            // private DateFormat formatter = new
-                            // SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
-                            // private DateFormat formatter = new
-                            // SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSS");
-                            // private DateFormat formatter = new
-                            // SimpleDateFormat("yyyy/MM/dd");
-                            private DateFormat formatter = new SimpleDateFormat("MMM dd, yyyy HH:mm");
+        JScrollPane scrollPane_1 = new JScrollPane();
+        panel_6.add(scrollPane_1);
 
-                            @Override
-                            public void setValue(Object value) {
-                                if (log.isDebugEnabled()) {
-                                    log.debug("cellRenderer: value=" + value + ", " + value.getClass().getName());
-                                }
-                                if (formatter == null) {
-                                    formatter = DateFormat.getDateInstance();
-                                }
-                                String renderedValue = (value == null) ? "" : formatter.format(value);
-                                if (log.isDebugEnabled()) {
-                                    log.debug("cellRenderer: renderedValue=" + renderedValue);
-                                }
+        table = new JTable() {
 
-                                setText(renderedValue);
-                            }
-                        });
-                        table.addMouseListener(popupListener);
-                        
-                        // TODO: try to install our mouselistener first
-//                        insertListenerToHead();
-                        
-                        table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-                        scrollPane_1.setViewportView(table);
-                        
-                        JPanel panel_7 = new JPanel();
-                        panel_7.setBorder(new EmptyBorder(3, 3, 3, 3));
-                        panel_6.add(panel_7, BorderLayout.SOUTH);
-                        panel_7.setLayout(new BoxLayout(panel_7, BoxLayout.LINE_AXIS));
-                        
-                        JLabel lblNewLabel_1 = new JLabel("Filter Text");
-                        panel_7.add(lblNewLabel_1);
-                        
-                        Component horizontalStrut = Box.createHorizontalStrut(5);
-                        panel_7.add(horizontalStrut);
-                        
-                        filterTextField = new JTextField();
-                        filterTextField.addActionListener(new ActionListener() {
-                            public void actionPerformed(ActionEvent event) {
-                                JTextField tf = (JTextField)event.getSource();
-                                String text = tf.getText();
+            @Override
+            public void setModel(TableModel dataModel) {
+                super.setModel(dataModel);
+                TableColumnModel columnModel = this.getColumnModel();
+                int cols = columnModel.getColumnCount();
 
-                                RowFilter<Object, Object> rf = null;
-                                if ((text == null) || (text.length() <= 0)) {
-                                    rf = null;
-                                } else {
-                                    //If current expression doesn't parse, don't update.
-                                    try {
-                                        if (filterOnSelectedColumnCheckBox.isSelected()) {
-                                            int selectedColumn = table.getSelectedColumn();
-                                            log.info("filter for text=" + text + ", selectedColumn=" + selectedColumn);
-                                            rf = RowFilter.regexFilter(text, selectedColumn);
-                                        } else {
-                                            log.info("filter for text=" + text);
-                                            rf = RowFilter.regexFilter(text);
-                                        }
-                                    } catch (java.util.regex.PatternSyntaxException e) {
-                                        return;
-                                    }
-                                }
-                                if (sorter != null) {
-                                    StopWatch stopwatch = new StopWatch();
-                                    int preViewRowCount = sorter.getViewRowCount();
-                                    try {
-                                        log.info("> setRowFilter");
-                                        sorter.setRowFilter(rf);
-                                    } finally {
-                                        long delta = stopwatch.click();
-                                        int postViewRowCount = sorter.getViewRowCount();
-                                        rightStatusLabel.setText("filter: rows=" + postViewRowCount + "/" + preViewRowCount + ", millisecond=" + delta);
-                                        log.info("< setRowFilter, delta=" + delta);
-                                    }
-                                }
-                            }
-                        });
-                        panel_7.add(filterTextField);
-                        filterTextField.setColumns(10);
-                        
-                        Component horizontalStrut_1 = Box.createHorizontalStrut(5);
-                        panel_7.add(horizontalStrut_1);
-                        
-                        filterOnSelectedColumnCheckBox = new JCheckBox("on selected column");
-                        filterOnSelectedColumnCheckBox.setSelected(true);
-                        panel_7.add(filterOnSelectedColumnCheckBox);
-                        
-        if (allowTableSorting) {
-            filterTextField.setEnabled(true);
-            filterTextField.setText("");
-            filterOnSelectedColumnCheckBox.setEnabled(true);
-        } else {
-            filterTextField.setEnabled(false);
-            filterTextField.setText("Filter is disable");
-            filterOnSelectedColumnCheckBox.setEnabled(false);
-        }
+                MnyTableModel mnyTableModel = MnyViewer.this.tableModel;
+                // IndexLookup indexLookup = new IndexLookup();
+
+                for (int i = 0; i < cols; i++) {
+                    TableColumn column = columnModel.getColumn(i);
+                    MyTableCellRenderer renderer = new MyTableCellRenderer(column.getCellRenderer());
+                    column.setCellRenderer(renderer);
+
+                    if (mnyTableModel.columnIsDateType(i)) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("columnIsDateType, i=" + i);
+                        }
+                        // TableCellEditor cellEditor = new
+                        // TableCellDateEditor();
+                        // TableCellEditor cellEditor = new
+                        // DatePickerTableEditor();
+                        TableCellEditor cellEditor = new DialogCellEditor();
+                        column.setCellEditor(cellEditor);
+                    }
+
+                    if (mnyTableModel.isPrimaryKeyColumn(i)) {
+                        TableCellRenderer headerRenderer = new MyTabletHeaderRenderer(table, column.getHeaderRenderer(), Color.RED);
+                        column.setHeaderRenderer(headerRenderer);
+                    }
+                    if (mnyTableModel.isForeignKeyColumn(i)) {
+                        TableCellRenderer headerRenderer = new MyTabletHeaderRenderer(table, column.getHeaderRenderer(), Color.BLUE);
+                        column.setHeaderRenderer(headerRenderer);
+                    }
+                }
+            }
+
+        };
+        // table.setAutoCreateRowSorter(true);
+        // RowSorter<TableModel> sorter = new
+        // TableRowSorter<TableModel>(tableModel);
+        // table.setRowSorter(sorter);
+
+        table.setDefaultRenderer(Date.class, new DefaultTableCellRenderer() {
+            // private DateFormat formatter = new
+            // SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+            // private DateFormat formatter = new
+            // SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSS");
+            // private DateFormat formatter = new
+            // SimpleDateFormat("yyyy/MM/dd");
+            private DateFormat formatter = new SimpleDateFormat("MMM dd, yyyy HH:mm");
+
+            @Override
+            public void setValue(Object value) {
+                if (log.isDebugEnabled()) {
+                    log.debug("cellRenderer: value=" + value + ", " + value.getClass().getName());
+                }
+                if (formatter == null) {
+                    formatter = DateFormat.getDateInstance();
+                }
+                String renderedValue = (value == null) ? "" : formatter.format(value);
+                if (log.isDebugEnabled()) {
+                    log.debug("cellRenderer: renderedValue=" + renderedValue);
+                }
+
+                setText(renderedValue);
+            }
+        });
+        table.addMouseListener(tablePopupListener);
+
+        // TODO: try to install our mouselistener first
+        // insertListenerToHead();
+
+        table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+        scrollPane_1.setViewportView(table);
+
+        JPanel panel_7 = new JPanel();
+        panel_7.setBorder(new EmptyBorder(3, 3, 3, 3));
+        panel_6.add(panel_7, BorderLayout.SOUTH);
+        panel_7.setLayout(new BoxLayout(panel_7, BoxLayout.LINE_AXIS));
+
+        JLabel lblNewLabel_1 = new JLabel("Filter Text");
+        panel_7.add(lblNewLabel_1);
+
+        JPopupMenu filterPopupMenu = new JPopupMenu();
+        JCheckBoxMenuItem checkBoxMenuItem = new JCheckBoxMenuItem(new AbstractAction("Enable Sorting/Filtering") {
+            public void actionPerformed(ActionEvent e) {
+                AbstractButton aButton = (AbstractButton) e.getSource();
+                boolean selected = aButton.getModel().isSelected();
+                if (selected == allowTableSorting) {
+                    // no change
+                    log.warn("No change in allowTableSorting=" + allowTableSorting);
+                    return;
+                }
+
+                allowTableSorting = selected;
+                
+                toggleTableSorting();
+            }
+        });
+        checkBoxMenuItem.setSelected(allowTableSorting);
+        filterPopupMenu.add(checkBoxMenuItem);
+        lblNewLabel_1.addMouseListener(new PopupListener(filterPopupMenu));
+
+        Component horizontalStrut = Box.createHorizontalStrut(5);
+        panel_7.add(horizontalStrut);
+
+        filterTextField = new JTextField();
+        filterTextField.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent event) {
+                JTextField tf = (JTextField) event.getSource();
+                String text = tf.getText();
+
+                RowFilter<Object, Object> rf = null;
+                if ((text == null) || (text.length() <= 0)) {
+                    rf = null;
+                } else {
+                    // If current expression doesn't parse, don't update.
+                    try {
+                        if (filterOnSelectedColumnCheckBox.isSelected()) {
+                            int selectedColumn = table.getSelectedColumn();
+                            log.info("filter for text=" + text + ", selectedColumn=" + selectedColumn);
+                            rf = RowFilter.regexFilter(text, selectedColumn);
+                        } else {
+                            log.info("filter for text=" + text);
+                            rf = RowFilter.regexFilter(text);
+                        }
+                    } catch (java.util.regex.PatternSyntaxException e) {
+                        log.warn(e);
+                        return;
+                    }
+                }
+                if (sorter != null) {
+                    StopWatch stopwatch = new StopWatch();
+                    int preViewRowCount = sorter.getViewRowCount();
+                    try {
+                        log.info("> setRowFilter");
+                        sorter.setRowFilter(rf);
+                    } finally {
+                        long delta = stopwatch.click();
+                        int postViewRowCount = sorter.getViewRowCount();
+                        rightStatusLabel.setText("filter: rows=" + postViewRowCount + "/" + preViewRowCount + ", millisecond=" + delta);
+                        log.info("< setRowFilter, delta=" + delta);
+                    }
+                }
+            }
+        });
+        panel_7.add(filterTextField);
+        filterTextField.setColumns(10);
+
+        Component horizontalStrut_1 = Box.createHorizontalStrut(5);
+        panel_7.add(horizontalStrut_1);
+
+        filterOnSelectedColumnCheckBox = new JCheckBox("on selected column");
+        filterOnSelectedColumnCheckBox.setSelected(true);
+        panel_7.add(filterOnSelectedColumnCheckBox);
+
+        toggleTableSorting();
 
         JPanel panel_2 = new JPanel();
         tabbedPane.addTab("Meta Data", null, panel_2, null);
@@ -780,22 +742,20 @@ public class MnyViewer {
     }
 
     private void insertListenerToHead(final JTableHeader tableHeader, MouseListener[] mouseListeners) {
-        for(MouseListener mouseListener: mouseListeners) {
-            tableHeader.removeMouseListener(mouseListener);        
+        for (MouseListener mouseListener : mouseListeners) {
+            tableHeader.removeMouseListener(mouseListener);
         }
         MouseListener l = null;
         l = new MouseInputAdapter() {
             public void mouseClicked(MouseEvent e) {
-                if (e.getClickCount() % 2 == 1 &&
-                        SwingUtilities.isLeftMouseButton(e)){
+                if (e.getClickCount() % 2 == 1 && SwingUtilities.isLeftMouseButton(e)) {
                     JTable table = tableHeader.getTable();
                     RowSorter sorter;
-                    if (table != null && (sorter = table.getRowSorter()) != null) { 
+                    if (table != null && (sorter = table.getRowSorter()) != null) {
                         int columnIndex = tableHeader.columnAtPoint(e.getPoint());
                         if (columnIndex != -1) {
-                            columnIndex = table.convertColumnIndexToModel(
-                                                columnIndex);
-//                                                sorter.toggleSortOrder(columnIndex);
+                            columnIndex = table.convertColumnIndexToModel(columnIndex);
+                            // sorter.toggleSortOrder(columnIndex);
                             log.info("> mouseClicked to sort");
                         }
                     }
@@ -804,8 +764,8 @@ public class MnyViewer {
 
         };
         tableHeader.addMouseListener(l);
-        for(MouseListener mouseListener: mouseListeners) {
-            tableHeader.addMouseListener(mouseListener);        
+        for (MouseListener mouseListener : mouseListeners) {
+            tableHeader.addMouseListener(mouseListener);
         }
     }
 
@@ -960,5 +920,75 @@ public class MnyViewer {
         AutoBinding<DataModel, String, JTextArea, String> autoBinding_5 = Bindings.createAutoBinding(UpdateStrategy.READ, dataModel, dataModelBeanProperty_4,
                 indexInfoTextArea, jTextAreaBeanProperty_3);
         autoBinding_5.bind();
+    }
+
+    private TableRowSorter<TableModel> createTableRowSorter(MnyTableModel tableModel) {
+        TableRowSorter<TableModel> sorter = new TableRowSorter<TableModel>(tableModel) {
+            @Override
+            public void toggleSortOrder(int column) {
+                StopWatch stopWatch = new StopWatch();
+                log.info("> toggleSortOrder, count=" + getViewRowCount() + ", column=" + column);
+                try {
+                    // JOptionPane.showConfirmDialog(MnyViewer.this.frame,
+                    // "Hello");
+                    super.toggleSortOrder(column);
+                } finally {
+                    long delta = stopWatch.click();
+                    rightStatusLabel.setText("sort: rows=" + getViewRowCount() + ", millisecond=" + delta);
+                    log.info("< toggleSortOrder, delta=" + delta);
+                }
+            }
+        };
+        RowSorterListener listener = new RowSorterListener() {
+            private long startTime = -1L;
+
+            public void sorterChanged(RowSorterEvent event) {
+                log.info("> sorterChanged");
+                Type type = event.getType();
+                log.info("  " + type);
+                switch (type) {
+                case SORT_ORDER_CHANGED:
+                    startTime = System.currentTimeMillis();
+                    break;
+                case SORTED:
+                    if (startTime > 0) {
+                        long now = System.currentTimeMillis();
+                        long delta = now - startTime;
+                        startTime = -1L;
+                        log.info("sorterChanged, delta=" + delta);
+                    }
+                    break;
+                default:
+                    break;
+                }
+            }
+        };
+        sorter.addRowSorterListener(listener);
+        return sorter;
+    }
+
+    private void toggleTableSorting() {
+        if (allowTableSorting) {
+            filterTextField.setEnabled(true);
+            filterTextField.setText("");
+            filterOnSelectedColumnCheckBox.setEnabled(true);
+
+            if (tableModel != null) {
+                log.info("creating new sorter ...");
+                sorter = createTableRowSorter(tableModel);
+
+                log.info("setting new sorter ...");
+                MnyViewer.this.table.setRowSorter(sorter);
+            }
+        } else {
+            filterTextField.setEnabled(false);
+            filterTextField.setText("Filter is disable");
+            filterOnSelectedColumnCheckBox.setEnabled(false);
+            
+            if (tableModel != null) {
+                sorter = null;
+                MnyViewer.this.table.setRowSorter(sorter);
+            }
+        }
     }
 }
