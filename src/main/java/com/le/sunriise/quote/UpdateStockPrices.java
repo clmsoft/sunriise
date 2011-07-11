@@ -174,13 +174,13 @@ public class UpdateStockPrices {
 
         Table tSP = db.getTable("SP");
         Cursor cSP = Cursor.createCursor(tSP);
-        Index index = tSP.getIndex("HsecDateSrcSp");
-        index = null;
-        if (index != null) {
-            log.info("Has index=" + "HsecDateSrcSp");
-            cSP = IndexCursor.createCursor(tSP, index);
-        }
-        
+        // Index index = tSP.getIndex("HsecDateSrcSp");
+        // index = null;
+        // if (index != null) {
+        // log.info("Has index=" + "HsecDateSrcSp");
+        // cSP = IndexCursor.createCursor(tSP, index);
+        // }
+
         Map<String, Object> rowPattern = new HashMap<String, Object>();
         Map<String, Object> row = null;
 
@@ -188,7 +188,10 @@ public class UpdateStockPrices {
         rowPattern.clear();
         rowPattern.put("dt", date);
         rowPattern.put("hsec", hsec);
-        log.info("Looking for existing row with date=" + date);
+        // src == 6 is online update
+        Integer src = new Integer(6);
+        rowPattern.put("src", src);
+        log.info("Looking for existing row with date=" + date + ", hsec=" + hsec + ", src=" + src);
         if (cSP.findRow(rowPattern)) {
             row = cSP.getCurrentRow();
             log.info("Found one");
@@ -196,20 +199,23 @@ public class UpdateStockPrices {
             log.info("Found none");
             log.info("Will duplicate one");
             row = getLastRow(cSP, hsec);
-            log.info("Last price date " + row.get("dt"));
-            
+            log.info("Last price date " + row.get("dt") + ", src=" + row.get("src"));
+
             IndexLookup indexLookup = new IndexLookup();
             Column column = tSP.getColumn("hsp");
             Long value = indexLookup.getMax(column);
             value++;
             row.put("hsp", value);
             row.put("dt", date);
+            // force src == 6
+            row.put("src", src);
             tSP.addRow(row.values().toArray());
             cSP.reset();
 
             rowPattern.clear();
             rowPattern.put("dt", date);
             rowPattern.put("hsec", hsec);
+            rowPattern.put("src", src);
             if (cSP.findRow(rowPattern)) {
                 row = cSP.getCurrentRow();
                 log.info("Just inserted, row=" + row);
@@ -234,6 +240,10 @@ public class UpdateStockPrices {
             row = cSP.getCurrentRow();
             dPrice = (Double) row.get("dPrice");
             log.info("New price " + dPrice);
+
+//            Date dtSerial = new Date();
+//            column = tSP.getColumn("dtSerial");
+//            cSP.setCurrentRowValue(column, dtSerial);
         }
 
         if (log.isDebugEnabled()) {
@@ -266,6 +276,7 @@ public class UpdateStockPrices {
         cSP.beforeFirst();
         rowPattern.clear();
         rowPattern.put("hsec", hsec);
+        rowPattern.put("src", new Integer(6));
         while (cSP.moveToNextRow()) {
             if (cSP.currentRowMatches(rowPattern)) {
                 row = cSP.getCurrentRow();
@@ -273,8 +284,25 @@ public class UpdateStockPrices {
             }
         }
         int size = rows.size();
-        if (size <= 0) {
-            return null;
+        if (size > 0) {
+            log.info("Found row with src == 6 that we can duplicated");
+        } else {
+            rows.clear();
+            cSP.beforeFirst();
+            rowPattern.clear();
+            rowPattern.put("hsec", hsec);
+            while (cSP.moveToNextRow()) {
+                if (cSP.currentRowMatches(rowPattern)) {
+                    row = cSP.getCurrentRow();
+                    rows.add(row);
+                }
+            }
+            size = rows.size();
+            if (size <= 0) {
+                return null;
+            } else {
+                log.info("Found row that we can duplicated");
+            }
         }
 
         Comparator<Map<String, Object>> comparator = new Comparator<Map<String, Object>>() {

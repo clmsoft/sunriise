@@ -3,30 +3,31 @@ package com.le.sunriise.viewer;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.prefs.Preferences;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.swing.AbstractAction;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -44,20 +45,28 @@ import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
+import javax.swing.RowFilter;
+import javax.swing.RowSorter;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.event.MouseInputAdapter;
+import javax.swing.event.RowSorterEvent;
+import javax.swing.event.RowSorterEvent.Type;
+import javax.swing.event.RowSorterListener;
+import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
 
 import org.apache.log4j.Logger;
-import org.bouncycastle.crypto.Digest;
-import org.bouncycastle.crypto.digests.MD5Digest;
-import org.bouncycastle.crypto.digests.SHA1Digest;
 import org.jdesktop.beansbinding.AutoBinding;
 import org.jdesktop.beansbinding.AutoBinding.UpdateStrategy;
 import org.jdesktop.beansbinding.BeanProperty;
@@ -66,26 +75,24 @@ import org.jdesktop.beansbinding.ELProperty;
 import org.jdesktop.swingbinding.JListBinding;
 import org.jdesktop.swingbinding.SwingBindings;
 
-import com.healthmarketscience.jackcess.BigIndexData;
-import com.healthmarketscience.jackcess.ByteUtil;
 import com.healthmarketscience.jackcess.Column;
 import com.healthmarketscience.jackcess.DataType;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Index;
 import com.healthmarketscience.jackcess.IndexData;
-import com.healthmarketscience.jackcess.JetFormat;
 import com.healthmarketscience.jackcess.IndexData.ColumnDescriptor;
+import com.healthmarketscience.jackcess.JetFormat;
 import com.healthmarketscience.jackcess.PageChannel;
 import com.healthmarketscience.jackcess.Table;
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
+import com.le.sunriise.StopWatch;
 import com.le.sunriise.encryption.EncryptionUtils;
 import com.le.sunriise.index.IndexLookup;
 import com.le.sunriise.model.bean.DataModel;
 import com.le.sunriise.model.bean.TableListItem;
-import org.jdesktop.beansbinding.ObjectProperty;
 
 public class MnyViewer {
     private static final Logger log = Logger.getLogger(MnyViewer.class);
@@ -95,10 +102,10 @@ public class MnyViewer {
     private static final Executor threadPool = Executors.newCachedThreadPool();
 
     private JFrame frame;
-//    private File dbFile;
-//    private Database db;
+    // private File dbFile;
+    // private Database db;
     private OpenedDb openedDb = new OpenedDb();
-    
+
     private DataModel dataModel = new DataModel();
     private JList list;
     private JTable table;
@@ -108,7 +115,8 @@ public class MnyViewer {
 
     private boolean dbReadOnly = true;
 
-//    private Pattern tableNamePattern = Pattern.compile("^(.*) \\([0-9]+\\)$");
+    // private Pattern tableNamePattern =
+    // Pattern.compile("^(.*) \\([0-9]+\\)$");
     private JTextArea textArea;
     private JTextArea headerTextArea;
 
@@ -117,6 +125,15 @@ public class MnyViewer {
     private JTextArea keyInfoTextArea;
 
     private JTextArea indexInfoTextArea;
+    private JTextField filterTextField;
+
+    protected TableRowSorter<TableModel> sorter;
+    
+    private boolean allowTableSorting = true;
+
+    private JCheckBox filterOnSelectedColumnCheckBox;
+
+    private JLabel rightStatusLabel;
 
     /**
      * Launch the application.
@@ -152,7 +169,7 @@ public class MnyViewer {
         sb.append("Table: " + t.getName());
         sb.append("\n");
         sb.append("\n");
-        
+
         Database db = t.getDatabase();
 
         PageChannel pageChannel = db.getPageChannel();
@@ -162,45 +179,11 @@ public class MnyViewer {
         JetFormat format = pageChannel.getFormat();
         sb.append("format=" + format.toString());
         sb.append("\n");
-        
-        if (format.CODEC_TYPE == format.CODEC_TYPE.MSISAM) {
-            sb.append("codecHandlerName=" + EncryptionUtils.getCodecHandlerName(buffer));
-            sb.append("\n");
 
-            Digest digest = EncryptionUtils.getDigest(buffer);
-            sb.append("digest=" + digest.getAlgorithmName());
-            sb.append("\n");
-            sb.append("\n");
-            
-            byte[] salt = EncryptionUtils.getSalt(buffer);
-            sb.append("salt=" + ByteUtil.toHexString(salt));
-            sb.append("\n");
-            
-            String password = openedDb.getPassword();
-            Charset charset = openedDb.getDb().getCharset();
-            byte[] pwdDigest = EncryptionUtils.createPasswordDigest(buffer, password, charset);
-            sb.append("pwdDigest=" + ByteUtil.toHexString(pwdDigest));
-            sb.append("\n");
-            
-            final int SALT_LENGTH = 0x4;
-            byte[] baseSalt = Arrays.copyOf(salt, SALT_LENGTH);
-            byte[] testEncodingKey = EncryptionUtils.concat(pwdDigest, salt);
-            sb.append("testEncodingKey=" + ByteUtil.toHexString(testEncodingKey));
-            sb.append("\n");
-            
-            byte[] encrypted4BytesCheck = EncryptionUtils.getPasswordTestBytes(buffer);
-            sb.append("encrypted4BytesCheck=" + ByteUtil.toHexString(encrypted4BytesCheck));
-            sb.append("\n");
-            
-            byte[] decrypted4BytesCheck = EncryptionUtils.getDecrypted4BytesCheck(encrypted4BytesCheck, testEncodingKey);
-            sb.append("decrypted4BytesCheck=" + ByteUtil.toHexString(decrypted4BytesCheck));
-            sb.append(" / ");
-            
-            byte[] testBytes = baseSalt;
-            sb.append("testBytes=" + ByteUtil.toHexString(testBytes));
-            sb.append("\n");
+        if (format.CODEC_TYPE == format.CODEC_TYPE.MSISAM) {
+            EncryptionUtils.appendMSISAMInfo(buffer, openedDb.getPassword(), openedDb.getDb().getCharset(), sb);
         }
-        
+
         // 0x00 4
         // ENGINE_NAME_OFFSET 0x04 15
         // OFFSET_VERSION 20 1
@@ -237,7 +220,7 @@ public class MnyViewer {
             }
         }
         sb.append("\n");
-        
+
         sb.append("# Foreign keys:");
         sb.append("\n");
         for (Column column : t.getColumns()) {
@@ -248,7 +231,7 @@ public class MnyViewer {
             }
         }
         sb.append("\n");
-        
+
         return sb.toString();
     }
 
@@ -263,12 +246,11 @@ public class MnyViewer {
         sb.append("\n");
         sb.append("\n");
 
-
         List<Index> indexes = t.getIndexes();
         sb.append("# Index: (" + indexes.size() + ")");
         sb.append("\n");
 
-        for(Index index : indexes) {
+        for (Index index : indexes) {
             IndexData indexData = index.getIndexData();
             sb.append("    type=" + indexData.getClass().getName());
             sb.append("\n");
@@ -279,23 +261,21 @@ public class MnyViewer {
             sb.append("\n");
             sb.append("    shouldIgnoreNulls=" + index.shouldIgnoreNulls());
             sb.append("\n");
-            
 
             List<ColumnDescriptor> columns = index.getColumns();
             sb.append("    " + index.getName() + " (" + columns.size() + ")");
             sb.append("\n");
-            for(ColumnDescriptor column: columns) {
-                sb.append("        " + column.getColumn().getTable().getName() + "." +
-                        column.getColumn().getName());
+            for (ColumnDescriptor column : columns) {
+                sb.append("        " + column.getColumn().getTable().getName() + "." + column.getColumn().getName());
                 sb.append("\n");
             }
             sb.append("\n");
         }
         sb.append("\n");
-        
+
         return sb.toString();
     }
-    
+
     /**
      * Initialize the contents of the frame.
      */
@@ -343,8 +323,8 @@ public class MnyViewer {
                 }
                 OpenDbDialog dialog = OpenDbDialog.showDialog(openedDb, recentOpenFileNames, locationRelativeTo);
                 if (!dialog.isCancel()) {
-//                    setDb(dialog.getDb());
-//                    dbFile = dialog.getDbFile();
+                    // setDb(dialog.getDb());
+                    // dbFile = dialog.getDbFile();
                     openedDb = dialog.getOpendDb();
                     File dbFile = openedDb.getDbFile();
                     if (dbFile != null) {
@@ -376,6 +356,7 @@ public class MnyViewer {
                         deleteMenuItem.setEnabled(!dbReadOnly);
                     }
                     MnyViewer.this.dataModel.setTables(tables);
+                    clearDataModel(MnyViewer.this.dataModel);
 
                     size = recentOpenFileNames.size();
                     size = Math.min(size, 10);
@@ -408,6 +389,13 @@ public class MnyViewer {
         JSeparator separator_1 = new JSeparator();
         mnNewMenu.add(separator_1);
         mnNewMenu.add(mntmNewMenuItem);
+        
+        JPanel statusPane = new JPanel();
+        frame.getContentPane().add(statusPane, BorderLayout.SOUTH);
+        statusPane.setLayout(new BorderLayout(0, 0));
+        
+        rightStatusLabel = new JLabel("...");
+        statusPane.add(rightStatusLabel, BorderLayout.EAST);
 
         JSplitPane splitPane = new JSplitPane();
         splitPane.setResizeWeight(0.33);
@@ -434,6 +422,8 @@ public class MnyViewer {
                     if (item != null) {
                         final Table table = item.getTable();
                         String tableName = table.getName();
+                        log.info("> new table is selected, table=" + tableName);
+                        
                         dataModel.setTable(table);
                         dataModel.setTableName(tableName);
                         dataModel.setTableMetaData(table.toString());
@@ -441,14 +431,87 @@ public class MnyViewer {
                         dataModel.setKeyInfo(parseKeyInfo(table));
                         dataModel.setIndexInfo(parseIndexInfo(table));
 
+                        log.info("clearing old filter text ...");
+                        filterTextField.setText("");
+                        if (tableModel != null) {
+                            try {
+                                tableModel.close();
+                            } finally {
+                                tableModel= null;
+                            }
+                        }
+                        
+                        log.info("creating new tableModel ...");
                         tableModel = new MnyTableModel(table);
                         tableModel.setDbReadOnly(dbReadOnly);
 
+                        if (allowTableSorting) {
+                            filterTextField.setEnabled(true);
+                            filterTextField.setText("");
+                            filterOnSelectedColumnCheckBox.setEnabled(true);
+
+                            log.info("creating new sorter ...");
+                            sorter = createTableRowSorter(tableModel);
+
+                            log.info("setting new sorter ...");
+                            MnyViewer.this.table.setRowSorter(sorter);
+                        } else {
+                            filterTextField.setEnabled(false);
+                            filterTextField.setText("Filter is disable");
+                            filterOnSelectedColumnCheckBox.setEnabled(false);
+                        }
+                        
+                        log.info("setting new tableModel ...");
                         dataModel.setTableModel(tableModel);
+                        rightStatusLabel.setText("open table=" + table.getName());
                     }
                 } catch (IOException e) {
                     log.error(e);
                 }
+            }
+
+            private TableRowSorter<TableModel> createTableRowSorter(MnyTableModel tableModel) {
+                TableRowSorter<TableModel> sorter = new TableRowSorter<TableModel>(tableModel) {
+                    @Override
+                    public void toggleSortOrder(int column) {
+                        StopWatch stopWatch = new StopWatch();
+                        log.info("> toggleSortOrder, count=" + getViewRowCount() + ", column=" + column);
+                        try {
+//                            JOptionPane.showConfirmDialog(MnyViewer.this.frame, "Hello");
+                            super.toggleSortOrder(column);
+                        } finally {
+                            long delta = stopWatch.click();
+                            rightStatusLabel.setText("sort: rows=" + getViewRowCount() + ", millisecond=" +
+                                    delta);
+                            log.info("< toggleSortOrder, delta=" + delta);
+                        }                        
+                    }
+                };
+                RowSorterListener listener = new RowSorterListener() {
+                    private long startTime = -1L;
+                    public void sorterChanged(RowSorterEvent event) {
+                        log.info("> sorterChanged");
+                        Type type = event.getType();
+                        log.info("  " + type);
+                        switch (type) {
+                        case SORT_ORDER_CHANGED:
+                            startTime = System.currentTimeMillis();
+                            break;
+                        case SORTED:
+                            if (startTime > 0) {
+                                long now = System.currentTimeMillis();
+                                long delta = now - startTime;
+                                startTime = -1L;
+                                log.info("sorterChanged, delta=" + delta);
+                            }
+                            break;
+                        default:
+                            break;
+                        }
+                    }
+                };
+                sorter.addRowSorterListener(listener);
+                return sorter;
             }
         });
         list.setVisibleRowCount(-1);
@@ -475,76 +538,6 @@ public class MnyViewer {
 
         JTabbedPane tabbedPane = new JTabbedPane(SwingConstants.TOP);
         panel.add(tabbedPane, BorderLayout.CENTER);
-
-        JScrollPane scrollPane_1 = new JScrollPane();
-        tabbedPane.addTab("Rows", null, scrollPane_1, null);
-
-        table = new JTable() {
-
-            @Override
-            public void setModel(TableModel dataModel) {
-                super.setModel(dataModel);
-                TableColumnModel columnModel = this.getColumnModel();
-                int cols = columnModel.getColumnCount();
-
-                MnyTableModel mnyTableModel = MnyViewer.this.tableModel;
-                IndexLookup indexLookup = new IndexLookup();
-
-                for (int i = 0; i < cols; i++) {
-                    TableColumn column = columnModel.getColumn(i);
-                    MyTableCellRenderer renderer = new MyTableCellRenderer(column.getCellRenderer());
-                    column.setCellRenderer(renderer);
-
-                    if (mnyTableModel.columnIsDateType(i)) {
-                        if (log.isDebugEnabled()) {
-                            log.debug("columnIsDateType, i=" + i);
-                        }
-                        // TableCellEditor cellEditor = new
-                        // TableCellDateEditor();
-                        // TableCellEditor cellEditor = new
-                        // DatePickerTableEditor();
-                        TableCellEditor cellEditor = new DialogCellEditor();
-                        column.setCellEditor(cellEditor);
-                    }
-
-                    if (mnyTableModel.isPrimaryKeyColumn(i)) {
-                        TableCellRenderer headerRenderer = new MyTabletHeaderRenderer(table, column.getHeaderRenderer(), Color.RED);
-                        column.setHeaderRenderer(headerRenderer);
-                    }
-                    if (mnyTableModel.isForeignKeyColumn(i)) {
-                        TableCellRenderer headerRenderer = new MyTabletHeaderRenderer(table, column.getHeaderRenderer(), Color.BLUE);
-                        column.setHeaderRenderer(headerRenderer);
-                    }
-                }
-            }
-
-        };
-//        table.setAutoCreateRowSorter(true);
-        table.setDefaultRenderer(Date.class, new DefaultTableCellRenderer() {
-            // private DateFormat formatter = new
-            // SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
-            // private DateFormat formatter = new
-            // SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSS");
-            // private DateFormat formatter = new
-            // SimpleDateFormat("yyyy/MM/dd");
-            private DateFormat formatter = new SimpleDateFormat("MMM dd, yyyy HH:mm");
-
-            @Override
-            public void setValue(Object value) {
-                if (log.isDebugEnabled()) {
-                    log.debug("cellRenderer: value=" + value + ", " + value.getClass().getName());
-                }
-                if (formatter == null) {
-                    formatter = DateFormat.getDateInstance();
-                }
-                String renderedValue = (value == null) ? "" : formatter.format(value);
-                if (log.isDebugEnabled()) {
-                    log.debug("cellRenderer: renderedValue=" + renderedValue);
-                }
-
-                setText(renderedValue);
-            }
-        });
         JPopupMenu popupMenu = new JPopupMenu();
         JMenuItem menuItem = null;
         menuItem = new JMenuItem(new AbstractAction("Duplicate") {
@@ -567,10 +560,173 @@ public class MnyViewer {
         popupMenu.add(menuItem);
         this.deleteMenuItem = menuItem;
 
+        popupMenu.addSeparator();
+
+        menuItem = new JMenuItem(new AbstractAction("Copy Column") {
+            public void actionPerformed(ActionEvent e) {
+                int rowIndex = table.getSelectedRow();
+                int columnIndex = table.getSelectedColumn();
+                copyColumn(rowIndex, columnIndex);
+            }
+        });
+        popupMenu.add(menuItem);
+
         MouseListener popupListener = new PopupListener(popupMenu);
-        table.addMouseListener(popupListener);
-        table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-        scrollPane_1.setViewportView(table);
+        
+        JPanel panel_6 = new JPanel();
+        tabbedPane.addTab("Rows", null, panel_6, null);
+                panel_6.setLayout(new BorderLayout(0, 0));
+        
+                JScrollPane scrollPane_1 = new JScrollPane();
+                panel_6.add(scrollPane_1);
+                
+                        table = new JTable() {
+                
+                            @Override
+                            public void setModel(TableModel dataModel) {
+                                super.setModel(dataModel);
+                                TableColumnModel columnModel = this.getColumnModel();
+                                int cols = columnModel.getColumnCount();
+                
+                                MnyTableModel mnyTableModel = MnyViewer.this.tableModel;
+                                // IndexLookup indexLookup = new IndexLookup();
+                
+                                for (int i = 0; i < cols; i++) {
+                                    TableColumn column = columnModel.getColumn(i);
+                                    MyTableCellRenderer renderer = new MyTableCellRenderer(column.getCellRenderer());
+                                    column.setCellRenderer(renderer);
+                
+                                    if (mnyTableModel.columnIsDateType(i)) {
+                                        if (log.isDebugEnabled()) {
+                                            log.debug("columnIsDateType, i=" + i);
+                                        }
+                                        // TableCellEditor cellEditor = new
+                                        // TableCellDateEditor();
+                                        // TableCellEditor cellEditor = new
+                                        // DatePickerTableEditor();
+                                        TableCellEditor cellEditor = new DialogCellEditor();
+                                        column.setCellEditor(cellEditor);
+                                    }
+                
+                                    if (mnyTableModel.isPrimaryKeyColumn(i)) {
+                                        TableCellRenderer headerRenderer = new MyTabletHeaderRenderer(table, column.getHeaderRenderer(), Color.RED);
+                                        column.setHeaderRenderer(headerRenderer);
+                                    }
+                                    if (mnyTableModel.isForeignKeyColumn(i)) {
+                                        TableCellRenderer headerRenderer = new MyTabletHeaderRenderer(table, column.getHeaderRenderer(), Color.BLUE);
+                                        column.setHeaderRenderer(headerRenderer);
+                                    }
+                                }
+                            }
+                
+                        };
+                        // table.setAutoCreateRowSorter(true);
+                        // RowSorter<TableModel> sorter = new
+                        // TableRowSorter<TableModel>(tableModel);
+                        // table.setRowSorter(sorter);
+
+                        table.setDefaultRenderer(Date.class, new DefaultTableCellRenderer() {
+                            // private DateFormat formatter = new
+                            // SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+                            // private DateFormat formatter = new
+                            // SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSS");
+                            // private DateFormat formatter = new
+                            // SimpleDateFormat("yyyy/MM/dd");
+                            private DateFormat formatter = new SimpleDateFormat("MMM dd, yyyy HH:mm");
+
+                            @Override
+                            public void setValue(Object value) {
+                                if (log.isDebugEnabled()) {
+                                    log.debug("cellRenderer: value=" + value + ", " + value.getClass().getName());
+                                }
+                                if (formatter == null) {
+                                    formatter = DateFormat.getDateInstance();
+                                }
+                                String renderedValue = (value == null) ? "" : formatter.format(value);
+                                if (log.isDebugEnabled()) {
+                                    log.debug("cellRenderer: renderedValue=" + renderedValue);
+                                }
+
+                                setText(renderedValue);
+                            }
+                        });
+                        table.addMouseListener(popupListener);
+                        
+                        // TODO: try to install our mouselistener first
+//                        insertListenerToHead();
+                        
+                        table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+                        scrollPane_1.setViewportView(table);
+                        
+                        JPanel panel_7 = new JPanel();
+                        panel_7.setBorder(new EmptyBorder(3, 3, 3, 3));
+                        panel_6.add(panel_7, BorderLayout.SOUTH);
+                        panel_7.setLayout(new BoxLayout(panel_7, BoxLayout.LINE_AXIS));
+                        
+                        JLabel lblNewLabel_1 = new JLabel("Filter Text");
+                        panel_7.add(lblNewLabel_1);
+                        
+                        Component horizontalStrut = Box.createHorizontalStrut(5);
+                        panel_7.add(horizontalStrut);
+                        
+                        filterTextField = new JTextField();
+                        filterTextField.addActionListener(new ActionListener() {
+                            public void actionPerformed(ActionEvent event) {
+                                JTextField tf = (JTextField)event.getSource();
+                                String text = tf.getText();
+
+                                RowFilter<Object, Object> rf = null;
+                                if ((text == null) || (text.length() <= 0)) {
+                                    rf = null;
+                                } else {
+                                    //If current expression doesn't parse, don't update.
+                                    try {
+                                        if (filterOnSelectedColumnCheckBox.isSelected()) {
+                                            int selectedColumn = table.getSelectedColumn();
+                                            log.info("filter for text=" + text + ", selectedColumn=" + selectedColumn);
+                                            rf = RowFilter.regexFilter(text, selectedColumn);
+                                        } else {
+                                            log.info("filter for text=" + text);
+                                            rf = RowFilter.regexFilter(text);
+                                        }
+                                    } catch (java.util.regex.PatternSyntaxException e) {
+                                        return;
+                                    }
+                                }
+                                if (sorter != null) {
+                                    StopWatch stopwatch = new StopWatch();
+                                    int preViewRowCount = sorter.getViewRowCount();
+                                    try {
+                                        log.info("> setRowFilter");
+                                        sorter.setRowFilter(rf);
+                                    } finally {
+                                        long delta = stopwatch.click();
+                                        int postViewRowCount = sorter.getViewRowCount();
+                                        rightStatusLabel.setText("filter: rows=" + postViewRowCount + "/" + preViewRowCount + ", millisecond=" + delta);
+                                        log.info("< setRowFilter, delta=" + delta);
+                                    }
+                                }
+                            }
+                        });
+                        panel_7.add(filterTextField);
+                        filterTextField.setColumns(10);
+                        
+                        Component horizontalStrut_1 = Box.createHorizontalStrut(5);
+                        panel_7.add(horizontalStrut_1);
+                        
+                        filterOnSelectedColumnCheckBox = new JCheckBox("on selected column");
+                        filterOnSelectedColumnCheckBox.setSelected(true);
+                        panel_7.add(filterOnSelectedColumnCheckBox);
+                        
+        if (allowTableSorting) {
+            filterTextField.setEnabled(true);
+            filterTextField.setText("");
+            filterOnSelectedColumnCheckBox.setEnabled(true);
+        } else {
+            filterTextField.setEnabled(false);
+            filterTextField.setText("Filter is disable");
+            filterOnSelectedColumnCheckBox.setEnabled(false);
+        }
 
         JPanel panel_2 = new JPanel();
         tabbedPane.addTab("Meta Data", null, panel_2, null);
@@ -601,29 +757,97 @@ public class MnyViewer {
 
         keyInfoTextArea = new JTextArea();
         scrollPane_4.setViewportView(keyInfoTextArea);
-        
+
         JPanel panel_5 = new JPanel();
         tabbedPane.addTab("Indexes", null, panel_5, null);
         panel_5.setLayout(new BorderLayout(0, 0));
-        
+
         JScrollPane scrollPane_5 = new JScrollPane();
         panel_5.add(scrollPane_5);
-        
+
         indexInfoTextArea = new JTextArea();
         scrollPane_5.setViewportView(indexInfoTextArea);
 
         initDataBindings();
     }
 
+    private void insertListenerToHead() {
+        final JTableHeader tableHeader = table.getTableHeader();
+        MouseListener[] mouseListeners = tableHeader.getMouseListeners();
+        if (mouseListeners != null) {
+            insertListenerToHead(tableHeader, mouseListeners);
+        }
+    }
+
+    private void insertListenerToHead(final JTableHeader tableHeader, MouseListener[] mouseListeners) {
+        for(MouseListener mouseListener: mouseListeners) {
+            tableHeader.removeMouseListener(mouseListener);        
+        }
+        MouseListener l = null;
+        l = new MouseInputAdapter() {
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() % 2 == 1 &&
+                        SwingUtilities.isLeftMouseButton(e)){
+                    JTable table = tableHeader.getTable();
+                    RowSorter sorter;
+                    if (table != null && (sorter = table.getRowSorter()) != null) { 
+                        int columnIndex = tableHeader.columnAtPoint(e.getPoint());
+                        if (columnIndex != -1) {
+                            columnIndex = table.convertColumnIndexToModel(
+                                                columnIndex);
+//                                                sorter.toggleSortOrder(columnIndex);
+                            log.info("> mouseClicked to sort");
+                        }
+                    }
+                }
+            }
+
+        };
+        tableHeader.addMouseListener(l);
+        for(MouseListener mouseListener: mouseListeners) {
+            tableHeader.addMouseListener(mouseListener);        
+        }
+    }
+
+    protected void clearDataModel(DataModel dataModel) {
+        dataModel.setHeaderInfo("");
+        dataModel.setIndexInfo("");
+        dataModel.setKeyInfo("");
+        dataModel.setTable(null);
+        dataModel.setTableMetaData("");
+        dataModel.setTableModel(new AbstractTableModel() {
+            public Object getValueAt(int rowIndex, int columnIndex) {
+                return null;
+            }
+
+            public int getRowCount() {
+                return 0;
+            }
+
+            public int getColumnCount() {
+                return 0;
+            }
+        });
+        dataModel.setTableName("");
+        // dataModel.setTables(null);
+
+    }
+
+    protected void copyColumn(int rowIndex, int columnIndex) {
+        if (tableModel != null) {
+            tableModel.copyColumn(table.convertRowIndexToModel(rowIndex), columnIndex);
+        }
+    }
+
     protected void deleteRow(int rowIndex) {
         if (tableModel != null) {
-            tableModel.deleteRow(rowIndex);
+            tableModel.deleteRow(table.convertRowIndexToModel(rowIndex));
         }
     }
 
     protected void duplicateRow(int rowIndex) {
         if (tableModel != null) {
-            tableModel.duplicateRow(rowIndex, this.getFrame());
+            tableModel.duplicateRow(table.convertRowIndexToModel(rowIndex), this.getFrame());
         }
     }
 
@@ -694,39 +918,47 @@ public class MnyViewer {
     public void setOpenedDb(OpenedDb openedDb) {
         this.openedDb = openedDb;
     }
+
     protected void initDataBindings() {
         BeanProperty<DataModel, List<TableListItem>> listOfTablesBeanProperty = BeanProperty.create("tables");
-        JListBinding<TableListItem, DataModel, JList> jListBinding = SwingBindings.createJListBinding(UpdateStrategy.READ, dataModel, listOfTablesBeanProperty, list);
+        JListBinding<TableListItem, DataModel, JList> jListBinding = SwingBindings.createJListBinding(UpdateStrategy.READ, dataModel, listOfTablesBeanProperty,
+                list);
         jListBinding.bind();
         //
         BeanProperty<DataModel, TableModel> dataModelBeanProperty = BeanProperty.create("tableModel");
         ELProperty<JTable, Object> jTableEvalutionProperty = ELProperty.create("${model}");
-        AutoBinding<DataModel, TableModel, JTable, Object> autoBinding = Bindings.createAutoBinding(UpdateStrategy.READ, dataModel, dataModelBeanProperty, table, jTableEvalutionProperty);
+        AutoBinding<DataModel, TableModel, JTable, Object> autoBinding = Bindings.createAutoBinding(UpdateStrategy.READ, dataModel, dataModelBeanProperty,
+                table, jTableEvalutionProperty);
         autoBinding.bind();
         //
         BeanProperty<DataModel, String> dataModelBeanProperty_1 = BeanProperty.create("tableName");
         BeanProperty<JTextField, String> jTextFieldBeanProperty_1 = BeanProperty.create("text");
-        AutoBinding<DataModel, String, JTextField, String> autoBinding_2 = Bindings.createAutoBinding(UpdateStrategy.READ, dataModel, dataModelBeanProperty_1, textField, jTextFieldBeanProperty_1);
+        AutoBinding<DataModel, String, JTextField, String> autoBinding_2 = Bindings.createAutoBinding(UpdateStrategy.READ, dataModel, dataModelBeanProperty_1,
+                textField, jTextFieldBeanProperty_1);
         autoBinding_2.bind();
         //
         ELProperty<DataModel, Object> dataModelEvalutionProperty = ELProperty.create("${tableMetaData}");
         BeanProperty<JTextArea, String> jTextAreaBeanProperty = BeanProperty.create("text");
-        AutoBinding<DataModel, Object, JTextArea, String> autoBinding_1 = Bindings.createAutoBinding(UpdateStrategy.READ, dataModel, dataModelEvalutionProperty, textArea, jTextAreaBeanProperty);
+        AutoBinding<DataModel, Object, JTextArea, String> autoBinding_1 = Bindings.createAutoBinding(UpdateStrategy.READ, dataModel,
+                dataModelEvalutionProperty, textArea, jTextAreaBeanProperty);
         autoBinding_1.bind();
         //
         BeanProperty<DataModel, String> dataModelBeanProperty_2 = BeanProperty.create("headerInfo");
         BeanProperty<JTextArea, String> jTextAreaBeanProperty_1 = BeanProperty.create("text");
-        AutoBinding<DataModel, String, JTextArea, String> autoBinding_3 = Bindings.createAutoBinding(UpdateStrategy.READ, dataModel, dataModelBeanProperty_2, headerTextArea, jTextAreaBeanProperty_1);
+        AutoBinding<DataModel, String, JTextArea, String> autoBinding_3 = Bindings.createAutoBinding(UpdateStrategy.READ, dataModel, dataModelBeanProperty_2,
+                headerTextArea, jTextAreaBeanProperty_1);
         autoBinding_3.bind();
         //
         BeanProperty<DataModel, String> dataModelBeanProperty_3 = BeanProperty.create("keyInfo");
         BeanProperty<JTextArea, String> jTextAreaBeanProperty_2 = BeanProperty.create("text");
-        AutoBinding<DataModel, String, JTextArea, String> autoBinding_4 = Bindings.createAutoBinding(UpdateStrategy.READ, dataModel, dataModelBeanProperty_3, keyInfoTextArea, jTextAreaBeanProperty_2);
+        AutoBinding<DataModel, String, JTextArea, String> autoBinding_4 = Bindings.createAutoBinding(UpdateStrategy.READ, dataModel, dataModelBeanProperty_3,
+                keyInfoTextArea, jTextAreaBeanProperty_2);
         autoBinding_4.bind();
         //
         BeanProperty<DataModel, String> dataModelBeanProperty_4 = BeanProperty.create("indexInfo");
         BeanProperty<JTextArea, String> jTextAreaBeanProperty_3 = BeanProperty.create("text");
-        AutoBinding<DataModel, String, JTextArea, String> autoBinding_5 = Bindings.createAutoBinding(UpdateStrategy.READ, dataModel, dataModelBeanProperty_4, indexInfoTextArea, jTextAreaBeanProperty_3);
+        AutoBinding<DataModel, String, JTextArea, String> autoBinding_5 = Bindings.createAutoBinding(UpdateStrategy.READ, dataModel, dataModelBeanProperty_4,
+                indexInfoTextArea, jTextAreaBeanProperty_3);
         autoBinding_5.bind();
     }
 }
