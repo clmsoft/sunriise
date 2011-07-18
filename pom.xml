@@ -67,8 +67,10 @@
         <artifactId>maven-assembly-plugin</artifactId>
         <version>2.2.1</version>
         <configuration>
+<!--
           <finalName>${project.artifactId}-Build_${buildNumber}-app</finalName>
           <appendAssemblyId>false</appendAssemblyId>
+-->
           <archive>
             <manifest>
               <mainClass>com.le.sunriise.viewer.MnyViewer</mainClass>
