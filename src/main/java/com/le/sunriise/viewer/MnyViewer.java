@@ -160,18 +160,18 @@ public class MnyViewer {
         initialize();
     }
 
-    private String parseHeaderInfo(Table t) throws IOException {
+    private String parseHeaderInfo(Table table) throws IOException {
         StringBuilder sb = new StringBuilder();
 
         sb.append("Header info");
         sb.append("\n");
         sb.append("\n");
 
-        sb.append("Table: " + t.getName());
+        sb.append("Table: " + table.getName());
         sb.append("\n");
         sb.append("\n");
 
-        Database db = t.getDatabase();
+        Database db = table.getDatabase();
 
         PageChannel pageChannel = db.getPageChannel();
         ByteBuffer buffer = pageChannel.createPageBuffer();
@@ -427,7 +427,7 @@ public class MnyViewer {
 
                         dataModel.setTable(table);
                         dataModel.setTableName(tableName);
-                        dataModel.setTableMetaData(table.toString());
+                        dataModel.setTableMetaData(parseTableMetaData(table));
                         dataModel.setHeaderInfo(parseHeaderInfo(table));
                         dataModel.setKeyInfo(parseKeyInfo(table));
                         dataModel.setIndexInfo(parseIndexInfo(table));
@@ -731,6 +731,19 @@ public class MnyViewer {
         scrollPane_5.setViewportView(indexInfoTextArea);
 
         initDataBindings();
+    }
+
+    protected String parseTableMetaData(Table table) {
+        StringBuilder sb = new StringBuilder();
+        
+        int pageCount = table.getApproximateOwnedPageCount();
+        
+        sb.append("pageCount=" + pageCount);
+        sb.append("\n");
+        
+        sb.append(table.toString());
+        
+        return sb.toString();
     }
 
     private void insertListenerToHead() {

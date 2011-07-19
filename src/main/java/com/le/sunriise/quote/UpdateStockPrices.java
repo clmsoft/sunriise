@@ -243,7 +243,9 @@ public class UpdateStockPrices {
             }
 
             if (latestMatchedRow != null) {
-                log.info("Found row with src == " + src + " that we can duplicate.");
+                if (log.isDebugEnabled()) {
+                    log.debug("Found row with src == " + src + " that we can duplicate.");
+                }
                 break;
             }
         }
@@ -279,7 +281,7 @@ public class UpdateStockPrices {
             return null;
         }
 
-        log.info("Found row that we can duplicate from");
+        log.info("Found row that we can duplicate from, dt=" + row.get("dt") + ", hsec=" + row.get("hsec") + ", src=" + row.get("src"));
 
         return latestMatchedRow;
     }
