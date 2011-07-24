@@ -85,7 +85,9 @@ public class Utils {
         }
 
         try {
-            log.info("> Database.open, dbFile=" + dbFile);
+            if (log.isDebugEnabled()) {
+                log.debug("> Database.open, dbFile=" + dbFile);
+            }
 
             if ((!readOnly) && (isMnyFile(dbFile))) {
                 File dbLockFile = null;
@@ -105,7 +107,9 @@ public class Utils {
         } catch (UnsupportedOperationException e) {
             throw new IOException(e);
         } finally {
-            log.info("< Database.open, dbFile=" + dbFile);
+            if (log.isDebugEnabled()) {
+                log.debug("< Database.open, dbFile=" + dbFile);
+            }
         }
 
         return openedDb;

@@ -46,79 +46,27 @@ public class CheckPasswordService {
 
     public CheckPasswordService(int passwordQueueCapacity, int threadCount, final File dbFile) {
         super();
-        this.threadCount = threadCount;
+        
         this.passwordQueue = new ArrayBlockingQueue<PasswordItem>(passwordQueueCapacity);
-        this.readerQueue = new ArrayBlockingQueue<ReaderItem>(readerQueueCapacity);
+        this.threadCount = threadCount;
         this.dbFile = dbFile;
 
-        // main + producer + consumer
-        this.mainBarrier = new CyclicBarrier(3, new Runnable() {
-            public void run() {
-                log.info("All producers and consumers are DONE");
-                if (password == null) {
-                    log.info("Found no working password");
-                    log.info("  for dbFile=" + dbFile);
-                } else {
-                    log.info("Found working password");
-                    log.info("  password=" + password);
-                    log.info("  for dbFile=" + dbFile);
-                }
-            }
-        });
+        this.readerQueue = new ArrayBlockingQueue<ReaderItem>(readerQueueCapacity);
+        
+        this.mainBarrier = createMainBarrier(dbFile);
 
-        this.producerBarrier = new CyclicBarrier(1, new Runnable() {
-            public void run() {
-                log.info("All producers are DONE");
-                try {
-                    log.info("Notifying consummer to stop ...");
-                    passwordQueue.put(new PasswordItem(true));
-                } catch (InterruptedException e) {
-                    log.warn(e);
-                } finally {
-                    if (mainBarrier != null) {
-                        try {
-                            log.info("Waiting for mainBarrier ...");
-                            mainBarrier.await();
-                        } catch (InterruptedException e) {
-                            log.warn(e);
-                        } catch (BrokenBarrierException e) {
-                            log.warn(e);
-                        }
-                    }
-                }
-            }
-        });
+        this.producerBarrier = createProducerBarrier();
+        this.producerThread = createProducerThread();
 
-        Runnable producerTask = new AbstractPasswordProducer(readerQueue, passwordQueue, this.producerBarrier) {
-            @Override
-            protected boolean stopProducing() {
-                if (hasResult()) {
-                    return true;
-                } else {
-                    return false;
-                }
-            }
-        };
-        this.producerThread = new Thread(producerTask, "ProducerThread");
-        this.producerThread.setDaemon(true);
+        this.consumerBarrier = createConsumerBarrier();
+        
+        this.consumerThreads = createConsumerThreads(dbFile);
 
-        this.consumerBarrier = new CyclicBarrier(this.threadCount, new Runnable() {
-            public void run() {
-                log.info("All consumers are DONE");
+        startThreads();
+    }
 
-                if (mainBarrier != null) {
-                    try {
-                        log.info("Waiting for mainBarrier ...");
-                        mainBarrier.await();
-                    } catch (InterruptedException e) {
-                        log.warn(e);
-                    } catch (BrokenBarrierException e) {
-                        log.warn(e);
-                    }
-                }
-            }
-        });
-        this.consumerThreads = new ArrayList<Thread>();
+    private ArrayList<Thread> createConsumerThreads(final File dbFile) {
+        ArrayList<Thread> threads = new ArrayList<Thread>();
         for (int i = 0; i < this.threadCount; i++) {
             Runnable consumer = new AbstractPasswordConsumer(dbFile, passwordQueue, this.consumerBarrier) {
                 @Override
@@ -136,12 +84,101 @@ public class CheckPasswordService {
                     }
                 }
             };
-            Thread consumerThread = new Thread(consumer, "ConsumerThread-" + i);
-            consumerThread.setDaemon(true);
-            consumerThreads.add(consumerThread);
+            Thread t = new Thread(consumer, "ConsumerThread-" + i);
+            t.setDaemon(true);
+            threads.add(t);
         }
+        return threads;
+    }
 
-        startThreads();
+    private CyclicBarrier createConsumerBarrier() {
+        int parties = this.threadCount;
+        Runnable barrierAction = new Runnable() {
+            public void run() {
+                log.info("All consumers are DONE");
+
+                if (mainBarrier != null) {
+                    try {
+                        log.info("Waiting for mainBarrier ...");
+                        // from consumer
+                        mainBarrier.await();
+                    } catch (InterruptedException e) {
+                        log.warn(e);
+                    } catch (BrokenBarrierException e) {
+                        log.warn(e);
+                    }
+                }
+            }
+        };
+        
+        CyclicBarrier barrier = new CyclicBarrier(parties, barrierAction);
+        
+        return barrier;
+    }
+
+    private Thread createProducerThread() {
+        Runnable producerTask = new AbstractPasswordProducer(readerQueue, passwordQueue, this.producerBarrier) {
+            @Override
+            protected boolean stopProducing() {
+                if (hasResult()) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        };
+        Thread t = new Thread(producerTask, "ProducerThread");
+        t.setDaemon(true);
+        return t;
+    }
+
+    private CyclicBarrier createProducerBarrier() {
+        int parties = 1;
+        Runnable barrierAction = new Runnable() {
+            public void run() {
+                log.info("All producers are DONE");
+                try {
+                    log.info("Notifying consummer to stop ...");
+                    passwordQueue.put(new PasswordItem(true));
+                } catch (InterruptedException e) {
+                    log.warn(e);
+                } finally {
+                    if (mainBarrier != null) {
+                        try {
+                            log.info("Waiting for mainBarrier ...");
+                            // from producer
+                            mainBarrier.await();
+                        } catch (InterruptedException e) {
+                            log.warn(e);
+                        } catch (BrokenBarrierException e) {
+                            log.warn(e);
+                        }
+                    }
+                }
+            }
+        };
+        CyclicBarrier barrier = new CyclicBarrier(parties, barrierAction);
+        return barrier;
+    }
+
+    private CyclicBarrier createMainBarrier(final File dbFile) {
+        // parties: main + producer + consumer
+        int parties = 3;
+        Runnable barrierAction = new Runnable() {
+            public void run() {
+                log.info("All producers and consumers are DONE");
+                if (password == null) {
+                    log.info("Found no working password");
+                    log.info("  for dbFile=" + dbFile);
+                } else {
+                    log.info("Found working password");
+                    log.info("  password=" + password);
+                    log.info("  for dbFile=" + dbFile);
+                }
+            }
+        };
+        CyclicBarrier barrier = new CyclicBarrier(parties, barrierAction);
+        return barrier;
     }
 
     private void startThreads() {
@@ -154,15 +191,15 @@ public class CheckPasswordService {
         }
     }
 
-    private void walkPath(File path) throws IOException {
+    private void recursePath(File path) throws IOException {
         if (path.isDirectory()) {
-            walkDirectory(path);
+            recurseDirectory(path);
         } else {
-            checkFile(path);
+            consumeFile(path);
         }
     }
 
-    private void checkFile(File file) {
+    private void consumeFile(File file) {
         log.info("> file=" + file);
         BufferedReader reader = null;
         try {
@@ -176,12 +213,12 @@ public class CheckPasswordService {
         }
     }
 
-    private void walkDirectory(File directory) throws IOException {
+    private void recurseDirectory(File directory) throws IOException {
         log.info("> dir=" + directory);
         File[] files = directory.listFiles();
         if (files != null) {
             for (File file : files) {
-                walkPath(file);
+                recursePath(file);
             }
         }
     }
@@ -192,13 +229,14 @@ public class CheckPasswordService {
 
     private void startCheck(File path) throws IOException {
         try {
-            walkPath(path);
+            recursePath(path);
         } finally {
             try {
                 log.info("Notifying producers to stop ...");
                 readerQueue.put(new ReaderItem(true));
 
                 log.info("> WAITING for mainBarrier ...");
+                // from main
                 mainBarrier.await();
             } catch (InterruptedException e) {
                 log.warn(e);
