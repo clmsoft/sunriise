@@ -8,6 +8,8 @@ public class Transaction {
     private Integer id;
 
     private BigDecimal amount;
+    
+    private BigDecimal runningBalance;
 
     private List<TransactionSplit> splits;
 
@@ -80,5 +82,13 @@ public class Transaction {
         }
         return false;
 
+    }
+
+    public BigDecimal getRunningBalance() {
+        return runningBalance;
+    }
+
+    public void setRunningBalance(BigDecimal runningBalance) {
+        this.runningBalance = runningBalance;
     }
 }

@@ -116,7 +116,7 @@ public class AccountViewer {
                     try {
                         log.info("select account=" + account);
                         ExportAccountsToMd exporter = new ExportAccountsToMd();
-                        List<Transaction> transactions = exporter.getTransactions(openedDb.getDb(), account);
+                        List<Transaction> transactions = AccountUtil.getTransactions(openedDb.getDb(), account);
                         account.setTransactions(transactions);
                         BigDecimal currentBalance = exporter.calculateCurrentBalance(account);
                         log.info(account.getName() + ", " + account.getStartingBalance() + ", " + currentBalance);
@@ -166,15 +166,8 @@ public class AccountViewer {
                     getFrame().setTitle("No opened db");
                 }
 
-                ExportAccountsToMd exporter = new ExportAccountsToMd();
                 try {
-                    List<Account> accounts = exporter.readAccounts(openedDb.getDb());
-                    Comparator<Account> comparator = new Comparator<Account>() {
-                        public int compare(Account o1, Account o2) {
-                            return o1.getName().compareTo(o2.getName());
-                        }
-                    };
-                    Collections.sort(accounts, comparator);
+                    List<Account> accounts = AccountUtil.readAccounts(openedDb.getDb());
                     AccountViewer.this.dataModel.setAccounts(accounts);
                 } catch (IOException e) {
                     log.warn(e);
@@ -206,38 +199,10 @@ public class AccountViewer {
                 TableColumnModel columnModel = this.getColumnModel();
                 int cols = columnModel.getColumnCount();
 
-                // MnyTableModel mnyTableModel = MynViewer.this.tableModel;
-                // IndexLookup indexLookup = new IndexLookup();
-
                 for (int i = 0; i < cols; i++) {
                     TableColumn column = columnModel.getColumn(i);
                     MyTableCellRenderer renderer = new MyTableCellRenderer(column.getCellRenderer());
                     column.setCellRenderer(renderer);
-
-                    // if (mnyTableModel.columnIsDateType(i)) {
-                    // if (log.isDebugEnabled()) {
-                    // log.debug("columnIsDateType, i=" + i);
-                    // }
-                    // // TableCellEditor cellEditor = new
-                    // // TableCellDateEditor();
-                    // // TableCellEditor cellEditor = new
-                    // // DatePickerTableEditor();
-                    // TableCellEditor cellEditor = new DialogCellEditor();
-                    // column.setCellEditor(cellEditor);
-                    // }
-
-                    // if (mnyTableModel.isPrimaryKeyColumn(i)) {
-                    // TableCellRenderer headerRenderer = new
-                    // MyTabletHeaderRenderer(table, column.getHeaderRenderer(),
-                    // Color.RED);
-                    // column.setHeaderRenderer(headerRenderer);
-                    // }
-                    // if (mnyTableModel.isForeignKeyColumn(i)) {
-                    // TableCellRenderer headerRenderer = new
-                    // MyTabletHeaderRenderer(table, column.getHeaderRenderer(),
-                    // Color.BLUE);
-                    // column.setHeaderRenderer(headerRenderer);
-                    // }
                 }
             }
 

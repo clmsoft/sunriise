@@ -16,49 +16,57 @@ import com.le.sunriise.Utils;
 import com.le.sunriise.viewer.OpenedDb;
 
 public class ExportAccountsToQif {
-    private static final Logger log = Logger.getLogger(ExportAccountsToQif.class);
+    private static final Logger log = Logger.getLogger(Logger.class);
 
     /**
      * @param args
      */
     public static void main(String[] args) {
-        File dbFile = null;
+        File inFile = null;
         String password = null;
         File outFile = null;
 
         if (args.length == 2) {
-            dbFile = new File(args[0]);
+            inFile = new File(args[0]);
             outFile = new File(args[1]);
         } else if (args.length == 3) {
-            dbFile = new File(args[0]);
+            inFile = new File(args[0]);
             password = args[1];
             outFile = new File(args[2]);
         } else {
             Class<ExportAccountsToQif> clz = ExportAccountsToQif.class;
-            System.out.println("Usage: " + clz.getName() + " file.mny [passsword] out.qif");
+            System.out.println("Usage: java " + clz.getName() + " file.mny [password] out.qif");
             System.exit(1);
         }
 
-        log.info("dbFile=" + dbFile);
+        log.info("inFile=" + inFile);
+        log.info("outFile=" + outFile);
+
         ExportAccountsToQif exporter = new ExportAccountsToQif();
         try {
-            exporter.export(dbFile, password, outFile);
+            exporter.export(inFile, password, outFile);
         } catch (IOException e) {
             log.error(e, e);
         } finally {
             log.info("< DONE");
         }
-
     }
 
     private void export(File dbFile, String password, File outFile) throws IOException {
-        OpenedDb openedDb = null;
+        OpenedDb openDb = null;
         PrintWriter writer = null;
         try {
-            openedDb = Utils.openDbReadOnly(dbFile, password);
+            openDb = Utils.openDbReadOnly(dbFile, password);
             writer = new PrintWriter(new BufferedWriter(new FileWriter(outFile)));
-            export(openedDb.getDb(), writer);
+            export(openDb.getDb(), writer);
         } finally {
+            if (openDb != null) {
+                try {
+                    openDb.close();
+                } finally {
+                    openDb = null;
+                }
+            }
             if (writer != null) {
                 try {
                     writer.close();
@@ -66,46 +74,41 @@ public class ExportAccountsToQif {
                     writer = null;
                 }
             }
-            if (openedDb != null) {
-                try {
-                    openedDb.close();
-                } finally {
-                    openedDb = null;
-                }
-            }
         }
-
     }
 
     private void export(Database db, PrintWriter writer) throws IOException {
-        String tableName = "ACCT";
-        Table table = db.getTable(tableName);
+        String tableName = null;
+        Table table  = null;
         Cursor cursor = null;
-        try {
-            cursor = Cursor.createCursor(table);
-
-            writer.println("!Option:AutoSwitch");
-            writer.println("!Account");
-
-            while (cursor.moveToNextRow()) {
-                Map<String, Object> row = cursor.getCurrentRow();
-                
-                String name = (String) row.get("szFull");
-                if (name == null) {
-                    continue;
-                }
-                if (name.length() == 0) {
-                    continue;
-                }
-                
-                Integer type = (Integer) row.get("at");
-                
-                writer.println("N" + name);
-                writer.println("T" + type);
-                writer.println("^");
-            }
-        } finally {
-            writer.println("!Clear:AutoSwitch");
+        
+        tableName = "ACCT";
+        table = db.getTable(tableName);
+        log.info("> traversing table=" + tableName);
+        cursor = Cursor.createCursor(table);
+        while(cursor.moveToNextRow()) {
+            Map<String, Object> row = cursor.getCurrentRow();
+            Integer hacct = (Integer) row.get("hacct");
+            
+            String name = (String) row.get("szFull");
+            log.info("hacct=" + hacct + ", name=" + name);
+            
+            Integer type = (Integer) row.get("at");
+            log.info("    type=" + type);
         }
+        
+        tableName = "TRN";
+        table = db.getTable(tableName);
+        log.info("> traversing table=" + tableName);
+        cursor = Cursor.createCursor(table);
+        while(cursor.moveToNextRow()) {
+            Map<String, Object> row = cursor.getCurrentRow();
+            Integer hacct = (Integer) row.get("hacct");
+            // hacctLink
+            Integer hacctLink = (Integer) row.get("hacctLink");
+            log.info("hacct=" + hacct + ", hacctLink=" + hacctLink);
+        }
+        
     }
+
 }
