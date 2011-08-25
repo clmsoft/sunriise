@@ -41,6 +41,7 @@ public class OpenedDb {
 
     public void close() {
         if (db != null) {
+            log.info("Closing dbFile=" + dbFile);
             try {
                 db.close();
             } catch (IOException e) {

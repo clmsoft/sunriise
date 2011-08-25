@@ -21,14 +21,14 @@ public class ExportToCsvAction implements ActionListener {
     /**
      * 
      */
-    private final MnyViewer mnyViewer;
+    private final MynViewer mnyViewer;
 
     private JFileChooser fc = null;
 
     /**
      * @param mnyViewer
      */
-    public ExportToCsvAction(MnyViewer mnyViewer) {
+    public ExportToCsvAction(MynViewer mnyViewer) {
         this.mnyViewer = mnyViewer;
     }
 
@@ -146,6 +146,6 @@ public class ExportToCsvAction implements ActionListener {
         progressMonitor.setProgress(0);
 
         Runnable command = new ExportToCsvTask(source, dir, progressMonitor);
-        MnyViewer.getThreadPool().execute(command);
+        MynViewer.getThreadPool().execute(command);
     }
 }

@@ -22,14 +22,14 @@ public class ExportToMdbAction implements ActionListener {
     /**
      * 
      */
-    private final MnyViewer mnyViewer;
+    private final MynViewer mnyViewer;
 
     private JFileChooser fc = null;
 
     /**
      * @param mnyViewer
      */
-    public ExportToMdbAction(MnyViewer mnyViewer) {
+    public ExportToMdbAction(MynViewer mnyViewer) {
         this.mnyViewer = mnyViewer;
     }
 
@@ -195,6 +195,6 @@ public class ExportToMdbAction implements ActionListener {
         progressMonitor.setProgress(0);
 
         Runnable command = new ExportToMdbTask(progressMonitor, destFile, source);
-        MnyViewer.getThreadPool().execute(command);
+        MynViewer.getThreadPool().execute(command);
     }
 }

@@ -7,7 +7,7 @@ import javax.swing.table.TableModel;
 
 import com.healthmarketscience.jackcess.Table;
 
-public class DataModel {
+public class MnyViewerDataModel {
     private List<TableListItem> tables;
 
     private Table table;

@@ -19,6 +19,7 @@ import com.healthmarketscience.jackcess.ByteUtil;
 import com.healthmarketscience.jackcess.Column;
 import com.healthmarketscience.jackcess.JetCryptCodecHandler;
 import com.healthmarketscience.jackcess.JetFormat;
+import com.healthmarketscience.jackcess.JetFormat.CodecType;
 import com.healthmarketscience.jackcess.MSISAMCryptCodecHandler;
 import com.healthmarketscience.jackcess.PageChannel;
 
@@ -148,7 +149,7 @@ public class EncryptionUtils {
             pageChannel.readPage(buffer, 0);
 
             StringBuilder sb = new StringBuilder();
-            if (format.CODEC_TYPE == format.CODEC_TYPE.MSISAM) {
+            if (format.CODEC_TYPE == CodecType.MSISAM) {
                 EncryptionUtils.appendMSISAMInfo(buffer, password, charset, sb);
             }
             

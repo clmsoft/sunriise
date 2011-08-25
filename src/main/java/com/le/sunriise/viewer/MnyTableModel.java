@@ -147,7 +147,7 @@ public class MnyTableModel extends AbstractTableModel {
         }
         List<Column> cols = table.getColumns();
         Column column = cols.get(columnIndex);
-        Class clz = MnyViewer.getColumnJavaClass(column);
+        Class clz = MynViewer.getColumnJavaClass(column);
         if (log.isDebugEnabled()) {
             log.debug("getColumnClass, " + columnIndex + ", " + clz);
         }

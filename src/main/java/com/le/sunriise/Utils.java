@@ -8,7 +8,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.TimeZone;
 
@@ -17,7 +16,6 @@ import org.apache.log4j.Logger;
 import com.healthmarketscience.jackcess.CodecProvider;
 import com.healthmarketscience.jackcess.CryptCodecProvider;
 import com.healthmarketscience.jackcess.Database;
-import com.healthmarketscience.jackcess.PageChannel;
 import com.le.sunriise.viewer.OpenedDb;
 
 public class Utils {

@@ -69,6 +69,7 @@ public class CalculateDiskUsage {
 
     private void calculate(OpenedDb openedDb) throws IOException {
         File dbFile = openedDb.getDbFile();
+        
         System.out.println(dbFile + ", " + dbFile.length() + ", " + humanReadableByteCount(dbFile.length(), true));
 
         Database db = openedDb.getDb();
@@ -83,33 +84,65 @@ public class CalculateDiskUsage {
             Table table = db.getTable(tableName);
             if (table != null) {
                 int pageCount = table.getApproximateOwnedPageCount();
-                log.info("  pageCount=" + pageCount);
+                if (log.isDebugEnabled()) {
+                    log.debug("  pageCount=" + pageCount);
+                }
                 int otherPageCount = getOtherPageCount(table);
                 int bytes = (pageCount + otherPageCount) * pageSize;
+                
                 System.out.println(tableName + ", " + table.getRowCount() + ", " + bytes + ", " + humanReadableByteCount(bytes, true));
+                
                 runningBytes += bytes;
                 tablesCount++;
+            } else {
+                log.warn("Cannot find table=" + tableName);
             }
         }
 
-        tableNames.clear();
-        tableNames.add(TABLE_SYSTEM_ACES);
-        tableNames.add(TABLE_SYSTEM_RELATIONSHIPS);
-        tableNames.add(TABLE_SYSTEM_QUERIES);
-        tableNames.add(OBJECT_NAME_DB_PROPS);
+//        tableNames.clear();
+//        tableNames.add(TABLE_SYSTEM_ACES);
+//        tableNames.add(TABLE_SYSTEM_RELATIONSHIPS);
+//        tableNames.add(TABLE_SYSTEM_QUERIES);
+//        tableNames.add(OBJECT_NAME_DB_PROPS);
+//        for (String tableName : tableNames) {
+//            Table table = db.getSystemTable(tableName);
+//            if (table != null) {
+//                int pageCount = table.getApproximateOwnedPageCount();
+//                if (log.isDebugEnabled()) {
+//                    log.debug("  pageCount=" + pageCount);
+//                }
+//                int otherPageCount = getOtherPageCount(table);
+//                int bytes = (pageCount + otherPageCount) * pageSize;
+//                
+//                System.out.println(tableName + ", " + table.getRowCount() + ", " + bytes + ", " + humanReadableByteCount(bytes, true));
+//                
+//                runningBytes += bytes;
+//                tablesCount++;
+//            } else {
+//                log.warn("Cannot find table=" + tableName);
+//            }
+//        }
+
+        tableNames= db.getSystemTableNames();
         for (String tableName : tableNames) {
             Table table = db.getSystemTable(tableName);
             if (table != null) {
                 int pageCount = table.getApproximateOwnedPageCount();
-                log.info("  pageCount=" + pageCount);
+                if (log.isDebugEnabled()) {
+                    log.debug("  pageCount=" + pageCount);
+                }
                 int otherPageCount = getOtherPageCount(table);
                 int bytes = (pageCount + otherPageCount) * pageSize;
+                
                 System.out.println(tableName + ", " + table.getRowCount() + ", " + bytes + ", " + humanReadableByteCount(bytes, true));
+                
                 runningBytes += bytes;
                 tablesCount++;
+            } else {
+                log.warn("Cannot find table=" + tableName);
             }
         }
-
+        
         System.out.println("Total: " + tablesCount + ", " + humanReadableByteCount(runningBytes, true));
     }
 
@@ -151,7 +184,9 @@ public class CalculateDiskUsage {
 
         int count = pageNums.size();
 
-        log.info("< getOtherPageCount, count=" + count);
+        if (log.isDebugEnabled()) {
+            log.debug("< getOtherPageCount, count=" + count);
+        }
 
         return count;
     }
