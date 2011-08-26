@@ -73,7 +73,7 @@
 -->
           <archive>
             <manifest>
-              <mainClass>com.le.sunriise.viewer.MnyViewer</mainClass>
+              <mainClass>app.AccountViewer</mainClass>
               <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
             </manifest>
             <manifestEntries>
