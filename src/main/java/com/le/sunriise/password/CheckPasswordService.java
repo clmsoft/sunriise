@@ -94,6 +94,7 @@ public class CheckPasswordService {
     private CyclicBarrier createConsumerBarrier() {
         int parties = this.threadCount;
         Runnable barrierAction = new Runnable() {
+            @Override
             public void run() {
                 log.info("All consumers are DONE");
 
@@ -135,6 +136,7 @@ public class CheckPasswordService {
     private CyclicBarrier createProducerBarrier() {
         int parties = 1;
         Runnable barrierAction = new Runnable() {
+            @Override
             public void run() {
                 log.info("All producers are DONE");
                 try {
@@ -165,6 +167,7 @@ public class CheckPasswordService {
         // parties: main + producer + consumer
         int parties = 3;
         Runnable barrierAction = new Runnable() {
+            @Override
             public void run() {
                 log.info("All producers and consumers are DONE");
                 if (password == null) {

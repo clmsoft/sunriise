@@ -88,6 +88,7 @@ public class DateEditorDialog extends JDialog {
         {
             JButton btnNewButton = new JButton("Use current date");
             btnNewButton.addActionListener(new ActionListener() {
+                @Override
                 public void actionPerformed(ActionEvent e) {
                     // date only, no time
                     Calendar cal = Calendar.getInstance();
@@ -108,6 +109,7 @@ public class DateEditorDialog extends JDialog {
             {
                 JButton okButton = new JButton("OK");
                 okButton.addActionListener(new ActionListener() {
+                    @Override
                     public void actionPerformed(ActionEvent e) {
                         DateEditorDialog.this.dispose();
                         stopEditing();
@@ -120,6 +122,7 @@ public class DateEditorDialog extends JDialog {
             {
                 JButton cancelButton = new JButton("Cancel");
                 cancelButton.addActionListener(new ActionListener() {
+                    @Override
                     public void actionPerformed(ActionEvent e) {
                         DateEditorDialog.this.dispose();
                         cancelEditing();

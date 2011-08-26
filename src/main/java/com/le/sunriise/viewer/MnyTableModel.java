@@ -53,14 +53,17 @@ public class MnyTableModel extends AbstractTableModel {
         this.rowsCache = new MapMaker().softValues().maximumSize(50000).makeMap();
     }
 
+    @Override
     public int getRowCount() {
         return table.getRowCount();
     }
 
+    @Override
     public int getColumnCount() {
         return table.getColumnCount();
     }
 
+    @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
         if (log.isDebugEnabled()) {
             log.debug("> getValueAt: rowIndex=" + rowIndex + ", columnIndex=" + columnIndex);
@@ -229,6 +232,7 @@ public class MnyTableModel extends AbstractTableModel {
             StringSelection stringSelection = new StringSelection(value.toString());
             Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
             ClipboardOwner owner = new ClipboardOwner() {
+                @Override
                 public void lostOwnership(Clipboard clipboard, Transferable contents) {
                 }
             };

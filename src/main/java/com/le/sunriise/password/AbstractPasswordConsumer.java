@@ -34,6 +34,7 @@ public abstract class AbstractPasswordConsumer implements Runnable {
         this.barrier = barrier;
     }
 
+    @Override
     public void run() {
         count = 0;
         log.info("> START " + Thread.currentThread().getName());

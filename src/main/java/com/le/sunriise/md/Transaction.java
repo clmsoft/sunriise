@@ -8,7 +8,7 @@ public class Transaction {
     private Integer id;
 
     private BigDecimal amount;
-    
+
     private BigDecimal runningBalance;
 
     private List<TransactionSplit> splits;
@@ -18,6 +18,12 @@ public class Transaction {
     private Date date;
 
     private Integer frequency;
+
+    private Integer category;
+
+    private Integer payee;
+
+    private Integer transferredAccount;
 
     public Integer getId() {
         return id;
@@ -59,6 +65,8 @@ public class Transaction {
         if ((statusFlag & 256) == 256) {
             return true;
         }
+
+        // TODO: hack to skip unknown transactions
         if (statusFlag == 2490368) {
             return true;
         }
@@ -71,6 +79,7 @@ public class Transaction {
         if (statusFlag > 2097152) {
             return true;
         }
+
         return false;
     }
 
@@ -105,5 +114,29 @@ public class Transaction {
 
     public void setRunningBalance(BigDecimal runningBalance) {
         this.runningBalance = runningBalance;
+    }
+
+    public Integer getCategory() {
+        return category;
+    }
+
+    public void setCategory(Integer category) {
+        this.category = category;
+    }
+
+    public Integer getPayee() {
+        return payee;
+    }
+
+    public void setPayee(Integer payee) {
+        this.payee = payee;
+    }
+
+    public Integer getTransferredAccount() {
+        return transferredAccount;
+    }
+
+    public void setTransferredAccount(Integer transferredAccount) {
+        this.transferredAccount = transferredAccount;
     }
 }

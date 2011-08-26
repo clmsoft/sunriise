@@ -74,6 +74,7 @@ public class Account {
         this.transactions = transactions;
     }
 
+    @Override
     public String toString() {
         return getName();
     }

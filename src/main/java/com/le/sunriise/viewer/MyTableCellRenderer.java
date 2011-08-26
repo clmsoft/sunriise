@@ -5,6 +5,7 @@ package com.le.sunriise.viewer;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.math.BigDecimal;
 import java.util.Date;
 
 import javax.swing.JLabel;
@@ -82,6 +83,12 @@ public class MyTableCellRenderer extends DefaultTableCellRenderer {
     protected void setCellHorizontalAlignment(Component rendererComponent, int column, Object value) {
         // right-align if it is a Date
         if ((value != null) && (value instanceof Date)) {
+            if (rendererComponent instanceof JLabel) {
+                JLabel label = (JLabel) rendererComponent;
+                label.setHorizontalAlignment(SwingConstants.RIGHT);
+            }
+        }
+        if ((value != null) && (value instanceof BigDecimal)) {
             if (rendererComponent instanceof JLabel) {
                 JLabel label = (JLabel) rendererComponent;
                 label.setHorizontalAlignment(SwingConstants.RIGHT);

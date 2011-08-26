@@ -1,13 +1,20 @@
 package com.le.sunriise.md;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.table.AbstractTableModel;
 
-final class AccountViewerTableModel extends AbstractTableModel {
+public class AccountViewerTableModel extends AbstractTableModel {
     private final Account account;
 
-    AccountViewerTableModel(Account account) {
+    private Map<Integer, Payee> payees;
+
+    private Map<Integer, Category> categories;
+
+    private List<Account> accounts;
+
+    public AccountViewerTableModel(Account account) {
         this.account = account;
     }
 
@@ -18,7 +25,7 @@ final class AccountViewerTableModel extends AbstractTableModel {
 
     @Override
     public int getColumnCount() {
-        return 6;
+        return 7;
     }
 
     @Override
@@ -34,23 +41,87 @@ final class AccountViewerTableModel extends AbstractTableModel {
             value = transaction.getDate();
             break;
         case 2:
-            value = transaction.getAmount();
+            Integer payeeId = transaction.getPayee();
+            String payeeName = getPayeeName(payeeId);
+            value = payeeName;
             break;
         case 3:
-            value = AccountUtil.getRunningBalance(rowIndex, account);
+            Integer transferredAccountId = transaction.getTransferredAccount();
+            if (transferredAccountId != null) {
+                if (accounts != null) {
+                    for (Account a : accounts) {
+                        Integer id = a.getId();
+                        if (id.equals(transferredAccountId)) {
+                            value = "Transfer to " + a.getName();
+                            break;
+                        }
+                    }
+                }
+            } else {
+                Integer categoryId = transaction.getCategory();
+                String categoryName = getCategoryName(categoryId);
+                value = categoryName;
+            }
+
+            if (value == null) {
+                List<TransactionSplit> splits = transaction.getSplits();
+                if ((splits != null) && (splits.size() > 0)) {
+                    value = "(" + splits.size() + ") Split Transaction";
+                }
+            }
             break;
         case 4:
-            value = transaction.isRecurring();
+            value = transaction.getAmount();
             break;
         case 5:
+            value = AccountUtil.getRunningBalance(rowIndex, account);
+            break;
+        case 6:
             value = transaction.isVoid();
             break;
+        // case 7:
+        // value = transaction.isRecurring();
+        // break;
         default:
             value = null;
             break;
         }
 
         return value;
+    }
+
+    private String getCategoryName(Integer categoryId) {
+        String categoryName = null;
+        if (categoryId != null) {
+            if (categories != null) {
+                Category category = categories.get(categoryId);
+                if (category != null) {
+                    Integer parentId = category.getParent();
+                    categoryName = category.getName();
+                    if (parentId != null) {
+                        String parentName = getCategoryName(parentId);
+                        categoryName = parentName + " : " + categoryName;
+                    }
+                }
+            }
+        }
+        return categoryName;
+    }
+
+    private String getPayeeName(Integer payeeId) {
+        String payeeName = null;
+        if (payeeId != null) {
+            if (payees != null) {
+                Payee payee = payees.get(payeeId);
+                if (payee != null) {
+                    payeeName = payee.getName();
+                }
+            }
+        }
+        if (payeeName == null) {
+            payeeName = payeeId.toString();
+        }
+        return payeeName;
     }
 
     @Override
@@ -64,22 +135,56 @@ final class AccountViewerTableModel extends AbstractTableModel {
             value = "Date";
             break;
         case 2:
-            value = "Amount";
+            value = "Payee";
             break;
         case 3:
-            value = "Balance";
+            value = "Category";
             break;
         case 4:
-            value = "Recurring";
+            value = "Amount";
             break;
         case 5:
+            value = "Balance";
+            break;
+        case 6:
             value = "Voided";
             break;
+        // case 7:
+        // value = "Recurring";
+        // break;
         default:
             value = null;
             break;
         }
 
         return value;
+    }
+
+    public Map<Integer, Payee> getPayees() {
+        return payees;
+    }
+
+    public void setPayees(Map<Integer, Payee> payees) {
+        this.payees = payees;
+    }
+
+    public Map<Integer, Category> getCategories() {
+        return categories;
+    }
+
+    public void setCategories(Map<Integer, Category> categories) {
+        this.categories = categories;
+    }
+
+    public Account getAccount() {
+        return account;
+    }
+
+    public List<Account> getAccounts() {
+        return accounts;
+    }
+
+    public void setAccounts(List<Account> accounts) {
+        this.accounts = accounts;
     }
 }

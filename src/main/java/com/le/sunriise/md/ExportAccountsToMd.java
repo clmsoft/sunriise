@@ -6,8 +6,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.math.BigDecimal;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -27,7 +25,7 @@ public class ExportAccountsToMd {
             writer = new PrintWriter(new BufferedWriter(new FileWriter(outFile)));
             Database db = openedDb.getDb();
 
-            List<Account> accounts = AccountUtil.readAccounts(db);
+            List<Account> accounts = AccountUtil.getAccounts(db);
             log.info("Accounts=" + accounts.size());
 
             readTransactions(db, accounts);

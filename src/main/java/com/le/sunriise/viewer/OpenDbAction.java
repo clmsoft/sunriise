@@ -25,6 +25,7 @@ public abstract class OpenDbAction implements ActionListener {
         this.openedDb = openedDb;
     }
 
+    @Override
     public void actionPerformed(ActionEvent event) {
         Component locationRelativeTo = getLocationRelativeTo();
         openDb(locationRelativeTo);

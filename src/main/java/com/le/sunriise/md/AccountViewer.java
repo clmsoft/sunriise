@@ -1,6 +1,7 @@
 package com.le.sunriise.md;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
@@ -8,9 +9,12 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.prefs.Preferences;
 
 import javax.swing.JFrame;
@@ -25,6 +29,7 @@ import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
@@ -38,6 +43,7 @@ import org.jdesktop.beansbinding.ELProperty;
 import org.jdesktop.swingbinding.JListBinding;
 import org.jdesktop.swingbinding.SwingBindings;
 
+import com.healthmarketscience.jackcess.Database;
 import com.ibm.icu.text.SimpleDateFormat;
 import com.le.sunriise.model.bean.AccountViewerDataModel;
 import com.le.sunriise.viewer.MyTableCellRenderer;
@@ -60,11 +66,18 @@ public class AccountViewer {
     private JList list;
     private JTable table;
 
+    protected List<Account> accounts;
+
+    protected Map<Integer, Payee> payees;
+
+    protected Map<Integer, Category> categories;
+
     /**
      * Launch the application.
      */
     public static void main(String[] args) {
         EventQueue.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 try {
                     AccountViewer window = new AccountViewer();
@@ -108,6 +121,7 @@ public class AccountViewer {
 
         list = new JList();
         list.addListSelectionListener(new ListSelectionListener() {
+            @Override
             public void valueChanged(ListSelectionEvent event) {
                 if (event.getValueIsAdjusting()) {
                     return;
@@ -122,11 +136,15 @@ public class AccountViewer {
                         BigDecimal currentBalance = exporter.calculateCurrentBalance(account);
                         log.info(account.getName() + ", " + account.getStartingBalance() + ", " + currentBalance);
 
-                        boolean calculateMonthlySummary = true;
+                        boolean calculateMonthlySummary = false;
                         if (calculateMonthlySummary) {
                             calculateMonthlySummary(account);
                         }
-                        TableModel tableModel = new AccountViewerTableModel(account);
+                        AccountViewerTableModel tableModel = new AccountViewerTableModel(account);
+                        tableModel.setPayees(payees);
+                        tableModel.setCategories(categories);
+                        tableModel.setAccounts(accounts);
+                        
                         dataModel.setTableModel(tableModel);
                     } catch (IOException e) {
                         log.error(e);
@@ -138,22 +156,22 @@ public class AccountViewer {
                 List<Transaction> transactions = account.getTransactions();
                 Date previousDate = null;
                 SimpleDateFormat dateFormatter = new SimpleDateFormat("MM/dd/yyyy");
-                
-                int rowIndex  = 0;
-                
+
+                int rowIndex = 0;
+
                 int entries = 0;
                 BigDecimal monthlyBalance = new BigDecimal(0);
                 for (Transaction transaction : transactions) {
-//                    if (transaction.isVoid()) {
-//                        rowIndex++;
-//                        continue;
-//                    }
+                    // if (transaction.isVoid()) {
+                    // rowIndex++;
+                    // continue;
+                    // }
                     if (transaction.isRecurring()) {
                         rowIndex++;
                         continue;
                     }
                     entries++;
-                    
+
                     Date date = transaction.getDate();
                     if (previousDate != null) {
                         Calendar cal = Calendar.getInstance();
@@ -165,8 +183,8 @@ public class AccountViewer {
                         int month = cal.get(Calendar.MONTH);
 
                         if (month != previousMonth) {
-                            log.info(dateFormatter.format(previousDate) + ", entries=" + entries + ", monthlyBalance=" + monthlyBalance
-                                    + ", balance=" + AccountUtil.getRunningBalance(rowIndex - 1, account));
+                            log.info(dateFormatter.format(previousDate) + ", entries=" + entries + ", monthlyBalance=" + monthlyBalance + ", balance="
+                                    + AccountUtil.getRunningBalance(rowIndex - 1, account));
                             entries = 0;
                             monthlyBalance = new BigDecimal(0);
                         }
@@ -181,7 +199,7 @@ public class AccountViewer {
                         amount = new BigDecimal(0);
                     }
                     monthlyBalance = monthlyBalance.add(amount);
-                    
+
                     rowIndex++;
                 }
 
@@ -203,6 +221,7 @@ public class AccountViewer {
 
         JMenuItem exitMenuItem = new JMenuItem("Exit");
         exitMenuItem.addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent e) {
                 System.exit(0);
             }
@@ -225,7 +244,13 @@ public class AccountViewer {
                 }
 
                 try {
-                    List<Account> accounts = AccountUtil.readAccounts(openedDb.getDb());
+                    Database db = openedDb.getDb();
+                    accounts = AccountUtil.getAccounts(db);
+                    
+                    payees = AccountUtil.getPayees(db);
+                    
+                    categories = AccountUtil.getCategories(db);
+
                     AccountViewer.this.dataModel.setAccounts(accounts);
                 } catch (IOException e) {
                     log.warn(e);
@@ -265,6 +290,41 @@ public class AccountViewer {
             }
 
         };
+        table.setDefaultRenderer(BigDecimal.class, new DefaultTableCellRenderer() {
+            private NumberFormat formatter = null;
+
+            @Override
+            public void setValue(Object value) {
+                if (log.isDebugEnabled()) {
+                    log.debug("cellRenderer: value=" + value + ", " + value.getClass().getName());
+                }
+                if (formatter == null) {
+                    // #;(#)
+                    // .00
+                    formatter = NumberFormat.getInstance();
+                    if (formatter instanceof DecimalFormat) {
+                        DecimalFormat decimalFormat = (DecimalFormat) formatter;
+                        decimalFormat.applyPattern("#,###,##0.00;(#,###,##0.00)");
+                        decimalFormat.setGroupingUsed(true);
+                    }
+                }
+                String renderedValue = (value == null) ? "" : formatter.format(value);
+                if (log.isDebugEnabled()) {
+                    log.debug("cellRenderer: renderedValue=" + renderedValue);
+                }
+
+                setText(renderedValue);
+
+                BigDecimal bigDecimal = (BigDecimal) value;
+                if (bigDecimal.compareTo(BigDecimal.ZERO) < 0) {
+                    setForeground(Color.RED);
+                } else {
+                    setForeground(Color.BLACK);
+                }
+            }
+        });
+        // table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+
         scrollPane_1.setViewportView(table);
         vSplitPane.setResizeWeight(0.66);
         rightComponent.add(vSplitPane, BorderLayout.CENTER);
