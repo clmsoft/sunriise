@@ -8,8 +8,8 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.Collections;
-import java.util.Comparator;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.prefs.Preferences;
 
@@ -38,6 +38,7 @@ import org.jdesktop.beansbinding.ELProperty;
 import org.jdesktop.swingbinding.JListBinding;
 import org.jdesktop.swingbinding.SwingBindings;
 
+import com.ibm.icu.text.SimpleDateFormat;
 import com.le.sunriise.model.bean.AccountViewerDataModel;
 import com.le.sunriise.viewer.MyTableCellRenderer;
 import com.le.sunriise.viewer.OpenDbAction;
@@ -89,7 +90,7 @@ public class AccountViewer {
      */
     private void initialize() {
         setFrame(new JFrame());
-        getFrame().setPreferredSize(new Dimension(800, 600));
+        getFrame().setPreferredSize(new Dimension(1000, 800));
         // frame.setBounds(100, 100, 450, 300);
         getFrame().setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -121,6 +122,10 @@ public class AccountViewer {
                         BigDecimal currentBalance = exporter.calculateCurrentBalance(account);
                         log.info(account.getName() + ", " + account.getStartingBalance() + ", " + currentBalance);
 
+                        boolean calculateMonthlySummary = true;
+                        if (calculateMonthlySummary) {
+                            calculateMonthlySummary(account);
+                        }
                         TableModel tableModel = new AccountViewerTableModel(account);
                         dataModel.setTableModel(tableModel);
                     } catch (IOException e) {
@@ -128,14 +133,67 @@ public class AccountViewer {
                     }
                 }
             }
+
+            private void calculateMonthlySummary(Account account) {
+                List<Transaction> transactions = account.getTransactions();
+                Date previousDate = null;
+                SimpleDateFormat dateFormatter = new SimpleDateFormat("MM/dd/yyyy");
+                
+                int rowIndex  = 0;
+                
+                int entries = 0;
+                BigDecimal monthlyBalance = new BigDecimal(0);
+                for (Transaction transaction : transactions) {
+//                    if (transaction.isVoid()) {
+//                        rowIndex++;
+//                        continue;
+//                    }
+                    if (transaction.isRecurring()) {
+                        rowIndex++;
+                        continue;
+                    }
+                    entries++;
+                    
+                    Date date = transaction.getDate();
+                    if (previousDate != null) {
+                        Calendar cal = Calendar.getInstance();
+
+                        cal.setTime(previousDate);
+                        int previousMonth = cal.get(Calendar.MONTH);
+
+                        cal.setTime(date);
+                        int month = cal.get(Calendar.MONTH);
+
+                        if (month != previousMonth) {
+                            log.info(dateFormatter.format(previousDate) + ", entries=" + entries + ", monthlyBalance=" + monthlyBalance
+                                    + ", balance=" + AccountUtil.getRunningBalance(rowIndex - 1, account));
+                            entries = 0;
+                            monthlyBalance = new BigDecimal(0);
+                        }
+                    }
+                    previousDate = date;
+
+                    BigDecimal amount = transaction.getAmount();
+                    if (transaction.isVoid()) {
+                        amount = new BigDecimal(0);
+                    }
+                    if (amount == null) {
+                        amount = new BigDecimal(0);
+                    }
+                    monthlyBalance = monthlyBalance.add(amount);
+                    
+                    rowIndex++;
+                }
+
+            }
         });
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         list.setVisibleRowCount(-1);
         scrollPane.setViewportView(list);
 
-        hSplitPane.setResizeWeight(0.2);
+        hSplitPane.setResizeWeight(0.3);
         getFrame().getContentPane().add(hSplitPane, BorderLayout.CENTER);
-        hSplitPane.setDividerLocation(0.2);
+        hSplitPane.setDividerLocation(0.3);
 
         JMenuBar menuBar = new JMenuBar();
         getFrame().setJMenuBar(menuBar);

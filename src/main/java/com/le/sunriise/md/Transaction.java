@@ -56,7 +56,22 @@ public class Transaction {
             return false;
         }
 
-        return (statusFlag & 256) == 256;
+        if ((statusFlag & 256) == 256) {
+            return true;
+        }
+        if (statusFlag == 2490368) {
+            return true;
+        }
+        if (statusFlag == 2490400) {
+            return true;
+        }
+        if (statusFlag > 2359302) {
+            return true;
+        }
+        if (statusFlag > 2097152) {
+            return true;
+        }
+        return false;
     }
 
     public Date getDate() {

@@ -212,4 +212,39 @@ public class AccountUtil {
         return transactionSplit;
     }
 
+    public static BigDecimal getRunningBalance(int rowIndex, Account account) {
+        List<Transaction> transactions = account.getTransactions();
+        Transaction transaction = transactions.get(rowIndex);
+        BigDecimal runningBalance = transaction.getRunningBalance();
+        if (runningBalance != null) {
+            return runningBalance;
+        }
+    
+        BigDecimal previousBalance = null;
+        if (rowIndex == 0) {
+            previousBalance = account.getStartingBalance();
+        } else {
+            int previousRowIndex = rowIndex - 1;
+            previousBalance = getRunningBalance(previousRowIndex, account);
+        }
+        if (previousBalance == null) {
+            previousBalance = new BigDecimal(0);
+        }
+    
+        BigDecimal currentBalance = null;
+        if (transaction.isVoid() || transaction.isRecurring()) {
+            currentBalance = new BigDecimal(0);
+        } else {
+            currentBalance = transaction.getAmount();
+        }
+        if (currentBalance == null) {
+            currentBalance = new BigDecimal(0);
+        }
+    
+        runningBalance = previousBalance.add(currentBalance);
+        transaction.setRunningBalance(runningBalance);
+    
+        return runningBalance;
+    }
+
 }

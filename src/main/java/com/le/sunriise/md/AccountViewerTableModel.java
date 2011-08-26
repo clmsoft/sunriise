@@ -1,6 +1,5 @@
 package com.le.sunriise.md;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 import javax.swing.table.AbstractTableModel;
@@ -38,7 +37,7 @@ final class AccountViewerTableModel extends AbstractTableModel {
             value = transaction.getAmount();
             break;
         case 3:
-            value = getRunningBalance(rowIndex, transaction, transactions, account);
+            value = AccountUtil.getRunningBalance(rowIndex, account);
             break;
         case 4:
             value = transaction.isRecurring();
@@ -52,40 +51,6 @@ final class AccountViewerTableModel extends AbstractTableModel {
         }
 
         return value;
-    }
-
-    private BigDecimal getRunningBalance(int rowIndex, Transaction transaction, List<Transaction> transactions, Account account) {
-        BigDecimal runningBalance = transaction.getRunningBalance();
-        if (runningBalance != null) {
-            return runningBalance;
-        }
-
-        BigDecimal previousBalance = null;
-        if (rowIndex == 0) {
-            previousBalance = account.getStartingBalance();
-        } else {
-            int previousRowIndex = rowIndex - 1;
-            Transaction previousTransaction = transactions.get(previousRowIndex);
-            previousBalance = getRunningBalance(previousRowIndex, previousTransaction, transactions, account);
-        }
-        if (previousBalance == null) {
-            previousBalance = new BigDecimal(0);
-        }
-        
-        BigDecimal currentBalance = null;
-        if (transaction.isVoid() || transaction.isRecurring()) {
-            currentBalance = new BigDecimal(0);
-        } else {
-            currentBalance = transaction.getAmount();
-        }
-        if (currentBalance == null) {
-            currentBalance = new BigDecimal(0);
-        }
-
-        runningBalance = previousBalance.add(currentBalance);
-        transaction.setRunningBalance(runningBalance);
-
-        return runningBalance;
     }
 
     @Override
