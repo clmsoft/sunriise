@@ -55,14 +55,24 @@ public class OpenDbDialog extends JDialog {
 
     private OpenedDb opendDb;
 
-    public static OpenDbDialog showDialog(OpenedDb opendDb, List<String> recentOpenFileNames, Component locationRealativeTo) {
+    public static OpenDbDialog showDialog(OpenedDb opendDb, List<String> recentOpenFileNames, Component locationRealativeTo, boolean disableReadOnlyCheckBox) {
         OpenDbDialog dialog = new OpenDbDialog(opendDb, recentOpenFileNames);
         dialog.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
         dialog.setModalityType(ModalityType.APPLICATION_MODAL);
+        if (disableReadOnlyCheckBox) {
+            dialog.readOnlyCheckBox.setEnabled(false);
+        } else {
+            dialog.readOnlyCheckBox.setEnabled(true);
+        }
         dialog.pack();
         dialog.setLocationRelativeTo(locationRealativeTo);
         dialog.setVisible(true);
         return dialog;
+    }
+
+    public static OpenDbDialog showDialog(OpenedDb openedDb, List<String> recentOpenFileNames, Component locationRelativeTo) {
+        boolean disableReadOnlyCheckBox = false;
+        return showDialog(openedDb, recentOpenFileNames, locationRelativeTo, disableReadOnlyCheckBox);
     }
 
     /**

@@ -3,7 +3,7 @@ package com.le.sunriise.md;
 import java.math.BigDecimal;
 import java.util.List;
 
-public class Account {
+public class Account implements Comparable<Account>{
     private Integer id;
     
     private Integer relatedToAccountId;
@@ -77,5 +77,10 @@ public class Account {
     @Override
     public String toString() {
         return getName();
+    }
+
+    @Override
+    public int compareTo(Account o) {
+        return id.compareTo(o.getId());
     }
 }

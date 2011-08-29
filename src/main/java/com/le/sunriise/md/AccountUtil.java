@@ -191,11 +191,11 @@ public class AccountUtil {
 
         transaction.setFrequency(frq);
 
-        transaction.setCategory(hcat);
+        transaction.setCategoryId(hcat);
 
-        transaction.setPayee(lhpay);
+        transaction.setPayeeId(lhpay);
 
-        transaction.setTransferredAccount(hacctLink);
+        transaction.setTransferredAccountId(hacctLink);
 
         transactions.add(transaction);
     }
@@ -248,7 +248,7 @@ public class AccountUtil {
             Integer iSplit = (Integer) row.get("iSplit");
 
             transactionSplit = new TransactionSplit();
-            transactionSplit.setTransaction(transaction);
+            transactionSplit.setTransactionId(transaction);
             transactionSplit.setParentId(htrnParent);
             transactionSplit.setRowId(iSplit);
         }
@@ -351,7 +351,7 @@ public class AccountUtil {
 
                 Category category = new Category();
                 category.setId(hcat);
-                category.setParent(hcatParent);
+                category.setParentId(hcatParent);
                 category.setName(name);
 
                 categories.put(hcat, category);

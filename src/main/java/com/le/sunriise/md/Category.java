@@ -2,7 +2,7 @@ package com.le.sunriise.md;
 
 public class Category {
     private Integer id;
-    private Integer parent;
+    private Integer parentId;
     private String name;
 
     public Integer getId() {
@@ -13,12 +13,12 @@ public class Category {
         this.id = id;
     }
 
-    public Integer getParent() {
-        return parent;
+    public Integer getParentId() {
+        return parentId;
     }
 
-    public void setParent(Integer parent) {
-        this.parent = parent;
+    public void setParentId(Integer parent) {
+        this.parentId = parent;
     }
 
     public String getName() {

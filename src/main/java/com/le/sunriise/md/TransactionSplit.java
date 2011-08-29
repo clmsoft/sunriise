@@ -5,7 +5,7 @@ public class TransactionSplit {
 
     private Integer rowId;
 
-    private Transaction transaction;
+    private Transaction transactionId;
 
     public Integer getParentId() {
         return parentId;
@@ -23,11 +23,11 @@ public class TransactionSplit {
         this.rowId = rowId;
     }
 
-    public Transaction getTransaction() {
-        return transaction;
+    public Transaction getTransactionId() {
+        return transactionId;
     }
 
-    public void setTransaction(Transaction transaction) {
-        this.transaction = transaction;
+    public void setTransactionId(Transaction transaction) {
+        this.transactionId = transaction;
     }
 }

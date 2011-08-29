@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
-public class Transaction {
+public class Transaction implements Comparable<Transaction>{
     private Integer id;
 
     private BigDecimal amount;
@@ -19,11 +19,11 @@ public class Transaction {
 
     private Integer frequency;
 
-    private Integer category;
+    private Integer categoryId;
 
-    private Integer payee;
+    private Integer payeeId;
 
-    private Integer transferredAccount;
+    private Integer transferredAccountId;
 
     public Integer getId() {
         return id;
@@ -116,27 +116,32 @@ public class Transaction {
         this.runningBalance = runningBalance;
     }
 
-    public Integer getCategory() {
-        return category;
+    public Integer getCategoryId() {
+        return categoryId;
     }
 
-    public void setCategory(Integer category) {
-        this.category = category;
+    public void setCategoryId(Integer category) {
+        this.categoryId = category;
     }
 
-    public Integer getPayee() {
-        return payee;
+    public Integer getPayeeId() {
+        return payeeId;
     }
 
-    public void setPayee(Integer payee) {
-        this.payee = payee;
+    public void setPayeeId(Integer payee) {
+        this.payeeId = payee;
     }
 
-    public Integer getTransferredAccount() {
-        return transferredAccount;
+    public Integer getTransferredAccountId() {
+        return transferredAccountId;
     }
 
-    public void setTransferredAccount(Integer transferredAccount) {
-        this.transferredAccount = transferredAccount;
+    public void setTransferredAccountId(Integer transferredAccount) {
+        this.transferredAccountId = transferredAccount;
+    }
+
+    @Override
+    public int compareTo(Transaction o) {
+        return id.compareTo(o.getId());
     }
 }

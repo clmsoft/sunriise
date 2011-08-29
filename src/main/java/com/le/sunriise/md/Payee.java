@@ -1,6 +1,6 @@
 package com.le.sunriise.md;
 
-public class Payee {
+public class Payee implements Comparable<Payee>{
     private Integer id;
 
     private Integer parent;
@@ -29,5 +29,10 @@ public class Payee {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    @Override
+    public int compareTo(Payee o) {
+        return id.compareTo(o.getId());
     }
 }

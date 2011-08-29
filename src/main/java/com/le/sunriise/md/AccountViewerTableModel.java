@@ -20,7 +20,11 @@ public class AccountViewerTableModel extends AbstractTableModel {
 
     @Override
     public int getRowCount() {
-        return account.getTransactions().size();
+        if (account != null) {
+            return account.getTransactions().size();
+        } else {
+            return 0;
+        }
     }
 
     @Override
@@ -41,12 +45,12 @@ public class AccountViewerTableModel extends AbstractTableModel {
             value = transaction.getDate();
             break;
         case 2:
-            Integer payeeId = transaction.getPayee();
+            Integer payeeId = transaction.getPayeeId();
             String payeeName = getPayeeName(payeeId);
             value = payeeName;
             break;
         case 3:
-            Integer transferredAccountId = transaction.getTransferredAccount();
+            Integer transferredAccountId = transaction.getTransferredAccountId();
             if (transferredAccountId != null) {
                 if (accounts != null) {
                     for (Account a : accounts) {
@@ -58,7 +62,7 @@ public class AccountViewerTableModel extends AbstractTableModel {
                     }
                 }
             } else {
-                Integer categoryId = transaction.getCategory();
+                Integer categoryId = transaction.getCategoryId();
                 String categoryName = getCategoryName(categoryId);
                 value = categoryName;
             }
@@ -96,7 +100,7 @@ public class AccountViewerTableModel extends AbstractTableModel {
             if (categories != null) {
                 Category category = categories.get(categoryId);
                 if (category != null) {
-                    Integer parentId = category.getParent();
+                    Integer parentId = category.getParentId();
                     categoryName = category.getName();
                     if (parentId != null) {
                         String parentName = getCategoryName(parentId);

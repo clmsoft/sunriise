@@ -2,6 +2,7 @@ package com.le.sunriise.md;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
@@ -28,6 +29,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -50,6 +52,8 @@ import com.le.sunriise.viewer.MyTableCellRenderer;
 import com.le.sunriise.viewer.OpenDbAction;
 import com.le.sunriise.viewer.OpenDbDialog;
 import com.le.sunriise.viewer.OpenedDb;
+import javax.swing.BoxLayout;
+import javax.swing.JLabel;
 
 public class AccountViewer {
     private static final Logger log = Logger.getLogger(AccountViewer.class);
@@ -71,24 +75,57 @@ public class AccountViewer {
     protected Map<Integer, Payee> payees;
 
     protected Map<Integer, Category> categories;
+    private JLabel startingBalanceLabel;
+    private JLabel endingBalanceLabel;
 
-    /**
-     * Launch the application.
-     */
-    public static void main(String[] args) {
-        EventQueue.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    AccountViewer window = new AccountViewer();
-                    window.getFrame().pack();
-                    window.getFrame().setLocationRelativeTo(null);
-                    window.getFrame().setVisible(true);
-                } catch (Exception e) {
-                    log.error(e, e);
-                }
+    private DecimalFormat amountFormatter;
+
+    private final class MyOpenDbAction extends OpenDbAction {
+        private MyOpenDbAction(Component locationRelativeTo, Preferences prefs, OpenedDb openedDb) {
+            super(locationRelativeTo, prefs, openedDb);
+            setDisableReadOnlyCheckBox(true);
+        }
+
+        @Override
+        public void dbFileOpened(OpenedDb newOpenedDb, OpenDbDialog dialog) {
+            if (newOpenedDb != null) {
+                AccountViewer.this.openedDb = newOpenedDb;
             }
-        });
+
+            File dbFile = openedDb.getDbFile();
+            if (dbFile != null) {
+                getFrame().setTitle(dbFile.getAbsolutePath());
+            } else {
+                getFrame().setTitle("No opened db");
+            }
+
+            try {
+                Database db = openedDb.getDb();
+                accounts = AccountUtil.getAccounts(db);
+
+                payees = AccountUtil.getPayees(db);
+
+                categories = AccountUtil.getCategories(db);
+
+                AccountViewer.this.dataModel.setAccounts(accounts);
+
+                Runnable doRun = new Runnable() {
+                    @Override
+                    public void run() {
+                        Account account = null;
+                        // clear out currently select account, if any
+                        try {
+                            accountSelected(account);
+                        } catch (IOException e) {
+                            log.warn(e);
+                        }
+                    }
+                };
+                SwingUtilities.invokeLater(doRun);
+            } catch (IOException e) {
+                log.warn(e);
+            }
+        }
     }
 
     /**
@@ -106,6 +143,13 @@ public class AccountViewer {
         getFrame().setPreferredSize(new Dimension(1000, 800));
         // frame.setBounds(100, 100, 450, 300);
         getFrame().setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        NumberFormat formatter = NumberFormat.getInstance();
+        if (formatter instanceof DecimalFormat) {
+            amountFormatter = (DecimalFormat) formatter;
+            amountFormatter.applyPattern("#,###,##0.00;(#,###,##0.00)");
+            amountFormatter.setGroupingUsed(true);
+        }
 
         JPanel leftComponent = new JPanel();
         leftComponent.setPreferredSize(new Dimension(80, -1));
@@ -129,81 +173,13 @@ public class AccountViewer {
                 final Account account = (Account) list.getSelectedValue();
                 if (account != null) {
                     try {
-                        log.info("select account=" + account);
-                        ExportAccountsToMd exporter = new ExportAccountsToMd();
-                        List<Transaction> transactions = AccountUtil.getTransactions(openedDb.getDb(), account);
-                        account.setTransactions(transactions);
-                        BigDecimal currentBalance = exporter.calculateCurrentBalance(account);
-                        log.info(account.getName() + ", " + account.getStartingBalance() + ", " + currentBalance);
-
-                        boolean calculateMonthlySummary = false;
-                        if (calculateMonthlySummary) {
-                            calculateMonthlySummary(account);
-                        }
-                        AccountViewerTableModel tableModel = new AccountViewerTableModel(account);
-                        tableModel.setPayees(payees);
-                        tableModel.setCategories(categories);
-                        tableModel.setAccounts(accounts);
-                        
-                        dataModel.setTableModel(tableModel);
+                        accountSelected(account);
                     } catch (IOException e) {
                         log.error(e);
                     }
                 }
             }
 
-            private void calculateMonthlySummary(Account account) {
-                List<Transaction> transactions = account.getTransactions();
-                Date previousDate = null;
-                SimpleDateFormat dateFormatter = new SimpleDateFormat("MM/dd/yyyy");
-
-                int rowIndex = 0;
-
-                int entries = 0;
-                BigDecimal monthlyBalance = new BigDecimal(0);
-                for (Transaction transaction : transactions) {
-                    // if (transaction.isVoid()) {
-                    // rowIndex++;
-                    // continue;
-                    // }
-                    if (transaction.isRecurring()) {
-                        rowIndex++;
-                        continue;
-                    }
-                    entries++;
-
-                    Date date = transaction.getDate();
-                    if (previousDate != null) {
-                        Calendar cal = Calendar.getInstance();
-
-                        cal.setTime(previousDate);
-                        int previousMonth = cal.get(Calendar.MONTH);
-
-                        cal.setTime(date);
-                        int month = cal.get(Calendar.MONTH);
-
-                        if (month != previousMonth) {
-                            log.info(dateFormatter.format(previousDate) + ", entries=" + entries + ", monthlyBalance=" + monthlyBalance + ", balance="
-                                    + AccountUtil.getRunningBalance(rowIndex - 1, account));
-                            entries = 0;
-                            monthlyBalance = new BigDecimal(0);
-                        }
-                    }
-                    previousDate = date;
-
-                    BigDecimal amount = transaction.getAmount();
-                    if (transaction.isVoid()) {
-                        amount = new BigDecimal(0);
-                    }
-                    if (amount == null) {
-                        amount = new BigDecimal(0);
-                    }
-                    monthlyBalance = monthlyBalance.add(amount);
-
-                    rowIndex++;
-                }
-
-            }
         });
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         list.setVisibleRowCount(-1);
@@ -228,35 +204,7 @@ public class AccountViewer {
         });
 
         JMenuItem fileOpenMenuItem = new JMenuItem("Open");
-        fileOpenMenuItem.addActionListener(new OpenDbAction(AccountViewer.this.frame, prefs, openedDb) {
-
-            @Override
-            public void dbFileOpened(OpenedDb newOpenedDb, OpenDbDialog dialog) {
-                if (newOpenedDb != null) {
-                    AccountViewer.this.openedDb = newOpenedDb;
-                }
-
-                File dbFile = openedDb.getDbFile();
-                if (dbFile != null) {
-                    getFrame().setTitle(dbFile.getAbsolutePath());
-                } else {
-                    getFrame().setTitle("No opened db");
-                }
-
-                try {
-                    Database db = openedDb.getDb();
-                    accounts = AccountUtil.getAccounts(db);
-                    
-                    payees = AccountUtil.getPayees(db);
-                    
-                    categories = AccountUtil.getCategories(db);
-
-                    AccountViewer.this.dataModel.setAccounts(accounts);
-                } catch (IOException e) {
-                    log.warn(e);
-                }
-            }
-        });
+        fileOpenMenuItem.addActionListener(new MyOpenDbAction(AccountViewer.this.frame, prefs, openedDb));
 
         fileMenu.add(fileOpenMenuItem);
         fileMenu.addSeparator();
@@ -291,24 +239,12 @@ public class AccountViewer {
 
         };
         table.setDefaultRenderer(BigDecimal.class, new DefaultTableCellRenderer() {
-            private NumberFormat formatter = null;
-
             @Override
             public void setValue(Object value) {
                 if (log.isDebugEnabled()) {
                     log.debug("cellRenderer: value=" + value + ", " + value.getClass().getName());
                 }
-                if (formatter == null) {
-                    // #;(#)
-                    // .00
-                    formatter = NumberFormat.getInstance();
-                    if (formatter instanceof DecimalFormat) {
-                        DecimalFormat decimalFormat = (DecimalFormat) formatter;
-                        decimalFormat.applyPattern("#,###,##0.00;(#,###,##0.00)");
-                        decimalFormat.setGroupingUsed(true);
-                    }
-                }
-                String renderedValue = (value == null) ? "" : formatter.format(value);
+                String renderedValue = (value == null) ? "" : amountFormatter.format(value);
                 if (log.isDebugEnabled()) {
                     log.debug("cellRenderer: renderedValue=" + renderedValue);
                 }
@@ -326,10 +262,97 @@ public class AccountViewer {
         // table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 
         scrollPane_1.setViewportView(table);
+
+        JPanel panel = new JPanel();
+        topComponent.add(panel, BorderLayout.NORTH);
+        panel.setLayout(new BorderLayout(0, 0));
+
+        startingBalanceLabel = new JLabel("");
+        updateStartingBalanceLabel(new BigDecimal(0.00));
+        panel.add(startingBalanceLabel, BorderLayout.EAST);
+
+        JPanel panel_1 = new JPanel();
+        topComponent.add(panel_1, BorderLayout.SOUTH);
+        panel_1.setLayout(new BorderLayout(0, 0));
+
+        endingBalanceLabel = new JLabel("");
+        updateEndingBalanceLabel(new BigDecimal(0.00));
+        panel_1.add(endingBalanceLabel, BorderLayout.EAST);
         vSplitPane.setResizeWeight(0.66);
         rightComponent.add(vSplitPane, BorderLayout.CENTER);
         vSplitPane.setDividerLocation(0.66);
         initDataBindings();
+    }
+
+    private void updateEndingBalanceLabel(BigDecimal bigDecimal) {
+        if (bigDecimal != null) {
+            getEndingBalanceLabel().setText("Ending balance: " + amountFormatter.format(bigDecimal));
+        } else {
+            getEndingBalanceLabel().setText("Ending balance: ");
+        }
+
+    }
+
+    private void updateStartingBalanceLabel(BigDecimal bigDecimal) {
+        if (bigDecimal != null) {
+            getStartingBalanceLabel().setText("Starting balance: " + amountFormatter.format(bigDecimal));
+        } else {
+            getStartingBalanceLabel().setText("Starting balance: ");
+        }
+
+    }
+
+    private void calculateMonthlySummary(Account account) {
+        List<Transaction> transactions = account.getTransactions();
+        Date previousDate = null;
+        SimpleDateFormat dateFormatter = new SimpleDateFormat("MM/dd/yyyy");
+
+        int rowIndex = 0;
+
+        int entries = 0;
+        BigDecimal monthlyBalance = new BigDecimal(0);
+        for (Transaction transaction : transactions) {
+            // if (transaction.isVoid()) {
+            // rowIndex++;
+            // continue;
+            // }
+            if (transaction.isRecurring()) {
+                rowIndex++;
+                continue;
+            }
+            entries++;
+
+            Date date = transaction.getDate();
+            if (previousDate != null) {
+                Calendar cal = Calendar.getInstance();
+
+                cal.setTime(previousDate);
+                int previousMonth = cal.get(Calendar.MONTH);
+
+                cal.setTime(date);
+                int month = cal.get(Calendar.MONTH);
+
+                if (month != previousMonth) {
+                    log.info(dateFormatter.format(previousDate) + ", entries=" + entries + ", monthlyBalance=" + monthlyBalance + ", balance="
+                            + AccountUtil.getRunningBalance(rowIndex - 1, account));
+                    entries = 0;
+                    monthlyBalance = new BigDecimal(0);
+                }
+            }
+            previousDate = date;
+
+            BigDecimal amount = transaction.getAmount();
+            if (transaction.isVoid()) {
+                amount = new BigDecimal(0);
+            }
+            if (amount == null) {
+                amount = new BigDecimal(0);
+            }
+            monthlyBalance = monthlyBalance.add(amount);
+
+            rowIndex++;
+        }
+
     }
 
     private void setFrame(JFrame frame) {
@@ -351,5 +374,56 @@ public class AccountViewer {
         AutoBinding<AccountViewerDataModel, TableModel, JTable, Object> autoBinding = Bindings.createAutoBinding(UpdateStrategy.READ, dataModel,
                 accountViewerDataModelBeanProperty_1, table, jTableEvalutionProperty);
         autoBinding.bind();
+    }
+
+    private void accountSelected(final Account account) throws IOException {
+        if (account != null) {
+            log.info("select account=" + account);
+            ExportAccountsToMd exporter = new ExportAccountsToMd();
+            List<Transaction> transactions = AccountUtil.getTransactions(openedDb.getDb(), account);
+            account.setTransactions(transactions);
+            BigDecimal currentBalance = exporter.calculateCurrentBalance(account);
+            log.info(account.getName() + ", " + account.getStartingBalance() + ", " + currentBalance);
+            updateStartingBalanceLabel(account.getStartingBalance());
+            updateEndingBalanceLabel(currentBalance);
+            boolean calculateMonthlySummary = false;
+            if (calculateMonthlySummary) {
+                calculateMonthlySummary(account);
+            }
+        }
+
+        AccountViewerTableModel tableModel = new AccountViewerTableModel(account);
+        tableModel.setPayees(payees);
+        tableModel.setCategories(categories);
+        tableModel.setAccounts(accounts);
+
+        dataModel.setTableModel(tableModel);
+    }
+
+    /**
+     * Launch the application.
+     */
+    public static void main(String[] args) {
+        EventQueue.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    AccountViewer window = new AccountViewer();
+                    window.getFrame().pack();
+                    window.getFrame().setLocationRelativeTo(null);
+                    window.getFrame().setVisible(true);
+                } catch (Exception e) {
+                    log.error(e, e);
+                }
+            }
+        });
+    }
+
+    protected JLabel getStartingBalanceLabel() {
+        return startingBalanceLabel;
+    }
+
+    protected JLabel getEndingBalanceLabel() {
+        return endingBalanceLabel;
     }
 }
