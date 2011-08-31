@@ -383,7 +383,9 @@ public class AccountViewer {
             List<Transaction> transactions = AccountUtil.getTransactions(openedDb.getDb(), account);
             account.setTransactions(transactions);
             BigDecimal currentBalance = exporter.calculateCurrentBalance(account);
-            log.info(account.getName() + ", " + account.getStartingBalance() + ", " + currentBalance);
+            log.info(account.getName() 
+                    + ", " + account.getAccountType() 
+                    + ", " + account.getStartingBalance() + ", " + currentBalance);
             updateStartingBalanceLabel(account.getStartingBalance());
             updateEndingBalanceLabel(currentBalance);
             boolean calculateMonthlySummary = false;

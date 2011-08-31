@@ -3,20 +3,22 @@ package com.le.sunriise.md;
 import java.math.BigDecimal;
 import java.util.List;
 
-public class Account implements Comparable<Account>{
+public class Account implements Comparable<Account> {
     private Integer id;
-    
+
     private Integer relatedToAccountId;
-    
+
     private String name;
-    
+
     private Integer type;
-    
+
     private boolean closed;
-    
+
     private BigDecimal startingBalance;
-    
+
     private List<Transaction> transactions;
+
+    private AccountType accountType;
 
     public String getName() {
         return name;
@@ -32,6 +34,8 @@ public class Account implements Comparable<Account>{
 
     public void setType(Integer type) {
         this.type = type;
+
+        this.accountType = AccountType.toAccountType(type);
     }
 
     public Integer getId() {
@@ -82,5 +86,13 @@ public class Account implements Comparable<Account>{
     @Override
     public int compareTo(Account o) {
         return id.compareTo(o.getId());
+    }
+
+    public AccountType getAccountType() {
+        return accountType;
+    }
+
+    public void setAccountType(AccountType accountType) {
+        this.accountType = accountType;
     }
 }
