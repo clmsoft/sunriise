@@ -7,12 +7,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
-import java.util.Set;
-
 import com.healthmarketscience.jackcess.Cursor;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Table;
@@ -170,6 +167,7 @@ public class AccountUtil {
 
         // frequency for recurring transaction?
         Integer frq = (Integer) row.get("frq");
+        Double cFrqInst = (Double) row.get("cFrqInst");
 
         // category
         Integer hcat = (Integer) row.get("hcat");
@@ -189,7 +187,10 @@ public class AccountUtil {
 
         transaction.setStatusFlag(grftt);
 
-        transaction.setFrequency(frq);
+        Frequency frequency = new Frequency();
+        frequency.setFrq(frq);
+        frequency.setcFrqInst(cFrqInst);
+        transaction.setFrequency(frequency);
 
         transaction.setCategoryId(hcat);
 

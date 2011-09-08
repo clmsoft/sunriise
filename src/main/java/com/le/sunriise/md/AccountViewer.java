@@ -52,7 +52,6 @@ import com.le.sunriise.viewer.MyTableCellRenderer;
 import com.le.sunriise.viewer.OpenDbAction;
 import com.le.sunriise.viewer.OpenDbDialog;
 import com.le.sunriise.viewer.OpenedDb;
-import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 
 public class AccountViewer {

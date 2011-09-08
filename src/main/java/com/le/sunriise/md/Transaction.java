@@ -17,7 +17,7 @@ public class Transaction implements Comparable<Transaction>{
 
     private Date date;
 
-    private Integer frequency;
+    private Frequency frequency;
 
     private Integer categoryId;
 
@@ -91,21 +91,8 @@ public class Transaction implements Comparable<Transaction>{
         this.date = date;
     }
 
-    public Integer getFrequency() {
-        return frequency;
-    }
-
-    public void setFrequency(Integer frequency) {
-        this.frequency = frequency;
-    }
-
     public boolean isRecurring() {
-        Integer frequency = getFrequency();
-        if ((frequency != null) && (frequency > 0)) {
-            return true;
-        }
-        return false;
-
+        return frequency.isRecurring();
     }
 
     public BigDecimal getRunningBalance() {
@@ -143,5 +130,13 @@ public class Transaction implements Comparable<Transaction>{
     @Override
     public int compareTo(Transaction o) {
         return id.compareTo(o.getId());
+    }
+
+    public Frequency getFrequency() {
+        return frequency;
+    }
+
+    public void setFrequency(Frequency frequency) {
+        this.frequency = frequency;
     }
 }

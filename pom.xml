@@ -10,6 +10,10 @@
     <system>SourceForge</system>
     <url>http://sourceforge.net/tracker/?group_id=404853&amp;atid=1677382</url>
   </issueManagement>
+  <ciManagement>
+  	<system>Jenkins</system>
+  	<url>https://hleofxquotes.ci.cloudbees.com/</url>
+  </ciManagement>
   <inceptionYear>2010</inceptionYear>
   <developers>
     <developer>
@@ -27,6 +31,9 @@
     <name>sunriise</name>
     <url>https://sourceforge.net/projects/sunriise/</url>
   </organization>
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>  
   <build>
     <plugins>
       <plugin>
@@ -140,6 +147,13 @@
       <url>http://sunriise.sourceforge.net/m2-repo/</url>
       <layout>default</layout>
     </repository>
+    <!-- -->
+    <repository>
+      <id>m2-repo.repository-hleofxquotes.forge.cloudbees.com</id>
+      <name>Repository for repository-hleofxquotes.forge.cloudbees.com</name>
+      <url>https://repository-hleofxquotes.forge.cloudbees.com/snapshot/</url>
+      <layout>default</layout>
+    </repository>
   </repositories>
   <dependencies>
     <dependency>
@@ -199,7 +213,15 @@
     	<version>1.0.3-SNAPSHOT</version>
     	<scope>compile</scope>
     </dependency>
+      <dependency>
+    	<groupId>com.jproductivity</groupId>
+    	<artifactId>jlive-id</artifactId>
+    	<version>1.0.0</version>
+    	<type>jar</type>
+    	<scope>compile</scope>
+    </dependency>
   </dependencies>
+  
   <reporting>
     <plugins>
       <plugin>
