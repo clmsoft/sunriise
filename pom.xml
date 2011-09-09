@@ -213,13 +213,6 @@
     	<version>1.0.3-SNAPSHOT</version>
     	<scope>compile</scope>
     </dependency>
-      <dependency>
-    	<groupId>com.jproductivity</groupId>
-    	<artifactId>jlive-id</artifactId>
-    	<version>1.0.0</version>
-    	<type>jar</type>
-    	<scope>compile</scope>
-    </dependency>
   </dependencies>
   
   <reporting>
