@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.math.BigDecimal;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -63,7 +62,7 @@ public class ExportAccountsToMd {
             nSplitTransactions = getSplitTransactionCount(transactions);
 
             log.info(count + ", " + account.getName() + ", " + account.isClosed() + ", " + account.getStartingBalance() + ", "
-                    + calculateCurrentBalance(account) + ", " + nTransactions);
+                    + AccountUtil.calculateCurrentBalance(account) + ", " + nTransactions);
 
             parentTransactionCount += nTransactions;
             splitTransactionCount += nSplitTransactions;
@@ -84,29 +83,6 @@ public class ExportAccountsToMd {
         log.info("SplitTransactionCount (no account): " + nSplitTransactions);
 
         log.info("Total Transaction: " + ((parentTransactionCount + splitTransactionCount) + (nTransactions + nSplitTransactions)));
-    }
-
-    public BigDecimal calculateCurrentBalance(Account account) {
-        BigDecimal currentBalane = account.getStartingBalance();
-        if (currentBalane == null) {
-            log.warn("Starting balance is null. Set to 0. Account's id=" + account.getId());
-            currentBalane = new BigDecimal(0.00);
-        }
-        for (Transaction transaction : account.getTransactions()) {
-            if (transaction.isVoid()) {
-                continue;
-            }
-            if (transaction.isRecurring()) {
-                continue;
-            }
-            BigDecimal amount = transaction.getAmount();
-            if (amount != null) {
-                currentBalane = currentBalane.add(amount);
-            } else {
-                log.warn("Transaction with no amount, id=" + transaction.getId());
-            }
-        }
-        return currentBalane;
     }
 
     private int getSplitTransactionCount(List<Transaction> transactions) {

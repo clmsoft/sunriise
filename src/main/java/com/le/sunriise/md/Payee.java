@@ -1,6 +1,6 @@
 package com.le.sunriise.md;
 
-public class Payee implements Comparable<Payee>{
+public class Payee extends MnyObject implements Comparable<Payee>{
     private Integer id;
 
     private Integer parent;

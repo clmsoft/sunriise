@@ -4,7 +4,11 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
-public class Transaction implements Comparable<Transaction>{
+import org.apache.log4j.Logger;
+
+public class Transaction extends MnyObject implements Comparable<Transaction> {
+    private static final Logger log = Logger.getLogger(Transaction.class);
+
     private Integer id;
 
     private BigDecimal amount;
@@ -24,6 +28,14 @@ public class Transaction implements Comparable<Transaction>{
     private Integer payeeId;
 
     private Integer transferredAccountId;
+
+    private TransactionInfo transactionInfo;
+
+    private Integer securityId;
+
+    private InvestmentActivity investmentActivity;
+
+    private InvestmentTransaction investmentTransaction;
 
     public Integer getId() {
         return id;
@@ -62,9 +74,15 @@ public class Transaction implements Comparable<Transaction>{
             return false;
         }
 
-        if ((statusFlag & 256) == 256) {
+        if (transactionInfo.isVoid()) {
             return true;
         }
+        // if ((statusFlag & 256) == 256) {
+        // if (!transactionInfo.isVoid()) {
+        // log.warn("isVoid does not match");
+        // }
+        // return true;
+        // }
 
         // TODO: hack to skip unknown transactions
         if (statusFlag == 2490368) {
@@ -139,4 +157,59 @@ public class Transaction implements Comparable<Transaction>{
     public void setFrequency(Frequency frequency) {
         this.frequency = frequency;
     }
+
+    public TransactionInfo getTransactionInfo() {
+        return transactionInfo;
+    }
+
+    public void setTransactionInfo(TransactionInfo transactionInfo) {
+        this.transactionInfo = transactionInfo;
+    }
+
+    public Integer getSecurityId() {
+        return securityId;
+    }
+
+    public void setSecurityId(Integer securityId) {
+        this.securityId = securityId;
+    }
+
+    public boolean isInvestment() {
+        return transactionInfo.isInvestment();
+    }
+
+    public InvestmentActivity getInvestmentActivity() {
+        return investmentActivity;
+    }
+
+    public void setInvestmentActivity(InvestmentActivity investmentActivity) {
+        this.investmentActivity = investmentActivity;
+    }
+
+    public InvestmentTransaction getInvestmentTransaction() {
+        return investmentTransaction;
+    }
+
+    public void setInvestmentTransaction(InvestmentTransaction investmentTransaction) {
+        this.investmentTransaction = investmentTransaction;
+    }
+
+    public Double getQuantity() {
+        Double quantity = null;
+        InvestmentTransaction investmentTransaction = getInvestmentTransaction();
+        if (investmentTransaction != null) {
+            quantity = investmentTransaction.getQuantity();
+        }
+        return quantity;
+    }
+
+    public Double getPrice() {
+        Double price = null;
+        InvestmentTransaction investmentTransaction = getInvestmentTransaction();
+        if (investmentTransaction != null) {
+            price = investmentTransaction.getPrice();
+        }
+        return price;
+    }
+
 }

@@ -1,9 +1,11 @@
 package com.le.sunriise.md;
 
 import java.math.BigDecimal;
+import java.text.NumberFormat;
 import java.util.List;
+import java.util.Locale;
 
-public class Account implements Comparable<Account> {
+public class Account extends MnyObject implements Comparable<Account> {
     private Integer id;
 
     private Integer relatedToAccountId;
@@ -19,6 +21,16 @@ public class Account implements Comparable<Account> {
     private List<Transaction> transactions;
 
     private AccountType accountType;
+
+    private Integer currencyId;
+
+    private NumberFormat amountFormatter = NumberFormat.getCurrencyInstance();
+
+    private String currencyCode;
+
+    public String formatAmmount(BigDecimal amount) {
+        return amountFormatter.format(amount);
+    }
 
     public String getName() {
         return name;
@@ -94,5 +106,49 @@ public class Account implements Comparable<Account> {
 
     public void setAccountType(AccountType accountType) {
         this.accountType = accountType;
+    }
+
+    public Integer getCurrencyId() {
+        return currencyId;
+    }
+
+    public void setCurrencyId(Integer currencyId) {
+        this.currencyId = currencyId;
+    }
+
+    public String getCurrencyCode() {
+        return currencyCode;
+    }
+
+    public void setCurrencyCode(String currencyCode) {
+//         currencyCode = "CNY";
+
+        this.currencyCode = currencyCode;
+        java.util.Currency javaCurrency = java.util.Currency.getInstance(currencyCode);
+        if (javaCurrency != null) {
+            Locale currencyLocale = null;
+            if (currencyCode.equals("USD")) {
+                currencyLocale = Locale.US;
+            } else if (currencyCode.equals("GBP")) {
+                currencyLocale = Locale.UK;
+            } else if (currencyCode.equals("CAD")) {
+                currencyLocale = Locale.CANADA;
+            } else if (currencyCode.equals("JPY")) {
+                currencyLocale = Locale.JAPAN;
+            } else if (currencyCode.equals("CNY")) {
+                currencyLocale = Locale.CHINA;
+            } else {
+                currencyLocale = null;
+            }
+
+//            currencyLocale = Locale.CHINA;
+
+            if (currencyLocale != null) {
+                amountFormatter = NumberFormat.getCurrencyInstance(currencyLocale);
+            } else {
+                amountFormatter = NumberFormat.getCurrencyInstance();
+            }
+            amountFormatter.setCurrency(javaCurrency);
+        }
     }
 }

@@ -1,6 +1,6 @@
 package com.le.sunriise.md;
 
-public class TransactionSplit {
+public class TransactionSplit extends MnyObject {
     private Integer parentId;
 
     private Integer rowId;
