@@ -3,7 +3,6 @@ package com.le.sunriise.md;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -11,143 +10,103 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
-import java.util.TreeMap;
-
 import org.apache.log4j.Logger;
+
 import com.healthmarketscience.jackcess.Cursor;
 import com.healthmarketscience.jackcess.Database;
-import com.healthmarketscience.jackcess.Index;
-import com.healthmarketscience.jackcess.IndexCursor;
 import com.healthmarketscience.jackcess.Table;
 import com.le.sunriise.StopWatch;
 
 public class AccountUtil {
     private static final Logger log = Logger.getLogger(AccountUtil.class);
 
+    /**
+     * Get a list of accounts.
+     * 
+     * @param db
+     * @param sort
+     * @return
+     * @throws IOException
+     */
     public static List<Account> getAccounts(Database db, boolean sort) throws IOException {
         List<Account> accounts = new ArrayList<Account>();
 
         String tableName = "ACCT";
         Table table = db.getTable(tableName);
-        Cursor cursor = null;
-        try {
-            cursor = Cursor.createCursor(table);
-
-            while (cursor.moveToNextRow()) {
-                Map<String, Object> row = cursor.getCurrentRow();
-
-                String name = (String) row.get("szFull");
-                if (name == null) {
-                    continue;
-                }
-                if (name.length() == 0) {
-                    continue;
-                }
-
-                Integer type = (Integer) row.get("at");
-
-                Integer hacct = (Integer) row.get("hacct");
-
-                Integer hacctRel = (Integer) row.get("hacctRel");
-
-                boolean closed = (Boolean) row.get("fClosed");
-
-                BigDecimal amtOpen = (BigDecimal) row.get("amtOpen");
-
-                Integer currencyId = (Integer) row.get("hcrnc");
-
-                Account account = new Account();
-                account.setId(hacct);
-                account.setRelatedToAccountId(hacctRel);
-                account.setName(name);
-                account.setType(type);
-                account.setClosed(closed);
-                account.setStartingBalance(amtOpen);
-                account.setCurrencyId(currencyId);
-
+        Cursor cursor = Cursor.createCursor(table);
+        while (cursor.moveToNextRow()) {
+            Map<String, Object> row = cursor.getCurrentRow();
+            Account account = getAcccount(row);
+            if (account != null) {
                 accounts.add(account);
             }
-            if (sort) {
-                Comparator<Account> comparator = new Comparator<Account>() {
-                    @Override
-                    public int compare(Account o1, Account o2) {
-                        return o1.getName().compareTo(o2.getName());
-                    }
-                };
-                Collections.sort(accounts, comparator);
-            }
-        } finally {
+        }
+
+        if (sort) {
+            Comparator<Account> comparator = new Comparator<Account>() {
+                @Override
+                public int compare(Account o1, Account o2) {
+                    return o1.getName().compareTo(o2.getName());
+                }
+            };
+            Collections.sort(accounts, comparator);
         }
 
         return accounts;
     }
 
+    private static Account getAcccount(Map<String, Object> row) {
+        Account account = null;
+        String name = (String) row.get("szFull");
+        if (name == null) {
+            return account;
+        }
+        if (name.length() == 0) {
+            return account;
+        }
+
+        account = new Account();
+
+        account.setName(name);
+
+        Integer hacct = (Integer) row.get("hacct");
+        account.setId(hacct);
+
+        Integer hacctRel = (Integer) row.get("hacctRel");
+        account.setRelatedToAccountId(hacctRel);
+
+        Integer type = (Integer) row.get("at");
+        account.setType(type);
+
+        Boolean closed = (Boolean) row.get("fClosed");
+        account.setClosed(closed);
+
+        BigDecimal amtOpen = (BigDecimal) row.get("amtOpen");
+        account.setStartingBalance(amtOpen);
+
+        Integer currencyId = (Integer) row.get("hcrnc");
+        account.setCurrencyId(currencyId);
+
+        Boolean retirement = (Boolean) row.get("fRetirement");
+        account.setRetirement(retirement);
+
+        // 0: 403(b)
+        // 1: 401k
+        // 2: IRA
+        // 3: Keogh
+        Integer investmentSubType = (Integer) row.get("uat");
+        account.setInvestmentSubType(investmentSubType);
+
+        // amtLimit
+        BigDecimal amountLimit = (BigDecimal) row.get("amtLimit");
+        account.setAmountLimit(amountLimit);
+
+        return account;
+    }
+
     public static List<Account> getAccounts(Database db) throws IOException {
         boolean sort = true;
         return getAccounts(db, sort);
-    }
-
-    public static List<Transaction> getTransactionsXXX(Database db, Account account) throws IOException {
-        if (account == null) {
-            return getTransactions(db, account);
-        }
-
-        StopWatch stopWatch = new StopWatch();
-
-        log.info("> getTransactions, account=" + account.getName());
-        List<Transaction> transactions = new ArrayList<Transaction>();
-        String tableName = "TRN";
-        Table table = db.getTable(tableName);
-        Cursor cursor = null;
-        try {
-            Index index = null;
-            index = table.getIndex("hacctTrn");
-            IndexCursor indexCursor = IndexCursor.createCursor(table, index);
-            for (Map<String, Object> row : indexCursor.entryIterable(Arrays.asList("hacct"), account.getId())) {
-                if (log.isDebugEnabled()) {
-                    log.info(row);
-                }
-                List<TransactionFilter> transactionFilters = null;
-
-                AccountUtil.addTransaction(db, transactions, row, transactionFilters);
-            }
-            AccountUtil.handleSplit(db, transactions);
-
-            boolean filterRecurring = true;
-            if (filterRecurring) {
-                filterRecurring(transactions);
-            }
-        } finally {
-            long delta = stopWatch.click();
-            log.info("< getTransactions, delta=" + delta);
-        }
-
-        Comparator<Transaction> comparator = new Comparator<Transaction>() {
-            @Override
-            public int compare(Transaction o1, Transaction o2) {
-                Date d1 = o1.getDate();
-                Date d2 = o2.getDate();
-
-                if ((d1 == null) && (d2 == null)) {
-                    return 0;
-                }
-
-                if (d1 == null) {
-                    return 1;
-                }
-
-                if (d2 == null) {
-                    return -1;
-                }
-
-                return d1.compareTo(d2);
-            }
-
-        };
-        Collections.sort(transactions, comparator);
-
-        return transactions;
-
     }
 
     public static List<Transaction> getTransactions(Database db, Account account) throws IOException {
@@ -173,22 +132,17 @@ public class AccountUtil {
                 if (account != null) {
                     if (cursor.currentRowMatches(rowPattern)) {
                         row = cursor.getCurrentRow();
-                        AccountUtil.addTransaction(db, transactions, row, transactionFilters);
+                        AccountUtil.addTransactionFromRow(db, transactionFilters, row, transactions);
                     }
                 } else {
                     row = cursor.getCurrentRow();
                     Integer hacct = (Integer) row.get("hacct");
                     if (hacct == null) {
-                        AccountUtil.addTransaction(db, transactions, row, transactionFilters);
+                        AccountUtil.addTransactionFromRow(db, transactionFilters, row, transactions);
                     }
                 }
             }
             AccountUtil.handleSplit(db, transactions);
-
-            // boolean filterRecurring = true;
-            // if (filterRecurring) {
-            // filterRecurring(transactions);
-            // }
 
             boolean sort = true;
             Comparator<Transaction> comparator = new Comparator<Transaction>() {
@@ -230,6 +184,8 @@ public class AccountUtil {
             log.info("< getTransactions, delta=" + delta);
         }
 
+        account.setTransactions(transactions);
+
         return transactions;
     }
 
@@ -245,80 +201,67 @@ public class AccountUtil {
         return transactionFilters;
     }
 
-    private static void filterRecurring(List<Transaction> transactions) {
-        ListIterator<Transaction> listIterator = transactions.listIterator();
-        while (listIterator.hasNext()) {
-            Transaction transaction = listIterator.next();
-            if (transaction.isRecurring()) {
-                listIterator.remove();
-            }
-        }
-    }
-
-    private static boolean addTransaction(Database db, List<Transaction> transactions, Map<String, Object> row, List<TransactionFilter> filters)
+    private static boolean addTransactionFromRow(Database db, List<TransactionFilter> filters, Map<String, Object> row, List<Transaction> transactions)
             throws IOException {
+        Transaction transaction = new Transaction();
+
         // transaction id
         Integer htrn = (Integer) row.get("htrn");
+        transaction.setId(htrn);
 
         // amount
         BigDecimal amt = (BigDecimal) row.get("amt");
+        transaction.setAmount(amt);
 
-        // Integer cs = (Integer) row.get("cs");
+//        TableID index   ColumnName      comments
+//        TRN     7       cs              "cleared state?
+//        0 == not cleared
+//        1 == cleared
+//        2 == reconciled
 
+         Integer cs = (Integer) row.get("cs");
+         transaction.setClearedState(cs);
+         
         // flags? we are currentl using this to figure out which transaction to
         // skip/void
         Integer grftt = (Integer) row.get("grftt");
-
-        // date
-        Date date = (Date) row.get("dt");
-
-        // frequency for recurring transaction?
-        Integer frq = (Integer) row.get("frq");
-        Double cFrqInst = (Double) row.get("cFrqInst");
-
-        // category
-        Integer hcat = (Integer) row.get("hcat");
-
-        // payee
-        Integer lhpay = (Integer) row.get("lHpay");
-
-        // transfer to account
-        Integer hacctLink = (Integer) row.get("hacctLink");
-
-        // hsec: security
-        Integer hsec = (Integer) row.get("hsec");
-
-        // act: Investment activity: Buy, Sell ..
-        Integer act = (Integer) row.get("act");
-
-        Transaction transaction = new Transaction();
-        transaction.setId(htrn);
-
-        transaction.setDate(date);
-
-        transaction.setAmount(amt);
-
         transaction.setStatusFlag(grftt);
-
         if (grftt != null) {
             TransactionInfo transactionInfo = new TransactionInfo();
             transactionInfo.setFlag(grftt);
             transaction.setTransactionInfo(transactionInfo);
         }
 
+        // date
+        Date date = (Date) row.get("dt");
+        transaction.setDate(date);
+
+        // frequency for recurring transaction?
+        Integer frq = (Integer) row.get("frq");
+        Double cFrqInst = (Double) row.get("cFrqInst");
         Frequency frequency = new Frequency();
         frequency.setFrq(frq);
         frequency.setcFrqInst(cFrqInst);
         transaction.setFrequency(frequency);
 
+        // category
+        Integer hcat = (Integer) row.get("hcat");
         transaction.setCategoryId(hcat);
 
+        // payee
+        Integer lhpay = (Integer) row.get("lHpay");
         transaction.setPayeeId(lhpay);
 
+        // transfer to account
+        Integer hacctLink = (Integer) row.get("hacctLink");
         transaction.setTransferredAccountId(hacctLink);
 
+        // hsec: security
+        Integer hsec = (Integer) row.get("hsec");
         transaction.setSecurityId(hsec);
 
+        // act: Investment activity: Buy, Sell ..
+        Integer act = (Integer) row.get("act");
         InvestmentActivity investmentActivity = new InvestmentActivity(act);
         transaction.setInvestmentActivity(investmentActivity);
 
@@ -328,6 +271,14 @@ public class AccountUtil {
         }
         transaction.setInvestmentTransaction(investmentTransaction);
 
+        // mMemo
+        String memo = (String) row.get("mMemo");
+        transaction.setMemo(memo);
+        
+        // szId
+        String szId = (String) row.get("szId");
+        transaction.setNumber(szId);
+        
         boolean accept = true;
         if (filters != null) {
             for (TransactionFilter filter : filters) {
@@ -341,6 +292,7 @@ public class AccountUtil {
         if (accept) {
             transactions.add(transaction);
         }
+
         return accept;
     }
 
@@ -413,7 +365,7 @@ public class AccountUtil {
             Integer iSplit = (Integer) row.get("iSplit");
 
             transactionSplit = new TransactionSplit();
-            transactionSplit.setTransactionId(transaction);
+            transactionSplit.setTransaction(transaction);
             transactionSplit.setParentId(htrnParent);
             transactionSplit.setRowId(iSplit);
         }
@@ -579,16 +531,22 @@ public class AccountUtil {
                     continue;
                 }
 
-                Integer hcat = (Integer) row.get("hcat");
-                Integer hcatParent = (Integer) row.get("hcatParent");
-                Integer hct = (Integer) row.get("hct");
-
                 Category category = new Category();
+
+                Integer hcat = (Integer) row.get("hcat");
                 category.setId(hcat);
+
+                Integer hcatParent = (Integer) row.get("hcatParent");
                 category.setParentId(hcatParent);
+                
                 category.setName(name);
+
+                Integer hct = (Integer) row.get("hct");
                 category.setClassificationId(hct);
 
+                Integer nLevel = (Integer) row.get("nLevel");
+                category.setLevel(nLevel);
+                
                 categories.put(hcat, category);
             }
         } finally {
@@ -617,10 +575,10 @@ public class AccountUtil {
     }
 
     public static BigDecimal calculateCurrentBalance(Account account) {
-        BigDecimal currentBalane = account.getStartingBalance();
-        if (currentBalane == null) {
+        BigDecimal currentBalance = account.getStartingBalance();
+        if (currentBalance == null) {
             log.warn("Starting balance is null. Set to 0. Account's id=" + account.getId());
-            currentBalane = new BigDecimal(0.00);
+            currentBalance = new BigDecimal(0.00);
         }
         for (Transaction transaction : account.getTransactions()) {
             if (transaction.isVoid()) {
@@ -631,12 +589,13 @@ public class AccountUtil {
             }
             BigDecimal amount = transaction.getAmount();
             if (amount != null) {
-                currentBalane = currentBalane.add(amount);
+                currentBalance = currentBalance.add(amount);
             } else {
                 log.warn("Transaction with no amount, id=" + transaction.getId());
             }
         }
-        return currentBalane;
+        account.setCurrentBalance(currentBalance);
+        return currentBalance;
     }
 
     public static Double calculateInvestmentBalance(Account account, MnyContext mnyContext) {
@@ -677,16 +636,17 @@ public class AccountUtil {
             quantities.put(securityId, quantity);
         }
 
-        TreeMap<String, Double> sortedByName = new TreeMap<String, Double>(new Comparator<String>() {
-            @Override
-            public int compare(String o1, String o2) {
-                return o1.compareTo(o2);
-            }
-        });
-        Map<String, Double> prices = new HashMap<String, Double>();
-
+        List<SecurityHolding> securityHoldings = new ArrayList<SecurityHolding>();
         for (Integer securityId : quantities.keySet()) {
             Double quantity = quantities.get(securityId);
+            // TODO: skip really small holding value
+            if (quantity < 0.00000001) {
+                continue;
+            }
+            SecurityHolding securityHolding = new SecurityHolding();
+            securityHolding.setId(securityId);
+            securityHolding.setQuanity(quantity);
+
             Map<Integer, Security> securities = mnyContext.getSecurities();
             Security security = securities.get(securityId);
             String securityName = null;
@@ -695,50 +655,107 @@ public class AccountUtil {
             } else {
                 securityName = securityId.toString();
             }
-            sortedByName.put(securityName, quantity);
+            securityHolding.setName(securityName);
 
             try {
                 Double price = getSecurityLatestPrice(securityId, mnyContext);
                 if (price == null) {
                     price = new Double(0.0);
                 }
-                prices.put(securityName, price);
+                securityHolding.setPrice(new BigDecimal(price));
             } catch (IOException e) {
                 log.warn("Cannot find latest price for securityId=" + securityId, e);
             }
+            securityHoldings.add(securityHolding);
+            BigDecimal price = securityHolding.getPrice();
+            securityHolding.setMarketValue(new BigDecimal(price.doubleValue() * securityHolding.getQuanity()));
         }
-        for (String name : sortedByName.keySet()) {
-            Double quantity = sortedByName.get(name);
-            if (quantity > 0.00000001) {
-                Double price = prices.get(name);
-                if (price == null) {
-                    price = new Double(0.0);
+        Collections.sort(securityHoldings, new Comparator<SecurityHolding>() {
+
+            @Override
+            public int compare(SecurityHolding o1, SecurityHolding o2) {
+                return o1.getName().compareTo(o2.getName());
+            }
+        });
+        account.setSecurityHoldings(securityHoldings);
+        for (SecurityHolding sec : securityHoldings) {
+            log.info("securityName=" + sec.getName() + ", quantity=" + account.formatSecurityQuantity(sec.getQuanity()) + ", price="
+                    + account.formatAmmount(sec.getPrice()) + ", value=" + account.formatAmmount(sec.getMarketValue()));
+            accountMarketValue += sec.getMarketValue().doubleValue();
+        }
+
+        try {
+            Double cashAccountValue = getCashAccountValue(account, mnyContext);
+            log.info("cashAccountValue=" + cashAccountValue);
+            if (cashAccountValue != null) {
+                accountMarketValue += cashAccountValue.doubleValue();
+            }
+        } catch (IOException e) {
+            log.warn(e);
+        }
+
+        return accountMarketValue;
+    }
+
+    private static Double getCashAccountValue(Account account, MnyContext mnyContext) throws IOException {
+        Double cashAccountValue = null;
+        Integer relatedToAccountId = account.getRelatedToAccountId();
+        if (relatedToAccountId != null) {
+            Account relatedToAccount = getAccount(relatedToAccountId, mnyContext);
+            account.setRelatedToAccount(relatedToAccount);
+            getTransactions(mnyContext.getDb(), relatedToAccount);
+            if (relatedToAccount != null) {
+                BigDecimal currentBalance = calculateCurrentBalance(relatedToAccount);
+                if (currentBalance != null) {
+                    cashAccountValue = currentBalance.doubleValue();
+                } else {
+                    cashAccountValue = new Double(0.0);
                 }
-                Double value = price * quantity;
-                accountMarketValue += value;
-                log.info("securityName=" + name + ", quantity=" + quantity + ", price=" + price + ", value=" + value);
             }
         }
-        
-        return accountMarketValue;
+        return cashAccountValue;
+    }
+
+    private static Account getAccount(Integer relatedToAccountId, MnyContext mnyContext) throws IOException {
+        Account relatedToAccount = null;
+        Database db = mnyContext.getDb();
+
+        String tableName = "ACCT";
+        Table table = db.getTable(tableName);
+        Cursor cursor = Cursor.createCursor(table);
+        Map<String, Object> rowPattern = new HashMap<String, Object>();
+        rowPattern.put("hacct", relatedToAccountId);
+        if (cursor.findRow(rowPattern)) {
+            Map<String, Object> row = cursor.getCurrentRow();
+            relatedToAccount = getAcccount(row);
+        }
+        return relatedToAccount;
     }
 
     private static Double getSecurityLatestPrice(Integer securityId, MnyContext mnyContext) throws IOException {
         Double price = null;
-        Database db = mnyContext.getDb();
-        Table table = db.getTable("SP");
-        Cursor cursor = Cursor.createCursor(table);
-        // XXX: assuming that row is already sorted in increasing date order
-        // we will start from end
-        cursor.afterLast();
-        while (cursor.moveToPreviousRow()) {
-            Map<String, Object> row = cursor.getCurrentRow();
-            Integer hsec = (Integer) row.get("hsec");
-            if (hsec.compareTo(securityId) != 0) {
-                continue;
+
+        StopWatch stopWatch = new StopWatch();
+        try {
+            Database db = mnyContext.getDb();
+            Table table = db.getTable("SP");
+            Cursor cursor = Cursor.createCursor(table);
+            // XXX: assuming that row is already sorted in increasing date order
+            // we will start from end
+            cursor.afterLast();
+            while (cursor.moveToPreviousRow()) {
+                Map<String, Object> row = cursor.getCurrentRow();
+                Integer hsec = (Integer) row.get("hsec");
+                if (hsec.compareTo(securityId) != 0) {
+                    continue;
+                }
+                price = (Double) row.get("dPrice");
+                break;
             }
-            price = (Double) row.get("dPrice");
-            return price;
+        } finally {
+            long delta = stopWatch.click();
+
+            log.info("< getSecurityLatestPrice, securityId=" + securityId + ", delta=" + delta);
         }
         return price;
     }

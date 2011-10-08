@@ -38,7 +38,7 @@ public class Currency extends MnyObject implements Comparable<Currency> {
         this.isoCode = isoCode;
     }
 
-    public static String getName(Map<Integer, Currency> currencies, Integer currencyId) {
+    public static String getName(Integer currencyId, Map<Integer, Currency> currencies) {
         Currency currency = currencies.get(currencyId);
         if (currency != null) {
             return currency.getIsoCode();

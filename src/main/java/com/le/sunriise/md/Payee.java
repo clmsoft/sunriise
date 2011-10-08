@@ -1,5 +1,7 @@
 package com.le.sunriise.md;
 
+import java.util.Map;
+
 public class Payee extends MnyObject implements Comparable<Payee>{
     private Integer id;
 
@@ -34,5 +36,19 @@ public class Payee extends MnyObject implements Comparable<Payee>{
     @Override
     public int compareTo(Payee o) {
         return id.compareTo(o.getId());
+    }
+
+    static String getPayeeName(Integer payeeId, Map<Integer, Payee> payees) {
+        if (payeeId == null) {
+            return null;
+        }
+        if (payeeId < 0) {
+            return null;
+        }
+        Payee payee = payees.get(payeeId);
+        if (payee == null) {
+            return null;
+        }
+        return payee.getName();
     }
 }

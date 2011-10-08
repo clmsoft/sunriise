@@ -37,6 +37,12 @@ public class Transaction extends MnyObject implements Comparable<Transaction> {
 
     private InvestmentTransaction investmentTransaction;
 
+    private Integer clearedState;
+
+    private String memo;
+    
+    private String number;
+        
     public Integer getId() {
         return id;
     }
@@ -210,6 +216,49 @@ public class Transaction extends MnyObject implements Comparable<Transaction> {
             price = investmentTransaction.getPrice();
         }
         return price;
+    }
+
+    public boolean isTransfer() {
+        return transferredAccountId != null;
+    }
+
+    public Integer getClearedState() {
+        return clearedState;
+    }
+
+    public void setClearedState(Integer clearedState) {
+        this.clearedState = clearedState;
+    }
+
+    public boolean isCleared() {
+        return (clearedState != null) && (clearedState == 1);
+    }
+
+    public boolean isReconciled() {
+        return (clearedState != null) && (clearedState == 2);
+    }
+
+    public boolean hasSplits() {
+       if (splits == null) {
+           return false;
+       }
+       return splits.size() > 0;
+    }
+
+    public String getMemo() {
+        return memo;
+    }
+
+    public void setMemo(String memo) {
+        this.memo = memo;
+    }
+
+    public String getNumber() {
+        return number;
+    }
+
+    public void setNumber(String number) {
+        this.number = number;
     }
 
 }

@@ -5,13 +5,18 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.EventQueue;
+import java.awt.ScrollPane;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -20,6 +25,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.prefs.Preferences;
 
+import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -29,7 +35,10 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
+import javax.swing.JTabbedPane;
 import javax.swing.JTable;
+import javax.swing.JTextArea;
+import javax.swing.JTextPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
@@ -38,6 +47,10 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyledDocument;
 
 import org.apache.log4j.Logger;
 import org.jdesktop.beansbinding.AutoBinding;
@@ -70,15 +83,20 @@ public class AccountViewer {
     private boolean dbReadOnly;
 
     private AccountViewerDataModel dataModel = new AccountViewerDataModel();
-    private JList list;
+    private JList accountList;
     private JTable table;
 
     private MnyContext mnyContext = new MnyContext();
 
+    private JLabel accountTypeLabel;
     private JLabel startingBalanceLabel;
     private JLabel endingBalanceLabel;
 
     private Account selectedAccount;
+
+    private JTextPane accountInfoTextPane;
+
+    private JTextArea transactionQifTextArea;
 
     private static final ExecutorService threadPool = Executors.newCachedThreadPool();
 
@@ -118,6 +136,8 @@ public class AccountViewer {
                 mnyContext.setSecurities(securities);
 
                 List<Account> accounts = AccountUtil.getAccounts(db);
+                mnyContext.setAccounts(accounts);
+
                 AccountUtil.setCurrencies(accounts, currencies);
 
                 AccountViewer.this.dataModel.setAccounts(accounts);
@@ -157,51 +177,19 @@ public class AccountViewer {
         // frame.setBounds(100, 100, 450, 300);
         getFrame().setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        // NumberFormat formatter = NumberFormat.getInstance();
-        // if (formatter instanceof DecimalFormat) {
-        // amountFormatter = (DecimalFormat) formatter;
-        // amountFormatter.applyPattern("#,###,##0.00;(#,###,##0.00)");
-        // amountFormatter.setGroupingUsed(true);
-        // }
+        initMainMenuBar();
 
-        JPanel leftComponent = new JPanel();
-        leftComponent.setPreferredSize(new Dimension(80, -1));
-        leftComponent.setLayout(new BorderLayout());
-
-        JPanel rightComponent = new JPanel();
-        rightComponent.setLayout(new BorderLayout());
-
+        JPanel leftComponent = createLeftComponent();
+        JPanel rightComponent = createRightComponent();
         JSplitPane hSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftComponent, rightComponent);
-
-        JScrollPane scrollPane = new JScrollPane();
-        leftComponent.add(scrollPane, BorderLayout.CENTER);
-
-        list = new JList();
-        list.addListSelectionListener(new ListSelectionListener() {
-            @Override
-            public void valueChanged(ListSelectionEvent event) {
-                if (event.getValueIsAdjusting()) {
-                    return;
-                }
-                final Account account = (Account) list.getSelectedValue();
-                if (account != null) {
-                    try {
-                        accountSelected(account);
-                    } catch (IOException e) {
-                        log.error(e);
-                    }
-                }
-            }
-
-        });
-        list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        list.setVisibleRowCount(-1);
-        scrollPane.setViewportView(list);
-
         hSplitPane.setResizeWeight(0.3);
         getFrame().getContentPane().add(hSplitPane, BorderLayout.CENTER);
         hSplitPane.setDividerLocation(0.3);
 
+        initDataBindings();
+    }
+
+    private void initMainMenuBar() {
         JMenuBar menuBar = new JMenuBar();
         getFrame().setJMenuBar(menuBar);
 
@@ -222,17 +210,95 @@ public class AccountViewer {
         fileMenu.add(fileOpenMenuItem);
         fileMenu.addSeparator();
         fileMenu.add(exitMenuItem);
+    }
 
-        JPanel topComponent = new JPanel();
-        topComponent.setLayout(new BorderLayout());
+    private JPanel createLeftComponent() {
+        JPanel leftComponent = new JPanel();
+        leftComponent.setPreferredSize(new Dimension(80, -1));
+        leftComponent.setLayout(new BorderLayout());
 
-        JPanel bottomComponent = new JPanel();
-        topComponent.setLayout(new BorderLayout());
+        JScrollPane scrollPane = new JScrollPane();
+        leftComponent.add(scrollPane, BorderLayout.CENTER);
+
+        accountList = new JList();
+        accountList.addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent event) {
+                if (event.getValueIsAdjusting()) {
+                    return;
+                }
+                final Account account = (Account) accountList.getSelectedValue();
+                if (account != null) {
+                    try {
+                        accountSelected(account);
+                    } catch (IOException e) {
+                        log.error(e);
+                    }
+                }
+            }
+
+        });
+        accountList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        accountList.setVisibleRowCount(-1);
+        scrollPane.setViewportView(accountList);
+        return leftComponent;
+    }
+
+    private JPanel createRightComponent() {
+        JPanel view = new JPanel();
+        view.setLayout(new BorderLayout());
+
+        Component topComponent = createTopComponent();
+        Component bottomComponent = createBottomComponent();
 
         JSplitPane vSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, topComponent, bottomComponent);
 
-        JScrollPane scrollPane_1 = new JScrollPane();
-        topComponent.add(scrollPane_1, BorderLayout.CENTER);
+        vSplitPane.setResizeWeight(0.66);
+        view.add(vSplitPane, BorderLayout.CENTER);
+        vSplitPane.setDividerLocation(0.66);
+
+        return view;
+    }
+
+    private Component createTopComponent() {
+        JTabbedPane tabbedPane = new JTabbedPane();
+
+        tabbedPane.addTab("Transactions", createTransactionsView());
+        tabbedPane.addTab("Account info", createAccountInfoView());
+
+        return tabbedPane;
+    }
+
+    private Component createAccountInfoView() {
+        JPanel view = new JPanel();
+        view.setLayout(new BorderLayout());
+
+        accountInfoTextPane = new JTextPane();
+        accountInfoTextPane.setEditable(false);
+        JScrollPane scrollPane = new JScrollPane(accountInfoTextPane);
+
+        view.add(scrollPane, BorderLayout.CENTER);
+
+        return view;
+    }
+
+    private Component createTransactionsView() {
+        JPanel view = new JPanel();
+        view.setLayout(new BorderLayout());
+
+        JPanel topStatusView = new JPanel();
+        view.add(topStatusView, BorderLayout.NORTH);
+        topStatusView.setLayout(new BorderLayout(0, 0));
+
+        accountTypeLabel = new JLabel("");
+        topStatusView.add(accountTypeLabel, BorderLayout.WEST);
+
+        startingBalanceLabel = new JLabel("");
+        updateStartingBalanceLabel(new BigDecimal(0.00), null);
+        topStatusView.add(startingBalanceLabel, BorderLayout.EAST);
+
+        JScrollPane scrollPane = new JScrollPane();
+        view.add(scrollPane, BorderLayout.CENTER);
 
         table = new JTable() {
 
@@ -295,27 +361,46 @@ public class AccountViewer {
                 }
             }
         });
-        scrollPane_1.setViewportView(table);
+        scrollPane.setViewportView(table);
 
-        JPanel panel = new JPanel();
-        topComponent.add(panel, BorderLayout.NORTH);
-        panel.setLayout(new BorderLayout(0, 0));
-
-        startingBalanceLabel = new JLabel("");
-        updateStartingBalanceLabel(new BigDecimal(0.00), null);
-        panel.add(startingBalanceLabel, BorderLayout.EAST);
-
-        JPanel panel_1 = new JPanel();
-        topComponent.add(panel_1, BorderLayout.SOUTH);
-        panel_1.setLayout(new BorderLayout(0, 0));
+        JPanel bottomStatusView = new JPanel();
+        view.add(bottomStatusView, BorderLayout.SOUTH);
+        bottomStatusView.setLayout(new BorderLayout(0, 0));
 
         endingBalanceLabel = new JLabel("");
         updateEndingBalanceLabel(new BigDecimal(0.00), null);
-        panel_1.add(endingBalanceLabel, BorderLayout.EAST);
-        vSplitPane.setResizeWeight(0.66);
-        rightComponent.add(vSplitPane, BorderLayout.CENTER);
-        vSplitPane.setDividerLocation(0.66);
-        initDataBindings();
+        bottomStatusView.add(endingBalanceLabel, BorderLayout.EAST);
+
+        return view;
+    }
+
+    private Component createBottomComponent() {
+        JTabbedPane tabPane = new JTabbedPane();
+        tabPane.addTab("Transaction info", createTransactionInfoView());
+        tabPane.addTab("QIF", createTransactionQif());
+
+        return tabPane;
+    }
+
+    private Component createTransactionQif() {
+        JPanel view = new JPanel();
+        view.setLayout(new BorderLayout());
+
+        ScrollPane scrollPane = new ScrollPane();
+
+        transactionQifTextArea = new JTextArea();
+        transactionQifTextArea.setEditable(false);
+
+        scrollPane.add(transactionQifTextArea);
+        view.add(scrollPane, BorderLayout.CENTER);
+
+        return view;
+    }
+
+    private Component createTransactionInfoView() {
+        JPanel view = new JPanel();
+        view.setLayout(new BorderLayout());
+        return view;
     }
 
     private Map<String, Object> getTransactionRow(OpenedDb openedDb, Integer id) throws IOException {
@@ -425,7 +510,7 @@ public class AccountViewer {
     protected void initDataBindings() {
         BeanProperty<AccountViewerDataModel, List<Account>> accountViewerDataModelBeanProperty = BeanProperty.create("accounts");
         JListBinding<Account, AccountViewerDataModel, JList> jListBinding = SwingBindings.createJListBinding(UpdateStrategy.READ, dataModel,
-                accountViewerDataModelBeanProperty, list);
+                accountViewerDataModelBeanProperty, accountList);
         jListBinding.bind();
         //
         BeanProperty<AccountViewerDataModel, TableModel> accountViewerDataModelBeanProperty_1 = BeanProperty.create("tableModel");
@@ -443,16 +528,17 @@ public class AccountViewer {
         try {
             if (account != null) {
                 log.info("select account=" + account);
-                List<Transaction> transactions = AccountUtil.getTransactions(openedDb.getDb(), account);
-                account.setTransactions(transactions);
+                AccountUtil.getTransactions(openedDb.getDb(), account);
 
                 BigDecimal currentBalance = AccountUtil.calculateCurrentBalance(account);
 
-                log.info(account.getName() + ", " + account.getAccountType() + ", " + Currency.getName(mnyContext.getCurrencies(), account.getCurrencyId())
-                        + ", " + account.getStartingBalance() + ", " + currentBalance);
+                log.info(account.getName() + ", " + account.getAccountType() + ", " + Currency.getName(account.getCurrencyId(), mnyContext.getCurrencies())
+                        + ", " + account.getStartingBalance() + ", " + currentBalance + ", " + account.getAmountLimit());
 
                 updateStartingBalanceLabel(account.getStartingBalance(), account);
                 updateEndingBalanceLabel(currentBalance, account);
+
+                getAccountTypeLabel().setText(account.getAccountType().toString());
 
                 boolean calculateMonthlySummary = false;
                 if (calculateMonthlySummary) {
@@ -518,6 +604,7 @@ public class AccountViewer {
                         }
                     };
                     Double marketValue = AccountUtil.calculateInvestmentBalance(account, mnyContext);
+                    account.setCurrentBalance(new BigDecimal(marketValue));
                     updateEndingBalanceLabel(new BigDecimal(marketValue), account);
                     break;
                 }
@@ -530,10 +617,95 @@ public class AccountViewer {
             tableModel.setMnyContext(mnyContext);
 
             dataModel.setTableModel(tableModel);
+
+            updateAccountInfoPane(account);
+            
+            transactionQifTextArea.setText("");
         } finally {
             long delta = stopWatch.click();
             log.info("< accountSelected, delta=" + delta);
         }
+    }
+
+    private void updateAccountInfoPane(Account account) {
+        accountInfoTextPane.setText("");
+
+        if (account == null) {
+            return;
+        }
+
+        StyledDocument doc = accountInfoTextPane.getStyledDocument();
+
+        // Define a keyword attribute
+        SimpleAttributeSet keyWord = new SimpleAttributeSet();
+        // StyleConstants.setForeground(keyWord, Color.RED);
+        StyleConstants.setBackground(keyWord, Color.YELLOW);
+        StyleConstants.setBold(keyWord, true);
+
+        try {
+            insertKeyValueToStyleDocument("Number of transactions", "" + account.getTransactions().size(), doc, keyWord);
+            insertKeyValueToStyleDocument("Name", account.getName(), doc, keyWord);
+            insertKeyValueToStyleDocument("Account type", account.getAccountType().toString(), doc, keyWord);
+            if (account.getAccountType() == AccountType.INVESTMENT) {
+                insertKeyValueToStyleDocument("    Retirement", account.getRetirement().toString(), doc, keyWord);
+            }
+            insertKeyValueToStyleDocument("Currency", Currency.getName(account.getCurrencyId(), mnyContext.getCurrencies()), doc, keyWord);
+            insertKeyValueToStyleDocument("Starting balance", account.formatAmmount(account.getStartingBalance()), doc, keyWord);
+            insertKeyValueToStyleDocument("Ending balance", account.formatAmmount(account.getCurrentBalance()), doc, keyWord);
+            if (account.getAccountType() == AccountType.INVESTMENT) {
+                List<SecurityHolding> securityHolding = account.getSecurityHoldings();
+                for (SecurityHolding sec : securityHolding) {
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("  ");
+                    sb.append(sec.getName());
+                    sb.append(", ");
+                    sb.append(account.formatSecurityQuantity(sec.getQuanity()));
+                    sb.append(", ");
+                    sb.append(account.formatAmmount(sec.getPrice()));
+                    sb.append(", ");
+                    sb.append(account.formatAmmount(sec.getMarketValue()));
+
+                    insertKeyValueToStyleDocument(null, sb.toString(), doc, keyWord);
+                }
+            }
+
+            Account relatedToAccount = account.getRelatedToAccount();
+            if (relatedToAccount != null) {
+                if (account.getAccountType() == AccountType.INVESTMENT) {
+                    insertKeyValueToStyleDocument("Cash account", relatedToAccount.getName(), doc, keyWord);
+                    insertKeyValueToStyleDocument("Cash account aalance", relatedToAccount.formatAmmount(relatedToAccount.getCurrentBalance()), doc, keyWord);
+                } else {
+                    insertKeyValueToStyleDocument("Related account", relatedToAccount.getName(), doc, keyWord);
+                    insertKeyValueToStyleDocument("Related account balance", relatedToAccount.formatAmmount(relatedToAccount.getCurrentBalance()), doc, keyWord);
+                }
+            }
+
+            if (account.getAccountType() == AccountType.CREDIT_CARD) {
+                BigDecimal amountLimit = account.getAmountLimit();
+                if (amountLimit == null) {
+                    amountLimit = new BigDecimal(0.0);
+                }
+                insertKeyValueToStyleDocument("Limit amount", account.formatAmmount(new BigDecimal(Math.abs(amountLimit.doubleValue()))), doc, keyWord);
+            }
+        } catch (BadLocationException e) {
+            log.warn(e);
+        }
+    }
+
+    private void insertKeyValueToStyleDocument(String key, String value, StyledDocument doc, SimpleAttributeSet keyWord) throws BadLocationException {
+        boolean newLine = true;
+        insertKeyValueToStyleDocument(key, value, doc, keyWord, newLine);
+    }
+
+    private void insertKeyValueToStyleDocument(String key, String value, StyledDocument doc, SimpleAttributeSet keyWord, boolean newLine)
+            throws BadLocationException {
+        if (newLine) {
+            doc.insertString(doc.getLength(), "\n", null);
+        }
+        if (key != null) {
+            doc.insertString(doc.getLength(), key + ":", keyWord);
+        }
+        doc.insertString(doc.getLength(), " " + value, null);
     }
 
     /**
@@ -563,16 +735,61 @@ public class AccountViewer {
         return endingBalanceLabel;
     }
 
-    private void rowSelected(int r) {
+    protected void rowSelected(int r) {
         int rowIndex = r;
         int columnIndex = 0;
-        final Integer id = (Integer) dataModel.getTableModel().getValueAt(rowIndex, columnIndex);
+        AbstractAccountViewerTableModel tableModel = (AbstractAccountViewerTableModel) dataModel.getTableModel();
+        final Integer id = (Integer) tableModel.getValueAt(rowIndex, columnIndex);
         if (log.isDebugEnabled()) {
             log.debug("id=" + id);
         }
+        final Account account = tableModel.getAccount();
+        final List<Transaction> transactions = account.getTransactions();
+
         Runnable command = new Runnable() {
             @Override
             public void run() {
+                logFlags(id);
+                logQif(id);
+            }
+
+            private void logQif(Integer id) {
+                // TODO: Better look up
+                for (Transaction transaction : transactions) {
+                    if (transaction.getId().equals(id)) {
+                        log.info("Selected transactionId=" + transaction.getId());
+                        StringWriter stringWriter = new StringWriter();
+                        PrintWriter writer = null;
+                        try {
+                            writer = new PrintWriter(stringWriter);
+                            QifExportUtils.logQif(transaction, mnyContext, writer);
+                            writer.flush();
+                            final String qifStr = stringWriter.getBuffer().toString();
+
+                            log.info("Transaction QIF:");
+                            log.info("\n" + qifStr);
+
+                            if (transactionQifTextArea != null) {
+                                Runnable doRun = new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        transactionQifTextArea.setText(qifStr);
+                                    }
+                                };
+                                SwingUtilities.invokeLater(doRun);
+                            }
+                        } finally {
+                            if (writer != null) {
+                                writer.close();
+                                writer = null;
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+
+            private void logFlags(final Integer id) {
                 try {
                     Map<String, Object> row = getTransactionRow(openedDb, id);
                     if (row != null) {
@@ -594,5 +811,9 @@ public class AccountViewer {
             }
         };
         threadPool.execute(command);
+    }
+
+    public JLabel getAccountTypeLabel() {
+        return accountTypeLabel;
     }
 }

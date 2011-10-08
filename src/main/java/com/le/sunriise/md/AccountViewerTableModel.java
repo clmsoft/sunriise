@@ -119,13 +119,14 @@ public class AccountViewerTableModel extends AbstractAccountViewerTableModel {
             }
         } else {
             Integer categoryId = transaction.getCategoryId();
-            String categoryName = getCategoryName(categoryId);
+            Map<Integer, Category> categories = getMnyContext().getCategories();
+            String categoryName = Category.getCategoryName(categoryId, categories);
             value = categoryName;
         }
 
         if (value == null) {
-            List<TransactionSplit> splits = transaction.getSplits();
-            if ((splits != null) && (splits.size() > 0)) {
+            if (transaction.hasSplits()) {
+                List<TransactionSplit> splits = transaction.getSplits();
                 value = "(" + splits.size() + ") Split Transaction";
             }
         }
@@ -143,25 +144,6 @@ public class AccountViewerTableModel extends AbstractAccountViewerTableModel {
             }
         }
         return value;
-    }
-
-    private String getCategoryName(Integer categoryId) {
-        String categoryName = null;
-        if (categoryId != null) {
-            Map<Integer, Category> categories = getMnyContext().getCategories();
-            if (categories != null) {
-                Category category = categories.get(categoryId);
-                if (category != null) {
-                    Integer parentId = category.getParentId();
-                    categoryName = category.getName();
-                    if (parentId != null) {
-                        String parentName = getCategoryName(parentId);
-                        categoryName = parentName + ":" + categoryName;
-                    }
-                }
-            }
-        }
-        return categoryName;
     }
 
     @Override

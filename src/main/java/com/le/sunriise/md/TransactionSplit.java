@@ -5,8 +5,8 @@ public class TransactionSplit extends MnyObject {
 
     private Integer rowId;
 
-    private Transaction transactionId;
-
+    private Transaction transaction;
+    
     public Integer getParentId() {
         return parentId;
     }
@@ -23,11 +23,11 @@ public class TransactionSplit extends MnyObject {
         this.rowId = rowId;
     }
 
-    public Transaction getTransactionId() {
-        return transactionId;
+    public Transaction getTransaction() {
+        return transaction;
     }
 
-    public void setTransactionId(Transaction transaction) {
-        this.transactionId = transaction;
+    public void setTransaction(Transaction transaction) {
+        this.transaction = transaction;
     }
 }
