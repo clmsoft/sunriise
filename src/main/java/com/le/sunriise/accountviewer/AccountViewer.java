@@ -15,8 +15,6 @@ import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -25,7 +23,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.prefs.Preferences;
 
-import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -107,6 +104,7 @@ public class AccountViewer {
             setDisableReadOnlyCheckBox(true);
         }
 
+        
         @Override
         public void dbFileOpened(OpenedDb newOpenedDb, OpenDbDialog dialog) {
             if (newOpenedDb != null) {
@@ -126,7 +124,7 @@ public class AccountViewer {
                 AccountViewer.this.dataModel.setAccounts(accounts);
 
                 Runnable doRun = new Runnable() {
-                    @Override
+                    
                     public void run() {
                         Account account = null;
                         // clear out currently select account, if any
@@ -181,7 +179,7 @@ public class AccountViewer {
 
         JMenuItem exitMenuItem = new JMenuItem("Exit");
         exitMenuItem.addActionListener(new ActionListener() {
-            @Override
+            
             public void actionPerformed(ActionEvent e) {
                 System.exit(0);
             }
@@ -205,7 +203,7 @@ public class AccountViewer {
 
         accountList = new JList();
         accountList.addListSelectionListener(new ListSelectionListener() {
-            @Override
+            
             public void valueChanged(ListSelectionEvent event) {
                 if (event.getValueIsAdjusting()) {
                     return;
@@ -285,6 +283,7 @@ public class AccountViewer {
 
         table = new JTable() {
 
+            
             @Override
             public void setModel(TableModel dataModel) {
                 super.setModel(dataModel);
@@ -301,6 +300,7 @@ public class AccountViewer {
 
         };
         table.setDefaultRenderer(BigDecimal.class, new DefaultTableCellRenderer() {
+            
             @Override
             public void setValue(Object value) {
                 if (log.isDebugEnabled()) {
@@ -323,7 +323,7 @@ public class AccountViewer {
         });
         // table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
         table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-            @Override
+            
             public void valueChanged(ListSelectionEvent event) {
                 if (event.getValueIsAdjusting()) {
                     return;
@@ -536,11 +536,13 @@ public class AccountViewer {
                 switch (accountType) {
                 case INVESTMENT:
                     tableModel = new AccountViewerTableModel(account) {
+                        
                         @Override
                         public int getColumnCount() {
                             return super.getColumnCount() + 1;
                         }
 
+                        
                         @Override
                         public Object getValueAt(int rowIndex, int columnIndex) {
                             Object value = super.getValueAt(rowIndex, columnIndex);
@@ -562,6 +564,7 @@ public class AccountViewer {
                             return value;
                         }
 
+                        
                         @Override
                         public String getColumnName(int column) {
                             String columnName = super.getColumnName(column);
@@ -696,7 +699,7 @@ public class AccountViewer {
      */
     public static void main(String[] args) {
         EventQueue.invokeLater(new Runnable() {
-            @Override
+            
             public void run() {
                 try {
                     AccountViewer window = new AccountViewer();
@@ -730,7 +733,7 @@ public class AccountViewer {
         final List<Transaction> transactions = account.getTransactions();
 
         Runnable command = new Runnable() {
-            @Override
+            
             public void run() {
                 logFlags(id);
                 logQif(id);
@@ -754,7 +757,7 @@ public class AccountViewer {
 
                             if (transactionQifTextArea != null) {
                                 Runnable doRun = new Runnable() {
-                                    @Override
+                                    
                                     public void run() {
                                         transactionQifTextArea.setText(qifStr);
                                     }

@@ -19,6 +19,7 @@ final class MyTabletHeaderRenderer extends DefaultTableCellRenderer {
         this.color = color;
     }
 
+    
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
         Component rendererComponent = null;

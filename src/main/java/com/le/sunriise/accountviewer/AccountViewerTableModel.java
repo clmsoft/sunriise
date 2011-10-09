@@ -1,91 +1,71 @@
-package com.le.sunriise.md;
+package com.le.sunriise.accountviewer;
 
 import java.util.List;
 import java.util.Map;
 
-import javax.swing.table.AbstractTableModel;
+import org.apache.log4j.Logger;
 
-public class AccountViewerTableModel extends AbstractTableModel {
-    private final Account account;
+public class AccountViewerTableModel extends AbstractAccountViewerTableModel {
+    private static final Logger log = Logger.getLogger(AccountViewerTableModel.class);
 
-    private Map<Integer, Payee> payees;
-
-    private Map<Integer, Category> categories;
-
-    private List<Account> accounts;
+    private static final int COLUMN_ID = 0;
+    private static final int COLUMN_DATE = COLUMN_ID + 1;
+    private static final int COLUMN_PAYEE = COLUMN_DATE + 1;
+    private static final int COLUMN_CATEGORY = COLUMN_PAYEE + 1;
+    // private static final int COLUMN_CLASSIFICATION = 4;
+    private static final int COLUMN_AMOUNT = COLUMN_CATEGORY + 1;
+    private static final int COLUMN_BALANCE = COLUMN_AMOUNT + 1;
+    private static final int COLUMN_VOIDED = COLUMN_BALANCE + 1;
 
     public AccountViewerTableModel(Account account) {
-        this.account = account;
+        super(account);
     }
 
-    @Override
+    
     public int getRowCount() {
-        if (account != null) {
-            return account.getTransactions().size();
+        if (getAccount() != null) {
+            return getAccount().getTransactions().size();
         } else {
             return 0;
         }
     }
 
-    @Override
+    
     public int getColumnCount() {
         return 7;
     }
 
-    @Override
+    
     public Object getValueAt(int rowIndex, int columnIndex) {
         Object value = null;
-        List<Transaction> transactions = account.getTransactions();
+        List<Transaction> transactions = getAccount().getTransactions();
         Transaction transaction = transactions.get(rowIndex);
         switch (columnIndex) {
-        case 0:
+        case COLUMN_ID:
             value = transaction.getId();
             break;
-        case 1:
+        case COLUMN_DATE:
             value = transaction.getDate();
             break;
-        case 2:
-            Integer payeeId = transaction.getPayeeId();
-            String payeeName = getPayeeName(payeeId);
-            value = payeeName;
+        case COLUMN_PAYEE:
+            value = toPayeeString(transaction);
             break;
-        case 3:
-            Integer transferredAccountId = transaction.getTransferredAccountId();
-            if (transferredAccountId != null) {
-                if (accounts != null) {
-                    for (Account a : accounts) {
-                        Integer id = a.getId();
-                        if (id.equals(transferredAccountId)) {
-                            value = "Transfer to " + a.getName();
-                            break;
-                        }
-                    }
-                }
-            } else {
-                Integer categoryId = transaction.getCategoryId();
-                String categoryName = getCategoryName(categoryId);
-                value = categoryName;
-            }
-
-            if (value == null) {
-                List<TransactionSplit> splits = transaction.getSplits();
-                if ((splits != null) && (splits.size() > 0)) {
-                    value = "(" + splits.size() + ") Split Transaction";
-                }
-            }
+        case COLUMN_CATEGORY:
+            value = toCategoryString(transaction);
             break;
-        case 4:
+        // case COLUMN_CLASSIFICATION:
+        // value = "classification";
+        // break;
+        case COLUMN_AMOUNT:
             value = transaction.getAmount();
             break;
-        case 5:
-            value = AccountUtil.getRunningBalance(rowIndex, account);
+        case COLUMN_BALANCE:
+            value = AccountUtil.getRunningBalance(rowIndex, getAccount());
             break;
-        case 6:
+        case COLUMN_VOIDED:
             value = transaction.isVoid();
             break;
-        // case 7:
-        // value = transaction.isRecurring();
-        // break;
+
         default:
             value = null;
             break;
@@ -94,27 +74,12 @@ public class AccountViewerTableModel extends AbstractTableModel {
         return value;
     }
 
-    private String getCategoryName(Integer categoryId) {
-        String categoryName = null;
-        if (categoryId != null) {
-            if (categories != null) {
-                Category category = categories.get(categoryId);
-                if (category != null) {
-                    Integer parentId = category.getParentId();
-                    categoryName = category.getName();
-                    if (parentId != null) {
-                        String parentName = getCategoryName(parentId);
-                        categoryName = parentName + " : " + categoryName;
-                    }
-                }
-            }
-        }
-        return categoryName;
-    }
-
-    private String getPayeeName(Integer payeeId) {
+    private Object toPayeeString(Transaction transaction) {
+        Object value;
+        Integer payeeId = transaction.getPayeeId();
         String payeeName = null;
         if (payeeId != null) {
+            Map<Integer, Payee> payees = getMnyContext().getPayees();
             if (payees != null) {
                 Payee payee = payees.get(payeeId);
                 if (payee != null) {
@@ -123,72 +88,98 @@ public class AccountViewerTableModel extends AbstractTableModel {
             }
         }
         if (payeeName == null) {
-            payeeName = payeeId.toString();
+            payeeName = "";
         }
-        return payeeName;
+        value = payeeName;
+
+        if (transaction.isInvestment()) {
+            value = "UNKNOWN";
+            InvestmentActivity investmentActivity = transaction.getInvestmentActivity();
+            if (investmentActivity != null) {
+                value = investmentActivity.toString();
+            }
+        }
+
+        return value;
     }
 
+    private Object toCategoryString(Transaction transaction) {
+        Object value = null;
+        Integer transferredAccountId = transaction.getTransferredAccountId();
+        if (transferredAccountId != null) {
+            List<Account> accounts = getMnyContext().getAccounts();
+            if (accounts != null) {
+                for (Account a : accounts) {
+                    Integer id = a.getId();
+                    if (id.equals(transferredAccountId)) {
+                        value = "Transfer to " + a.getName();
+                        break;
+                    }
+                }
+            }
+        } else {
+            Integer categoryId = transaction.getCategoryId();
+            Map<Integer, Category> categories = getMnyContext().getCategories();
+            String categoryName = Category.getCategoryName(categoryId, categories);
+            value = categoryName;
+        }
+
+        if (value == null) {
+            if (transaction.hasSplits()) {
+                List<TransactionSplit> splits = transaction.getSplits();
+                value = "(" + splits.size() + ") Split Transaction";
+            }
+        }
+
+        if (transaction.isInvestment()) {
+            Integer securityId = transaction.getSecurityId();
+            if (securityId != null) {
+                Map<Integer, Security> securities = getMnyContext().getSecurities();
+                Security security = securities.get(securityId);
+                if (security != null) {
+                    value = security.getName();
+                } else {
+                    value = securityId.toString();
+                }
+            }
+        }
+        return value;
+    }
+
+    
     @Override
     public String getColumnName(int column) {
         String value = null;
         switch (column) {
-        case 0:
+        case COLUMN_ID:
             value = "ID";
             break;
-        case 1:
+        case COLUMN_DATE:
             value = "Date";
             break;
-        case 2:
+        case COLUMN_PAYEE:
             value = "Payee";
             break;
-        case 3:
+        case COLUMN_CATEGORY:
             value = "Category";
             break;
-        case 4:
+        // case COLUMN_CLASSIFICATION:
+        // value = "Classification";
+        // break;
+        case COLUMN_AMOUNT:
             value = "Amount";
             break;
-        case 5:
+        case COLUMN_BALANCE:
             value = "Balance";
             break;
-        case 6:
+        case COLUMN_VOIDED:
             value = "Voided";
             break;
-        // case 7:
-        // value = "Recurring";
-        // break;
         default:
             value = null;
             break;
         }
 
         return value;
-    }
-
-    public Map<Integer, Payee> getPayees() {
-        return payees;
-    }
-
-    public void setPayees(Map<Integer, Payee> payees) {
-        this.payees = payees;
-    }
-
-    public Map<Integer, Category> getCategories() {
-        return categories;
-    }
-
-    public void setCategories(Map<Integer, Category> categories) {
-        this.categories = categories;
-    }
-
-    public Account getAccount() {
-        return account;
-    }
-
-    public List<Account> getAccounts() {
-        return accounts;
-    }
-
-    public void setAccounts(List<Account> accounts) {
-        this.accounts = accounts;
     }
 }

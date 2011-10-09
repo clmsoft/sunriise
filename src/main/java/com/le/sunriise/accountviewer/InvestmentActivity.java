@@ -63,6 +63,8 @@ public class InvestmentActivity {
         return flag;
     }
 
+    
+    @Override
     public String toString() {
         return string;
     }

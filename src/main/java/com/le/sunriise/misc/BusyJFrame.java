@@ -43,6 +43,7 @@ public class BusyJFrame extends JFrame {
         // Create our own glass pane which says it manages focus. This is
         // part of the key to capturing keyboard events.
         glass_pane = new JPanel() {
+            
             @Override
             public boolean isManagingFocus() {
                 return true;
@@ -53,6 +54,7 @@ public class BusyJFrame extends JFrame {
         });
         // Eat keystrokes so they don't go to other components
         glass_pane.addKeyListener(new KeyAdapter() {
+            
             @Override
             public void keyPressed(KeyEvent e) {
                 e.consume();

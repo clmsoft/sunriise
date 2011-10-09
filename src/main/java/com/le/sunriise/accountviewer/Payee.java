@@ -33,7 +33,7 @@ public class Payee extends MnyObject implements Comparable<Payee>{
         this.name = name;
     }
 
-    @Override
+    
     public int compareTo(Payee o) {
         return id.compareTo(o.getId());
     }

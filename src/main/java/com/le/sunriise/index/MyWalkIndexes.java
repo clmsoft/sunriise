@@ -29,7 +29,7 @@ public class MyWalkIndexes extends WalkIndexes {
         super(dbFile, password);
     }
 
-    // @Override
+    // 
     // protected boolean accept(Table table) {
     // String tableName = table.getName();
     // if (tableName.compareToIgnoreCase("SP") == 0) {
@@ -38,7 +38,7 @@ public class MyWalkIndexes extends WalkIndexes {
     // return false;
     // }
 
-    // @Override
+    // 
     // protected boolean accept(Index index, Table table) {
     // String name = index.getName();
     // if (name.compareToIgnoreCase("PrimaryKey") != 0) {
@@ -48,6 +48,7 @@ public class MyWalkIndexes extends WalkIndexes {
     // return true;
     // }
 
+    
     @Override
     protected void walk(Index idx, Table table) throws IOException {
 //        String indexName = idx.getName();
@@ -181,6 +182,7 @@ if(otherCursor.findRowByEntry(entryKey)) {
         return uniqueIndexes;
     }
 
+    
     @Override
     protected void walk(Table table) throws IOException {
         primaryKeyIndexes = new HashSet<Integer>();

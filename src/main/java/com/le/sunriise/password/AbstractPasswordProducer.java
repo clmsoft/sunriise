@@ -27,7 +27,6 @@ public abstract class AbstractPasswordProducer implements Runnable {
         this.barrier = barrier;
     }
 
-    @Override
     public void run() {
         log.info("> START " + Thread.currentThread().getName());
         try {

@@ -22,7 +22,7 @@ public class UpdateStockPrices {
     private static final Logger log = Logger.getLogger(UpdateStockPrices.class);
 
     private final class RowByDateComparator implements Comparator<Map<String, Object>> {
-        @Override
+        
         public int compare(Map<String, Object> row1, Map<String, Object> row2) {
             Date dt1 = (Date) row1.get("dt");
             Date dt2 = (Date) row2.get("dt");

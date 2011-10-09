@@ -38,6 +38,7 @@ public class MyTableCellRenderer extends DefaultTableCellRenderer {
         this(cellRenderer, new Color(204, 255, 204), Color.WHITE);
     }
 
+    
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
         Component rendererComponent = null;

@@ -70,12 +70,14 @@ public class CheckPasswordService {
         ArrayList<Thread> threads = new ArrayList<Thread>();
         for (int i = 0; i < this.threadCount; i++) {
             Runnable consumer = new AbstractPasswordConsumer(dbFile, passwordQueue, this.consumerBarrier) {
+                
                 @Override
                 protected void notifyFoundPassword(String password) {
                     log.info("Found password=" + password);
                     setPassword(password);
                 }
 
+                
                 @Override
                 protected boolean stopConsuming() {
                     if (hasResult()) {
@@ -95,7 +97,7 @@ public class CheckPasswordService {
     private CyclicBarrier createConsumerBarrier() {
         int parties = this.threadCount;
         Runnable barrierAction = new Runnable() {
-            @Override
+            
             public void run() {
                 log.info("All consumers are DONE");
 
@@ -120,6 +122,7 @@ public class CheckPasswordService {
 
     private Thread createProducerThread() {
         Runnable producerTask = new AbstractPasswordProducer(readerQueue, passwordQueue, this.producerBarrier) {
+            
             @Override
             protected boolean stopProducing() {
                 if (hasResult()) {
@@ -137,7 +140,7 @@ public class CheckPasswordService {
     private CyclicBarrier createProducerBarrier() {
         int parties = 1;
         Runnable barrierAction = new Runnable() {
-            @Override
+            
             public void run() {
                 log.info("All producers are DONE");
                 try {
@@ -168,7 +171,7 @@ public class CheckPasswordService {
         // parties: main + producer + consumer
         int parties = 3;
         Runnable barrierAction = new Runnable() {
-            @Override
+            
             public void run() {
                 log.info("All producers and consumers are DONE");
                 if (password == null) {

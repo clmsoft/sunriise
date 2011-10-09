@@ -1,4 +1,4 @@
-package com.le.sunriise.md;
+package com.le.sunriise.accountviewer;
 
 public enum AccountType {
     BANKING(0), CREDIT_CARD(1), CASH(2), ASSET(3), LIABILITY(4), INVESTMENT(5), LOAN(6), UNKNOWN(-1);

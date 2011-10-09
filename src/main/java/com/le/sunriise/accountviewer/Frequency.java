@@ -1,4 +1,4 @@
-package com.le.sunriise.md;
+package com.le.sunriise.accountviewer;
 
 public class Frequency {
     /*

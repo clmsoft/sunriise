@@ -22,6 +22,7 @@ public class WaitCursorEventQueue extends EventQueue {
         waitTimer.start();
     }
 
+    
     @Override
     protected void dispatchEvent(AWTEvent event) {
         MouseEvent mouseEvent = null;
@@ -62,6 +63,7 @@ public class WaitCursorEventQueue extends EventQueue {
             }
         }
 
+        
         @Override
         public synchronized void run() {
             while (true) {

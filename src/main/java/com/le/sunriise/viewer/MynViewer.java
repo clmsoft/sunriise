@@ -314,7 +314,7 @@ public class MynViewer {
 
         JMenuItem mntmNewMenuItem_1 = new JMenuItem("Open");
         mntmNewMenuItem_1.addActionListener(new OpenDbAction(MynViewer.this.getFrame(), prefs, openedDb) {
-            @Override
+            
             public void dbFileOpened(OpenedDb newOpenedDb, OpenDbDialog dialog) {
                 if (newOpenedDb != null) {
                     MynViewer.this.openedDb = newOpenedDb;
@@ -518,7 +518,7 @@ public class MynViewer {
 
         table = new JTable() {
 
-            @Override
+            
             public void setModel(TableModel dataModel) {
                 super.setModel(dataModel);
                 TableColumnModel columnModel = this.getColumnModel();
@@ -570,7 +570,7 @@ public class MynViewer {
             // SimpleDateFormat("yyyy/MM/dd");
             private DateFormat formatter = new SimpleDateFormat("MMM dd, yyyy HH:mm");
 
-            @Override
+            
             public void setValue(Object value) {
                 if (log.isDebugEnabled()) {
                     log.debug("cellRenderer: value=" + value + ", " + value.getClass().getName());
@@ -929,7 +929,7 @@ public class MynViewer {
 
     private TableRowSorter<TableModel> createTableRowSorter(MnyTableModel tableModel) {
         TableRowSorter<TableModel> sorter = new TableRowSorter<TableModel>(tableModel) {
-            @Override
+            
             public void toggleSortOrder(int column) {
                 StopWatch stopWatch = new StopWatch();
                 log.info("> toggleSortOrder, count=" + getViewRowCount() + ", column=" + column);
@@ -944,7 +944,7 @@ public class MynViewer {
                 }
             }
 
-            @Override
+            
             public void sort() {
                 StopWatch stopWatch = new StopWatch();
                 log.info("> sort");

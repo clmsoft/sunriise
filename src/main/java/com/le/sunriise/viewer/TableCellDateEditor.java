@@ -22,7 +22,7 @@ public class TableCellDateEditor extends AbstractCellEditor implements TableCell
 //        JTextField textField = new JTextField();
         JButton button = new JButton();
         KeyListener keyListener = new KeyListener() {
-            @Override
+            
             public void keyTyped(KeyEvent e) {
 //                if (e.isAltDown()) {
 //                    if (e.getKeyChar() == 'd') {
@@ -35,14 +35,14 @@ public class TableCellDateEditor extends AbstractCellEditor implements TableCell
 //                log.info("> keyTyped, modifier=" + KeyEvent.getModifiersExText(e.getModifiersEx()) + ", char=" + e.getKeyChar());
             }
 
-            @Override
+            
             public void keyReleased(KeyEvent e) {
                 if (log.isDebugEnabled()) {
                     log.debug("> keyReleased");
                 }
             }
 
-            @Override
+            
             public void keyPressed(KeyEvent e) {
                 if (log.isDebugEnabled()) {
                     log.debug("> keyPressed");
@@ -54,7 +54,7 @@ public class TableCellDateEditor extends AbstractCellEditor implements TableCell
         this.component = button;
     }
 
-    @Override
+    
     public Object getCellEditorValue() {
 //        String text = ((JTextField) component).getText();
         String text = ((JButton) component).getText();
@@ -62,7 +62,7 @@ public class TableCellDateEditor extends AbstractCellEditor implements TableCell
         return text;
     }
 
-    @Override
+    
     public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
         String text = null;
         if (value != null) {

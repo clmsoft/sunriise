@@ -1,10 +1,14 @@
-package com.le.sunriise.md;
+package com.le.sunriise.accountviewer;
 
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
-public class Transaction implements Comparable<Transaction>{
+import org.apache.log4j.Logger;
+
+public class Transaction extends MnyObject implements Comparable<Transaction> {
+    private static final Logger log = Logger.getLogger(Transaction.class);
+
     private Integer id;
 
     private BigDecimal amount;
@@ -25,6 +29,20 @@ public class Transaction implements Comparable<Transaction>{
 
     private Integer transferredAccountId;
 
+    private TransactionInfo transactionInfo;
+
+    private Integer securityId;
+
+    private InvestmentActivity investmentActivity;
+
+    private InvestmentTransaction investmentTransaction;
+
+    private Integer clearedState;
+
+    private String memo;
+    
+    private String number;
+        
     public Integer getId() {
         return id;
     }
@@ -62,9 +80,15 @@ public class Transaction implements Comparable<Transaction>{
             return false;
         }
 
-        if ((statusFlag & 256) == 256) {
+        if (transactionInfo.isVoid()) {
             return true;
         }
+        // if ((statusFlag & 256) == 256) {
+        // if (!transactionInfo.isVoid()) {
+        // log.warn("isVoid does not match");
+        // }
+        // return true;
+        // }
 
         // TODO: hack to skip unknown transactions
         if (statusFlag == 2490368) {
@@ -127,7 +151,7 @@ public class Transaction implements Comparable<Transaction>{
         this.transferredAccountId = transferredAccount;
     }
 
-    @Override
+    
     public int compareTo(Transaction o) {
         return id.compareTo(o.getId());
     }
@@ -139,4 +163,102 @@ public class Transaction implements Comparable<Transaction>{
     public void setFrequency(Frequency frequency) {
         this.frequency = frequency;
     }
+
+    public TransactionInfo getTransactionInfo() {
+        return transactionInfo;
+    }
+
+    public void setTransactionInfo(TransactionInfo transactionInfo) {
+        this.transactionInfo = transactionInfo;
+    }
+
+    public Integer getSecurityId() {
+        return securityId;
+    }
+
+    public void setSecurityId(Integer securityId) {
+        this.securityId = securityId;
+    }
+
+    public boolean isInvestment() {
+        return transactionInfo.isInvestment();
+    }
+
+    public InvestmentActivity getInvestmentActivity() {
+        return investmentActivity;
+    }
+
+    public void setInvestmentActivity(InvestmentActivity investmentActivity) {
+        this.investmentActivity = investmentActivity;
+    }
+
+    public InvestmentTransaction getInvestmentTransaction() {
+        return investmentTransaction;
+    }
+
+    public void setInvestmentTransaction(InvestmentTransaction investmentTransaction) {
+        this.investmentTransaction = investmentTransaction;
+    }
+
+    public Double getQuantity() {
+        Double quantity = null;
+        InvestmentTransaction investmentTransaction = getInvestmentTransaction();
+        if (investmentTransaction != null) {
+            quantity = investmentTransaction.getQuantity();
+        }
+        return quantity;
+    }
+
+    public Double getPrice() {
+        Double price = null;
+        InvestmentTransaction investmentTransaction = getInvestmentTransaction();
+        if (investmentTransaction != null) {
+            price = investmentTransaction.getPrice();
+        }
+        return price;
+    }
+
+    public boolean isTransfer() {
+        return transferredAccountId != null;
+    }
+
+    public Integer getClearedState() {
+        return clearedState;
+    }
+
+    public void setClearedState(Integer clearedState) {
+        this.clearedState = clearedState;
+    }
+
+    public boolean isCleared() {
+        return (clearedState != null) && (clearedState == 1);
+    }
+
+    public boolean isReconciled() {
+        return (clearedState != null) && (clearedState == 2);
+    }
+
+    public boolean hasSplits() {
+       if (splits == null) {
+           return false;
+       }
+       return splits.size() > 0;
+    }
+
+    public String getMemo() {
+        return memo;
+    }
+
+    public void setMemo(String memo) {
+        this.memo = memo;
+    }
+
+    public String getNumber() {
+        return number;
+    }
+
+    public void setNumber(String number) {
+        this.number = number;
+    }
+
 }
