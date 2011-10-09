@@ -7,9 +7,9 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.le.sunriise.md.Account;
-import com.le.sunriise.md.AccountUtil;
-import com.le.sunriise.md.Transaction;
+import com.le.sunriise.accountviewer.Account;
+import com.le.sunriise.accountviewer.AccountUtil;
+import com.le.sunriise.accountviewer.Transaction;
 import com.le.sunriise.viewer.OpenedDb;
 
 public class OpenMnyFileTest {
