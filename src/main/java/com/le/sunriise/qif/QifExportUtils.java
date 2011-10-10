@@ -300,11 +300,11 @@ public class QifExportUtils {
         }
     }
 
-    private static String qifAmount(BigDecimal amount) {
+    public static String qifAmount(BigDecimal amount) {
         return formatter.format(amount);
     }
 
-    private static String qifDate(Date date) {
+    public static String qifDate(Date date) {
         StringBuilder sb = new StringBuilder();
 
         calendar.setTime(date);

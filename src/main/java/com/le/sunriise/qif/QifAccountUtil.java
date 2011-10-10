@@ -50,7 +50,7 @@ public class QifAccountUtil {
         writer.println("!Account");
     }
 
-    private static String toQifType(Account account) {
+    public static String toQifType(Account account) {
         AccountType accountType = account.getAccountType();
         Boolean retirement = account.getRetirement();
         

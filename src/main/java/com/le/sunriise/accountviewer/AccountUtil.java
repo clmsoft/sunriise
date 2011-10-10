@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+
 import org.apache.log4j.Logger;
 
 import com.healthmarketscience.jackcess.Cursor;
@@ -573,7 +574,12 @@ public class AccountUtil {
         }
     }
 
-    public static BigDecimal calculateCurrentBalance(Account account) {
+    public static BigDecimal calculateCurrentBalance(Account relatedToAccount) {
+        Date date = null;
+        return calculateCurrentBalance(relatedToAccount, date);
+    }
+
+    public static BigDecimal calculateCurrentBalance(Account account, Date date) {
         BigDecimal currentBalance = account.getStartingBalance();
         if (currentBalance == null) {
             log.warn("Starting balance is null. Set to 0. Account's id=" + account.getId());
@@ -585,6 +591,12 @@ public class AccountUtil {
             }
             if (transaction.isRecurring()) {
                 continue;
+            }
+            if (date != null) {
+                Date transactionDate = transaction.getDate();
+                if (transactionDate.compareTo(date) > 0) {
+                    continue;
+                }
             }
             BigDecimal amount = transaction.getAmount();
             if (amount != null) {
@@ -598,6 +610,11 @@ public class AccountUtil {
     }
 
     public static Double calculateInvestmentBalance(Account account, MnyContext mnyContext) {
+        Date date = null;
+        return calculateInvestmentBalance(account, date, mnyContext);
+    }
+
+    public static Double calculateInvestmentBalance(Account account, Date date, MnyContext mnyContext) {
         Map<Integer, Double> quantities = new HashMap<Integer, Double>();
         Double accountMarketValue = new Double(0.0);
 
@@ -610,6 +627,12 @@ public class AccountUtil {
             }
             if (!transaction.isInvestment()) {
                 continue;
+            }
+            if (date != null) {
+                Date transactionDate = transaction.getDate();
+                if (transactionDate.compareTo(date) > 0) {
+                    continue;
+                }
             }
             InvestmentTransaction investmentTransaction = transaction.getInvestmentTransaction();
             if (investmentTransaction == null) {
@@ -657,7 +680,7 @@ public class AccountUtil {
             securityHolding.setName(securityName);
 
             try {
-                Double price = getSecurityLatestPrice(securityId, mnyContext);
+                Double price = getSecurityLatestPrice(securityId, date, mnyContext);
                 if (price == null) {
                     price = new Double(0.0);
                 }
@@ -729,7 +752,7 @@ public class AccountUtil {
         return relatedToAccount;
     }
 
-    private static Double getSecurityLatestPrice(Integer securityId, MnyContext mnyContext) throws IOException {
+    private static Double getSecurityLatestPrice(Integer securityId, Date date, MnyContext mnyContext) throws IOException {
         Double price = null;
 
         StopWatch stopWatch = new StopWatch();
@@ -745,6 +768,14 @@ public class AccountUtil {
                 Integer hsec = (Integer) row.get("hsec");
                 if (hsec.compareTo(securityId) != 0) {
                     continue;
+                }
+                if (date != null) {
+                    Date priceDate = (Date) row.get("dt");
+                    if (priceDate != null) {
+                        if (priceDate.compareTo(date) > 0) {
+                            continue;
+                        }
+                    }
                 }
                 price = (Double) row.get("dPrice");
                 break;
