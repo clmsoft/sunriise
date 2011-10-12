@@ -42,6 +42,8 @@ public class Transaction extends MnyObject implements Comparable<Transaction> {
     private String memo;
     
     private String number;
+    
+    private TransactionState state = TransactionState.UNRECONCILED;
         
     public Integer getId() {
         return id;
@@ -259,6 +261,14 @@ public class Transaction extends MnyObject implements Comparable<Transaction> {
 
     public void setNumber(String number) {
         this.number = number;
+    }
+
+    public TransactionState getState() {
+        return state;
+    }
+
+    public void setState(TransactionState state) {
+        this.state = state;
     }
 
 }
