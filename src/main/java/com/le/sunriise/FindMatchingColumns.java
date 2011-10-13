@@ -33,7 +33,7 @@ public class FindMatchingColumns {
         if (args.length == 1) {
             dbFileName = args[0];
         } else {
-            Class clz = FindMatchingColumns.class;
+            Class<FindMatchingColumns> clz = FindMatchingColumns.class;
             System.out.println("Usage: java " + clz.getName() + " file.mny");
             System.exit(1);
         }

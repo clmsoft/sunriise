@@ -25,7 +25,7 @@ public class GetRelationships {
         if (args.length == 1) {
             dbFileName = args[0];
         } else {
-            Class clz = GetRelationships.class;
+            Class<GetRelationships> clz = GetRelationships.class;
             System.out.println("Usage: java " + clz.getName() + " file.mny");
             System.exit(1);
         }

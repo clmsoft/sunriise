@@ -34,6 +34,7 @@ public class Payee extends MnyObject implements Comparable<Payee>{
     }
 
     
+    @Override
     public int compareTo(Payee o) {
         return id.compareTo(o.getId());
     }

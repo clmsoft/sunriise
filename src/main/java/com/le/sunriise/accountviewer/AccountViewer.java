@@ -125,6 +125,7 @@ public class AccountViewer {
 
                 Runnable doRun = new Runnable() {
                     
+                    @Override
                     public void run() {
                         Account account = null;
                         // clear out currently select account, if any
@@ -163,9 +164,9 @@ public class AccountViewer {
         JPanel leftComponent = createLeftComponent();
         JPanel rightComponent = createRightComponent();
         JSplitPane hSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftComponent, rightComponent);
-        hSplitPane.setResizeWeight(0.3);
+        hSplitPane.setResizeWeight(0.30);
         getFrame().getContentPane().add(hSplitPane, BorderLayout.CENTER);
-        hSplitPane.setDividerLocation(0.3);
+        hSplitPane.setDividerLocation(0.30);
 
         initDataBindings();
     }
@@ -180,6 +181,7 @@ public class AccountViewer {
         JMenuItem exitMenuItem = new JMenuItem("Exit");
         exitMenuItem.addActionListener(new ActionListener() {
             
+            @Override
             public void actionPerformed(ActionEvent e) {
                 System.exit(0);
             }
@@ -195,7 +197,7 @@ public class AccountViewer {
 
     private JPanel createLeftComponent() {
         JPanel leftComponent = new JPanel();
-        leftComponent.setPreferredSize(new Dimension(80, -1));
+//        leftComponent.setPreferredSize(new Dimension(80, -1));
         leftComponent.setLayout(new BorderLayout());
 
         JScrollPane scrollPane = new JScrollPane();
@@ -204,6 +206,7 @@ public class AccountViewer {
         accountList = new JList();
         accountList.addListSelectionListener(new ListSelectionListener() {
             
+            @Override
             public void valueChanged(ListSelectionEvent event) {
                 if (event.getValueIsAdjusting()) {
                     return;
@@ -324,6 +327,7 @@ public class AccountViewer {
         // table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
         table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
             
+            @Override
             public void valueChanged(ListSelectionEvent event) {
                 if (event.getValueIsAdjusting()) {
                     return;
@@ -331,11 +335,15 @@ public class AccountViewer {
                 if (log.isDebugEnabled()) {
                     log.debug("Rows:");
                     for (int r : table.getSelectedRows()) {
-                        log.debug(String.format(" %d", r));
+                        if (log.isDebugEnabled()) {
+                            log.debug(String.format(" %d", r));
+                        }
                     }
                     log.info(". Columns:");
                     for (int c : table.getSelectedColumns()) {
-                        log.debug(String.format(" %d", c));
+                        if (log.isDebugEnabled()) {
+                            log.debug(String.format(" %d", c));
+                        }
                     }
                 }
 
@@ -535,60 +543,7 @@ public class AccountViewer {
                 AccountType accountType = account.getAccountType();
                 switch (accountType) {
                 case INVESTMENT:
-                    tableModel = new AccountViewerTableModel(account) {
-                        
-                        @Override
-                        public int getColumnCount() {
-                            return super.getColumnCount() + 1;
-                        }
-
-                        
-                        @Override
-                        public Object getValueAt(int rowIndex, int columnIndex) {
-                            Object value = super.getValueAt(rowIndex, columnIndex);
-
-                            List<Transaction> transactions = getAccount().getTransactions();
-                            Transaction transaction = transactions.get(rowIndex);
-
-                            switch (columnIndex) {
-                            case 5:
-                                value = transaction.getQuantity();
-                                break;
-                            case 6:
-                                value = transaction.getPrice();
-                                break;
-                            case 7:
-                                value = transaction.isVoid();
-                                break;
-                            }
-                            return value;
-                        }
-
-                        
-                        @Override
-                        public String getColumnName(int column) {
-                            String columnName = super.getColumnName(column);
-
-                            switch (column) {
-                            case 2:
-                                columnName = "Activity";
-                                break;
-                            case 3:
-                                columnName = "Investment";
-                                break;
-                            case 5:
-                                columnName = "Quantity";
-                                break;
-                            case 6:
-                                columnName = "Price";
-                                break;
-                            case 7:
-                                columnName = "Voided";
-                                break;
-                            }
-                            return columnName;
-                        }
-                    };
+                    tableModel = new InvestmentTableModel(account);
                     Double marketValue = AccountUtil.calculateInvestmentBalance(account, mnyContext);
                     account.setCurrentBalance(new BigDecimal(marketValue));
                     updateEndingBalanceLabel(new BigDecimal(marketValue), account);
@@ -597,7 +552,7 @@ public class AccountViewer {
             }
 
             if (tableModel == null) {
-                tableModel = new AccountViewerTableModel(account);
+                tableModel = new DefaultAccountViewerTableModel(account);
             }
 
             tableModel.setMnyContext(mnyContext);
@@ -700,6 +655,7 @@ public class AccountViewer {
     public static void main(String[] args) {
         EventQueue.invokeLater(new Runnable() {
             
+            @Override
             public void run() {
                 try {
                     AccountViewer window = new AccountViewer();
@@ -734,6 +690,7 @@ public class AccountViewer {
 
         Runnable command = new Runnable() {
             
+            @Override
             public void run() {
                 logFlags(id);
                 logQif(id);
@@ -758,6 +715,7 @@ public class AccountViewer {
                             if (transactionQifTextArea != null) {
                                 Runnable doRun = new Runnable() {
                                     
+                                    @Override
                                     public void run() {
                                         transactionQifTextArea.setText(qifStr);
                                     }

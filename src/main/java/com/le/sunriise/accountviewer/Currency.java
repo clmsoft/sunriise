@@ -10,6 +10,7 @@ public class Currency extends MnyObject implements Comparable<Currency> {
     private String isoCode;
 
     
+    @Override
     public int compareTo(Currency o) {
         return id.compareTo(o.getId());
     }

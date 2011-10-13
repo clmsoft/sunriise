@@ -5,8 +5,8 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
-public class AccountViewerTableModel extends AbstractAccountViewerTableModel {
-    private static final Logger log = Logger.getLogger(AccountViewerTableModel.class);
+public class DefaultAccountViewerTableModel extends AbstractAccountViewerTableModel {
+    private static final Logger log = Logger.getLogger(DefaultAccountViewerTableModel.class);
 
     private static final int COLUMN_ID = 0;
     private static final int COLUMN_DATE = COLUMN_ID + 1;
@@ -17,11 +17,11 @@ public class AccountViewerTableModel extends AbstractAccountViewerTableModel {
     private static final int COLUMN_BALANCE = COLUMN_AMOUNT + 1;
     private static final int COLUMN_VOIDED = COLUMN_BALANCE + 1;
 
-    public AccountViewerTableModel(Account account) {
+    public DefaultAccountViewerTableModel(Account account) {
         super(account);
     }
 
-    
+    @Override
     public int getRowCount() {
         if (getAccount() != null) {
             return getAccount().getTransactions().size();
@@ -30,12 +30,12 @@ public class AccountViewerTableModel extends AbstractAccountViewerTableModel {
         }
     }
 
-    
+    @Override
     public int getColumnCount() {
         return 7;
     }
 
-    
+    @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
         Object value = null;
         List<Transaction> transactions = getAccount().getTransactions();
@@ -133,20 +133,12 @@ public class AccountViewerTableModel extends AbstractAccountViewerTableModel {
 
         if (transaction.isInvestment()) {
             Integer securityId = transaction.getSecurityId();
-            if (securityId != null) {
-                Map<Integer, Security> securities = getMnyContext().getSecurities();
-                Security security = securities.get(securityId);
-                if (security != null) {
-                    value = security.getName();
-                } else {
-                    value = securityId.toString();
-                }
-            }
+            String securityName = AccountUtil.getSecurityName(securityId, getMnyContext());
+            value = securityName;
         }
         return value;
     }
 
-    
     @Override
     public String getColumnName(int column) {
         String value = null;

@@ -115,6 +115,7 @@ public class OpenDbDialog extends JDialog {
                 private JFileChooser fc = null;
 
                 
+                @Override
                 public void actionPerformed(ActionEvent event) {
                     Component component = (Component) event.getSource();
                     if (fc == null) {
@@ -152,6 +153,7 @@ public class OpenDbDialog extends JDialog {
                 dbFileNames = new JComboBox();
                 dbFileNames.addItemListener(new ItemListener() {
                     
+                    @Override
                     public void itemStateChanged(ItemEvent e) {
                         if (e.getStateChange() == ItemEvent.SELECTED) {
                             String fileName = (String) dbFileNames.getSelectedItem();
@@ -202,6 +204,7 @@ public class OpenDbDialog extends JDialog {
                 JButton okButton = new JButton("OK");
                 okButton.addActionListener(new ActionListener() {
                     
+                    @Override
                     public void actionPerformed(ActionEvent event) {
                         String dbFileName = (String) dbFileNames.getSelectedItem();
                         if ((dbFileName == null) || (dbFileName.length() <= 0)) {
@@ -245,6 +248,7 @@ public class OpenDbDialog extends JDialog {
                 JButton cancelButton = new JButton("Cancel");
                 cancelButton.addActionListener(new ActionListener() {
                     
+                    @Override
                     public void actionPerformed(ActionEvent e) {
                         setCancel(true);
                         // dispose();

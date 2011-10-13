@@ -46,6 +46,7 @@ public class AccountUtil {
 
         if (sort) {
             Comparator<Account> comparator = new Comparator<Account>() {
+                @Override
                 public int compare(Account o1, Account o2) {
                     return o1.getName().compareTo(o2.getName());
                 }
@@ -147,6 +148,7 @@ public class AccountUtil {
 
             boolean sort = true;
             Comparator<Transaction> comparator = new Comparator<Transaction>() {
+                @Override
                 public int compare(Transaction o1, Transaction o2) {
                     Date d1 = o1.getDate();
                     Date d2 = o2.getDate();
@@ -693,6 +695,7 @@ public class AccountUtil {
             securityHolding.setMarketValue(new BigDecimal(price.doubleValue() * securityHolding.getQuanity()));
         }
         Collections.sort(securityHoldings, new Comparator<SecurityHolding>() {
+            @Override
             public int compare(SecurityHolding o1, SecurityHolding o2) {
                 return o1.getName().compareTo(o2.getName());
             }
@@ -815,5 +818,19 @@ public class AccountUtil {
 
         setCurrencies(accounts, currencies);
         return accounts;
+    }
+
+    public static String getSecurityName(Integer securityId, MnyContext mnyContext) {
+        String securityName = null;
+        if (securityId != null) {
+            Map<Integer, Security> securities = mnyContext.getSecurities();
+            Security security = securities.get(securityId);
+            if (security != null) {
+                securityName = security.getName();
+            } else {
+                securityName = securityId.toString();
+            }
+        }
+        return securityName;
     }
 }

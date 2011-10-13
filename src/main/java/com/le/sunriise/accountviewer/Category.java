@@ -34,6 +34,7 @@ public class Category extends MnyObject implements Comparable<Category> {
     }
 
     
+    @Override
     public int compareTo(Category o) {
         return getId().compareTo(o.getId());
     }

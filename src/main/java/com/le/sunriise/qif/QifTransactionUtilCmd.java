@@ -128,10 +128,10 @@ public class QifTransactionUtilCmd {
     }
 
     private static void printTransactionsHeader(Account account, MnyContext mnyContext, PrintWriter writer) {
-//        !Account
-//        NCalPERS Retireme (Contributions)
-//        TBank
-//        ^   
+        // !Account
+        // NCalPERS Retireme (Contributions)
+        // TBank
+        // ^
         writer.println("!Account");
         writer.println("N" + account.getName());
         writer.println("T" + QifAccountUtil.toQifType(account));
@@ -149,6 +149,10 @@ public class QifTransactionUtilCmd {
                 startingBalance = new BigDecimal(0.00);
             }
         }
+        if (startingBalance.doubleValue() <= 0) {
+            return;
+        }
+
         Date date = null;
         List<Transaction> transactions = account.getTransactions();
         if (transactions != null) {

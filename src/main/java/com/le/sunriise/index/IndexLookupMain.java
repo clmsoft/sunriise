@@ -25,7 +25,7 @@ public class IndexLookupMain {
         if (args.length == 1) {
             dbFileName = args[0];
         } else {
-            Class clz = IndexLookupMain.class;
+            Class<IndexLookupMain> clz = IndexLookupMain.class;
             System.out.println("Usage: java " + clz.getName() + " file.mny");
             System.exit(1);
         }

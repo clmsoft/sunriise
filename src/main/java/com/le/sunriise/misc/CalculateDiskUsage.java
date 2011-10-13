@@ -205,7 +205,7 @@ public class CalculateDiskUsage {
             inFileName = args[0];
             password = args[1];
         } else {
-            Class clz = CalculateDiskUsage.class;
+            Class<CalculateDiskUsage> clz = CalculateDiskUsage.class;
             System.out.println("Usage: " + clz.getName() + " sample.mny [password]");
             System.exit(1);
         }

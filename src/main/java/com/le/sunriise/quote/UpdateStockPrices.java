@@ -23,6 +23,7 @@ public class UpdateStockPrices {
 
     private final class RowByDateComparator implements Comparator<Map<String, Object>> {
         
+        @Override
         public int compare(Map<String, Object> row1, Map<String, Object> row2) {
             Date dt1 = (Date) row1.get("dt");
             Date dt2 = (Date) row2.get("dt");
@@ -49,7 +50,11 @@ public class UpdateStockPrices {
 
     public void update(File quotesFile, File inFile, String password) throws IOException {
         List<PriceInfo> newPrices = PriceInfo.parse(quotesFile);
-        update(newPrices, inFile, password);
+        log.info("Got " + newPrices.size() + " new prices ...");
+        boolean skipUpdate = false;
+        if (! skipUpdate) {
+            update(newPrices, inFile, password);
+        }
     }
 
     public void update(List<PriceInfo> newPrices, File inFile, String password) throws IOException {

@@ -38,7 +38,7 @@ public class ExportToMdb {
             srcPassword = args[1];
             destFile = new File(args[2]);
         } else {
-            Class clz = ExportToMdb.class;
+            Class<ExportToMdb> clz = ExportToMdb.class;
             System.out.println("Usage: java " + clz.getName() + " in.mny [password] out.mdb");
             System.exit(1);
         }

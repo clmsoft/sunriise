@@ -154,6 +154,7 @@ public class Transaction extends MnyObject implements Comparable<Transaction> {
     }
 
     
+    @Override
     public int compareTo(Transaction o) {
         return id.compareTo(o.getId());
     }

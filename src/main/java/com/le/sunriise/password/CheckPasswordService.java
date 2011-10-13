@@ -98,6 +98,7 @@ public class CheckPasswordService {
         int parties = this.threadCount;
         Runnable barrierAction = new Runnable() {
             
+            @Override
             public void run() {
                 log.info("All consumers are DONE");
 
@@ -141,6 +142,7 @@ public class CheckPasswordService {
         int parties = 1;
         Runnable barrierAction = new Runnable() {
             
+            @Override
             public void run() {
                 log.info("All producers are DONE");
                 try {
@@ -172,6 +174,7 @@ public class CheckPasswordService {
         int parties = 3;
         Runnable barrierAction = new Runnable() {
             
+            @Override
             public void run() {
                 log.info("All producers and consumers are DONE");
                 if (password == null) {

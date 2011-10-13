@@ -3,7 +3,6 @@ package com.le.sunriise.accountviewer;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -128,6 +127,7 @@ public class Account extends MnyObject implements Comparable<Account> {
         return getName();
     }
 
+    @Override
     public int compareTo(Account o) {
         return id.compareTo(o.getId());
     }

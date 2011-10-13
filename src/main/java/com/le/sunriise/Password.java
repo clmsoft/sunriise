@@ -37,7 +37,7 @@ public class Password {
             file = new File(args[0]);
             newPassword = args[1];
         } else {
-            Class clz = Password.class;
+            Class<Password> clz = Password.class;
             System.out.println("Usage: java " + clz.getName() + " file.mny [newPassword]");
             System.exit(1);
         }

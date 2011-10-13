@@ -35,7 +35,7 @@ public class ExportToSql {
             srcPassword = args[1];
             destFile = new File(args[2]);
         } else {
-            Class clz = ExportToSql.class;
+            Class<ExportToSql> clz = ExportToSql.class;
             System.out.println("Usage: java " + clz.getName() + " in.mny [password] out.sql");
             System.exit(1);
         }

@@ -11,6 +11,7 @@ import java.util.List;
 import org.apache.log4j.Logger;
 
 import com.le.sunriise.accountviewer.Account;
+import com.le.sunriise.accountviewer.AccountUtil;
 import com.le.sunriise.accountviewer.Category;
 import com.le.sunriise.accountviewer.InvestmentActivity;
 import com.le.sunriise.accountviewer.MnyContext;
@@ -37,18 +38,42 @@ public class QifExportUtils {
                 // Letter What it means
                 // D Date (optional)
                 writer.println("D" + qifDate(transaction.getDate()));
+
                 // N Action
                 String qifInvestmentAction = qifInvestmentAction(transaction);
                 if (qifInvestmentAction != null) {
                     writer.println("N" + qifInvestmentAction);
                 }
+
                 // Y Security
+                Integer securityId = transaction.getSecurityId();
+                writer.println("Y" + AccountUtil.getSecurityName(securityId, mnyContext));
+
                 // I Price
+                Double price = transaction.getPrice();
+                if (price == null) {
+                    price = new Double(0.0);
+                }
+                writer.println("I" + formatter.format(price));
+
                 // Q Quantity (# of shares or split ratio)
-                // C Cleared status
+                Double quantity = transaction.getQuantity();
+                if (quantity == null) {
+                    quantity = new Double(0.0);
+                }
+                writer.println("Q" + quantity);
+
+                printClearedStatus(transaction, writer);
+
                 // P 1st line text for transfers/reminders
+                writer.println("P" + "transfers-TODO");
+
                 // M Memo
+                printMemo(transaction, writer);
+
                 // O Commission
+                writer.println("O" + "Commission-TODO");
+
                 // L For MiscIncX or MiscExpX actions:Category/class
                 // followed by
                 // |transfer/class of the transaction
@@ -56,128 +81,160 @@ public class QifExportUtils {
                 // transaction
                 // For all other actions:Transfer/class of the
                 // transactions
-                // T Amount of transaction
-                // U Amount of transaction (higher possible value than
-                // T)
+                writer.println("L" + "Category-TODO");
+
+                // T and U
+                printAmount(transaction, writer);
+
                 // $ Amount transferred
+                writer.println("$" + "Amount-TODO");
             } else {
                 // D Date
                 writer.println("D" + qifDate(transaction.getDate()));
-                // T Amount of transaction
-                if (transaction.isVoid()) {
-                    writer.println("T" + "0.00");
-                } else {
-                    writer.println("T" + qifAmount(transaction.getAmount()));
-                }
-                // U Amount of transaction (higher possible value than T)
-                if (transaction.isVoid()) {
-                    writer.println("U" + "0.00");
-                } else {
-                    writer.println("U" + qifAmount(transaction.getAmount()));
-                }
+
+                // T and U
+                printAmount(transaction, writer);
 
                 // C Cleared status
-                if (transaction.isVoid()) {
-                    // clear: *
-                    // reconcile: X
-                    writer.println("C*");
-                } else {
-                    if (transaction.isReconciled()) {
-                        writer.println("CX");
-                    } else if (transaction.isCleared()) {
-                        writer.println("C*");
-                    }
-                }
-                // N Number (check or reference)
-                String number = transaction.getNumber();
-                if (number != null) {
-                    log.info("number=" + number);
+                printClearedStatus(transaction, writer);
 
-                    String leftSide = null;
-                    String rightSide = null;
-                    if (number.length() == 0) {
-                        leftSide = null;
-                        rightSide = null;
-                    } else if (number.length() == 1) {
-                        leftSide = null;
-                        rightSide = number;
-                    } else {
-                        leftSide = number.substring(0, 1);
-                        rightSide = number.substring(1);
-                    }
-                    if (leftSide != null) {
-                        leftSide = leftSide.trim();
-                    }
-                    if (rightSide != null) {
-                        rightSide = rightSide.trim();
-                    }
-                    String value = rightSide;
-                    if (value != null) {
-                        value = value.trim();
-                        writer.println("N" + value);
-                    }
-                }
+                // N Number (check or reference)
+                printNumber(transaction, writer);
+
                 // P Payee/description
-                Integer payeeId = transaction.getPayeeId();
-                if (log.isDebugEnabled()) {
-                    log.debug("payeeId=" + payeeId);
-                }
-                String payeeName = Payee.getPayeeName(payeeId, mnyContext.getPayees());
-                if (transaction.isVoid()) {
-                    // money way
-                    // writer.println("PVOID " + Payee.getPayeeName(payeeId,
-                    // mnyContext.getPayees()));
-                    // quicken way
-                    if (payeeName != null) {
-                        writer.println("P**VOID**" + payeeName);
-                    } else {
-                        writer.println("P**VOID**");
-                    }
-                } else {
-                    if (payeeName != null) {
-                        writer.println("P" + payeeName);
-                    }
-                }
-                // M Memo
-                String memo = transaction.getMemo();
-                if (memo != null) {
-                    writer.println("M" + memo);
-                }
+                printPayee(transaction, mnyContext, writer);
+
+                printMemo(transaction, writer);
 
                 // A Address (up to 5 lines; 6th line is an optional
                 // message)
 
                 // L Category/class or transfer/class
                 printQifCategory("L", transaction, mnyContext, writer);
-                List<TransactionSplit> splits = transaction.getSplits();
-                if (splits != null) {
-                    for (TransactionSplit split : splits) {
-                        Transaction txn = split.getTransaction();
 
-                        // S Category in split (category/class or
-                        // transfer/class)
-                        printQifCategory("S", txn, mnyContext, writer);
-                        // E Memo in split
-                        memo = txn.getMemo();
-                        if (memo != null) {
-                            writer.println("M" + memo);
-                        }
-                        // $ Dollar amount of split
-                        if (txn.isVoid()) {
-                            writer.println("$" + "0.00");
-                        } else {
-                            writer.println("$" + qifAmount(txn.getAmount()));
-                        }
-                        // % Percentage of split if percentages are used
-                        // F Reimbursable business expense flag
-                    }
-                }
+                printSplits(transaction, mnyContext, writer);
             }
         } finally {
             // ^ End of entry
             writer.println("^");
         }
 
+    }
+
+    private static void printSplits(Transaction transaction, MnyContext mnyContext, PrintWriter writer) {
+        List<TransactionSplit> splits = transaction.getSplits();
+        if (splits != null) {
+            for (TransactionSplit split : splits) {
+                Transaction txn = split.getTransaction();
+
+                // S Category in split (category/class or
+                // transfer/class)
+                printQifCategory("S", txn, mnyContext, writer);
+                // E Memo in split
+                String memo = txn.getMemo();
+                if (memo != null) {
+                    writer.println("M" + memo);
+                }
+                // $ Dollar amount of split
+                if (txn.isVoid()) {
+                    writer.println("$" + "0.00");
+                } else {
+                    writer.println("$" + qifAmount(txn.getAmount()));
+                }
+                // % Percentage of split if percentages are used
+                // F Reimbursable business expense flag
+            }
+        }
+    }
+
+    private static void printPayee(Transaction transaction, MnyContext mnyContext, PrintWriter writer) {
+        Integer payeeId = transaction.getPayeeId();
+        if (log.isDebugEnabled()) {
+            log.debug("payeeId=" + payeeId);
+        }
+        String payeeName = Payee.getPayeeName(payeeId, mnyContext.getPayees());
+        if (transaction.isVoid()) {
+            // money way
+            // writer.println("PVOID " + Payee.getPayeeName(payeeId,
+            // mnyContext.getPayees()));
+            // quicken way
+            if (payeeName != null) {
+                writer.println("P**VOID**" + payeeName);
+            } else {
+                writer.println("P**VOID**");
+            }
+        } else {
+            if (payeeName != null) {
+                writer.println("P" + payeeName);
+            }
+        }
+    }
+
+    private static void printNumber(Transaction transaction, PrintWriter writer) {
+        String number = transaction.getNumber();
+        if (number != null) {
+            log.info("number=" + number);
+
+            String leftSide = null;
+            String rightSide = null;
+            if (number.length() == 0) {
+                leftSide = null;
+                rightSide = null;
+            } else if (number.length() == 1) {
+                leftSide = null;
+                rightSide = number;
+            } else {
+                leftSide = number.substring(0, 1);
+                rightSide = number.substring(1);
+            }
+            if (leftSide != null) {
+                leftSide = leftSide.trim();
+            }
+            if (rightSide != null) {
+                rightSide = rightSide.trim();
+            }
+            String value = rightSide;
+            if (value != null) {
+                value = value.trim();
+                writer.println("N" + value);
+            }
+        }
+    }
+
+    private static void printMemo(Transaction transaction, PrintWriter writer) {
+        String memo = transaction.getMemo();
+        if (memo != null) {
+            writer.println("M" + memo);
+        }
+    }
+
+    private static void printAmount(Transaction transaction, PrintWriter writer) {
+        // T Amount of transaction
+        if (transaction.isVoid()) {
+            writer.println("T" + "0.00");
+        } else {
+            writer.println("T" + qifAmount(transaction.getAmount()));
+        }
+        // U Amount of transaction (higher possible value than T)
+        if (transaction.isVoid()) {
+            writer.println("U" + "0.00");
+        } else {
+            writer.println("U" + qifAmount(transaction.getAmount()));
+        }
+    }
+
+    private static void printClearedStatus(Transaction transaction, PrintWriter writer) {
+        if (transaction.isVoid()) {
+            // clear: *
+            // reconcile: X
+            writer.println("C*");
+        } else {
+            if (transaction.isReconciled()) {
+                writer.println("CX");
+            } else if (transaction.isCleared()) {
+                writer.println("C*");
+            }
+        }
     }
 
     private static String qifInvestmentAction(Transaction transaction) {

@@ -28,7 +28,7 @@ public class GraphVizMain {
             dbFileName = args[0];
             outDir = new File(args[1]);
         } else {
-            Class clz = GraphVizMain.class;
+            Class<GraphVizMain> clz = GraphVizMain.class;
             System.out.println("Usage: java " + clz.getName() + " file.mny [outDir]");
             System.exit(1);
         }

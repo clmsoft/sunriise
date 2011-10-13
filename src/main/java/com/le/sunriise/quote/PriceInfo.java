@@ -94,7 +94,7 @@ public class PriceInfo {
 
         String symbol = csvReader.get("symbol");
         if (QuoteUtils.isBlank(symbol)) {
-            log.warn("Bad format, 'symbol' column is blank");
+            log.warn("Bad format, 'symbol' column is blank. " + csvReader.getRawRecord());
             return priceInfo;
         }
 

@@ -201,7 +201,7 @@ public class ExportToCsv {
             outDirName = args[1];
             password = args[2];
         } else {
-            Class clz = ExportToCsv.class;
+            Class<ExportToCsv> clz = ExportToCsv.class;
             System.out.println("Usage: " + clz.getName() + " sample.mny outDir [password]");
             System.exit(1);
         }

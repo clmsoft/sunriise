@@ -8,6 +8,7 @@ public class Security extends MnyObject implements Comparable<Security> {
     private String symbol;
     
     
+    @Override
     public int compareTo(Security o) {
         return getId().compareTo(o.getId());
     }
