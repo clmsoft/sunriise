@@ -219,6 +219,10 @@ public class OpenDbDialog extends JDialog {
 
                             OpenDbDialog.this.opendDb = Utils.openDb(dbFileName, passwordField.getPassword(), readOnlyCheckBox.isSelected(), encryptedCheckBox.isSelected());
                             log.info("Opened dbFile=" + OpenDbDialog.this.opendDb.getDbFile());
+                        } catch (IllegalStateException e) {
+                            log.error(e, e);
+                            JOptionPane.showMessageDialog(dbFileNames, dbFileName + " \n" + e.toString(), "Error open db file", JOptionPane.ERROR_MESSAGE);
+                            return;
                         } catch (IOException e) {
                             log.error(e);
                             JOptionPane.showMessageDialog(dbFileNames, dbFileName + " \n" + e.toString(), "Error open db file", JOptionPane.ERROR_MESSAGE);

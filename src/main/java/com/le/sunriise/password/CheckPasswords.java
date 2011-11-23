@@ -30,37 +30,93 @@ public class CheckPasswords {
     private final AtomicInteger counter = new AtomicInteger();
 
     private final class CheckPasswordWorker implements Callable<String> {
-        private String testPassword;
-        private File dbFile;
+        private final File dbFile;
+        private final HeaderPage headerPage;
+        private final String testPassword;
 
-        public CheckPasswordWorker(File dbFile, String line) {
+        public CheckPasswordWorker(File dbFile, HeaderPage headerPage, String testPassword) {
+            super();
             this.dbFile = dbFile;
-            this.testPassword = line;
+            this.headerPage = headerPage;
+            this.testPassword = testPassword;
         }
 
-        
+        public CheckPasswordWorker(File dbFile, String testPassword) {
+            this(dbFile, null, testPassword);
+        }
+
+        public CheckPasswordWorker(HeaderPage headerPage, String testPassword) {
+            this(null, headerPage, testPassword);
+        }
+
         @Override
         public String call() throws Exception {
             int counterValue = counter.incrementAndGet();
-            if ((counterValue % 10000) == 0) {
+            int max = 100000;
+            if ((counterValue % max) == 0) {
                 log.info("Have checked " + counterValue);
             }
+
+            if (checkPassword(testPassword)) {
+                log.info("testPassword=" + testPassword + ", YES");
+                return testPassword;
+            } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("testPassword=" + testPassword + ", NO");
+                }
+                return null;
+            }
+        }
+
+        private boolean checkPassword(String testPassword) throws IOException {
+            boolean result = false;
+            boolean checkUsingOpenDb = (headerPage == null);
+
+            if (checkUsingOpenDb) {
+                result = checkUsingOpenDb(dbFile, testPassword);
+            } else {
+                result = checkMinPasswordChecker(headerPage, testPassword);
+            }
+
+            return result;
+        }
+
+        private boolean checkMinPasswordChecker(HeaderPage headerPage, String testPassword) throws IOException {
+            boolean result = false;
+            try {
+                if (MinPasswordChecker.checkPassword(headerPage, testPassword)) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("OK password=" + testPassword);
+                    }
+                    result = true;
+                } else {
+                    if (log.isDebugEnabled()) {
+                        log.debug("NOT OK password=" + testPassword);
+                    }
+                    result = false;
+                }
+
+            } finally {
+
+            }
+            return result;
+        }
+
+        private boolean checkUsingOpenDb(File dbFile, String testPassword) throws IOException {
+            boolean result = false;
             try {
                 Utils.openDbReadOnly(dbFile, testPassword);
                 if (log.isDebugEnabled()) {
                     log.debug("testPassword=" + testPassword + ", YES");
                 }
-                return testPassword;
+                result = true;
             } catch (java.lang.IllegalStateException e) {
                 // wrong password
                 if (log.isDebugEnabled()) {
                     log.warn(e);
                 }
             }
-            if (log.isDebugEnabled()) {
-                log.debug("testPassword=" + testPassword + ", NO");
-            }
-            return null;
+            return result;
         }
     }
 
@@ -69,42 +125,46 @@ public class CheckPasswords {
         pool = Executors.newFixedThreadPool(threads);
     }
 
-    private String check(File dbFile, File path) throws IOException {
-        return recursePath(dbFile, path);
+    public String check(HeaderPage headerPage, File path) throws IOException {
+        return recursePath(headerPage, path);
     }
 
-    private String recursePath(File dbFile, File path) throws IOException {
+    private String recursePath(HeaderPage headerPage, File path) throws IOException {
         if (path.isDirectory()) {
-            recurseDirectory(dbFile, path);
+            return recurseDirectory(headerPage, path);
         } else {
-            return consumeFile(dbFile, path);
+            return consumeFile(headerPage, path);
         }
-        return null;
     }
 
-    private void recurseDirectory(File dbFile, File directory) throws IOException {
+    private String recurseDirectory(HeaderPage dbFile, File directory) throws IOException {
+        String value = null;
         log.info("> dir=" + directory);
         File[] files = directory.listFiles();
         if (files != null) {
             for (File file : files) {
-                recursePath(dbFile, file);
+                value = recursePath(dbFile, file);
+                if (value != null) {
+                    return value;
+                }
             }
         }
+        return null;
     }
 
-    private String consumeFile(File dbFile, File file) {
+    private String consumeFile(HeaderPage headerPage, File file) {
         log.info("> file=" + file);
         BufferedReader reader = null;
         try {
             reader = new BufferedReader(new FileReader(file));
-            return consumeReader(dbFile, reader);
+            return consumeReader(headerPage, reader);
         } catch (IOException e) {
             log.error(e, e);
         }
         return null;
     }
 
-    private String consumeReader(File dbFile, BufferedReader reader) {
+    private String consumeReader(HeaderPage headerPage, BufferedReader reader) {
         String result = null;
         String line = null;
         int lineCount = 1;
@@ -124,7 +184,7 @@ public class CheckPasswords {
 
                 lineCount++;
 
-                Callable<String> callable = new CheckPasswordWorker(dbFile, line);
+                Callable<String> callable = new CheckPasswordWorker(headerPage, line);
                 Future<String> future = pool.submit(callable);
                 workingList.add(future);
 
@@ -135,10 +195,11 @@ public class CheckPasswords {
                         try {
                             result = job.get();
                             if (result != null) {
+                                log.info("111 workingList.size=" + workingList.size());
                                 return result;
                             }
                         } catch (ExecutionException e) {
-                            log.warn(e);
+                            log.warn(e, e);
                         } catch (InterruptedException e) {
                             log.warn(e);
                         } finally {
@@ -155,6 +216,7 @@ public class CheckPasswords {
                         try {
                             result = job.get();
                             if (result != null) {
+                                log.info("222 workingList.size=" + workingList.size());
                                 return result;
                             }
                         } catch (ExecutionException e) {
@@ -179,78 +241,7 @@ public class CheckPasswords {
         return null;
     }
 
-    /**
-     * @param args
-     */
-    public static void main(String[] args) {
-        File dbFile = null;
-        File path = null;
-        int threads = 1;
-
-        if (args.length == 2) {
-            dbFile = new File(args[0]);
-            path = new File(args[1]);
-        } else if (args.length == 3) {
-            dbFile = new File(args[0]);
-            path = new File(args[1]);
-            try {
-                threads = Integer.valueOf(args[2]);
-            } catch (NumberFormatException e) {
-                log.warn(e);
-            }
-        } else {
-            Class<CheckPasswords> clz = CheckPasswords.class;
-            System.out.println("Usage: java " + clz.getName() + " file.mny {passwordsFile.txt | path} threads");
-            System.exit(1);
-        }
-
-        if (!dbFile.exists()) {
-            log.error("dbFile does not exist, dbFile=" + dbFile);
-            System.exit(1);
-        }
-
-        if (!path.exists()) {
-            log.error("path does not exist, path=" + path);
-            System.exit(1);
-        }
-        if (threads <= 0) {
-            threads = 1;
-        }
-        
-        log.info("dbFile=" + dbFile);
-        log.info("path=" + path);
-        log.info("threads=" + threads);
-
-        String matchedPassword = null;
-        CheckPasswords checker = null;
-        StopWatch stopWatch = new StopWatch();
-        try {
-            checker = new CheckPasswords(threads);
-            matchedPassword = checker.check(dbFile, path);
-            log.info("Have checked " + checker.getCounter().get());
-        } catch (IOException e) {
-            log.error(e, e);
-        } finally {
-            long millis = stopWatch.click();
-
-            if (checker != null) {
-                checker.close();
-            }
-            long hours = TimeUnit.MILLISECONDS.toHours(millis);
-            long minutes = TimeUnit.MILLISECONDS.toMinutes(millis) - TimeUnit.MILLISECONDS.toMinutes(hours);
-            long seconds = TimeUnit.MILLISECONDS.toSeconds(millis) - TimeUnit.MINUTES.toSeconds(minutes);
-
-            String durationString = String.format("%d hour, %d min, %d sec", hours, minutes, seconds);
-            log.info("Took " + durationString);
-
-            log.info("< DONE, matchedPassword=" + matchedPassword);
-
-            // the pool might still be running. Force exit.
-            System.exit(0);
-        }
-    }
-
-    private void close() {
+    public void close() {
         if (pool != null) {
             try {
                 pool.shutdownNow();
@@ -263,5 +254,15 @@ public class CheckPasswords {
 
     public AtomicInteger getCounter() {
         return counter;
+    }
+
+
+    public static String toDurationString(long millis) {
+        long hours = TimeUnit.MILLISECONDS.toHours(millis);
+        long minutes = TimeUnit.MILLISECONDS.toMinutes(millis) - TimeUnit.MILLISECONDS.toMinutes(hours);
+        long seconds = TimeUnit.MILLISECONDS.toSeconds(millis) - TimeUnit.MINUTES.toSeconds(minutes);
+
+        String durationString = String.format("%d hour, %d min, %d sec", hours, minutes, seconds);
+        return durationString;
     }
 }
