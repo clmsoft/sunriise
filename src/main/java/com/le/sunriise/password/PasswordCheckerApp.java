@@ -6,8 +6,8 @@ import javax.swing.JFrame;
 
 import org.apache.log4j.Logger;
 
-public class PasswordCheckerGui {
-    private static final Logger log = Logger.getLogger(PasswordCheckerGui.class);
+public class PasswordCheckerApp {
+    private static final Logger log = Logger.getLogger(PasswordCheckerApp.class);
     
     private JFrame frame;
 
@@ -18,7 +18,7 @@ public class PasswordCheckerGui {
         EventQueue.invokeLater(new Runnable() {
             public void run() {
                 try {
-                    PasswordCheckerGui window = new PasswordCheckerGui();
+                    PasswordCheckerApp window = new PasswordCheckerApp();
                     window.frame.setVisible(true);
                 } catch (Exception e) {
                     log.error(e, e);
@@ -30,7 +30,7 @@ public class PasswordCheckerGui {
     /**
      * Create the application.
      */
-    public PasswordCheckerGui() {
+    public PasswordCheckerApp() {
         initialize();
     }
 
