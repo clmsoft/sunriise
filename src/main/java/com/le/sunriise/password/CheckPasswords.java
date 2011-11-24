@@ -256,7 +256,6 @@ public class CheckPasswords {
         return counter;
     }
 
-
     public static String toDurationString(long millis) {
         long hours = TimeUnit.MILLISECONDS.toHours(millis);
         long minutes = TimeUnit.MILLISECONDS.toMinutes(millis) - TimeUnit.MILLISECONDS.toMinutes(hours);

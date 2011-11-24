@@ -57,7 +57,7 @@ public class CheckPasswordsCmd {
         StopWatch stopWatch = new StopWatch();
         try {
             checker = new CheckPasswords(threads);
-            HeaderPage headerPage = HeaderPage.newInstance(dbFile);
+            HeaderPage headerPage = new HeaderPage(dbFile);
             matchedPassword = checker.check(headerPage, path);
             log.info("Have checked " + checker.getCounter().get());
         } catch (IOException e) {

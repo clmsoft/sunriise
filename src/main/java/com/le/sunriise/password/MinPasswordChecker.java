@@ -9,6 +9,7 @@ import java.nio.charset.Charset;
 import java.util.Arrays;
 
 import org.apache.log4j.Logger;
+import org.apache.poi.util.HexDump;
 import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.digests.MD5Digest;
 import org.bouncycastle.crypto.digests.SHA1Digest;
@@ -16,7 +17,6 @@ import org.bouncycastle.crypto.engines.RC4Engine;
 import org.bouncycastle.crypto.params.KeyParameter;
 
 import com.healthmarketscience.jackcess.ByteUtil;
-import com.healthmarketscience.jackcess.Column;
 import com.healthmarketscience.jackcess.JetFormat;
 
 public class MinPasswordChecker {
@@ -24,28 +24,10 @@ public class MinPasswordChecker {
 
     private RC4Engine engine;
 
-    private static final int USE_SHA1 = 0x20;
-
     private static final int PASSWORD_LENGTH = 0x28;
-
-    private static final int ENCRYPTION_FLAGS_OFFSET = 0x298;
-    private static final int NEW_ENCRYPTION = 0x6;
-
     private static final int PASSWORD_DIGEST_LENGTH = 0x10;
 
-    private static final int CRYPT_CHECK_START = 0x2e9;
-
-    private static final int SALT_OFFSET = 0x72;
-    private static final int SALT_LENGTH = 0x4;
-
     private static final ByteOrder DEFAULT_BYTE_ORDER = ByteOrder.LITTLE_ENDIAN;
-
-    // private static final int INVALID_PAGE_NUMBER = -1;
-
-    // private static final String CHARSET_PROPERTY_PREFIX =
-    // "com.healthmarketscience.jackcess.charset.";
-
-    private boolean newEncryption;
 
     private final HeaderPage headerPage;
 
@@ -70,7 +52,7 @@ public class MinPasswordChecker {
         try {
             File file = new File(fileName);
             log.info("file=" + file);
-            HeaderPage headerPage = HeaderPage.newInstance(file);
+            HeaderPage headerPage = new HeaderPage(file);
 
             if (checkPassword(headerPage, password)) {
                 log.info("OK password=" + password);
@@ -112,9 +94,7 @@ public class MinPasswordChecker {
     }
 
     private String getDatabasePassword() throws IOException {
-        JetFormat jetFormat = getHeaderPage().getJetFormat();
-        ByteBuffer buffer = getHeaderPage().getBuffer();
-        return getDatabasePassword(buffer, jetFormat);
+        return getHeaderPage().getEmbeddedDatabasePassword();
     }
 
     private JetFormat getJetFormat() {
@@ -124,16 +104,6 @@ public class MinPasswordChecker {
     public MinPasswordChecker(HeaderPage headerPage) throws IOException {
         super();
         this.headerPage = headerPage;
-
-        ByteBuffer buffer = this.headerPage.getBuffer();
-
-        if ((buffer.get(ENCRYPTION_FLAGS_OFFSET) & NEW_ENCRYPTION) != 0) {
-            newEncryption = true;
-            // checkNewEncryption(headerPage, password, charset);
-        } else {
-            newEncryption = false;
-            // checkOldEncryption(buffer, password, charset);
-        }
     }
 
     private boolean check(String password) throws IOException {
@@ -142,38 +112,34 @@ public class MinPasswordChecker {
 
     private boolean check(String password, Charset charset) throws IOException {
         boolean result = false;
-        ByteBuffer buffer = headerPage.getBuffer();
-        if (newEncryption) {
-            result = checkNewEncryption(buffer, password, charset);
+        if (headerPage.isNewEncryption()) {
+            result = checkNewEncryption(headerPage, password, charset);
         } else {
-            checkOldEncryption(buffer, password, charset);
+            checkOldEncryption(headerPage, password, charset);
         }
         return result;
     }
 
-    private void checkOldEncryption(ByteBuffer buffer, String password, Charset charset) throws IOException {
-        throw new IOException("Old MSISAM dbs using jet-style encryption. No password to check.");
+    private void checkOldEncryption(HeaderPage headerPage, String password, Charset charset) throws IOException {
+        throw new IOException("Old MSISAM dbs using jet-style encryption. " + "No password to check. " + "The embedded password is "
+                + headerPage.getEmbeddedDatabasePassword());
     }
 
-    private boolean checkNewEncryption(ByteBuffer buffer, String password, Charset charset) {
-        byte[] pwdDigest = createPasswordDigest(buffer, password, charset);
-
-        byte[] salt = new byte[8];
-        buffer.position(SALT_OFFSET);
-        buffer.get(salt);
-
-        byte[] baseSalt = Arrays.copyOf(salt, SALT_LENGTH);
-
-        byte[] testEncodingKey = concat(pwdDigest, salt);
-        byte[] testBytes = baseSalt;
-        return verifyPassword(buffer, testEncodingKey, testBytes);
+    private boolean checkNewEncryption(HeaderPage headerPage, String password, Charset charset) {
+        byte[] passwordDigest = createPasswordDigest(headerPage, password, charset);
+        if (log.isDebugEnabled()) {
+            log.debug("passwordDigest=" + HexDump.toHex(passwordDigest));
+        }
+        byte[] testKey = concat(passwordDigest, headerPage.getSalt());
+        byte[] testBytes = headerPage.getBaseSalt();
+        return verifyPassword(headerPage, testKey, testBytes);
     }
 
-    private boolean verifyPassword(ByteBuffer buffer, byte[] testEncodingKey, byte[] testBytes) {
+    private boolean verifyPassword(HeaderPage headerPage, byte[] testKey, byte[] testBytes) {
         RC4Engine engine = getEngine();
-        engine.init(false, new KeyParameter(testEncodingKey));
+        engine.init(false, new KeyParameter(testKey));
 
-        byte[] encrypted4BytesCheck = getPasswordTestBytes(buffer);
+        byte[] encrypted4BytesCheck = headerPage.getPasswordTestBytes();
         if (isBlankKey(encrypted4BytesCheck)) {
             // no password?
             return false;
@@ -197,27 +163,14 @@ public class MinPasswordChecker {
         return engine;
     }
 
-    /**
-     * Reads and returns the header page (page 0) from the given pageChannel.
-     */
-    // protected ByteBuffer readHeaderPage() throws IOException {
-    // ByteBuffer buffer = createPageBuffer();
-    // readPage(buffer, 0);
-    // return buffer;
-    // }
+    private static byte[] createPasswordDigest(HeaderPage headerPage, String password, Charset charset) {
+        boolean toUpperCase = true;
+        byte[] passwordBytes = toPasswordBytes(password, charset, toUpperCase);
 
-    private static byte[] createPasswordDigest(ByteBuffer buffer, String password, Charset charset) {
-        boolean useSha1 = (buffer.get(ENCRYPTION_FLAGS_OFFSET) & USE_SHA1) != 0;
+        boolean useSha1 = headerPage.isUseSha1();
         Digest digest = (useSha1 ? new SHA1Digest() : new MD5Digest());
         if (log.isDebugEnabled()) {
             log.debug("digest=" + digest.getAlgorithmName());
-        }
-
-        byte[] passwordBytes = new byte[PASSWORD_LENGTH];
-
-        if (password != null) {
-            ByteBuffer bb = encodeUncompressedText(password.toUpperCase(), charset);
-            bb.get(passwordBytes, 0, Math.min(passwordBytes.length, bb.remaining()));
         }
 
         digest.update(passwordBytes, 0, passwordBytes.length);
@@ -235,6 +188,20 @@ public class MinPasswordChecker {
         }
 
         return digestBytes;
+    }
+
+    private static byte[] toPasswordBytes(String password, Charset charset, boolean toUpperCase) {
+        byte[] passwordBytes = new byte[PASSWORD_LENGTH];
+
+        if (password != null) {
+            String str = password;
+            if (toUpperCase) {
+                str = password.toUpperCase();
+            }
+            ByteBuffer buffer = encodeUncompressedText(str, charset);
+            buffer.get(passwordBytes, 0, Math.min(passwordBytes.length, buffer.remaining()));
+        }
+        return passwordBytes;
     }
 
     private static byte[] concat(byte[] b1, byte[] b2) {
@@ -257,185 +224,9 @@ public class MinPasswordChecker {
         return true;
     }
 
-    private static byte[] getPasswordTestBytes(ByteBuffer buffer) {
-        byte[] encrypted4BytesCheck = new byte[4];
-
-        int cryptCheckOffset = ByteUtil.getUnsignedByte(buffer, SALT_OFFSET);
-        buffer.position(CRYPT_CHECK_START + cryptCheckOffset);
-        buffer.get(encrypted4BytesCheck);
-
-        return encrypted4BytesCheck;
-    }
-
     private static ByteBuffer encodeUncompressedText(CharSequence text, Charset charset) {
         CharBuffer cb = ((text instanceof CharBuffer) ? (CharBuffer) text : CharBuffer.wrap(text));
         return charset.encode(cb);
-    }
-
-    /**
-     * @return A newly-allocated buffer that can be passed to readPage
-     */
-    // private ByteBuffer createPageBuffer() {
-    // ByteBuffer buffer = null;
-    // buffer = createBuffer(getFormat().PAGE_SIZE);
-    //
-    // return buffer;
-    // }
-    //
-    // private ByteBuffer createBuffer(int size) {
-    // return createBuffer(size, DEFAULT_BYTE_ORDER);
-    // }
-    //
-    // private ByteBuffer createBuffer(int size, ByteOrder order) {
-    // ByteBuffer buffer = ByteBuffer.allocate(size);
-    // buffer.order(order);
-    // return buffer;
-    // }
-
-    // private void readPage(ByteBuffer buffer, int pageNumber) throws
-    // IOException {
-    // long pageSize = (long) getFormat().PAGE_SIZE;
-    // if (log.isDebugEnabled()) {
-    // log.debug("readPage, pageNumber=" + pageNumber + ", pageSize=" +
-    // pageSize);
-    // }
-    //
-    // validatePageNumber(pageNumber);
-    // if (log.isDebugEnabled()) {
-    // log.debug("Reading in page " + Integer.toHexString(pageNumber));
-    // }
-    // buffer.clear();
-    // int bytesRead = fileChannel.read(buffer, (long) pageNumber * pageSize);
-    // buffer.flip();
-    // if (bytesRead != getFormat().PAGE_SIZE) {
-    // throw new IOException("Failed attempting to read " +
-    // getFormat().PAGE_SIZE + " bytes from page " + pageNumber + ", only read "
-    // + bytesRead);
-    // }
-    //
-    // if (pageNumber == 0) {
-    // // de-mask header (note, page 0 never has additional encoding)
-    // applyHeaderMask(buffer);
-    // } else {
-    // this.codecHandler.decodePage(buffer, pageNumber);
-    // }
-    // }
-
-    // private void validatePageNumber(int pageNumber) throws IOException {
-    // int nextPageNumber = getNextPageNumber(fileChannel.size());
-    // if ((pageNumber <= INVALID_PAGE_NUMBER) || (pageNumber >=
-    // nextPageNumber)) {
-    // throw new IllegalStateException("invalid page number " + pageNumber);
-    // }
-    // }
-
-    // private int getNextPageNumber(long size) {
-    // return (int) (size / getFormat().PAGE_SIZE);
-    // }
-    //
-    // private void applyHeaderMask(ByteBuffer buffer) {
-    // // de/re-obfuscate the header
-    // byte[] headerMask = format.HEADER_MASK;
-    // for (int idx = 0; idx < headerMask.length; ++idx) {
-    // int pos = idx + format.OFFSET_MASKED_HEADER;
-    // byte b = (byte) (buffer.get(pos) ^ headerMask[idx]);
-    // buffer.put(pos, b);
-    // }
-    // }
-    //
-    // private static Charset getDefaultCharset(JetFormat format) {
-    // String csProp = System.getProperty(CHARSET_PROPERTY_PREFIX + format);
-    // if (log.isDebugEnabled()) {
-    // log.debug("csProp=" + csProp);
-    // }
-    // if (csProp != null) {
-    // csProp = csProp.trim();
-    // if (csProp.length() > 0) {
-    // return Charset.forName(csProp);
-    // }
-    // }
-    //
-    // // use format default
-    // Charset cs = format.CHARSET;
-    // if (log.isDebugEnabled()) {
-    // log.debug("format.CHARSET=" + cs);
-    // }
-    // return cs;
-    // }
-
-    private String getDatabasePassword(ByteBuffer buffer, JetFormat jetFormat) throws IOException {
-        // ByteBuffer buffer = takeSharedBuffer();
-        try {
-            // this.readPage(buffer, 0);
-
-            byte[] pwdBytes = new byte[jetFormat.SIZE_PASSWORD];
-            buffer.position(jetFormat.OFFSET_PASSWORD);
-            buffer.get(pwdBytes);
-
-            if (log.isDebugEnabled()) {
-                log.debug("preMask pwdBytes=" + pwdBytes.length);
-            }
-
-            // de-mask password using extra password mask if necessary (the
-            // extra
-            // password mask is generated from the database creation date stored
-            // in
-            // the header)
-            byte[] pwdMask = getPasswordMask(buffer, jetFormat);
-            if (pwdMask != null) {
-                for (int i = 0; i < pwdBytes.length; ++i) {
-                    pwdBytes[i] ^= pwdMask[i % pwdMask.length];
-                }
-            }
-
-            boolean hasPassword = false;
-            for (int i = 0; i < pwdBytes.length; ++i) {
-                if (pwdBytes[i] != 0) {
-                    hasPassword = true;
-                    break;
-                }
-            }
-
-            if (!hasPassword) {
-                return null;
-            }
-
-            log.info("postMask pwdBytes=" + pwdBytes.length);
-
-            Charset charset = getHeaderPage().getCharset();
-            log.info("charset=" + charset);
-            String pwd = Column.decodeUncompressedText(pwdBytes, charset);
-
-            // remove any trailing null chars
-            int idx = pwd.indexOf('\0');
-            if (idx >= 0) {
-                pwd = pwd.substring(0, idx);
-            }
-
-            return pwd;
-        } finally {
-            // releaseSharedBuffer(buffer);
-        }
-    }
-
-    static byte[] getPasswordMask(ByteBuffer buffer, JetFormat format) {
-        // get extra password mask if necessary (the extra password mask is
-        // generated from the database creation date stored in the header)
-        int pwdMaskPos = format.OFFSET_HEADER_DATE;
-        if (pwdMaskPos < 0) {
-            return null;
-        }
-
-        buffer.position(pwdMaskPos);
-        double dateVal = Double.longBitsToDouble(buffer.getLong());
-        if (log.isDebugEnabled()) {
-            log.debug("dateVal=" + dateVal);
-        }
-
-        byte[] pwdMask = new byte[4];
-        ByteBuffer.wrap(pwdMask).order(DEFAULT_BYTE_ORDER).putInt((int) dateVal);
-
-        return pwdMask;
     }
 
     public HeaderPage getHeaderPage() {
