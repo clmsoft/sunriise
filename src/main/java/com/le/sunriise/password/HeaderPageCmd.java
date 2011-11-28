@@ -41,6 +41,8 @@ public class HeaderPageCmd {
             log.info("isUseSha1=" + headerPage.isUseSha1());
             log.info("getSalt=" + HeaderPage.toHexString(headerPage.getSalt()));
             log.info("getBaseSalt=" + HeaderPage.toHexString(headerPage.getBaseSalt()));
+            log.info("encrypted4BytesCheck=" + HeaderPage.toHexString(headerPage.getEncrypted4BytesCheck()));
+            log.info("decrypted4BytesCheck=" + HeaderPage.toHexString(headerPage.getBaseSalt()));
         } catch (IOException e) {
             log.error(e, e);
         } finally {

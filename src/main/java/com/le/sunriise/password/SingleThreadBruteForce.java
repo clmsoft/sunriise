@@ -10,6 +10,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import jline.Terminal;
+
 import org.apache.log4j.Logger;
 
 import com.le.sunriise.StopWatch;
@@ -25,7 +27,7 @@ public class SingleThreadBruteForce {
         private static final BigInteger ONE_HUNDRED = BigInteger.valueOf(100);
         private StopWatch stopWatch;
         private ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(2);
-        private ScheduledFuture<?> scheduledFuture;
+        private ScheduledFuture<?> periodicStatusFuture;
 
         private CheckBruteForce(int passwordLength, char[] alphabets, char[] mask, HeaderPage hp) {
             super(passwordLength, mask, alphabets);
@@ -58,8 +60,8 @@ public class SingleThreadBruteForce {
             count = 0;
             password = null;
             stopWatch = new StopWatch();
-            if (scheduledFuture != null) {
-                scheduledFuture.cancel(true);
+            if (periodicStatusFuture != null) {
+                periodicStatusFuture.cancel(true);
             }
             Runnable command = new Runnable() {
                 @Override
@@ -68,18 +70,23 @@ public class SingleThreadBruteForce {
                     Duration duration = new Duration(delta);
                     BigInteger percentage = BigInteger.valueOf(count).multiply(ONE_HUNDRED).divide(maxCount);
                     log.info("Tested " + count + " strings" + " (" + percentage + "% completed" + ", elapsed=" + duration.toString() + ")");
+                    if (isTerminate()) {
+                        if (periodicStatusFuture != null) {
+                            periodicStatusFuture.cancel(true);
+                        }
+                    }
                 }
             };
             long initialDelay = 0;
             long period = 30;
             TimeUnit unit = TimeUnit.SECONDS;
-            this.scheduledFuture = scheduledExecutorService.scheduleAtFixedRate(command, initialDelay, period, unit);
+            this.periodicStatusFuture = scheduledExecutorService.scheduleAtFixedRate(command, initialDelay, period, unit);
             try {
                 rv = super.generate();
             } finally {
                 command.run();
-                if (this.scheduledFuture != null) {
-                    this.scheduledFuture.cancel(true);
+                if (this.periodicStatusFuture != null) {
+                    this.periodicStatusFuture.cancel(true);
                 }
             }
             return rv;
@@ -111,7 +118,7 @@ public class SingleThreadBruteForce {
             int passwordLength = 5;
             log.info("passwordLength=" + passwordLength);
 
-            char[] mask = new String("****!").toCharArray();
+            char[] mask = new String("*****").toCharArray();
 
             char[] alphabets = createAlphabets();
             log.info("alphabets.length=" + alphabets.length);

@@ -27,8 +27,6 @@ public class MinPasswordChecker {
     private static final int PASSWORD_LENGTH = 0x28;
     private static final int PASSWORD_DIGEST_LENGTH = 0x10;
 
-    private static final ByteOrder DEFAULT_BYTE_ORDER = ByteOrder.LITTLE_ENDIAN;
-
     private final HeaderPage headerPage;
 
     /**
@@ -45,7 +43,7 @@ public class MinPasswordChecker {
             password = args[1];
         } else {
             Class<MinPasswordChecker> clz = MinPasswordChecker.class;
-            System.out.println("Usage: java " + clz.getName() + "samples.mny [password]");
+            System.out.println("Usage: java " + clz.getName() + " samples.mny [password]");
             System.exit(1);
         }
 
@@ -136,14 +134,20 @@ public class MinPasswordChecker {
     }
 
     private boolean verifyPassword(HeaderPage headerPage, byte[] testKey, byte[] testBytes) {
-        RC4Engine engine = getEngine();
-        engine.init(false, new KeyParameter(testKey));
-
-        byte[] encrypted4BytesCheck = headerPage.getPasswordTestBytes();
+        byte[] encrypted4BytesCheck = headerPage.getEncrypted4BytesCheck();
         if (isBlankKey(encrypted4BytesCheck)) {
             // no password?
-            return false;
+            return true;
         }
+
+        return verifyPassword(encrypted4BytesCheck, testKey, testBytes);
+    }
+
+    private boolean verifyPassword(byte[] encrypted4BytesCheck, byte[] testKey, byte[] testBytes) {
+        RC4Engine engine = getEngine();
+        boolean encrypting = false;
+        log.info("testKey.length=" + testKey.length + ", " + (testKey.length * 8));
+        engine.init(encrypting, new KeyParameter(testKey));
 
         byte[] decrypted4BytesCheck = new byte[4];
         engine.processBytes(encrypted4BytesCheck, 0, encrypted4BytesCheck.length, decrypted4BytesCheck, 0);

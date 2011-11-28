@@ -1,6 +1,8 @@
 package com.le.sunriise.password;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
@@ -44,7 +46,7 @@ public class HeaderPage {
 
     private byte[] baseSalt;
 
-    private byte[] passwordTestBytes;
+    private byte[] encrypted4BytesCheck;
 
     public HeaderPage() {
         super();
@@ -56,6 +58,15 @@ public class HeaderPage {
     }
 
     private void parse(File dbFile) throws IOException {
+        String fileName = dbFile.getName();
+        if (fileName.endsWith(".mbf")) {
+            File tempFile = File.createTempFile("sunriise", ".mny");
+//            tempFile.deleteOnExit();
+            long headerOffset = 77;
+            dbFile = copyBackupFile(dbFile, tempFile, headerOffset, headerOffset + 4096);
+            log.info("Temp converted backup file=" + dbFile);
+        }
+
         RandomAccessFile rFile = null;
         FileChannel fileChannel = null;
         try {
@@ -86,7 +97,7 @@ public class HeaderPage {
 
                 baseSalt = Arrays.copyOf(salt, SALT_LENGTH);
 
-                passwordTestBytes = readPasswordTestBytes(buffer);
+                encrypted4BytesCheck = readEncrypted4BytesCheck(buffer);
             }
         } finally {
             if (fileChannel != null) {
@@ -109,6 +120,62 @@ public class HeaderPage {
                 }
             }
         }
+    }
+
+    private File copyBackupFile(File srcFile, File destFile, long offset, long maxCount) throws IOException {
+        File newFile = destFile;
+
+        FileChannel srcChannel = null;
+        FileChannel destChannel = null;
+        try {
+            srcChannel = new RandomAccessFile(srcFile, "r").getChannel();
+
+            // Create channel on the destination
+            destChannel = new RandomAccessFile(destFile, "rwd").getChannel();
+
+            if (log.isDebugEnabled()) {
+                log.debug("srcFile=" + srcFile);
+                log.debug("destFile=" + destFile);
+            }
+            // Copy file contents from source to destination
+            if (maxCount < 0) {
+                maxCount = srcChannel.size();
+            }
+            maxCount -= offset;
+            if (log.isDebugEnabled()) {
+                log.debug("offset=" + offset);
+                log.debug("maxCount=" + maxCount);
+            }
+
+            while (maxCount > 0) {
+                long count = srcChannel.transferTo(offset, maxCount, destChannel);
+                if (log.isDebugEnabled()) {
+                    log.debug("count=" + count);
+                }
+                maxCount -= count;
+                offset += count;
+            }
+        } finally {
+            if (srcChannel != null) {
+                try {
+                    srcChannel.close();
+                } catch (IOException e) {
+                    log.warn(e);
+                } finally {
+                    srcChannel = null;
+                }
+            }
+            if (destChannel != null) {
+                try {
+                    destChannel.close();
+                } catch (IOException e) {
+                    log.warn(e);
+                } finally {
+                    destChannel = null;
+                }
+            }
+        }
+        return newFile;
     }
 
     private static Charset getDefaultCharset(JetFormat format) {
@@ -292,7 +359,7 @@ public class HeaderPage {
         return baseSalt;
     }
 
-    private static byte[] readPasswordTestBytes(ByteBuffer buffer) {
+    private static byte[] readEncrypted4BytesCheck(ByteBuffer buffer) {
         byte[] encrypted4BytesCheck = new byte[4];
 
         int cryptCheckOffset = ByteUtil.getUnsignedByte(buffer, SALT_OFFSET);
@@ -302,8 +369,8 @@ public class HeaderPage {
         return encrypted4BytesCheck;
     }
 
-    public byte[] getPasswordTestBytes() {
-        return passwordTestBytes;
+    public byte[] getEncrypted4BytesCheck() {
+        return encrypted4BytesCheck;
     }
 
     public static String toHexString(byte[] bytes) {
