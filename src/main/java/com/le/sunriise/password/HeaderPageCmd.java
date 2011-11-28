@@ -32,6 +32,7 @@ public class HeaderPageCmd {
             headerPage = new HeaderPage(dbFile);
             log.info("fileSize=" + dbFile.length());
             log.info("getJetFormat=" + headerPage.getJetFormat());
+            log.info("getJetFormat.PAGE_SIZE=" + headerPage.getJetFormat().PAGE_SIZE);
             log.info("getCharset=" + headerPage.getCharset());
 
             log.info("isNewEncryption=" + headerPage.isNewEncryption());

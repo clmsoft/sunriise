@@ -9,15 +9,20 @@ public class StopWatch {
     }
 
     public long click() {
+        return click(true);
+    }
+
+    public long click(boolean reset) {
         long delta = 0L;
 
         endTime = System.currentTimeMillis();
 
         delta = endTime - startTime;
 
-        startTime = endTime;
-
+        if (reset) {
+            startTime = endTime;
+        }
         return delta;
-
     }
+
 }

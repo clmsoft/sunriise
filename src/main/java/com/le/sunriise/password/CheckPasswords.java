@@ -255,13 +255,4 @@ public class CheckPasswords {
     public AtomicInteger getCounter() {
         return counter;
     }
-
-    public static String toDurationString(long millis) {
-        long hours = TimeUnit.MILLISECONDS.toHours(millis);
-        long minutes = TimeUnit.MILLISECONDS.toMinutes(millis) - TimeUnit.MILLISECONDS.toMinutes(hours);
-        long seconds = TimeUnit.MILLISECONDS.toSeconds(millis) - TimeUnit.MINUTES.toSeconds(minutes);
-
-        String durationString = String.format("%d hour, %d min, %d sec", hours, minutes, seconds);
-        return durationString;
-    }
 }

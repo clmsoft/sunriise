@@ -7,6 +7,7 @@ import org.apache.log4j.Logger;
 
 import com.le.sunriise.StopWatch;
 
+// http://essayweb.net/mathematics/permcomb.shtml
 public class CheckPasswordsCmd {
     private static final Logger log = Logger.getLogger(CheckPasswordsCmd.class);
 
@@ -70,7 +71,7 @@ public class CheckPasswordsCmd {
                 checker = null;
             }
 
-            String durationString = CheckPasswords.toDurationString(millis);
+            String durationString = Duration.toDurationString(millis);
             log.info("Took " + durationString);
 
             log.info("< DONE, matchedPassword=" + matchedPassword);
