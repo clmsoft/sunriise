@@ -27,7 +27,7 @@ public class AccountUtil {
      * 
      * @param db
      * @param sort
-     * @return
+     * @return list of account
      * @throws IOException
      */
     public static List<Account> getAccounts(Database db, boolean sort) throws IOException {
