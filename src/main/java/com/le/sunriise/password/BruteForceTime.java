@@ -1,8 +1,6 @@
 package com.le.sunriise.password;
 
 import java.math.BigInteger;
-import java.util.concurrent.TimeUnit;
-
 import org.apache.log4j.Logger;
 
 public class BruteForceTime {

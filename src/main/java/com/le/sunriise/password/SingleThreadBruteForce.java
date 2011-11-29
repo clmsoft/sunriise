@@ -10,8 +10,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import jline.Terminal;
-
 import org.apache.log4j.Logger;
 
 import com.le.sunriise.StopWatch;
@@ -33,7 +31,6 @@ public class SingleThreadBruteForce {
             super(passwordLength, mask, alphabets);
             this.hp = hp;
             maxCount = GenBruteForce.calculateExpected(passwordLength, alphabets.length);
-
         }
 
         @Override
@@ -50,7 +47,6 @@ public class SingleThreadBruteForce {
         public boolean checkPassword(String testPassword) {
             boolean matched = false;
             matched = MinPasswordChecker.checkPassword(hp, testPassword);
-            // matched = testPassword.compareToIgnoreCase("12@A!") == 0;
             return matched;
         }
 
@@ -103,55 +99,6 @@ public class SingleThreadBruteForce {
         }
     }
 
-    /**
-     * @param args
-     */
-    public static void main(String[] args) {
-        File dbFile = null;
-
-        dbFile = new File(args[0]);
-        log.info("dbFile=" + dbFile);
-        HeaderPage headerPage = null;
-        try {
-            headerPage = new HeaderPage(dbFile);
-
-            int passwordLength = 5;
-            log.info("passwordLength=" + passwordLength);
-
-            char[] mask = new String("*****").toCharArray();
-
-            char[] alphabets = createAlphabets();
-            log.info("alphabets.length=" + alphabets.length);
-
-            if (log.isDebugEnabled()) {
-                for (int i = 0; i < alphabets.length; i++) {
-                    log.debug(alphabets[i]);
-                }
-            }
-            final HeaderPage hp = headerPage;
-            CheckBruteForce checker = null;
-            try {
-                checker = new CheckBruteForce(passwordLength, alphabets, mask, hp);
-                checker.generate();
-                log.info("password=" + checker.getPassword());
-            } finally {
-                if (checker != null) {
-                    try {
-                        checker.shutdown();
-                    } finally {
-                        checker = null;
-                    }
-                }
-            }
-
-        } catch (IOException e) {
-            log.error(e, e);
-        } finally {
-            log.info("< DONE");
-        }
-
-    }
-
     private static char[] createAlphabets() {
         List<char[]> arrays = new ArrayList<char[]>();
         arrays.add(GenBruteForce.ALPHABET_UPPERS);
@@ -179,6 +126,65 @@ public class SingleThreadBruteForce {
             System.arraycopy(src, srcPos, dest, destPos, length);
         }
         return alphabets;
+    }
+
+    /**
+     * @param args
+     */
+    public static void main(String[] args) {
+        File dbFile = null;
+
+        dbFile = new File(args[0]);
+        log.info("dbFile=" + dbFile);
+        try {
+            int passwordLength = 5;
+            log.info("passwordLength=" + passwordLength);
+
+            char[] mask = new String("*****").toCharArray();
+
+            char[] alphabets = createAlphabets();
+
+            checkUsingBruteForce(dbFile, passwordLength, mask, alphabets);
+
+        } catch (IOException e) {
+            log.error(e, e);
+        } finally {
+            log.info("< DONE");
+        }
+
+    }
+
+    public static String checkUsingBruteForce(File dbFile, int passwordLength, char[] mask, char[] alphabets) throws IOException {
+        String password = null;
+        HeaderPage headerPage = new HeaderPage(dbFile);
+
+        if (alphabets == null) {
+            alphabets = createAlphabets();
+        }
+        log.info("");
+        log.info("alphabets.length=" + alphabets.length);
+        if (log.isDebugEnabled()) {
+            for (int i = 0; i < alphabets.length; i++) {
+                log.debug(alphabets[i]);
+            }
+        }
+        final HeaderPage hp = headerPage;
+        CheckBruteForce checker = null;
+        try {
+            checker = new CheckBruteForce(passwordLength, alphabets, mask, hp);
+            checker.generate();
+            password = checker.getPassword();
+            log.info("password=" + password);
+        } finally {
+            if (checker != null) {
+                try {
+                    checker.shutdown();
+                } finally {
+                    checker = null;
+                }
+            }
+        }
+        return password;
     }
 
 }

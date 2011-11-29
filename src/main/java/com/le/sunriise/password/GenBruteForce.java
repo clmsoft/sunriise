@@ -45,14 +45,14 @@ public class GenBruteForce {
         return generateString(buffer, alphabets, mask);
     }
 
-    private long generateString(char[] buffer, char[] alphabet, char[] mask) {
+    private long generateString(char[] buffer, char[] alphabets, char[] mask) {
         long count = 0;
         int passwordLength = 0;
-        int alphabetLen = alphabet.length;
+        int alphabetsLen = alphabets.length;
         if (!terminate) {
-            count += generateString(buffer, buffer.length, mask, passwordLength, alphabet, alphabetLen);
+            count += generateString(buffer, buffer.length, mask, passwordLength, alphabets, alphabetsLen);
         } else {
-            log.warn("Terminate early at passwordLength=" + passwordLength + ", alphabetLen=" + alphabetLen);
+            log.warn("Terminate early at passwordLength=" + passwordLength + ", alphabetsLen=" + alphabetsLen);
         }
         return count;
     }
@@ -66,27 +66,23 @@ public class GenBruteForce {
             return count;
         }
 
-        // if the mask has
-        // loop through the alphabets
-        if ((mask != null) && (mask[cursor] != '*')) {
-            char c = mask[cursor];
-            if (log.isDebugEnabled()) {
-                log.debug("Found known char=" + c  + ", cursor=" + cursor);
-            }
-            buffer[cursor] = c;
-            notifyResult(new String(buffer, 0, cursor + 1));
-            count++;
-            if (!terminate) {
-                long n = generateString(buffer, bufferLen, mask, cursor + 1, alphabets, alphabetsLen);
-                count += n;
-            } else {
-                log.warn("Terminate early at cursor=" + cursor + ", alphabet=" + c + ", alphabetLen=" + alphabetsLen);
-            }
+        char maskChar = '*';
+        if (mask == null) {
+            maskChar = '*';
         } else {
+            maskChar = mask[cursor];
+        }
+
+        if ((maskChar == '*') || (maskChar == '+')) {
+            // loop through the alphabets
             for (int i = 0; i < alphabetsLen; i++) {
                 char c = alphabets[i];
                 buffer[cursor] = c;
-                notifyResult(new String(buffer, 0, cursor + 1));
+                if (maskChar == '+') {
+                    // no need to check
+                } else {
+                    notifyResult(new String(buffer, 0, cursor + 1));
+                }
                 count++;
                 if (!terminate) {
                     long n = generateString(buffer, bufferLen, mask, cursor + 1, alphabets, alphabetsLen);
@@ -95,6 +91,19 @@ public class GenBruteForce {
                     log.warn("Terminate early at cursor=" + cursor + ", alphabet=" + c + ", alphabetLen=" + alphabetsLen);
                     break;
                 }
+            }
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("Found known char=" + maskChar + ", cursor=" + cursor);
+            }
+            buffer[cursor] = maskChar;
+            notifyResult(new String(buffer, 0, cursor + 1));
+            count++;
+            if (!terminate) {
+                long n = generateString(buffer, bufferLen, mask, cursor + 1, alphabets, alphabetsLen);
+                count += n;
+            } else {
+                log.warn("Terminate early at cursor=" + cursor + ", alphabet=" + maskChar + ", alphabetsLen=" + alphabetsLen);
             }
         }
 

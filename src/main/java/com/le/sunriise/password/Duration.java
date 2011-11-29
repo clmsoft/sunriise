@@ -30,6 +30,7 @@ public class Duration implements Comparable<Duration> {
         this.millis = millis;
     }
 
+    @Override
     public String toString() {
         return String.format("%d days, %d hours, %d mins, %d secs, %d millis", days, hours, minutes, seconds, millis);
     }

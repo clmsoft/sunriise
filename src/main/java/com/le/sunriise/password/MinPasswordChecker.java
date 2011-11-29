@@ -3,7 +3,6 @@ package com.le.sunriise.password;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.util.Arrays;
@@ -146,7 +145,9 @@ public class MinPasswordChecker {
     private boolean verifyPassword(byte[] encrypted4BytesCheck, byte[] testKey, byte[] testBytes) {
         RC4Engine engine = getEngine();
         boolean encrypting = false;
-        log.info("testKey.length=" + testKey.length + ", " + (testKey.length * 8));
+        if (log.isDebugEnabled()) {
+            log.debug("testKey.length=" + testKey.length + ", " + (testKey.length * 8));
+        }
         engine.init(encrypting, new KeyParameter(testKey));
 
         byte[] decrypted4BytesCheck = new byte[4];

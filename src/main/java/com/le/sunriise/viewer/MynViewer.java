@@ -83,6 +83,7 @@ import com.healthmarketscience.jackcess.Index;
 import com.healthmarketscience.jackcess.IndexData;
 import com.healthmarketscience.jackcess.IndexData.ColumnDescriptor;
 import com.healthmarketscience.jackcess.JetFormat;
+import com.healthmarketscience.jackcess.JetFormat.CodecType;
 import com.healthmarketscience.jackcess.PageChannel;
 import com.healthmarketscience.jackcess.Table;
 import com.jgoodies.forms.factories.FormFactory;
@@ -146,6 +147,7 @@ public class MynViewer {
         // Toolkit.getDefaultToolkit().getSystemEventQueue().push(waitQueue);
 
         EventQueue.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 try {
                     MynViewer window = new MynViewer();
@@ -186,7 +188,7 @@ public class MynViewer {
         sb.append("format=" + format.toString());
         sb.append("\n");
 
-        if (format.CODEC_TYPE == format.CODEC_TYPE.MSISAM) {
+        if (format.CODEC_TYPE == CodecType.MSISAM) {
             EncryptionUtils.appendMSISAMInfo(buffer, openedDb.getPassword(), openedDb.getDb().getCharset(), sb);
         }
 
@@ -298,6 +300,7 @@ public class MynViewer {
 
         JMenuItem mntmNewMenuItem = new JMenuItem("Exit");
         mntmNewMenuItem.addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent event) {
                 if (getDb() != null) {
                     try {
@@ -315,6 +318,7 @@ public class MynViewer {
         JMenuItem mntmNewMenuItem_1 = new JMenuItem("Open");
         mntmNewMenuItem_1.addActionListener(new OpenDbAction(MynViewer.this.getFrame(), prefs, openedDb) {
             
+            @Override
             public void dbFileOpened(OpenedDb newOpenedDb, OpenDbDialog dialog) {
                 if (newOpenedDb != null) {
                     MynViewer.this.openedDb = newOpenedDb;
@@ -401,6 +405,7 @@ public class MynViewer {
         list = new JList();
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         list.addListSelectionListener(new ListSelectionListener() {
+            @Override
             public void valueChanged(ListSelectionEvent event) {
                 if (event.getValueIsAdjusting()) {
                     return;
@@ -477,6 +482,7 @@ public class MynViewer {
         JPopupMenu tablePopupMenu = new JPopupMenu();
         JMenuItem menuItem = null;
         menuItem = new JMenuItem(new AbstractAction("Duplicate") {
+            @Override
             public void actionPerformed(ActionEvent e) {
                 int rowIndex = table.getSelectedRow();
                 duplicateRow(rowIndex);
@@ -488,6 +494,7 @@ public class MynViewer {
         tablePopupMenu.addSeparator();
 
         menuItem = new JMenuItem(new AbstractAction("Delete") {
+            @Override
             public void actionPerformed(ActionEvent e) {
                 int rowIndex = table.getSelectedRow();
                 deleteRow(rowIndex);
@@ -499,6 +506,7 @@ public class MynViewer {
         tablePopupMenu.addSeparator();
 
         menuItem = new JMenuItem(new AbstractAction("Copy Column") {
+            @Override
             public void actionPerformed(ActionEvent e) {
                 int rowIndex = table.getSelectedRow();
                 int columnIndex = table.getSelectedColumn();
@@ -519,6 +527,7 @@ public class MynViewer {
         table = new JTable() {
 
             
+            @Override
             public void setModel(TableModel dataModel) {
                 super.setModel(dataModel);
                 TableColumnModel columnModel = this.getColumnModel();
@@ -571,6 +580,7 @@ public class MynViewer {
             private DateFormat formatter = new SimpleDateFormat("MMM dd, yyyy HH:mm");
 
             
+            @Override
             public void setValue(Object value) {
                 if (log.isDebugEnabled()) {
                     log.debug("cellRenderer: value=" + value + ", " + value.getClass().getName());
@@ -604,6 +614,7 @@ public class MynViewer {
 
         JPopupMenu filterPopupMenu = new JPopupMenu();
         JCheckBoxMenuItem checkBoxMenuItem = new JCheckBoxMenuItem(new AbstractAction("Enable Sorting/Filtering") {
+            @Override
             public void actionPerformed(ActionEvent e) {
                 AbstractButton aButton = (AbstractButton) e.getSource();
                 boolean selected = aButton.getModel().isSelected();
@@ -627,6 +638,7 @@ public class MynViewer {
 
         filterTextField = new JTextField();
         filterTextField.addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent event) {
                 JTextField tf = (JTextField) event.getSource();
                 String text = tf.getText();
@@ -752,6 +764,7 @@ public class MynViewer {
         }
         MouseListener l = null;
         l = new MouseInputAdapter() {
+            @Override
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() % 2 == 1 && SwingUtilities.isLeftMouseButton(e)) {
                     JTable table = tableHeader.getTable();
@@ -781,14 +794,17 @@ public class MynViewer {
         dataModel.setTable(null);
         dataModel.setTableMetaData("");
         dataModel.setTableModel(new AbstractTableModel() {
+            @Override
             public Object getValueAt(int rowIndex, int columnIndex) {
                 return null;
             }
 
+            @Override
             public int getRowCount() {
                 return 0;
             }
 
+            @Override
             public int getColumnCount() {
                 return 0;
             }
@@ -930,6 +946,7 @@ public class MynViewer {
     private TableRowSorter<TableModel> createTableRowSorter(MnyTableModel tableModel) {
         TableRowSorter<TableModel> sorter = new TableRowSorter<TableModel>(tableModel) {
             
+            @Override
             public void toggleSortOrder(int column) {
                 StopWatch stopWatch = new StopWatch();
                 log.info("> toggleSortOrder, count=" + getViewRowCount() + ", column=" + column);
@@ -945,6 +962,7 @@ public class MynViewer {
             }
 
             
+            @Override
             public void sort() {
                 StopWatch stopWatch = new StopWatch();
                 log.info("> sort");
@@ -998,6 +1016,7 @@ public class MynViewer {
         RowSorterListener listener = new RowSorterListener() {
             private long startTime = -1L;
 
+            @Override
             public void sorterChanged(RowSorterEvent event) {
                 log.info("> sorterChanged");
                 Type type = event.getType();
