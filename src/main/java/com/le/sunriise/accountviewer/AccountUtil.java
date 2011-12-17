@@ -111,7 +111,7 @@ public class AccountUtil {
         return getAccounts(db, sort);
     }
 
-    public static List<Transaction> getTransactions(Database db, Account account) throws IOException {
+    public static List<Transaction> retrieveTransactions(Database db, Account account) throws IOException {
         StopWatch stopWatch = new StopWatch();
 
         log.info("> getTransactions, account=" + account.getName());
@@ -578,10 +578,10 @@ public class AccountUtil {
 
     public static BigDecimal calculateCurrentBalance(Account relatedToAccount) {
         Date date = null;
-        return calculateCurrentBalance(relatedToAccount, date);
+        return calculateNonInvestmentBalance(relatedToAccount, date);
     }
 
-    public static BigDecimal calculateCurrentBalance(Account account, Date date) {
+    public static BigDecimal calculateNonInvestmentBalance(Account account, Date date) {
         BigDecimal currentBalance = account.getStartingBalance();
         if (currentBalance == null) {
             log.warn("Starting balance is null. Set to 0. Account's id=" + account.getId());
@@ -726,7 +726,7 @@ public class AccountUtil {
         if (relatedToAccountId != null) {
             Account relatedToAccount = getAccount(relatedToAccountId, mnyContext);
             account.setRelatedToAccount(relatedToAccount);
-            getTransactions(mnyContext.getDb(), relatedToAccount);
+            retrieveTransactions(mnyContext.getDb(), relatedToAccount);
             if (relatedToAccount != null) {
                 BigDecimal currentBalance = calculateCurrentBalance(relatedToAccount);
                 if (currentBalance != null) {
@@ -832,5 +832,16 @@ public class AccountUtil {
             }
         }
         return securityName;
+    }
+
+    public static BigDecimal calculateBalance(Account account, Date date, MnyContext mnyContext) {
+        BigDecimal currentBalance = null;
+        if (account.getAccountType() == AccountType.INVESTMENT) {
+            Double investmentBalance = calculateInvestmentBalance(account, date, mnyContext);
+            currentBalance = new BigDecimal(investmentBalance);
+        } else {
+            currentBalance = calculateNonInvestmentBalance(account, date);
+        }
+        return currentBalance;
     }
 }
