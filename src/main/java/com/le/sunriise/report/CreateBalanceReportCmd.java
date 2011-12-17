@@ -15,45 +15,25 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 
 import com.healthmarketscience.jackcess.Database;
-import com.le.sunriise.Utils;
 import com.le.sunriise.accountviewer.Account;
 import com.le.sunriise.accountviewer.AccountType;
 import com.le.sunriise.accountviewer.AccountUtil;
 import com.le.sunriise.accountviewer.MnyContext;
 import com.le.sunriise.viewer.OpenedDb;
 
-public class CreateBalanceReportCmd {
+public class CreateBalanceReportCmd extends DefaultAccountVisitor {
     private static final Logger log = Logger.getLogger(CreateBalanceReportCmd.class);
 
-    private class AccountBalance {
-        private Account account;
-        private Date date;
-        private BigDecimal balance;
+    private Date date;
+    private Map<AccountType, List<AccountBalance>> balances;
+    private File outFile;
 
-        public Account getAccount() {
-            return account;
-        }
+    public File getOutFile() {
+        return outFile;
+    }
 
-        public void setAccount(Account account) {
-            this.account = account;
-        }
-
-        public Date getDate() {
-            return date;
-        }
-
-        public void setDate(Date date) {
-            this.date = date;
-        }
-
-        public BigDecimal getBalance() {
-            return balance;
-        }
-
-        public void setBalance(BigDecimal balance) {
-            this.balance = balance;
-        }
-
+    public void setOutFile(File outFile) {
+        this.outFile = outFile;
     }
 
     /**
@@ -78,11 +58,11 @@ public class CreateBalanceReportCmd {
         }
 
         log.info("dbFile=" + dbFile);
-        log.info("outDir=" + outFile);
+        log.info("outFile=" + outFile);
         try {
-            OpenedDb openedDb = Utils.openDbReadOnly(dbFile, password);
             CreateBalanceReportCmd cmd = new CreateBalanceReportCmd();
-            cmd.genReport(openedDb, outFile);
+            cmd.setOutFile(outFile);
+            cmd.visit(dbFile, password);
         } catch (IOException e) {
             log.error(e, e);
         } finally {
@@ -90,44 +70,17 @@ public class CreateBalanceReportCmd {
         }
     }
 
-    private void genReport(OpenedDb openedDb, File outFile) throws IOException {
-        Map<AccountType, List<AccountBalance>> balances = new HashMap<AccountType, List<AccountBalance>>();
+    @Override
+    public void preVisit(OpenedDb openedDb) throws IOException {
+        this.date = new Date();
+        this.balances = new HashMap<AccountType, List<AccountBalance>>();
+    }
 
-        Date date = new Date();
+    @Override
+    public void postVisit(OpenedDb openedDb) throws IOException {
         PrintWriter writer = null;
         try {
             writer = new PrintWriter(new BufferedWriter(new FileWriter(outFile)));
-            MnyContext mnyContext = AccountUtil.createMnyContext(openedDb);
-            List<Account> accounts = mnyContext.getAccounts();
-            int count = 0;
-            int size = accounts.size();
-            for (Account account : accounts) {
-                count++;
-                log.info("");
-                log.info("###");
-                log.info(count + "/" + size + ", account=" + account.getName());
-                Database db = mnyContext.getDb();
-                AccountUtil.getTransactions(db, account);
-                BigDecimal currentBalance = null;
-                if (account.getAccountType() == AccountType.INVESTMENT) {
-                    Double investmentBalance = AccountUtil.calculateInvestmentBalance(account, date, mnyContext);
-                    currentBalance = new BigDecimal(investmentBalance);
-                } else {
-                    currentBalance = AccountUtil.calculateCurrentBalance(account, date);
-                }
-                AccountBalance accountBalance = new AccountBalance();
-                accountBalance.setAccount(account);
-                accountBalance.setDate(date);
-                accountBalance.setBalance(currentBalance);
-
-                AccountType accountType = account.getAccountType();
-                List<AccountBalance> list = balances.get(accountType);
-                if (list == null) {
-                    list = new ArrayList<AccountBalance>();
-                    balances.put(accountType, list);
-                }
-                list.add(accountBalance);
-            }
 
             for (AccountType accountType : balances.keySet()) {
                 List<AccountBalance> list = balances.get(accountType);
@@ -135,15 +88,38 @@ public class CreateBalanceReportCmd {
                 writer.println("### " + accountType);
                 for (AccountBalance balance : list) {
                     Account account = balance.getAccount();
-                    writer.println(account.getName() + ", " + account.getAccountType() + ", " + account.formatAmmount(balance.getBalance()));
+                    writer.println(account.getName() + ", " + account.getAccountType() + ", "
+                            + account.formatAmmount(balance.getBalance()));
                 }
             }
         } finally {
+            log.info("outFile=" + outFile);
             if (writer != null) {
                 writer.close();
                 writer = null;
             }
         }
+    }
+
+    @Override
+    public void visitAccount(Account account) throws IOException {
+        log.info("account=" + account.getName());
+
+        Database db = mnyContext.getDb();
+        AccountUtil.retrieveTransactions(db, account);
+        BigDecimal currentBalance = AccountUtil.calculateBalance(account, date, mnyContext);
+        AccountBalance accountBalance = new AccountBalance();
+        accountBalance.setAccount(account);
+        accountBalance.setDate(date);
+        accountBalance.setBalance(currentBalance);
+
+        AccountType accountType = account.getAccountType();
+        List<AccountBalance> list = balances.get(accountType);
+        if (list == null) {
+            list = new ArrayList<AccountBalance>();
+            balances.put(accountType, list);
+        }
+        list.add(accountBalance);
 
     }
 
