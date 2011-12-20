@@ -1,1 +1,1 @@
-mvn clean source:jar package assembly:single site
+mvn clean source:jar package site
