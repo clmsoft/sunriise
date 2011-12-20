@@ -55,7 +55,7 @@ public class ExportAccountsToMd {
         int nTransactions = 0;
         int nSplitTransactions = 0;
         for (Account account : accounts) {
-            transactions = AccountUtil.getTransactions(db, account);
+            transactions = AccountUtil.retrieveTransactions(db, account);
 
             nTransactions = transactions.size();
             nSplitTransactions = getSplitTransactionCount(transactions);
@@ -73,7 +73,7 @@ public class ExportAccountsToMd {
 
         // transaction with no account
         Account account = null;
-        transactions = AccountUtil.getTransactions(db, account);
+        transactions = AccountUtil.retrieveTransactions(db, account);
         nTransactions = transactions.size();
 
         nSplitTransactions = getSplitTransactionCount(transactions);

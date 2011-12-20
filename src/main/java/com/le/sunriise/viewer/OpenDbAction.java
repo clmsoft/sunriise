@@ -3,7 +3,6 @@ package com.le.sunriise.viewer;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.prefs.Preferences;
 
@@ -43,50 +42,21 @@ public abstract class OpenDbAction implements ActionListener {
     // }
 
     private void openDb(Component locationRelativeTo) {
-        List<String> recentOpenFileNames = getRecentOpenFileNames(prefs);
+        List<String> recentOpenFileNames = OpenDbDialog.getRecentOpenFileNames(prefs);
 
         OpenDbDialog dialog = OpenDbDialog.showDialog(openedDb, recentOpenFileNames, locationRelativeTo, disableReadOnlyCheckBox);
         if (!dialog.isCancel()) {
             // setDb(dialog.getDb());
             // dbFile = dialog.getDbFile();
-            openedDb = dialog.getOpendDb();
+            openedDb = dialog.getOpenedDb();
             
             dbFileOpened(openedDb, dialog);
 
-            updateRecentOpenFileNames(recentOpenFileNames, prefs);
+            OpenDbDialog.updateRecentOpenFileNames(recentOpenFileNames, prefs);
         }
     }
 
     public abstract void dbFileOpened(OpenedDb newOpenedDb, OpenDbDialog dialog);
-
-    private void updateRecentOpenFileNames(List<String> recentOpenFileNames, Preferences preferences) {
-        int size;
-        size = recentOpenFileNames.size();
-        size = Math.min(size, 10);
-        if (log.isDebugEnabled()) {
-            log.debug("prefs: recentOpenFileNames_size=" + size);
-        }
-        preferences.putInt("recentOpenFileNames_size", size);
-        for (int i = 0; i < size; i++) {
-            if (log.isDebugEnabled()) {
-                log.debug("prefs: recentOpenFileNames_" + i + ", value=" + recentOpenFileNames.get(i));
-            }
-            preferences.put("recentOpenFileNames_" + i, recentOpenFileNames.get(i));
-        }
-    }
-
-    private List<String> getRecentOpenFileNames(Preferences preferences) {
-        List<String> recentOpenFileNames = new ArrayList<String>();
-        int size = preferences.getInt("recentOpenFileNames_size", 0);
-        size = Math.min(size, 10);
-        for (int i = 0; i < size; i++) {
-            String value = prefs.get("recentOpenFileNames_" + i, null);
-            if (value != null) {
-                recentOpenFileNames.add(value);
-            }
-        }
-        return recentOpenFileNames;
-    }
 
     public Component getLocationRelativeTo() {
         return locationRelativeTo;

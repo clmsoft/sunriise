@@ -9,7 +9,9 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.prefs.Preferences;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -43,31 +45,113 @@ public class OpenDbDialog extends JDialog {
     private final JPanel contentPanel = new JPanel();
 
     private boolean cancel = false;
-    
+
     private JPasswordField passwordField;
 
     private JCheckBox readOnlyCheckBox;
-    
+
     private JCheckBox encryptedCheckBox;
-    
+
     private OpenDbDialogDataModel dataModel = new OpenDbDialogDataModel();
     private JComboBox dbFileNames;
 
-    private OpenedDb opendDb;
+    private OpenedDb openedDb;
 
-    public static OpenDbDialog showDialog(OpenedDb opendDb, List<String> recentOpenFileNames, Component locationRealativeTo, boolean disableReadOnlyCheckBox) {
-        OpenDbDialog dialog = new OpenDbDialog(opendDb, recentOpenFileNames);
+    private JButton okButton;
+
+    private JButton cancelButton;
+
+    private boolean hide = true;
+
+    private final class CancelAction implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            setCancel(true);
+
+            if (preHideDialog()) {
+                if (hide) {
+                    setVisible(false);
+                } else {
+                    dispose();
+                }
+            }
+        }
+    }
+
+    private final class OkAction implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent event) {
+            String dbFileName = (String) dbFileNames.getSelectedItem();
+            if ((dbFileName == null) || (dbFileName.length() <= 0)) {
+                JOptionPane.showMessageDialog(dbFileNames, "Please enter a database filename.", "Missing database filename", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            try {
+                if (OpenDbDialog.this.openedDb != null) {
+                    OpenDbDialog.this.openedDb.close();
+                }
+
+                OpenDbDialog.this.openedDb = Utils.openDb(dbFileName, passwordField.getPassword(), readOnlyCheckBox.isSelected(),
+                        encryptedCheckBox.isSelected());
+                log.info("Opened dbFile=" + OpenDbDialog.this.openedDb.getDbFile());
+            } catch (IllegalStateException e) {
+                log.error(e, e);
+                JOptionPane.showMessageDialog(dbFileNames, dbFileName + " \n" + e.toString(), "Error open db file", JOptionPane.ERROR_MESSAGE);
+                return;
+            } catch (IOException e) {
+                log.error(e);
+                JOptionPane.showMessageDialog(dbFileNames, dbFileName + " \n" + e.toString(), "Error open db file", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            File file = OpenDbDialog.this.openedDb.getDbFile();
+            if (file != null) {
+                List<String> list = dataModel.getRecentOpenFileNames();
+                if (list.contains(file.getAbsolutePath())) {
+                    list.remove(file.getAbsolutePath());
+                }
+                list.add(0, file.getAbsolutePath());
+                if (log.isDebugEnabled()) {
+                    log.debug(list);
+                }
+            }
+            setCancel(false);
+
+            if (preHideDialog()) {
+                if (hide) {
+                    setVisible(false);
+                } else {
+                    dispose();
+                }
+            }
+        }
+    }
+
+    public static OpenDbDialog showDialog(OpenedDb opendDb, List<String> recentOpenFileNames, Component locationRelativeTo, boolean disablekReadOnlyCheckBox) {
+        String title = null;
+        OpenDbDialog dialog = new OpenDbDialog(opendDb, title, recentOpenFileNames);
+
+        showDialog(dialog, locationRelativeTo, disablekReadOnlyCheckBox);
+
+        return dialog;
+    }
+
+    protected boolean preHideDialog() {
+        return true;
+    }
+
+    public static void showDialog(OpenDbDialog dialog, Component locationRelativeTo, boolean disableReadOnlyCheckBox) {
         dialog.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
         dialog.setModalityType(ModalityType.APPLICATION_MODAL);
+
         if (disableReadOnlyCheckBox) {
             dialog.readOnlyCheckBox.setEnabled(false);
         } else {
             dialog.readOnlyCheckBox.setEnabled(true);
         }
+
         dialog.pack();
-        dialog.setLocationRelativeTo(locationRealativeTo);
+        dialog.setLocationRelativeTo(locationRelativeTo);
         dialog.setVisible(true);
-        return dialog;
     }
 
     public static OpenDbDialog showDialog(OpenedDb openedDb, List<String> recentOpenFileNames, Component locationRelativeTo) {
@@ -78,32 +162,23 @@ public class OpenDbDialog extends JDialog {
     /**
      * Create the dialog.
      */
-    public OpenDbDialog(OpenedDb opendDb, final List<String> recentOpenFileNames) {
-        setTitle("Open");
+    public OpenDbDialog(OpenedDb openedDb, String title, final List<String> recentOpenFileNames) {
+        if ((title == null)) {
+            title = "Open";
+        }
+        setTitle(title);
         // setModalityType(ModalityType.APPLICATION_MODAL);
-        this.opendDb = opendDb;
+        this.openedDb = openedDb;
         this.dataModel.setRecentOpenFileNames(recentOpenFileNames);
         // setBounds(100, 100, 450, 300);
         getContentPane().setLayout(new BorderLayout());
         contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
         getContentPane().add(contentPanel, BorderLayout.CENTER);
-        contentPanel.setLayout(new FormLayout(new ColumnSpec[] {
-                FormFactory.UNRELATED_GAP_COLSPEC,
-                FormFactory.DEFAULT_COLSPEC,
-                FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
-                ColumnSpec.decode("default:grow"),
-                FormFactory.RELATED_GAP_COLSPEC,
-                FormFactory.DEFAULT_COLSPEC,
-                FormFactory.UNRELATED_GAP_COLSPEC,},
-            new RowSpec[] {
-                FormFactory.RELATED_GAP_ROWSPEC,
-                FormFactory.DEFAULT_ROWSPEC,
-                FormFactory.RELATED_GAP_ROWSPEC,
-                FormFactory.DEFAULT_ROWSPEC,
-                FormFactory.RELATED_GAP_ROWSPEC,
-                FormFactory.DEFAULT_ROWSPEC,
-                FormFactory.RELATED_GAP_ROWSPEC,
-                FormFactory.DEFAULT_ROWSPEC,}));
+        contentPanel.setLayout(new FormLayout(new ColumnSpec[] { FormFactory.UNRELATED_GAP_COLSPEC, FormFactory.DEFAULT_COLSPEC,
+                FormFactory.LABEL_COMPONENT_GAP_COLSPEC, ColumnSpec.decode("default:grow"), FormFactory.RELATED_GAP_COLSPEC, FormFactory.DEFAULT_COLSPEC,
+                FormFactory.UNRELATED_GAP_COLSPEC, }, new RowSpec[] { FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+                FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+                FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC, }));
         {
             JLabel lblNewLabel = new JLabel("DB Filename");
             lblNewLabel.setHorizontalAlignment(SwingConstants.TRAILING);
@@ -114,13 +189,12 @@ public class OpenDbDialog extends JDialog {
             btnNewButton.addActionListener(new ActionListener() {
                 private JFileChooser fc = null;
 
-                
                 @Override
                 public void actionPerformed(ActionEvent event) {
                     Component component = (Component) event.getSource();
                     if (fc == null) {
                         File currentDirectory = new File(".");
-                        
+
                         String fileName = (String) dbFileNames.getSelectedItem();
                         if ((fileName != null) && (fileName.length() > 0)) {
                             File file = new File(fileName);
@@ -139,20 +213,20 @@ public class OpenDbDialog extends JDialog {
                     }
                     File selectedFile = fc.getSelectedFile();
                     selectedFile = selectedFile.getAbsoluteFile();
-//                    String fileName= selectedFile.getName();
-//                    if (fileName.endsWith(".mny")) {
-//                        encryptedCheckBox.setSelected(true);
-//                    } else {
-//                        encryptedCheckBox.setSelected(false);
-//                    }
+                    // String fileName= selectedFile.getName();
+                    // if (fileName.endsWith(".mny")) {
+                    // encryptedCheckBox.setSelected(true);
+                    // } else {
+                    // encryptedCheckBox.setSelected(false);
+                    // }
                     dbFileNames.setSelectedItem(selectedFile.getAbsolutePath());
-                    
+
                 }
             });
             {
                 dbFileNames = new JComboBox();
                 dbFileNames.addItemListener(new ItemListener() {
-                    
+
                     @Override
                     public void itemStateChanged(ItemEvent e) {
                         if (e.getStateChange() == ItemEvent.SELECTED) {
@@ -201,64 +275,15 @@ public class OpenDbDialog extends JDialog {
             buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
             getContentPane().add(buttonPane, BorderLayout.SOUTH);
             {
-                JButton okButton = new JButton("OK");
-                okButton.addActionListener(new ActionListener() {
-                    
-                    @Override
-                    public void actionPerformed(ActionEvent event) {
-                        String dbFileName = (String) dbFileNames.getSelectedItem();
-                        if ((dbFileName == null) || (dbFileName.length() <= 0)) {
-                            JOptionPane.showMessageDialog(dbFileNames, "Please enter a database filename.", "Missing database filename",
-                                    JOptionPane.ERROR_MESSAGE);
-                            return;
-                        }
-                        try {
-                            if (OpenDbDialog.this.opendDb != null) {
-                                OpenDbDialog.this.opendDb.close();
-                            }
-
-                            OpenDbDialog.this.opendDb = Utils.openDb(dbFileName, passwordField.getPassword(), readOnlyCheckBox.isSelected(), encryptedCheckBox.isSelected());
-                            log.info("Opened dbFile=" + OpenDbDialog.this.opendDb.getDbFile());
-                        } catch (IllegalStateException e) {
-                            log.error(e, e);
-                            JOptionPane.showMessageDialog(dbFileNames, dbFileName + " \n" + e.toString(), "Error open db file", JOptionPane.ERROR_MESSAGE);
-                            return;
-                        } catch (IOException e) {
-                            log.error(e);
-                            JOptionPane.showMessageDialog(dbFileNames, dbFileName + " \n" + e.toString(), "Error open db file", JOptionPane.ERROR_MESSAGE);
-                            return;
-                        }
-                        File file = OpenDbDialog.this.opendDb.getDbFile();
-                        if (file != null) {
-                            List<String> list = dataModel.getRecentOpenFileNames();
-                            if (list.contains(file.getAbsolutePath())) {
-                                list.remove(file.getAbsolutePath());
-                            }
-                            list.add(0, file.getAbsolutePath());
-                            if (log.isDebugEnabled()) {
-                                log.debug(list);
-                            }
-                        }
-                        setCancel(false);
-                        // dispose();
-                        setVisible(false);
-                    }
-                });
+                okButton = new JButton("OK");
+                okButton.addActionListener(new OkAction());
                 okButton.setActionCommand("OK");
                 buttonPane.add(okButton);
                 getRootPane().setDefaultButton(okButton);
             }
             {
-                JButton cancelButton = new JButton("Cancel");
-                cancelButton.addActionListener(new ActionListener() {
-                    
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        setCancel(true);
-                        // dispose();
-                        setVisible(false);
-                    }
-                });
+                cancelButton = new JButton("Cancel");
+                cancelButton.addActionListener(new CancelAction());
                 cancelButton.setActionCommand("Cancel");
                 buttonPane.add(cancelButton);
             }
@@ -275,13 +300,13 @@ public class OpenDbDialog extends JDialog {
         this.cancel = cancel;
     }
 
-//    public Database getDb() {
-//        return opendDb.getDb();
-//    }
-//
-//    public File getDbFile() {
-//        return opendDb.getDbFile();
-//    }
+    // public Database getDb() {
+    // return opendDb.getDb();
+    // }
+    //
+    // public File getDbFile() {
+    // return opendDb.getDbFile();
+    // }
 
     public JCheckBox getReadOnlyCheckBox() {
         return readOnlyCheckBox;
@@ -289,11 +314,57 @@ public class OpenDbDialog extends JDialog {
 
     protected void initDataBindings() {
         BeanProperty<OpenDbDialogDataModel, List<String>> openDbDialogDataModelBeanProperty = BeanProperty.create("recentOpenFileNames");
-        JComboBoxBinding<String, OpenDbDialogDataModel, JComboBox> jComboBinding = SwingBindings.createJComboBoxBinding(UpdateStrategy.READ, dataModel, openDbDialogDataModelBeanProperty, dbFileNames);
+        JComboBoxBinding<String, OpenDbDialogDataModel, JComboBox> jComboBinding = SwingBindings.createJComboBoxBinding(UpdateStrategy.READ, dataModel,
+                openDbDialogDataModelBeanProperty, dbFileNames);
         jComboBinding.bind();
     }
 
-    public OpenedDb getOpendDb() {
-        return opendDb;
+    public OpenedDb getOpenedDb() {
+        return openedDb;
+    }
+
+    public static void updateRecentOpenFileNames(List<String> recentOpenFileNames, Preferences preferences) {
+        int size;
+        size = recentOpenFileNames.size();
+        size = Math.min(size, 10);
+        if (log.isDebugEnabled()) {
+            log.debug("prefs: recentOpenFileNames_size=" + size);
+        }
+        preferences.putInt("recentOpenFileNames_size", size);
+        for (int i = 0; i < size; i++) {
+            if (log.isDebugEnabled()) {
+                log.debug("prefs: recentOpenFileNames_" + i + ", value=" + recentOpenFileNames.get(i));
+            }
+            preferences.put("recentOpenFileNames_" + i, recentOpenFileNames.get(i));
+        }
+    }
+
+    public static List<String> getRecentOpenFileNames(Preferences prefs) {
+        List<String> recentOpenFileNames = new ArrayList<String>();
+        int size = prefs.getInt("recentOpenFileNames_size", 0);
+        size = Math.min(size, 10);
+        for (int i = 0; i < size; i++) {
+            String value = prefs.get("recentOpenFileNames_" + i, null);
+            if (value != null) {
+                recentOpenFileNames.add(value);
+            }
+        }
+        return recentOpenFileNames;
+    }
+
+    public JButton getOkButton() {
+        return okButton;
+    }
+
+    public JButton getCancelButton() {
+        return cancelButton;
+    }
+
+    public boolean isHide() {
+        return hide;
+    }
+
+    public void setHide(boolean hide) {
+        this.hide = hide;
     }
 }

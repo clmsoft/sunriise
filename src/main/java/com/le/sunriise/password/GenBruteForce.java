@@ -79,7 +79,7 @@ public class GenBruteForce {
                 char c = alphabets[i];
                 buffer[cursor] = c;
                 if (maskChar == '+') {
-                    // no need to check
+                    // TODO: no need to check
                 } else {
                     notifyResult(new String(buffer, 0, cursor + 1));
                 }

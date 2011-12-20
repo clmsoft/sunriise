@@ -13,8 +13,10 @@ public class BruteForceTime {
     public static void main(String[] args) {
         int alphabetsLenghth = 26;
         String message = null;
-        int ratePerSecond = 90000;
+        int ratePerSecond = 150000;
 
+        log.info("ratePerSecond=" + ratePerSecond);
+        
         alphabetsLenghth = 26;
         message = "Just lower OR upper case ... alphabetsLenghth=" + alphabetsLenghth;
         calc(alphabetsLenghth, message, ratePerSecond);

@@ -105,7 +105,7 @@ public class QifTransactionUtilCmd {
 
     private static void printTransactions(Account account, MnyContext mnyContext, PrintWriter writer) throws IOException {
         Database db = mnyContext.getDb();
-        AccountUtil.getTransactions(db, account);
+        AccountUtil.retrieveTransactions(db, account);
         BigDecimal currentBalance = AccountUtil.calculateCurrentBalance(account);
 
         List<Transaction> transactions = account.getTransactions();

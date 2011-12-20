@@ -59,6 +59,7 @@ public class MinPasswordChecker {
         } catch (IOException e) {
             log.error(e, e);
         } finally {
+            log.info("< DONE");
         }
     }
 
@@ -136,6 +137,7 @@ public class MinPasswordChecker {
         byte[] encrypted4BytesCheck = headerPage.getEncrypted4BytesCheck();
         if (isBlankKey(encrypted4BytesCheck)) {
             // no password?
+            log.warn("Found blank encrypted4BytesCheck=" + toHexString(encrypted4BytesCheck));
             return true;
         }
 
@@ -143,12 +145,15 @@ public class MinPasswordChecker {
     }
 
     private boolean verifyPassword(byte[] encrypted4BytesCheck, byte[] testKey, byte[] testBytes) {
-        RC4Engine engine = getEngine();
-        boolean encrypting = false;
+        RC4Engine engine = null; 
+        engine = getEngine();
+//        engine = new RC4Engine();
+
+        boolean forEncryption = false;
         if (log.isDebugEnabled()) {
             log.debug("testKey.length=" + testKey.length + ", " + (testKey.length * 8));
         }
-        engine.init(encrypting, new KeyParameter(testKey));
+        engine.init(forEncryption, new KeyParameter(testKey));
 
         byte[] decrypted4BytesCheck = new byte[4];
         engine.processBytes(encrypted4BytesCheck, 0, encrypted4BytesCheck.length, decrypted4BytesCheck, 0);
@@ -157,8 +162,16 @@ public class MinPasswordChecker {
             // throw new IllegalStateException("Incorrect password provided");
             return false;
         } else {
+            log.info("encrypted4BytesCheck=" + toHexString(encrypted4BytesCheck));
+            log.info("testKey=" + toHexString(testKey));
+            log.info("decrypted4BytesCheck=" + toHexString(decrypted4BytesCheck));
+            log.info("testBytes=" + toHexString(testBytes));
             return true;
         }
+    }
+
+    private String toHexString(byte[] bytes) {
+        return HexDump.toHex(bytes);
     }
 
     private final RC4Engine getEngine() {

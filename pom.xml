@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.le.sunriise</groupId>
   <artifactId>sunriise</artifactId>
-  <version>0.0.2-SNAPSHOT</version>
+  <version>0.0.3-SNAPSHOT</version>
   <name>sunriise</name>
   <description>sunriise goal is to provide read/write support for Microsoft Money *.mny file.</description>
   <url>https://sourceforge.net/projects/sunriise/</url>

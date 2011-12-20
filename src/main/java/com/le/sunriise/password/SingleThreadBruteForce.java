@@ -23,6 +23,7 @@ public class SingleThreadBruteForce {
         private String password = null;
         private BigInteger maxCount;
         private static final BigInteger ONE_HUNDRED = BigInteger.valueOf(100);
+        private static final BigInteger ONE_THOUSAND = BigInteger.valueOf(1000);
         private StopWatch stopWatch;
         private ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(2);
         private ScheduledFuture<?> periodicStatusFuture;
@@ -64,8 +65,16 @@ public class SingleThreadBruteForce {
                 public void run() {
                     long delta = stopWatch.click(false);
                     Duration duration = new Duration(delta);
-                    BigInteger percentage = BigInteger.valueOf(count).multiply(ONE_HUNDRED).divide(maxCount);
+                    BigInteger aCount = BigInteger.valueOf(count);
+                    BigInteger percentage = aCount.multiply(ONE_HUNDRED).divide(maxCount);
                     log.info("Tested " + count + " strings" + " (" + percentage + "% completed" + ", elapsed=" + duration.toString() + ")");
+                    if (delta > 0) {
+                        BigInteger seconds = BigInteger.valueOf(delta).divide(ONE_THOUSAND);
+                        if (seconds.longValue() > 0) {
+                            log.info("  Rate=" + aCount.divide(seconds) + "/sec");
+                        }
+                    }
+
                     if (isTerminate()) {
                         if (periodicStatusFuture != null) {
                             periodicStatusFuture.cancel(true);
@@ -128,32 +137,6 @@ public class SingleThreadBruteForce {
         return alphabets;
     }
 
-    /**
-     * @param args
-     */
-    public static void main(String[] args) {
-        File dbFile = null;
-
-        dbFile = new File(args[0]);
-        log.info("dbFile=" + dbFile);
-        try {
-            int passwordLength = 5;
-            log.info("passwordLength=" + passwordLength);
-
-            char[] mask = new String("*****").toCharArray();
-
-            char[] alphabets = createAlphabets();
-
-            checkUsingBruteForce(dbFile, passwordLength, mask, alphabets);
-
-        } catch (IOException e) {
-            log.error(e, e);
-        } finally {
-            log.info("< DONE");
-        }
-
-    }
-
     public static String checkUsingBruteForce(File dbFile, int passwordLength, char[] mask, char[] alphabets) throws IOException {
         String password = null;
         HeaderPage headerPage = new HeaderPage(dbFile);
@@ -185,6 +168,41 @@ public class SingleThreadBruteForce {
             }
         }
         return password;
+    }
+
+    /**
+     * @param args
+     */
+    public static void main(String[] args) {
+        File dbFile = null;
+        int passwordLength = 5;
+
+        if (args.length == 2) {
+            dbFile = new File(args[0]);
+            passwordLength = Integer.valueOf(args[1]);
+        } else {
+            Class<SingleThreadBruteForce> clz = SingleThreadBruteForce.class;
+            System.out.println("Usage: java " + clz.getName() + " sample.mny passwordLength");
+            System.exit(1);
+        }
+        char[] mask = null;
+         mask = new String("*****!").toCharArray();
+
+        char[] alphabets = createAlphabets();
+
+        log.info("dbFile=" + dbFile);
+        log.info("passwordLength=" + passwordLength);
+        log.info("mask=" + ((mask == null) ? null : new String(mask)));
+        log.info("alphabets=" + new String(alphabets));
+
+        try {
+            checkUsingBruteForce(dbFile, passwordLength, mask, alphabets);
+        } catch (IOException e) {
+            log.error(e, e);
+        } finally {
+            log.info("< DONE");
+        }
+
     }
 
 }

@@ -519,7 +519,7 @@ public class AccountViewer {
         try {
             if (account != null) {
                 log.info("select account=" + account);
-                AccountUtil.getTransactions(openedDb.getDb(), account);
+                AccountUtil.retrieveTransactions(openedDb.getDb(), account);
 
                 BigDecimal currentBalance = AccountUtil.calculateCurrentBalance(account);
 

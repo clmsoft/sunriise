@@ -34,7 +34,7 @@ public class UpdateExchangeRates {
             inFileName = args[1];
             password = args[2];
         } else {
-            Class clz = UpdateExchangeRates.class;
+            Class<UpdateExchangeRates> clz = UpdateExchangeRates.class;
             System.out.println("Usage: " + clz.getName() + " fx.csv sample.mny [password]");
             System.exit(1);
         }
@@ -80,7 +80,7 @@ public class UpdateExchangeRates {
         }
     }
 
-    private void update(FxTable fxTable, Database db) throws IOException {
+    public void update(FxTable fxTable, Database db) throws IOException {
         // CRNC
         // (PK) CRNC.hcrnc
         //
@@ -137,23 +137,15 @@ public class UpdateExchangeRates {
                 Double newRate = fxTable.getRateString(hcrncFromStr, hcrncToStr);
 
                 if (newRate == null) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("");
-                        log.debug("# NO NEW FX RATE");
-                        log.debug("  CURRENT: " + hcrncFromStr + " -> " + hcrncToStr + ", " + rate + ", (" + hcrncFromName + " -> " + hcrncToName + ")");
-                        log.debug("  NEW: " + hcrncFromStr + " -> " + hcrncToStr + ", " + newRate);
-                    }
+                    notifyNoExistingRate(rate, hcrncFromStr, hcrncFromName, hcrncToStr, hcrncToName, newRate);
                 } else {
-                    log.info("");
-                    log.info("# YES NEW FX RATE");
-                    log.info("  CURRENT: " + hcrncFromStr + " -> " + hcrncToStr + ", " + rate + ", (" + hcrncFromName + " -> " + hcrncToName + ")");
-                    log.info("  NEW: " + hcrncFromStr + " -> " + hcrncToStr + ", " + newRate);
                     Column column = tCRNC_EXCHG.getColumn("rate");
                     if (column != null) {
                         cCRNC_EXCHG.setCurrentRowValue(column, newRate);
                     } else {
                         log.warn("Cannot find column=CRNC.rate");
                     }
+                    notifyUpdateExistingRate(rate, hcrncFromStr, hcrncFromName, hcrncToStr, hcrncToName, newRate);
                 }
             }
         } finally {
@@ -164,6 +156,22 @@ public class UpdateExchangeRates {
             if (cCRNC != null) {
                 cCRNC = null;
             }
+        }
+    }
+
+    protected void notifyUpdateExistingRate(Double rate, String hcrncFromStr, String hcrncFromName, String hcrncToStr, String hcrncToName, Double newRate) {
+        log.info("");
+        log.info("# YES NEW FX RATE");
+        log.info("  CURRENT: " + hcrncFromStr + " -> " + hcrncToStr + ", " + rate + ", (" + hcrncFromName + " -> " + hcrncToName + ")");
+        log.info("  NEW: " + hcrncFromStr + " -> " + hcrncToStr + ", " + newRate);
+    }
+
+    protected void notifyNoExistingRate(Double rate, String hcrncFromStr, String hcrncFromName, String hcrncToStr, String hcrncToName, Double newRate) {
+        if (log.isDebugEnabled()) {
+            log.debug("");
+            log.debug("# NO NEW FX RATE");
+            log.debug("  CURRENT: " + hcrncFromStr + " -> " + hcrncToStr + ", " + rate + ", (" + hcrncFromName + " -> " + hcrncToName + ")");
+            log.debug("  NEW: " + hcrncFromStr + " -> " + hcrncToStr + ", " + newRate);
         }
     }
 }
