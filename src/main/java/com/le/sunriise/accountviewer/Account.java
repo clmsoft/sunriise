@@ -86,10 +86,6 @@ public class Account extends MnyObject implements Comparable<Account> {
         this.id = id;
     }
 
-    public Boolean isClosed() {
-        return closed;
-    }
-
     public void setClosed(Boolean closed) {
         this.closed = closed;
     }

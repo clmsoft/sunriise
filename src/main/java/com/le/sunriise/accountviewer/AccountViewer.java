@@ -409,7 +409,7 @@ public class AccountViewer {
         cursor = Cursor.createCursor(table);
         Map<String, Object> rowPattern = new HashMap<String, Object>();
         rowPattern.put("htrn", id);
-        if (cursor.findRow(rowPattern)) {
+        if (cursor.findFirstRow(rowPattern)) {
             row = cursor.getCurrentRow();
         }
         return row;

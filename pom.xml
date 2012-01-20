@@ -74,6 +74,7 @@
         <artifactId>maven-assembly-plugin</artifactId>
         <version>2.2.1</version>
         <configuration>
+          <index>true</index>
           <finalName>${project.artifactId}-Build_${buildNumber}-app</finalName>
           <appendAssemblyId>false</appendAssemblyId>          
           <archive>
@@ -197,7 +198,7 @@
     <dependency>
       <groupId>com.healthmarketscience.jackcess</groupId>
       <artifactId>jackcess</artifactId>
-      <version>1.2.6-SNAPSHOT</version>
+      <version>1.2.7-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.healthmarketscience.jackcess</groupId>
@@ -225,6 +226,11 @@
     	<version>4.10</version>
     	<type>jar</type>
     	<scope>test</scope>
+    </dependency>
+    <dependency>
+    	<groupId>org.codehaus.jackson</groupId>
+    	<artifactId>jackson-mapper-asl</artifactId>
+    	<version>1.9.3</version>
     </dependency>
   </dependencies>
 

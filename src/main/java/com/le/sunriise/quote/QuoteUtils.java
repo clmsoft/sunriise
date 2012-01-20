@@ -74,7 +74,7 @@ public class QuoteUtils {
 
     public static Map<String, Object> findRowFromTop(Cursor cursor, Map<String, Object> rowPattern) throws IOException {
         cursor.beforeFirst();
-        if (!cursor.findRow(rowPattern)) {
+        if (!cursor.findFirstRow(rowPattern)) {
             return null;
         }
         Map<String, Object> row = cursor.getCurrentRow();

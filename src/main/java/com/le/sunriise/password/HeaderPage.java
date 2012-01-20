@@ -61,7 +61,7 @@ public class HeaderPage {
             File tempFile = File.createTempFile("sunriise", ".mny");
 //            tempFile.deleteOnExit();
             long headerOffset = 77;
-            dbFile = copyBackupFile(dbFile, tempFile, headerOffset, headerOffset + 4096);
+            dbFile = BackupFileUtils.copyBackupFile(dbFile, tempFile, headerOffset, headerOffset + 4096);
             log.info("Temp converted backup file=" + dbFile);
         }
 
@@ -118,62 +118,6 @@ public class HeaderPage {
                 }
             }
         }
-    }
-
-    private File copyBackupFile(File srcFile, File destFile, long offset, long maxCount) throws IOException {
-        File newFile = destFile;
-
-        FileChannel srcChannel = null;
-        FileChannel destChannel = null;
-        try {
-            srcChannel = new RandomAccessFile(srcFile, "r").getChannel();
-
-            // Create channel on the destination
-            destChannel = new RandomAccessFile(destFile, "rwd").getChannel();
-
-            if (log.isDebugEnabled()) {
-                log.debug("srcFile=" + srcFile);
-                log.debug("destFile=" + destFile);
-            }
-            // Copy file contents from source to destination
-            if (maxCount < 0) {
-                maxCount = srcChannel.size();
-            }
-            maxCount -= offset;
-            if (log.isDebugEnabled()) {
-                log.debug("offset=" + offset);
-                log.debug("maxCount=" + maxCount);
-            }
-
-            while (maxCount > 0) {
-                long count = srcChannel.transferTo(offset, maxCount, destChannel);
-                if (log.isDebugEnabled()) {
-                    log.debug("count=" + count);
-                }
-                maxCount -= count;
-                offset += count;
-            }
-        } finally {
-            if (srcChannel != null) {
-                try {
-                    srcChannel.close();
-                } catch (IOException e) {
-                    log.warn(e);
-                } finally {
-                    srcChannel = null;
-                }
-            }
-            if (destChannel != null) {
-                try {
-                    destChannel.close();
-                } catch (IOException e) {
-                    log.warn(e);
-                } finally {
-                    destChannel = null;
-                }
-            }
-        }
-        return newFile;
     }
 
     private static Charset getDefaultCharset(JetFormat format) {

@@ -183,7 +183,16 @@ public class AccountUtil {
             }
         } finally {
             long delta = stopWatch.click();
-            log.info("< getTransactions, delta=" + delta);
+            int count = 0;
+            if (transactions != null) {
+                count = transactions.size();
+            }
+            if (count <= 0) {
+                log.info("< getTransactions, delta=" + delta);
+            } else {
+                log.info("< getTransactions, delta=" + delta + ", " + (delta * 1.0) / count);
+            }
+
         }
 
         account.setTransactions(transactions);
@@ -203,8 +212,8 @@ public class AccountUtil {
         return transactionFilters;
     }
 
-    private static boolean addTransactionFromRow(Database db, List<TransactionFilter> filters, Map<String, Object> row, List<Transaction> transactions)
-            throws IOException {
+    private static boolean addTransactionFromRow(Database db, List<TransactionFilter> filters, Map<String, Object> row,
+            List<Transaction> transactions) throws IOException {
         Transaction transaction = new Transaction();
 
         // transaction id
@@ -306,7 +315,7 @@ public class AccountUtil {
         Cursor cursor = Cursor.createCursor(splitTable);
         Map<String, Object> rowPattern = new HashMap<String, Object>();
         rowPattern.put("htrn", id);
-        if (cursor.findRow(rowPattern)) {
+        if (cursor.findFirstRow(rowPattern)) {
             Map<String, Object> row = cursor.getCurrentRow();
             Double price = (Double) row.get("dPrice");
             investmentTransaction.setPrice(price);
@@ -361,7 +370,7 @@ public class AccountUtil {
         TransactionSplit transactionSplit = null;
         Map<String, Object> rowPattern = new HashMap<String, Object>();
         rowPattern.put("htrn", transaction.getId());
-        if (splitCursor.findRow(rowPattern)) {
+        if (splitCursor.findFirstRow(rowPattern)) {
             Map<String, Object> row = splitCursor.getCurrentRow();
             Integer htrnParent = (Integer) row.get("htrnParent");
             Integer iSplit = (Integer) row.get("iSplit");
@@ -702,8 +711,8 @@ public class AccountUtil {
         });
         account.setSecurityHoldings(securityHoldings);
         for (SecurityHolding sec : securityHoldings) {
-            log.info("securityName=" + sec.getName() + ", quantity=" + account.formatSecurityQuantity(sec.getQuanity()) + ", price="
-                    + account.formatAmmount(sec.getPrice()) + ", value=" + account.formatAmmount(sec.getMarketValue()));
+            log.info("securityName=" + sec.getName() + ", quantity=" + account.formatSecurityQuantity(sec.getQuanity())
+                    + ", price=" + account.formatAmmount(sec.getPrice()) + ", value=" + account.formatAmmount(sec.getMarketValue()));
             accountMarketValue += sec.getMarketValue().doubleValue();
         }
 
@@ -748,7 +757,7 @@ public class AccountUtil {
         Cursor cursor = Cursor.createCursor(table);
         Map<String, Object> rowPattern = new HashMap<String, Object>();
         rowPattern.put("hacct", relatedToAccountId);
-        if (cursor.findRow(rowPattern)) {
+        if (cursor.findFirstRow(rowPattern)) {
             Map<String, Object> row = cursor.getCurrentRow();
             relatedToAccount = getAcccount(row);
         }
@@ -817,6 +826,7 @@ public class AccountUtil {
         mnyContext.setAccounts(accounts);
 
         setCurrencies(accounts, currencies);
+        
         return accounts;
     }
 

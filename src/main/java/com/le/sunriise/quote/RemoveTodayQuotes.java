@@ -78,7 +78,7 @@ public class RemoveTodayQuotes {
 //            rowPattern.clear();
 //            rowPattern.put("hsp", hsp);
 //            log.info("Looking for row hsp=" + hsp);
-//            if (cursor.findRow(rowPattern)) {
+//            if (cursor.findFirstRow(rowPattern)) {
 //                log.info("   FOUND. Deleting");
 //                cursor.deleteCurrentRow();
 //            } else {

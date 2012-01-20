@@ -60,7 +60,7 @@ public class ExportAccountsToMd {
             nTransactions = transactions.size();
             nSplitTransactions = getSplitTransactionCount(transactions);
 
-            log.info(count + ", " + account.getName() + ", " + account.isClosed() + ", " + account.getStartingBalance() + ", "
+            log.info(count + ", " + account.getName() + ", " + account.getClosed() + ", " + account.getStartingBalance() + ", "
                     + AccountUtil.calculateCurrentBalance(account) + ", " + nTransactions);
 
             parentTransactionCount += nTransactions;

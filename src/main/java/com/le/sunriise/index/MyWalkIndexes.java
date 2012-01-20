@@ -81,7 +81,7 @@ for(int i = 0; i < entryKey.length; ++i) {
 }
 
 Map<String,Object> otherRow = null;
-if(otherCursor.findRowByEntry(entryKey)) {
+if(othercursor.findFirstRowByEntry(entryKey)) {
  otherRow = otherCursor.getCurrentRow();
 }
 [/code]
