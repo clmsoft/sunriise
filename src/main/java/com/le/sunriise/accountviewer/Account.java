@@ -22,6 +22,7 @@ public class Account extends MnyObject implements Comparable<Account> {
     private BigDecimal currentBalance;
 
     private List<Transaction> transactions;
+    private List<Transaction> filteredTransactions;
 
     private AccountType accountType;
 
@@ -43,7 +44,7 @@ public class Account extends MnyObject implements Comparable<Account> {
     private List<SecurityHolding> securityHoldings;
 
     private final NumberFormat securityQuantityFormatter;
-    
+
     public Account() {
         super();
 
@@ -117,7 +118,6 @@ public class Account extends MnyObject implements Comparable<Account> {
         this.transactions = transactions;
     }
 
-    
     @Override
     public String toString() {
         return getName();
@@ -258,5 +258,13 @@ public class Account extends MnyObject implements Comparable<Account> {
 
     public void setRelatedToAccount(Account relatedToAccount) {
         this.relatedToAccount = relatedToAccount;
+    }
+
+    public List<Transaction> getFilteredTransactions() {
+        return filteredTransactions;
+    }
+
+    public void setFilteredTransactions(List<Transaction> filteredTransactions) {
+        this.filteredTransactions = filteredTransactions;
     }
 }

@@ -47,22 +47,26 @@ public class ListAccounts extends DefaultAccountVisitor {
     @Override
     public void visitAccount(Account account) {
         log.info(account.getName());
-        CharArrayWriter writer = new CharArrayWriter();
-        try {
-            JSONUtils.writeValue(account, writer);
-        } catch (JsonGenerationException e) {
-            log.error(e, e);
-        } catch (JsonMappingException e) {
-            log.error(e, e);
-        } catch (IOException e) {
-            log.error(e, e);
-        } finally {
-            if (writer != null) {
-                try {
-                    writer.close();
-                    System.out.println(new String(writer.toCharArray()));
-                } finally {
-                    writer = null;
+
+        boolean toJSON = false;
+        if (toJSON) {
+            CharArrayWriter writer = new CharArrayWriter();
+            try {
+                JSONUtils.writeValue(account, writer);
+            } catch (JsonGenerationException e) {
+                log.error(e, e);
+            } catch (JsonMappingException e) {
+                log.error(e, e);
+            } catch (IOException e) {
+                log.error(e, e);
+            } finally {
+                if (writer != null) {
+                    try {
+                        writer.close();
+                        System.out.println(new String(writer.toCharArray()));
+                    } finally {
+                        writer = null;
+                    }
                 }
             }
         }

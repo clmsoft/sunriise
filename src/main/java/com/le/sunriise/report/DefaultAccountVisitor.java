@@ -45,4 +45,10 @@ public class DefaultAccountVisitor extends AbstractAccountVisitor {
 
     }
 
+    @Override
+    public void visitFilteredTransaction(Transaction transaction) throws IOException {
+        // TODO Auto-generated method stub
+        
+    }
+
 }

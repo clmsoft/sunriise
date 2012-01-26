@@ -17,6 +17,7 @@ public class Transaction extends MnyObject implements Comparable<Transaction> {
 
     private List<TransactionSplit> splits;
 
+    // column: grftt
     private Integer statusFlag;
 
     private Date date;
@@ -40,11 +41,11 @@ public class Transaction extends MnyObject implements Comparable<Transaction> {
     private Integer clearedState;
 
     private String memo;
-    
+
     private String number;
-    
+
     private TransactionState state = TransactionState.UNRECONCILED;
-        
+
     public Integer getId() {
         return id;
     }
@@ -153,7 +154,6 @@ public class Transaction extends MnyObject implements Comparable<Transaction> {
         this.transferredAccountId = transferredAccount;
     }
 
-    
     @Override
     public int compareTo(Transaction o) {
         return id.compareTo(o.getId());
@@ -242,10 +242,10 @@ public class Transaction extends MnyObject implements Comparable<Transaction> {
     }
 
     public boolean hasSplits() {
-       if (splits == null) {
-           return false;
-       }
-       return splits.size() > 0;
+        if (splits == null) {
+            return false;
+        }
+        return splits.size() > 0;
     }
 
     public String getMemo() {
@@ -271,5 +271,4 @@ public class Transaction extends MnyObject implements Comparable<Transaction> {
     public void setState(TransactionState state) {
         this.state = state;
     }
-
 }

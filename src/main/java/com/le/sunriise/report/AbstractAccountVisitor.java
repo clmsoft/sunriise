@@ -18,6 +18,7 @@ public abstract class AbstractAccountVisitor {
     private static final Logger log = Logger.getLogger(AbstractAccountVisitor.class);
     private Account currentAccount;
     private Transaction currentTransaction;
+    private Transaction currentFilteredTransaction;
     protected MnyContext mnyContext;
 
     public void visit(File dbFile, String password) throws IOException {
@@ -36,6 +37,8 @@ public abstract class AbstractAccountVisitor {
     public abstract void visitAccount(Account account) throws IOException;
 
     public abstract void visitTransaction(Transaction transaction) throws IOException;
+
+    public abstract void visitFilteredTransaction(Transaction transaction) throws IOException;
 
     private void _visit(OpenedDb openedDb) throws IOException {
         preVisit(openedDb);
@@ -70,11 +73,25 @@ public abstract class AbstractAccountVisitor {
                 _visitTransaction(transaction);
             }
         }
+
+        List<Transaction> filteredTransactions = account.getFilteredTransactions();
+        if (transactions != null) {
+            for (Transaction filteredTransaction : filteredTransactions) {
+                _visitFilteredTransaction(filteredTransaction);
+            }
+        }
+
     }
 
     private void _visitTransaction(Transaction transaction) throws IOException {
         this.currentTransaction = transaction;
 
         visitTransaction(transaction);
+    }
+
+    private void _visitFilteredTransaction(Transaction transaction) throws IOException {
+        this.currentFilteredTransaction = transaction;
+
+        visitFilteredTransaction(transaction);
     }
 }

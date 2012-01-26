@@ -53,19 +53,16 @@ public class MnyTableModel extends AbstractTableModel {
         this.rowsCache = new MapMaker().softValues().maximumSize(50000).makeMap();
     }
 
-    
     @Override
     public int getRowCount() {
         return table.getRowCount();
     }
 
-    
     @Override
     public int getColumnCount() {
         return table.getColumnCount();
     }
 
-    
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
         if (log.isDebugEnabled()) {
@@ -135,19 +132,16 @@ public class MnyTableModel extends AbstractTableModel {
         }
     }
 
-    
     @Override
     public String getColumnName(int column) {
         return columnsArray[column].getName();
     }
 
-    
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
         return !dbReadOnly;
     }
 
-    
     @Override
     public Class<?> getColumnClass(int columnIndex) {
         if (table == null) {
@@ -163,7 +157,6 @@ public class MnyTableModel extends AbstractTableModel {
         return clz;
     }
 
-    
     @Override
     public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
         if (dbReadOnly) {
@@ -190,6 +183,12 @@ public class MnyTableModel extends AbstractTableModel {
         } catch (IOException e) {
             log.error(e, e);
         }
+    }
+
+    public Map<String, Object> getRowValues(int rowIndex) throws IOException {
+        moveCursorToRow(rowIndex);
+        Map<String, Object> rowData = cursor.getCurrentRow();
+        return rowData;
     }
 
     public boolean isDbReadOnly() {
@@ -233,13 +232,25 @@ public class MnyTableModel extends AbstractTableModel {
             log.debug("> copyColumn rowIndex=" + rowIndex + ", columnIndex=" + columnIndex);
         }
         try {
+            String columnName = getColumnName(columnIndex);
             Object value = getValueAt(rowIndex, columnIndex);
-            log.info("value=" + value + ", className=" + ((value == null) ? null : value.getClass().getName()));
+            log.info("columnName=" + columnName + ", value=" + value + ", className="
+                    + ((value == null) ? null : value.getClass().getName()));
+            if (valueIsFlag(columnName)) {
+                int num = Integer.valueOf(value.toString());
+                StringBuffer sb = new StringBuffer();
+                int maxBits = Integer.SIZE;
+                for (int i = 0; i < maxBits; i++) {
+                    sb.append(((num & 1) == 1) ? '1' : '0');
+                    num >>= 1;
+                }
 
+                String binaryString = sb.reverse().toString();
+                log.info("    value (binary)=" + binaryString);
+            }
             StringSelection stringSelection = new StringSelection(value.toString());
             Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
             ClipboardOwner owner = new ClipboardOwner() {
-                
                 @Override
                 public void lostOwnership(Clipboard clipboard, Transferable contents) {
                 }
@@ -249,6 +260,21 @@ public class MnyTableModel extends AbstractTableModel {
             // TODO: not needed?
         }
 
+    }
+
+    private boolean valueIsFlag(String columnName) {
+        String[] flagColumns = { "grftt", };
+
+        if (columnName == null) {
+            return false;
+        }
+
+        for (String flagColumn : flagColumns) {
+            if (columnName.compareToIgnoreCase(flagColumn) == 0) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public void duplicateRow(int rowIndex, Component locationRealativeTo) {
@@ -345,6 +371,6 @@ public class MnyTableModel extends AbstractTableModel {
         if (rowsCache != null) {
             rowsCache.clear();
         }
-        
+
     }
 }

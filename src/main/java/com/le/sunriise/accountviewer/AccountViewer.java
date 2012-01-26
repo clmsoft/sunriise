@@ -13,9 +13,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -68,6 +65,7 @@ import com.le.sunriise.viewer.MyTableCellRenderer;
 import com.le.sunriise.viewer.OpenDbAction;
 import com.le.sunriise.viewer.OpenDbDialog;
 import com.le.sunriise.viewer.OpenedDb;
+import com.le.sunriise.viewer.TableUtils;
 
 public class AccountViewer {
     private static final Logger log = Logger.getLogger(AccountViewer.class);
@@ -437,59 +435,6 @@ public class AccountViewer {
 
     }
 
-    private void calculateMonthlySummary(Account account) {
-        List<Transaction> transactions = account.getTransactions();
-        Date previousDate = null;
-        SimpleDateFormat dateFormatter = new SimpleDateFormat("MM/dd/yyyy");
-
-        int rowIndex = 0;
-
-        int entries = 0;
-        BigDecimal monthlyBalance = new BigDecimal(0);
-        for (Transaction transaction : transactions) {
-            // if (transaction.isVoid()) {
-            // rowIndex++;
-            // continue;
-            // }
-            if (transaction.isRecurring()) {
-                rowIndex++;
-                continue;
-            }
-            entries++;
-
-            Date date = transaction.getDate();
-            if (previousDate != null) {
-                Calendar cal = Calendar.getInstance();
-
-                cal.setTime(previousDate);
-                int previousMonth = cal.get(Calendar.MONTH);
-
-                cal.setTime(date);
-                int month = cal.get(Calendar.MONTH);
-
-                if (month != previousMonth) {
-                    log.info(dateFormatter.format(previousDate) + ", entries=" + entries + ", monthlyBalance=" + monthlyBalance + ", balance="
-                            + AccountUtil.getRunningBalance(rowIndex - 1, account));
-                    entries = 0;
-                    monthlyBalance = new BigDecimal(0);
-                }
-            }
-            previousDate = date;
-
-            BigDecimal amount = transaction.getAmount();
-            if (transaction.isVoid()) {
-                amount = new BigDecimal(0);
-            }
-            if (amount == null) {
-                amount = new BigDecimal(0);
-            }
-            monthlyBalance = monthlyBalance.add(amount);
-
-            rowIndex++;
-        }
-
-    }
-
     private void setFrame(JFrame frame) {
         this.frame = frame;
     }
@@ -526,6 +471,7 @@ public class AccountViewer {
                 log.info(account.getName() + ", " + account.getAccountType() + ", " + Currency.getName(account.getCurrencyId(), mnyContext.getCurrencies())
                         + ", " + account.getStartingBalance() + ", " + currentBalance + ", " + account.getAmountLimit());
 
+                // UI
                 updateStartingBalanceLabel(account.getStartingBalance(), account);
                 updateEndingBalanceLabel(currentBalance, account);
 
@@ -533,7 +479,7 @@ public class AccountViewer {
 
                 boolean calculateMonthlySummary = false;
                 if (calculateMonthlySummary) {
-                    calculateMonthlySummary(account);
+                    TableUtils.calculateMonthlySummary(account);
                 }
             }
 

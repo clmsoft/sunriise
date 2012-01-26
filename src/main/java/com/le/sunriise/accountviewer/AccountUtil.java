@@ -112,14 +112,20 @@ public class AccountUtil {
     }
 
     public static List<Transaction> retrieveTransactions(Database db, Account account) throws IOException {
-        StopWatch stopWatch = new StopWatch();
-
-        log.info("> getTransactions, account=" + account.getName());
         List<TransactionFilter> transactionFilters = null;
-
         transactionFilters = getTransactionFilters();
 
+        return retrieveTransactions(db, account, transactionFilters);
+    }
+
+    public static List<Transaction> retrieveTransactions(Database db, Account account, List<TransactionFilter> transactionFilters)
+            throws IOException {
+        log.info("> getTransactions, account=" + account.getName());
+
+        StopWatch stopWatch = new StopWatch();
         List<Transaction> transactions = new ArrayList<Transaction>();
+        List<Transaction> filteredTransactions = new ArrayList<Transaction>();
+
         String tableName = "TRN";
         Table table = db.getTable(tableName);
         Cursor cursor = null;
@@ -134,13 +140,13 @@ public class AccountUtil {
                 if (account != null) {
                     if (cursor.currentRowMatches(rowPattern)) {
                         row = cursor.getCurrentRow();
-                        AccountUtil.addTransactionFromRow(db, transactionFilters, row, transactions);
+                        AccountUtil.addTransactionFromRow(db, transactionFilters, row, transactions, filteredTransactions);
                     }
                 } else {
                     row = cursor.getCurrentRow();
                     Integer hacct = (Integer) row.get("hacct");
                     if (hacct == null) {
-                        AccountUtil.addTransactionFromRow(db, transactionFilters, row, transactions);
+                        AccountUtil.addTransactionFromRow(db, transactionFilters, row, transactions, filteredTransactions);
                     }
                 }
             }
@@ -190,12 +196,13 @@ public class AccountUtil {
             if (count <= 0) {
                 log.info("< getTransactions, delta=" + delta);
             } else {
-                log.info("< getTransactions, delta=" + delta + ", " + (delta * 1.0) / count);
+                log.info("< getTransactions, delta=" + delta + ", " + ((delta * 1.0) / count) + " per txn");
             }
 
         }
 
         account.setTransactions(transactions);
+        account.setFilteredTransactions(filteredTransactions);
 
         return transactions;
     }
@@ -213,7 +220,7 @@ public class AccountUtil {
     }
 
     private static boolean addTransactionFromRow(Database db, List<TransactionFilter> filters, Map<String, Object> row,
-            List<Transaction> transactions) throws IOException {
+            List<Transaction> transactions, List<Transaction> filteredTransactions) throws IOException {
         Transaction transaction = new Transaction();
 
         // transaction id
@@ -253,6 +260,7 @@ public class AccountUtil {
         Frequency frequency = new Frequency();
         frequency.setFrq(frq);
         frequency.setcFrqInst(cFrqInst);
+        frequency.setGrftt(grftt);
         transaction.setFrequency(frequency);
 
         // category
@@ -302,6 +310,8 @@ public class AccountUtil {
 
         if (accept) {
             transactions.add(transaction);
+        } else {
+            filteredTransactions.add(transaction);
         }
 
         return accept;
@@ -826,7 +836,7 @@ public class AccountUtil {
         mnyContext.setAccounts(accounts);
 
         setCurrencies(accounts, currencies);
-        
+
         return accounts;
     }
 

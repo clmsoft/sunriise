@@ -18,7 +18,6 @@ import com.healthmarketscience.jackcess.Database;
 import com.le.sunriise.accountviewer.Account;
 import com.le.sunriise.accountviewer.AccountType;
 import com.le.sunriise.accountviewer.AccountUtil;
-import com.le.sunriise.accountviewer.MnyContext;
 import com.le.sunriise.viewer.OpenedDb;
 
 public class CreateBalanceReportCmd extends DefaultAccountVisitor {
