@@ -57,7 +57,6 @@ public class SanityCheck extends DefaultAccountVisitor {
     @Override
     public void visitAccount(Account account) throws IOException {
         String name = account.getName();
-
         log.info("> Account name=" + name);
 
         super.visitAccount(account);
@@ -72,6 +71,7 @@ public class SanityCheck extends DefaultAccountVisitor {
                 break;
             }
         }
+
         log.info("  currentBalance=" + account.getCurrentBalance());
     }
 

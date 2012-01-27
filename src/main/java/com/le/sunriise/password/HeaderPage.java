@@ -59,7 +59,7 @@ public class HeaderPage {
         String fileName = dbFile.getName();
         if (fileName.endsWith(".mbf")) {
             File tempFile = File.createTempFile("sunriise", ".mny");
-//            tempFile.deleteOnExit();
+            tempFile.deleteOnExit();
             long headerOffset = 77;
             dbFile = BackupFileUtils.copyBackupFile(dbFile, tempFile, headerOffset, headerOffset + 4096);
             log.info("Temp converted backup file=" + dbFile);
@@ -170,7 +170,8 @@ public class HeaderPage {
         int bytesRead = fileChannel.read(buffer, pageNumber * pageSize);
         buffer.flip();
         if (bytesRead != jetFormat.PAGE_SIZE) {
-            throw new IOException("Failed attempting to read " + jetFormat.PAGE_SIZE + " bytes from page " + pageNumber + ", only read " + bytesRead);
+            throw new IOException("Failed attempting to read " + jetFormat.PAGE_SIZE + " bytes from page " + pageNumber
+                    + ", only read " + bytesRead);
         }
 
         if (pageNumber == 0) {

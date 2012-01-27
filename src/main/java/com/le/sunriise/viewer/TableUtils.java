@@ -30,18 +30,18 @@ import com.le.sunriise.index.IndexLookup;
 public class TableUtils {
     private static final Logger log = Logger.getLogger(TableUtils.class);
     
-    public static String parseIndexInfo(Table t) throws IOException {
+    public static String parseIndexInfo(Table table) throws IOException {
         StringBuilder sb = new StringBuilder();
 
         sb.append("Index info");
         sb.append("\n");
         sb.append("\n");
 
-        sb.append("Table: " + t.getName());
+        sb.append("Table: " + table.getName());
         sb.append("\n");
         sb.append("\n");
 
-        List<Index> indexes = t.getIndexes();
+        List<Index> indexes = table.getIndexes();
         sb.append("# Index: (" + indexes.size() + ")");
         sb.append("\n");
 
@@ -71,23 +71,23 @@ public class TableUtils {
         return sb.toString();
     }
 
-    public static String parseKeyInfo(Table t) throws IOException {
+    public static String parseKeyInfo(Table table) throws IOException {
         StringBuilder sb = new StringBuilder();
     
         sb.append("Key info");
         sb.append("\n");
         sb.append("\n");
     
-        sb.append("Table: " + t.getName());
+        sb.append("Table: " + table.getName());
         sb.append("\n");
         sb.append("\n");
     
         sb.append("# Primary keys:");
         sb.append("\n");
         IndexLookup indexLookup = new IndexLookup();
-        for (Column column : t.getColumns()) {
+        for (Column column : table.getColumns()) {
             if (indexLookup.isPrimaryKeyColumn(column)) {
-                sb.append("(PK) " + t.getName() + "." + column.getName() + ", " + indexLookup.getMax(column));
+                sb.append("(PK) " + table.getName() + "." + column.getName() + ", " + indexLookup.getMax(column));
                 sb.append("\n");
     
                 List<Column> referencing = indexLookup.getReferencing(column);
@@ -101,10 +101,10 @@ public class TableUtils {
     
         sb.append("# Foreign keys:");
         sb.append("\n");
-        for (Column column : t.getColumns()) {
+        for (Column column : table.getColumns()) {
             List<Column> referenced = indexLookup.getReferencedColumns(column);
             for (Column col : referenced) {
-                sb.append("(FK) " + t.getName() + "." + column.getName() + " -> " + col.getTable().getName() + "." + col.getName());
+                sb.append("(FK) " + table.getName() + "." + column.getName() + " -> " + col.getTable().getName() + "." + col.getName());
                 sb.append("\n");
             }
         }
