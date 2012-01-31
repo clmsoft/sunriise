@@ -134,6 +134,8 @@ public class MynViewer {
     private Map<String, Object> selectRowValues1 = null;
     private Map<String, Object> selectRowValues2 = null;
 
+    private JMenu toolsMenu;
+
     /**
      * Launch the application.
      */
@@ -255,6 +257,15 @@ public class MynViewer {
         JSeparator separator_1 = new JSeparator();
         mnNewMenu.add(separator_1);
         mnNewMenu.add(mntmNewMenuItem);
+
+        toolsMenu = new JMenu("Tools");
+        menuBar.add(toolsMenu);
+        JMenuItem scriptMenuItem = new JMenuItem(new AbstractAction("Run Script") {
+            @Override
+            public void actionPerformed(ActionEvent event) {
+            }
+        });
+        toolsMenu.add(scriptMenuItem);
 
         JPanel statusPane = new JPanel();
         frame.getContentPane().add(statusPane, BorderLayout.SOUTH);
@@ -447,8 +458,8 @@ public class MynViewer {
                                 if (obj1 instanceof byte[]) {
                                     log.info("DIFF columm=" + key + ", value1=" + obj1 + ", value2=" + obj2);
                                 } else {
-                                    log.info("DIFF columm=" + key + ", value1=" + "byte[]-instance" 
-                                + ", value2=" + "byte[]-instance");
+                                    log.info("DIFF columm=" + key + ", value1=" + "byte[]-instance" + ", value2="
+                                            + "byte[]-instance");
                                 }
                             }
                         }
