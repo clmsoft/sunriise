@@ -46,6 +46,10 @@ public class TableUtils {
         sb.append("\n");
 
         for (Index index : indexes) {
+            List<ColumnDescriptor> columns = index.getColumns();
+            sb.append("    > " + index.getName() + " (" + columns.size() + ")");
+            sb.append("\n");
+            
             IndexData indexData = index.getIndexData();
             sb.append("    type=" + indexData.getClass().getName());
             sb.append("\n");
@@ -56,10 +60,12 @@ public class TableUtils {
             sb.append("\n");
             sb.append("    shouldIgnoreNulls=" + index.shouldIgnoreNulls());
             sb.append("\n");
-
-            List<ColumnDescriptor> columns = index.getColumns();
-            sb.append("    " + index.getName() + " (" + columns.size() + ")");
+            // references
+            sb.append("    reference=" + index.getReference());
             sb.append("\n");
+            sb.append("    referencedIndex=" + index.getReferencedIndex());
+            sb.append("\n");
+
             for (ColumnDescriptor column : columns) {
                 sb.append("        " + column.getColumn().getTable().getName() + "." + column.getColumn().getName());
                 sb.append("\n");

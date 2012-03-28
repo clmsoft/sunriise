@@ -60,6 +60,9 @@ public abstract class AbstractAccountVisitor {
     }
 
     private void _visitAccount(Account account) throws IOException {
+        if (! acceptAccount(account)) {
+            return;
+        }
         this.currentAccount = account;
 
         Database db = mnyContext.getDb();
@@ -81,6 +84,10 @@ public abstract class AbstractAccountVisitor {
             }
         }
 
+    }
+
+    protected boolean acceptAccount(Account account) {
+        return true;
     }
 
     private void _visitTransaction(Transaction transaction) throws IOException {

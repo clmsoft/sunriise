@@ -1,0 +1,75 @@
+TRSingle.Income_1,0,"8,700",10
+TRSingle.Income_2,"8,701","35,350",15
+TRSingle.Income_3,"35,351","85,650",25
+TRSingle.Income_4,"85,651","178,650",28
+TRSingle.Income_5,"178,651","388,350",33
+TRSingle.Income_6,336551, ,35
+TRSingle.Long-Term Capital Gains,15,,
+TRSingle.Dividends,15,,
+TRSingle.Standard Deduction,"5,950",,
+TRSingle.Exemption Amount,"3,800",,
+TRSingle.Exemption Cutoff,145950,,
+TRSingle.Maximum Capital Loss,3000,,
+TRSingle.Blind,"1,450",,
+TRSingle.Over 65,"1,450",,
+TRSingle.Deduction Cutoff,150500,,
+TRJoint.Income_1,0,"17,400",10
+TRJoint.Income_2,"17,401","70,700",15
+TRJoint.Income_3,"70,701","142,700",25
+TRJoint.Income_4,"142,701","217,450",28
+TRJoint.Income_5,"217,451","388,350",33
+TRJoint.Income_6,"388,351", ,35
+TRJoint.Long-Term Capital Gains,15,,
+TRJoint.Dividends,15,,
+TRJoint.Standard Deduction,"11,900",,
+TRJoint.Exemption Amount,"3,800",,
+TRJoint.Exemption Cutoff,225750,,
+TRJoint.Maximum Capital Loss,3000,,
+TRJoint.Blind,"1,150",,
+TRJoint.Over 65,"1,150",,
+TRJoint.Deduction Cutoff,145950,,
+TRSeparate.Income_1,0,"8,700",10
+TRSeparate.Income_2,"8,701","35,350",15
+TRSeparate.Income_3,"35,351","71,350",25
+TRSeparate.Income_4,"71,351","108,725",28
+TRSeparate.Income_5,"108,726","194,175",33
+TRSeparate.Income_6,"194,176", ,35
+TRSeparate.Long-Term Capital Gains,15,,
+TRSeparate.Dividends,15,,
+TRSeparate.Standard Deduction,"5,950",,
+TRSeparate.Exemption Amount,"3,800",,
+TRSeparate.Exemption Cutoff,112875,,
+TRSeparate.Maximum Capital Loss,1500,,
+TRSeparate.Blind,"1,150",,
+TRSeparate.Over 65,"1,150",,
+TRSeparate.Deduction Cutoff,75250,,
+TRHHouse.Income_1,0,"12,400",10
+TRHHouse.Income_2,"12,401","47,350",15
+TRHHouse.Income_3,"47,351","122,300",25
+TRHHouse.Income_4,"122,301","198,050",28
+TRHHouse.Income_5,"198,051","388,350",33
+TRHHouse.Income_6,"388,351", ,35
+TRHHouse.Long-Term Capital Gains,15,,
+TRHHouse.Dividends,15,,
+TRHHouse.Standard Deduction,"8,700",,
+TRHHouse.Exemption Amount,"3,800",,
+TRHHouse.Exemption Cutoff,188150,,
+TRHHouse.Maximum Capital Loss,3000,,
+TRHHouse.Blind,"1,450",,
+TRHHouse.Over 65,"1,450",,
+TRHHouse.Deduction Cutoff,145950,,
+TRCustom.Income_1,0,0,0
+TRCustom.Income_2,0,0,0
+TRCustom.Income_3,0,0,0
+TRCustom.Income_4,0,0,0
+TRCustom.Income_5,0,0,0
+TRCustom.Income_6,0, ,0
+TRCustom.Long-Term Capital Gains,0,,
+TRCustom.Dividends,15,,
+TRCustom.Standard Deduction,0,,
+TRCustom.Exemption Amount,0,,
+TRCustom.Exemption Cutoff,0,,
+TRCustom.Maximum Capital Loss,0,,
+TRCustom.Blind,0,,
+TRCustom.Over 65,0,,
+TRCustom.Deduction Cutoff,0,,

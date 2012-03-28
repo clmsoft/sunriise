@@ -84,6 +84,7 @@ import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
+import com.le.sunriise.BuildNumber;
 import com.le.sunriise.StopWatch;
 import com.le.sunriise.model.bean.MnyViewerDataModel;
 import com.le.sunriise.model.bean.TableListItem;
@@ -143,6 +144,8 @@ public class MynViewer {
         // EventQueue waitQueue = new WaitCursorEventQueue(500);
         // Toolkit.getDefaultToolkit().getSystemEventQueue().push(waitQueue);
 
+        String builNumber = BuildNumber.findBuilderNumber();
+        
         EventQueue.invokeLater(new Runnable() {
             @Override
             public void run() {

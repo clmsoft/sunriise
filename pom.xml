@@ -153,6 +153,10 @@
       <url>https://repository-hleofxquotes.forge.cloudbees.com/snapshot/</url>
       <layout>default</layout>
     </repository>
+    <repository>
+      <id>mandubian-mvn</id>
+      <url>http://mandubian-mvn.googlecode.com/svn/trunk/mandubian-mvn/repository</url>
+    </repository>
   </repositories>
   <dependencies>
     <dependency>

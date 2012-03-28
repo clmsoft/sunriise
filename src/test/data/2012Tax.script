@@ -1,9 +1,0 @@
-# Mon Jan 30 11:36:34 PST 2012
-
-# updating tax rates for Joint
-table "Tax Rate Custom Pool"
-
-column lTaxYear 2012
-column szFull "TRJoint"
-
-set column damtStdDed "11900"
