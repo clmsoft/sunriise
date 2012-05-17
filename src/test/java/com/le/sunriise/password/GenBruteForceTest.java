@@ -33,6 +33,33 @@ public class GenBruteForceTest {
     }
 
     @Test
+    public void testCalculateExpected() {
+        int passwordLength;
+        char[] alphabets;
+        BigInteger actual;
+        BigInteger expected;
+
+        passwordLength = 7;
+        alphabets = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray();
+        actual = BigInteger.valueOf(8353082582L);
+        expected = GenBruteForce.calculateExpected(passwordLength, alphabets.length);
+        Assert.assertEquals(expected, actual);
+
+        passwordLength = 7;
+        alphabets = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_+=~`[]{}|\\:;\"'<>,.?/".toCharArray();
+        actual = BigInteger.valueOf(6823331935124L);
+        expected = GenBruteForce.calculateExpected(passwordLength, alphabets.length);
+        Assert.assertEquals(expected, actual);
+
+        passwordLength = 8;
+        // 92
+        alphabets = GenBruteForce.ALPHABET_US_KEYBOARD;
+        actual = BigInteger.valueOf(5188586409742380L);
+        expected = GenBruteForce.calculateExpected(passwordLength, alphabets.length);
+        Assert.assertEquals(expected, actual);
+    }
+
+    @Test
     public void test() {
         int passwordLength = 0;
         char[] alphabets = null;
@@ -105,28 +132,32 @@ public class GenBruteForceTest {
         Assert.assertNotNull(password);
         Assert.assertTrue(password.compareToIgnoreCase("12@a!") == 0);
 
-         mask = new String("12***").toCharArray();
-         password = SingleThreadBruteForce.checkUsingBruteForce(dbFile,
-         passwordLength, mask, alphabets);
-         Assert.assertNotNull(password);
-         Assert.assertTrue(password.compareToIgnoreCase("12@a!") == 0);
-        
-         mask = new String("1****").toCharArray();
-         password = SingleThreadBruteForce.checkUsingBruteForce(dbFile,
-         passwordLength, mask, alphabets);
-         Assert.assertNotNull(password);
-         Assert.assertTrue(password.compareToIgnoreCase("12@a!") == 0);
-        
-        // mask = new String("*****").toCharArray();
-        // password = SingleThreadBruteForce.checkUsingBruteForce(dbFile,
-        // passwordLength, mask, alphabets);
-        // Assert.assertEquals("12@a!", password);
-        //
-        // mask = null;
-        // password = SingleThreadBruteForce.checkUsingBruteForce(dbFile,
-        // passwordLength, mask, alphabets);
-        // Assert.assertEquals("12@a!", password);
+        mask = new String("12***").toCharArray();
+        password = SingleThreadBruteForce.checkUsingBruteForce(dbFile, passwordLength, mask, alphabets);
+        Assert.assertNotNull(password);
+        Assert.assertTrue(password.compareToIgnoreCase("12@a!") == 0);
 
+        mask = new String("1****").toCharArray();
+        password = SingleThreadBruteForce.checkUsingBruteForce(dbFile, passwordLength, mask, alphabets);
+        Assert.assertNotNull(password);
+        Assert.assertTrue(password.compareToIgnoreCase("12@a!") == 0);
+
+        mask = new String("0****").toCharArray();
+        password = SingleThreadBruteForce.checkUsingBruteForce(dbFile, passwordLength, mask, alphabets);
+        Assert.assertNull(password);
+//        Assert.assertTrue(password.compareToIgnoreCase("12@a!") == 0);
+        
+        boolean longRunning = false;
+        if (longRunning) {
+            mask = new String("*****").toCharArray();
+            password = SingleThreadBruteForce.checkUsingBruteForce(dbFile, passwordLength, mask, alphabets);
+            Assert.assertNotNull(password);
+            Assert.assertTrue(password.compareToIgnoreCase("12@a!") == 0);
+
+            mask = null;
+            password = SingleThreadBruteForce.checkUsingBruteForce(dbFile, passwordLength, mask, alphabets);
+            Assert.assertNotNull(password);
+            Assert.assertTrue(password.compareToIgnoreCase("12@a!") == 0);
+        }
     }
-
 }

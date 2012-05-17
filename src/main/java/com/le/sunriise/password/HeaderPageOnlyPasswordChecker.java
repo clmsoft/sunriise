@@ -18,8 +18,8 @@ import org.bouncycastle.crypto.params.KeyParameter;
 import com.healthmarketscience.jackcess.ByteUtil;
 import com.healthmarketscience.jackcess.JetFormat;
 
-public class MinPasswordChecker {
-    private static final Logger log = Logger.getLogger(MinPasswordChecker.class);
+public class HeaderPageOnlyPasswordChecker {
+    private static final Logger log = Logger.getLogger(HeaderPageOnlyPasswordChecker.class);
 
     private RC4Engine engine;
 
@@ -41,7 +41,7 @@ public class MinPasswordChecker {
             fileName = args[0];
             password = args[1];
         } else {
-            Class<MinPasswordChecker> clz = MinPasswordChecker.class;
+            Class<HeaderPageOnlyPasswordChecker> clz = HeaderPageOnlyPasswordChecker.class;
             System.out.println("Usage: java " + clz.getName() + " samples.mny [password]");
             System.exit(1);
         }
@@ -65,10 +65,10 @@ public class MinPasswordChecker {
 
     public static boolean checkPassword(HeaderPage headerPage, String password) {
         boolean matched = false;
-        MinPasswordChecker checker = null;
+        HeaderPageOnlyPasswordChecker checker = null;
 
         try {
-            checker = new MinPasswordChecker(headerPage);
+            checker = new HeaderPageOnlyPasswordChecker(headerPage);
             if (log.isDebugEnabled()) {
                 JetFormat jetFormat = checker.getJetFormat();
                 log.debug("format=" + jetFormat);
@@ -99,7 +99,7 @@ public class MinPasswordChecker {
         return getHeaderPage().getJetFormat();
     }
 
-    public MinPasswordChecker(HeaderPage headerPage) throws IOException {
+    public HeaderPageOnlyPasswordChecker(HeaderPage headerPage) throws IOException {
         super();
         this.headerPage = headerPage;
     }

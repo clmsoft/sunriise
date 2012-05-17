@@ -87,10 +87,10 @@ public class TestJoiner {
         printJoinInfo(join);
 
         for (Map<String, Object> fromRow : join.getFromTable()) {
-            log.info("fromRow=" + fromRow);
+            log.info(fromTableName + " - fromRow=" + fromRow);
             int count = 0;
             for (Map<String, Object> toRow : join.findRowsIterable(fromRow)) {
-                log.info("toRow=" + toRow);
+                log.info(toTableName + " - toRow=" + toRow);
                 count++;
             }
             log.info("  count=" + count);

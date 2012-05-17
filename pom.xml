@@ -202,13 +202,12 @@
     <dependency>
       <groupId>com.healthmarketscience.jackcess</groupId>
       <artifactId>jackcess</artifactId>
-      <version>1.2.7-SNAPSHOT</version>
+      <version>1.2.8-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.healthmarketscience.jackcess</groupId>
       <artifactId>jackcess-encrypt</artifactId>
       <version>1.0.3-SNAPSHOT</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.python</groupId>

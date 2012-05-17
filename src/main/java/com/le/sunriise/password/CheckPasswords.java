@@ -12,7 +12,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.log4j.Logger;
 
@@ -25,110 +25,61 @@ public class CheckPasswords {
 
     private ExecutorService pool;
 
-    private final AtomicInteger counter = new AtomicInteger();
-
-    private final class CheckPasswordWorker implements Callable<String> {
-        private final File dbFile;
-        private final HeaderPage headerPage;
-        private final String testPassword;
-
-        public CheckPasswordWorker(File dbFile, HeaderPage headerPage, String testPassword) {
-            super();
-            this.dbFile = dbFile;
-            this.headerPage = headerPage;
-            this.testPassword = testPassword;
-        }
-
-        public CheckPasswordWorker(File dbFile, String testPassword) {
-            this(dbFile, null, testPassword);
-        }
-
-        public CheckPasswordWorker(HeaderPage headerPage, String testPassword) {
-            this(null, headerPage, testPassword);
-        }
-
-        @Override
-        public String call() throws Exception {
-            int counterValue = counter.incrementAndGet();
-            int max = 100000;
-            if ((counterValue % max) == 0) {
-                log.info("Have checked " + counterValue);
-            }
-
-            if (checkPassword(testPassword)) {
-                log.info("testPassword=" + testPassword + ", YES");
-                return testPassword;
-            } else {
-                if (log.isDebugEnabled()) {
-                    log.debug("testPassword=" + testPassword + ", NO");
-                }
-                return null;
-            }
-        }
-
-        private boolean checkPassword(String testPassword) throws IOException {
-            boolean result = false;
-            boolean checkUsingOpenDb = (headerPage == null);
-
-            if (checkUsingOpenDb) {
-                result = checkUsingOpenDb(dbFile, testPassword);
-            } else {
-                result = checkMinPasswordChecker(headerPage, testPassword);
-            }
-
-            return result;
-        }
-
-        private boolean checkMinPasswordChecker(HeaderPage headerPage, String testPassword) throws IOException {
-            boolean result = false;
-            try {
-                if (MinPasswordChecker.checkPassword(headerPage, testPassword)) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("OK password=" + testPassword);
-                    }
-                    result = true;
-                } else {
-                    if (log.isDebugEnabled()) {
-                        log.debug("NOT OK password=" + testPassword);
-                    }
-                    result = false;
-                }
-
-            } finally {
-
-            }
-            return result;
-        }
-
-        private boolean checkUsingOpenDb(File dbFile, String testPassword) throws IOException {
-            boolean result = false;
-            try {
-                Utils.openDbReadOnly(dbFile, testPassword);
-                if (log.isDebugEnabled()) {
-                    log.debug("testPassword=" + testPassword + ", YES");
-                }
-                result = true;
-            } catch (java.lang.IllegalStateException e) {
-                // wrong password
-                if (log.isDebugEnabled()) {
-                    log.warn(e);
-                }
-            }
-            return result;
-        }
-    }
+    private final AtomicLong counter = new AtomicLong();
 
     public CheckPasswords(int threads) {
         super();
         pool = Executors.newFixedThreadPool(threads);
     }
 
+    public CheckPasswords() {
+        this(1);
+    }
+
     public String check(HeaderPage headerPage, File path) throws IOException {
         return recursePath(headerPage, path);
     }
 
+    public static boolean checkUsingHeaderPage(HeaderPage headerPage, String testPassword) throws IOException {
+        boolean result = false;
+        try {
+            if (HeaderPageOnlyPasswordChecker.checkPassword(headerPage, testPassword)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("OK password=" + testPassword);
+                }
+                result = true;
+            } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("NOT OK password=" + testPassword);
+                }
+                result = false;
+            }
+
+        } finally {
+
+        }
+        return result;
+    }
+
+    public static boolean checkUsingOpenDb(File dbFile, String testPassword) throws IOException {
+        boolean result = false;
+        try {
+            Utils.openDbReadOnly(dbFile, testPassword);
+            if (log.isDebugEnabled()) {
+                log.debug("testPassword=" + testPassword + ", YES");
+            }
+            result = true;
+        } catch (java.lang.IllegalStateException e) {
+            // wrong password
+            if (log.isDebugEnabled()) {
+                log.warn(e);
+            }
+        }
+        return result;
+    }
+
     private String recursePath(HeaderPage headerPage, File path) throws IOException {
-        if (path.isDirectory()) {
+        if ((path != null) && (path.isDirectory())) {
             return recurseDirectory(headerPage, path);
         } else {
             return consumeFile(headerPage, path);
@@ -151,6 +102,12 @@ public class CheckPasswords {
     }
 
     private String consumeFile(HeaderPage headerPage, File file) {
+        if (headerPage == null) {
+            return null;
+        }
+        if (file == null) {
+            return null;
+        }
         log.info("> file=" + file);
         BufferedReader reader = null;
         try {
@@ -166,7 +123,7 @@ public class CheckPasswords {
         String result = null;
         String line = null;
         int lineCount = 1;
-        List<Future<String>> workingList = new ArrayList<Future<String>>();
+        List<Future<String>> runningJobs = new ArrayList<Future<String>>();
 
         try {
             while ((line = reader.readLine()) != null) {
@@ -182,18 +139,21 @@ public class CheckPasswords {
 
                 lineCount++;
 
-                Callable<String> callable = new CheckPasswordWorker(headerPage, line);
-                Future<String> future = pool.submit(callable);
-                workingList.add(future);
+                Callable<String> callable = createWorker(headerPage, line, counter);
+                if (callable != null) {
+                    Future<String> future = pool.submit(callable);
+                    runningJobs.add(future);
+                }
 
-                ListIterator<Future<String>> iter = workingList.listIterator();
+                // check running jobs to see if any has done
+                ListIterator<Future<String>> iter = runningJobs.listIterator();
                 while (iter.hasNext()) {
                     Future<String> job = iter.next();
                     if (job.isDone()) {
                         try {
                             result = job.get();
                             if (result != null) {
-                                log.info("111 workingList.size=" + workingList.size());
+                                log.info("111 runningJobs.size=" + runningJobs.size());
                                 return result;
                             }
                         } catch (ExecutionException e) {
@@ -206,15 +166,17 @@ public class CheckPasswords {
                     }
                 }
             }
-            while (workingList.size() > 0) {
-                ListIterator<Future<String>> iter = workingList.listIterator();
+
+            // flush the working list
+            while (runningJobs.size() > 0) {
+                ListIterator<Future<String>> iter = runningJobs.listIterator();
                 while (iter.hasNext()) {
                     Future<String> job = iter.next();
                     if (job.isDone()) {
                         try {
                             result = job.get();
                             if (result != null) {
-                                log.info("222 workingList.size=" + workingList.size());
+                                log.info("222 runningJobs.size=" + runningJobs.size());
                                 return result;
                             }
                         } catch (ExecutionException e) {
@@ -239,6 +201,10 @@ public class CheckPasswords {
         return null;
     }
 
+    public Callable<String> createWorker(HeaderPage headerPage, String testPassword, AtomicLong counter) {
+        return new CheckPasswordWorker(headerPage, testPassword, counter);
+    }
+
     public void close() {
         if (pool != null) {
             try {
@@ -250,7 +216,7 @@ public class CheckPasswords {
 
     }
 
-    public AtomicInteger getCounter() {
+    public AtomicLong getCounter() {
         return counter;
     }
 }
