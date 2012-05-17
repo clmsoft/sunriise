@@ -82,7 +82,7 @@ public class ListBillsCmd {
 
             Index trnIndex = trnTable.getIndex("AcctDtIdTrn");
 
-            Cursor trnCursor = IndexCursor.createIndexCursor(trnTable, trnIndex);
+            Cursor trnCursor = Cursor.createIndexCursor(trnTable, trnIndex);
             
             Cursor cursor = Cursor.createCursor(table);
             Map<String, Object> row = null;

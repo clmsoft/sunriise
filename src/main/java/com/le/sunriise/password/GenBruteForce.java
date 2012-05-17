@@ -3,8 +3,6 @@ package com.le.sunriise.password;
 import java.io.CharArrayWriter;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.ArrayList;
-
 import org.apache.log4j.Logger;
 
 public class GenBruteForce {

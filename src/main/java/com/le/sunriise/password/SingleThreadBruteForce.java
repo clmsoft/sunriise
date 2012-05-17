@@ -67,7 +67,8 @@ public class SingleThreadBruteForce {
                     Duration duration = new Duration(delta);
                     BigInteger aCount = BigInteger.valueOf(count);
                     BigInteger percentage = aCount.multiply(ONE_HUNDRED).divide(maxCount);
-                    log.info("Tested " + count + " strings" + " (" + percentage + "% completed" + ", elapsed=" + duration.toString() + ")");
+                    log.info("Tested " + count + " strings" + " (" + percentage + "% completed" + ", elapsed="
+                            + duration.toString() + ")");
                     if (delta > 0) {
                         BigInteger seconds = BigInteger.valueOf(delta).divide(ONE_THOUSAND);
                         if (seconds.longValue() > 0) {
@@ -186,7 +187,7 @@ public class SingleThreadBruteForce {
             System.exit(1);
         }
         char[] mask = null;
-         mask = new String("*****!").toCharArray();
+        mask = new String("*****!").toCharArray();
 
         char[] alphabets = createAlphabets();
 

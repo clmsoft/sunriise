@@ -44,6 +44,7 @@ public class TaxInfo {
             this.rate = rate;
         }
 
+        @Override
         public String toString() {
             StringBuilder sb = new StringBuilder();
 

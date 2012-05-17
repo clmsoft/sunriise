@@ -40,6 +40,7 @@ public class FilteredAccountVisitor extends DefaultAccountVisitor {
         }
     }
 
+    @Override
     public boolean acceptAccount(Account account) {
         boolean rv = false;
 
