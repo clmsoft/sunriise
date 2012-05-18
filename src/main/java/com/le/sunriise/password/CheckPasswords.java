@@ -43,7 +43,7 @@ public class CheckPasswords {
     public static boolean checkUsingHeaderPage(HeaderPage headerPage, String testPassword) throws IOException {
         boolean result = false;
         try {
-            if (HeaderPageOnlyPasswordChecker.checkPassword(headerPage, testPassword)) {
+            if (AbstractHeaderPageOnlyPasswordChecker.checkPassword(headerPage, testPassword)) {
                 if (log.isDebugEnabled()) {
                     log.debug("OK password=" + testPassword);
                 }

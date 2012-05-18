@@ -47,7 +47,7 @@ public class SingleThreadBruteForce {
 
         public boolean checkPassword(String testPassword) {
             boolean matched = false;
-            matched = HeaderPageOnlyPasswordChecker.checkPassword(hp, testPassword);
+            matched = AbstractHeaderPageOnlyPasswordChecker.checkPassword(hp, testPassword);
             return matched;
         }
 

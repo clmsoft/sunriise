@@ -11,7 +11,6 @@ import org.apache.log4j.Logger;
 import com.healthmarketscience.jackcess.Cursor;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Index;
-import com.healthmarketscience.jackcess.IndexCursor;
 import com.healthmarketscience.jackcess.Joiner;
 import com.healthmarketscience.jackcess.Table;
 import com.le.sunriise.accountviewer.Account;
