@@ -118,44 +118,44 @@ public class GenBruteForceTest {
         String password = null;
 
         mask = new String("12@a!").toCharArray();
-        password = SingleThreadBruteForce.checkUsingBruteForce(dbFile, passwordLength, mask, alphabets);
+        password = SingleThreadBruteForce.checkUsingMask(dbFile, passwordLength, mask, alphabets);
         Assert.assertNotNull(password);
         Assert.assertTrue(password.compareToIgnoreCase("12@a!") == 0);
 
         mask = new String("12@a*").toCharArray();
-        password = SingleThreadBruteForce.checkUsingBruteForce(dbFile, passwordLength, mask, alphabets);
+        password = SingleThreadBruteForce.checkUsingMask(dbFile, passwordLength, mask, alphabets);
         Assert.assertNotNull(password);
         Assert.assertTrue(password.compareToIgnoreCase("12@a!") == 0);
 
         mask = new String("12@**").toCharArray();
-        password = SingleThreadBruteForce.checkUsingBruteForce(dbFile, passwordLength, mask, alphabets);
+        password = SingleThreadBruteForce.checkUsingMask(dbFile, passwordLength, mask, alphabets);
         Assert.assertNotNull(password);
         Assert.assertTrue(password.compareToIgnoreCase("12@a!") == 0);
 
         mask = new String("12***").toCharArray();
-        password = SingleThreadBruteForce.checkUsingBruteForce(dbFile, passwordLength, mask, alphabets);
+        password = SingleThreadBruteForce.checkUsingMask(dbFile, passwordLength, mask, alphabets);
         Assert.assertNotNull(password);
         Assert.assertTrue(password.compareToIgnoreCase("12@a!") == 0);
 
         mask = new String("1****").toCharArray();
-        password = SingleThreadBruteForce.checkUsingBruteForce(dbFile, passwordLength, mask, alphabets);
+        password = SingleThreadBruteForce.checkUsingMask(dbFile, passwordLength, mask, alphabets);
         Assert.assertNotNull(password);
         Assert.assertTrue(password.compareToIgnoreCase("12@a!") == 0);
 
         mask = new String("0****").toCharArray();
-        password = SingleThreadBruteForce.checkUsingBruteForce(dbFile, passwordLength, mask, alphabets);
+        password = SingleThreadBruteForce.checkUsingMask(dbFile, passwordLength, mask, alphabets);
         Assert.assertNull(password);
 //        Assert.assertTrue(password.compareToIgnoreCase("12@a!") == 0);
         
         boolean longRunning = false;
         if (longRunning) {
             mask = new String("*****").toCharArray();
-            password = SingleThreadBruteForce.checkUsingBruteForce(dbFile, passwordLength, mask, alphabets);
+            password = SingleThreadBruteForce.checkUsingMask(dbFile, passwordLength, mask, alphabets);
             Assert.assertNotNull(password);
             Assert.assertTrue(password.compareToIgnoreCase("12@a!") == 0);
 
             mask = null;
-            password = SingleThreadBruteForce.checkUsingBruteForce(dbFile, passwordLength, mask, alphabets);
+            password = SingleThreadBruteForce.checkUsingMask(dbFile, passwordLength, mask, alphabets);
             Assert.assertNotNull(password);
             Assert.assertTrue(password.compareToIgnoreCase("12@a!") == 0);
         }

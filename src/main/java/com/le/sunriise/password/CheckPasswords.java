@@ -79,11 +79,35 @@ public class CheckPasswords {
     }
 
     private String recursePath(HeaderPage headerPage, File path) throws IOException {
-        if ((path != null) && (path.isDirectory())) {
+        if (acceptPathAsDirectory(path)) {
             return recurseDirectory(headerPage, path);
         } else {
-            return consumeFile(headerPage, path);
+            if (acceptPathAsFile(path)) {
+                return consumeFile(headerPage, path);
+            } else {
+                return null;
+            }
         }
+    }
+
+    private boolean acceptPathAsFile(File path) {
+        if (path == null) {
+            return false;
+        }
+        if (path.getName().startsWith(".")) {
+            return false;
+        }
+        return path.isFile();
+    }
+
+    private boolean acceptPathAsDirectory(File path) {
+        if (path == null) {
+            return false;
+        }
+        if (path.getName().startsWith(".")) {
+            return false;
+        }
+        return path.isDirectory();
     }
 
     private String recurseDirectory(HeaderPage dbFile, File directory) throws IOException {

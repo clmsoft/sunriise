@@ -138,8 +138,7 @@ public class SingleThreadBruteForce {
         return alphabets;
     }
 
-    public static String checkUsingBruteForce(File dbFile, int passwordLength, char[] mask, char[] alphabets) throws IOException {
-        String password = null;
+    public static String checkUsingMask(File dbFile, int passwordLength, char[] mask, char[] alphabets) throws IOException {
         HeaderPage headerPage = new HeaderPage(dbFile);
 
         if (alphabets == null) {
@@ -152,10 +151,14 @@ public class SingleThreadBruteForce {
                 log.debug(alphabets[i]);
             }
         }
-        final HeaderPage hp = headerPage;
+        return checkUsingMask(headerPage, passwordLength, mask, alphabets);
+    }
+
+    public static String checkUsingMask(final HeaderPage headerPage, int passwordLength, char[] mask, char[] alphabets) {
+        String password;
         CheckBruteForce checker = null;
         try {
-            checker = new CheckBruteForce(passwordLength, alphabets, mask, hp);
+            checker = new CheckBruteForce(passwordLength, alphabets, mask, headerPage);
             checker.generate();
             password = checker.getPassword();
             log.info("password=" + password);
@@ -177,6 +180,7 @@ public class SingleThreadBruteForce {
     public static void main(String[] args) {
         File dbFile = null;
         int passwordLength = 5;
+        String password = null;
 
         if (args.length == 2) {
             dbFile = new File(args[0]);
@@ -197,13 +201,13 @@ public class SingleThreadBruteForce {
         log.info("alphabets=" + new String(alphabets));
 
         try {
-            checkUsingBruteForce(dbFile, passwordLength, mask, alphabets);
+            password = checkUsingMask(dbFile, passwordLength, mask, alphabets);
         } catch (IOException e) {
             log.error(e, e);
         } finally {
+            log.info("password=" + password);
             log.info("< DONE");
         }
-
     }
 
 }

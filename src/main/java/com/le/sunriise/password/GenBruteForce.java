@@ -16,6 +16,7 @@ public class GenBruteForce {
     public static char[] ALPHABET_SPECIAL_CHARS_3 = "[]\\{}|;':\"".toCharArray();
     public static char[] ALPHABET_SPECIAL_CHARS_4 = ",./<>?".toCharArray();
     public static char[] ALPHABET_US_KEYBOARD = createUSKeyboardAlphabets();
+    public static char[] ALPHABET_US_KEYBOARD_MNY = createUSKeyboardMnyAlphabets();
 
     private final char[] alphabets;
 
@@ -27,12 +28,17 @@ public class GenBruteForce {
 
     private boolean terminate = false;
 
+    private static char[] createUSKeyboardMnyAlphabets() {
+        return appendCharArrays(ALPHABET_UPPERS, ALPHABET_DIGITS, ALPHABET_SPECIAL_CHARS_1, ALPHABET_SPECIAL_CHARS_2,
+                ALPHABET_SPECIAL_CHARS_3, ALPHABET_SPECIAL_CHARS_4);
+    }
+
     private static char[] createUSKeyboardAlphabets() {
         return appendCharArrays(ALPHABET_UPPERS, ALPHABET_LOWERS, ALPHABET_DIGITS, ALPHABET_SPECIAL_CHARS_1,
                 ALPHABET_SPECIAL_CHARS_2, ALPHABET_SPECIAL_CHARS_3, ALPHABET_SPECIAL_CHARS_4);
     }
-    
-    private static char[] appendCharArrays(char[]... alphabets) {
+
+    public static char[] appendCharArrays(char[]... alphabets) {
         CharArrayWriter writer = null;
         char[] results = null;
         try {
@@ -52,7 +58,7 @@ public class GenBruteForce {
         }
         return results;
     }
-    
+
     public GenBruteForce(int passwordLength, char[] mask, char[] alphabets) {
         this.passwordLength = passwordLength;
         this.mask = mask;
@@ -151,7 +157,7 @@ public class GenBruteForce {
         log.info(string);
     }
 
-    /**
+/**
      * {@literal
      * KS = L^(m) + L^(m+1) + L^(m+2) + ........ + L^(M)
      * where

@@ -15,6 +15,7 @@ public class BruteForceTime {
         String message = null;
         int ratePerSecond = 150000;
 
+        ratePerSecond = 220000;
         log.info("ratePerSecond=" + ratePerSecond);
         
         alphabetsLenghth = 26;
@@ -39,6 +40,10 @@ public class BruteForceTime {
 
         alphabetsLenghth = (26 * 2) + 10 + 3;
         message = "Both lower AND upper case + digits + 3 special chars ... alphabetsLenghth=" + alphabetsLenghth;
+        calc(alphabetsLenghth, message, ratePerSecond);
+        
+        alphabetsLenghth = 92;
+        message = "us-keyboard ... alphabetsLenghth=" + alphabetsLenghth;
         calc(alphabetsLenghth, message, ratePerSecond);
 
     }
