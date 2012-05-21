@@ -46,23 +46,27 @@ public class HeaderPage {
 
     private byte[] encrypted4BytesCheck;
 
+    private File dbFile;
+
     public HeaderPage() {
         super();
     }
 
     public HeaderPage(File dbFile) throws IOException {
         super();
-        parse(dbFile);
+        this.dbFile = parse(dbFile);
     }
 
-    private void parse(File dbFile) throws IOException {
+    private File parse(File dbFile) throws IOException {
         String fileName = dbFile.getName();
         if (fileName.endsWith(".mbf")) {
             File tempFile = File.createTempFile("sunriise", ".mny");
             tempFile.deleteOnExit();
             long headerOffset = 77;
             dbFile = BackupFileUtils.copyBackupFile(dbFile, tempFile, headerOffset, headerOffset + 4096);
-            log.info("Temp converted backup file=" + dbFile);
+            if (log.isDebugEnabled()) {
+                log.debug("Temp converted backup file=" + dbFile);
+            }
         }
 
         RandomAccessFile rFile = null;
@@ -118,6 +122,8 @@ public class HeaderPage {
                 }
             }
         }
+
+        return dbFile;
     }
 
     private static Charset getDefaultCharset(JetFormat format) {
@@ -321,5 +327,9 @@ public class HeaderPage {
             return null;
         }
         return HexDump.toHex(bytes);
+    }
+
+    public File getDbFile() {
+        return dbFile;
     }
 }

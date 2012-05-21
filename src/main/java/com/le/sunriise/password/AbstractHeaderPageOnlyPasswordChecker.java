@@ -69,8 +69,16 @@ public abstract class AbstractHeaderPageOnlyPasswordChecker {
         return check(password, getHeaderPage().getCharset());
     }
 
+    /**
+     * 
+     * @param password
+     * @param charset
+     * @return
+     * @throws IOException
+     */
     private boolean check(String password, Charset charset) throws IOException {
         boolean result = false;
+        // Notes: important fact: headerPage.isNewEncryption()
         if (headerPage.isNewEncryption()) {
             result = checkNewEncryption(headerPage, password, charset);
         } else {
@@ -85,16 +93,25 @@ public abstract class AbstractHeaderPageOnlyPasswordChecker {
     }
 
     private boolean checkNewEncryption(HeaderPage headerPage, String password, Charset charset) {
-        byte[] passwordDigest = createPasswordDigest(headerPage, password, charset);
+        // input password is first hash to get a digest (either sha1 or md5)
+        byte[] passwordDigest = createPasswordDigest(password, headerPage.isUseSha1(), charset);
         if (log.isDebugEnabled()) {
             log.debug("passwordDigest=" + HexDump.toHex(passwordDigest));
         }
+        // then a salt is append to the digest. This is is now known as the testKey
+        // Notes: important fact headerPage.getSalt()
         byte[] testKey = concat(passwordDigest, headerPage.getSalt());
+        // Notes: important fact headerPage.getBaseSalt()
         byte[] testBytes = headerPage.getBaseSalt();
+        
+        // an embedded encrypted 4 bytes is retrieved from the db (encrypted4BytesCheck)
+        // decrypted4BytesCheck = f(encrypted4BytesCheck, testKey)
+        // assert decrypted4BytesCheck == testBytes
         return verifyPassword(headerPage, testKey, testBytes);
     }
 
     private boolean verifyPassword(HeaderPage headerPage, byte[] testKey, byte[] testBytes) {
+        // Notes: important fact headerPage.getBaseSalt()
         byte[] encrypted4BytesCheck = headerPage.getEncrypted4BytesCheck();
         if (isBlankKey(encrypted4BytesCheck)) {
             // no password?
@@ -126,24 +143,23 @@ public abstract class AbstractHeaderPageOnlyPasswordChecker {
         return HexDump.toHex(bytes);
     }
 
-    private byte[] createPasswordDigest(HeaderPage headerPage, String password, Charset charset) {
+    private byte[] createPasswordDigest(String password, boolean useSha1, Charset charset) {
         boolean toUpperCase = true;
         byte[] passwordBytes = toPasswordBytes(password, charset, toUpperCase);
-
-        byte[] digestBytes = createDigestBytes(headerPage, passwordBytes);
+        byte[] passwordDigestBytes = createDigestBytes(passwordBytes, useSha1);
 
         if (log.isDebugEnabled()) {
             log.debug("PASSWORD_DIGEST_LENGTH=" + PASSWORD_DIGEST_LENGTH + ", " + (PASSWORD_DIGEST_LENGTH * 8));
         }
         // Truncate to 128 bit to match Max key length as per MSDN
-        if (digestBytes.length != PASSWORD_DIGEST_LENGTH) {
-            digestBytes = ByteUtil.copyOf(digestBytes, PASSWORD_DIGEST_LENGTH);
+        if (passwordDigestBytes.length != PASSWORD_DIGEST_LENGTH) {
+            passwordDigestBytes = ByteUtil.copyOf(passwordDigestBytes, PASSWORD_DIGEST_LENGTH);
         }
 
-        return digestBytes;
+        return passwordDigestBytes;
     }
 
-    protected abstract byte[] createDigestBytes(HeaderPage headerPage, byte[] passwordBytes);
+    protected abstract byte[] createDigestBytes(byte[] passwordBytes, boolean useSha1);
 
     private static byte[] toPasswordBytes(String password, Charset charset, boolean toUpperCase) {
         byte[] passwordBytes = new byte[PASSWORD_LENGTH];

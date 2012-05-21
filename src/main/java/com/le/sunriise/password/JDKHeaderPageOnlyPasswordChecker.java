@@ -22,9 +22,9 @@ public class JDKHeaderPageOnlyPasswordChecker extends AbstractHeaderPageOnlyPass
     }
 
     @Override
-    protected byte[] createDigestBytes(HeaderPage headerPage, byte[] passwordBytes) {
+    protected byte[] createDigestBytes(byte[] passwordBytes, boolean useSha1) {
         byte[] digestBytes = null;
-        boolean useSha1 = headerPage.isUseSha1();
+//        boolean useSha1 = headerPage.isUseSha1();
 
         MessageDigest digest = null;
 

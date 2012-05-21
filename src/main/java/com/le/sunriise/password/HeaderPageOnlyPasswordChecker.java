@@ -28,8 +28,8 @@ public class HeaderPageOnlyPasswordChecker extends AbstractHeaderPageOnlyPasswor
     }
 
     @Override
-    protected byte[] createDigestBytes(HeaderPage headerPage, byte[] passwordBytes) {
-        boolean useSha1 = headerPage.isUseSha1();
+    protected byte[] createDigestBytes(byte[] passwordBytes, boolean useSha1) {
+//        boolean useSha1 = headerPage.isUseSha1();
         Digest digest = (useSha1 ? new SHA1Digest() : new MD5Digest());
         if (log.isDebugEnabled()) {
             log.debug("digest=" + digest.getAlgorithmName());

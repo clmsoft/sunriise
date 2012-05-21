@@ -13,16 +13,11 @@ public class HeaderPageCmd {
      */
     public static void main(String[] args) {
         File dbFile = null;
-        String password = null;
         if (args.length == 1) {
             dbFile = new File(args[0]);
-            password = null;
-        } else if (args.length == 2) {
-            dbFile = new File(args[0]);
-            password = args[1];
         } else {
             Class<HeaderPageCmd> clz = HeaderPageCmd.class;
-            System.out.println("Usage: java " + clz.getName() + " sample.mny [password]");
+            System.out.println("Usage: java " + clz.getName() + " sample.mny");
             System.exit(1);
         }
 
@@ -31,22 +26,27 @@ public class HeaderPageCmd {
         try {
             headerPage = new HeaderPage(dbFile);
             log.info("fileSize=" + dbFile.length());
-            log.info("getJetFormat=" + headerPage.getJetFormat());
-            log.info("getJetFormat.PAGE_SIZE=" + headerPage.getJetFormat().PAGE_SIZE);
-            log.info("getCharset=" + headerPage.getCharset());
-
-            log.info("isNewEncryption=" + headerPage.isNewEncryption());
-            log.info("getEmbeddedDatabasePassword=" + headerPage.getEmbeddedDatabasePassword());
-
-            log.info("isUseSha1=" + headerPage.isUseSha1());
-            log.info("getSalt=" + HeaderPage.toHexString(headerPage.getSalt()));
-            log.info("getBaseSalt=" + HeaderPage.toHexString(headerPage.getBaseSalt()));
-            log.info("encrypted4BytesCheck=" + HeaderPage.toHexString(headerPage.getEncrypted4BytesCheck()));
-            log.info("decrypted4BytesCheck=" + HeaderPage.toHexString(headerPage.getBaseSalt()));
+            
+            logHeaderPage(headerPage);
         } catch (IOException e) {
             log.error(e, e);
         } finally {
             log.info("< DONE");
         }
+    }
+
+    private static void logHeaderPage(HeaderPage headerPage) {
+        log.info("getJetFormat=" + headerPage.getJetFormat());
+        log.info("getJetFormat.PAGE_SIZE=" + headerPage.getJetFormat().PAGE_SIZE);
+        log.info("getCharset=" + headerPage.getCharset());
+
+        log.info("isNewEncryption=" + headerPage.isNewEncryption());
+        log.info("getEmbeddedDatabasePassword=" + headerPage.getEmbeddedDatabasePassword());
+
+        log.info("isUseSha1=" + headerPage.isUseSha1());
+        log.info("getSalt=" + HeaderPage.toHexString(headerPage.getSalt()));
+        log.info("getBaseSalt=" + HeaderPage.toHexString(headerPage.getBaseSalt()));
+        log.info("encrypted4BytesCheck=" + HeaderPage.toHexString(headerPage.getEncrypted4BytesCheck()));
+//        log.info("decrypted4BytesCheck=" + HeaderPage.toHexString(headerPage.getBaseSalt()));
     }
 }
