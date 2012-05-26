@@ -1,3 +1,21 @@
+/*******************************************************************************
+ * Copyright (c) 2010 Hung Le
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ * USA
+ *******************************************************************************/
 package com.le.sunriise.password;
 
 import java.io.File;
@@ -44,7 +62,7 @@ public class HeaderPageCmd2 {
             headerPage = new HeaderPage(dbFile);
             // System.out.println("fileSize=" +
             // dbFile.length());
-            printHeaderPage(headerPage);
+            HeaderPage.printHeaderPage(headerPage);
         } catch (IOException e) {
             log.error(e, e);
         } finally {
@@ -52,18 +70,5 @@ public class HeaderPageCmd2 {
                 headerPage = null;
             }
         }
-    }
-
-    private static void printHeaderPage(HeaderPage headerPage) {
-        System.out.println("getJetFormat=" + headerPage.getJetFormat());
-        System.out.println("getJetFormat.PAGE_SIZE=" + headerPage.getJetFormat().PAGE_SIZE);
-        System.out.println("getCharset=" + headerPage.getCharset());
-
-        System.out.println("isNewEncryption=" + headerPage.isNewEncryption());
-
-        System.out.println("isUseSha1=" + headerPage.isUseSha1());
-        System.out.println("getSalt=" + HeaderPage.toHexString(headerPage.getSalt()));
-        System.out.println("getBaseSalt=" + HeaderPage.toHexString(headerPage.getBaseSalt()));
-        System.out.println("encrypted4BytesCheck=" + HeaderPage.toHexString(headerPage.getEncrypted4BytesCheck()));
     }
 }

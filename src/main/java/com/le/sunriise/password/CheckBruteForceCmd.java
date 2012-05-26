@@ -16,26 +16,49 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA
  *******************************************************************************/
-package com.le.sunriise.encryption;
+package com.le.sunriise.password;
 
 import java.io.File;
 import java.io.IOException;
 
 import org.apache.log4j.Logger;
 
-public class PrintHeader {
-    private static final Logger log = Logger.getLogger(PrintHeader.class);
+public class CheckBruteForceCmd {
+    private static final Logger log = Logger.getLogger(CheckBruteForceUtils.class);
 
     /**
      * @param args
      */
     public static void main(String[] args) {
-        File mdbFile = new File(args[0]);
+        File dbFile = null;
+        int passwordLength = 5;
         String password = null;
+    
+        if (args.length == 2) {
+            dbFile = new File(args[0]);
+            passwordLength = Integer.valueOf(args[1]);
+        } else {
+            Class<CheckBruteForceUtils> clz = CheckBruteForceUtils.class;
+            System.out.println("Usage: java " + clz.getName() + " sample.mny passwordLength");
+            System.exit(1);
+        }
+        char[] mask = null;
+        mask = new String("*****!").toCharArray();
+    
+        char[] alphabets = CheckBruteForceUtils.createAlphabets();
+    
+        log.info("dbFile=" + dbFile);
+        log.info("passwordLength=" + passwordLength);
+        log.info("mask=" + ((mask == null) ? null : new String(mask)));
+        log.info("alphabets=" + new String(alphabets));
+    
         try {
-            EncryptionUtils.parseHeader(mdbFile, password);
+            password = CheckBruteForceUtils.checkUsingMask(dbFile, passwordLength, mask, alphabets);
         } catch (IOException e) {
-            log.error(e);
+            log.error(e, e);
+        } finally {
+            log.info("password=" + password);
+            log.info("< DONE");
         }
     }
 

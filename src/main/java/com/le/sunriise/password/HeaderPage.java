@@ -1,3 +1,21 @@
+/*******************************************************************************
+ * Copyright (c) 2010 Hung Le
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ * USA
+ *******************************************************************************/
 package com.le.sunriise.password;
 
 import java.io.File;
@@ -62,7 +80,13 @@ public class HeaderPage {
         if (fileName.endsWith(".mbf")) {
             File tempFile = File.createTempFile("sunriise", ".mny");
             tempFile.deleteOnExit();
-            long headerOffset = 77;
+            long headerOffset = BackupFileUtils.findMagicHeader(dbFile);
+            if (log.isDebugEnabled()) {
+                log.debug("headerOffset=" + headerOffset);
+            }
+            if (headerOffset < 0) {
+                headerOffset = 70; // compression header?
+            }
             dbFile = BackupFileUtils.copyBackupFile(dbFile, tempFile, headerOffset, headerOffset + 4096);
             if (log.isDebugEnabled()) {
                 log.debug("Temp converted backup file=" + dbFile);
@@ -331,5 +355,22 @@ public class HeaderPage {
 
     public File getDbFile() {
         return dbFile;
+    }
+
+    public static void printHeaderPage(HeaderPage headerPage, String indentation) {
+        System.out.println(indentation + "getJetFormat=" + headerPage.getJetFormat());
+        System.out.println(indentation + "getJetFormat.PAGE_SIZE=" + headerPage.getJetFormat().PAGE_SIZE);
+        System.out.println(indentation + "getCharset=" + headerPage.getCharset());
+
+        System.out.println(indentation + "isNewEncryption=" + headerPage.isNewEncryption());
+
+        System.out.println(indentation + "isUseSha1=" + headerPage.isUseSha1());
+        System.out.println(indentation + "getSalt=" + toHexString(headerPage.getSalt()));
+        System.out.println(indentation + "getBaseSalt=" + toHexString(headerPage.getBaseSalt()));
+        System.out.println(indentation + "encrypted4BytesCheck=" + toHexString(headerPage.getEncrypted4BytesCheck()));
+    }
+
+    public static void printHeaderPage(HeaderPage headerPage) {
+        printHeaderPage(headerPage, "");
     }
 }

@@ -1,3 +1,21 @@
+/*******************************************************************************
+ * Copyright (c) 2010 Hung Le
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ * USA
+ *******************************************************************************/
 package com.le.sunriise.password;
 
 import java.io.CharArrayWriter;
@@ -25,6 +43,10 @@ public class GenBruteForce {
     private char[] buffer;
 
     private char[] mask;
+
+    private int[] currentCursorIndex;
+
+    private String currentResult;
 
     private boolean terminate = false;
 
@@ -67,6 +89,11 @@ public class GenBruteForce {
         buffer = new char[this.passwordLength + 1];
         for (int i = 0; i < buffer.length; i++) {
             buffer[i] = '\0';
+        }
+
+        currentCursorIndex = new int[this.passwordLength];
+        for (int i = 0; i < currentCursorIndex.length; i++) {
+            currentCursorIndex[i] = -1;
         }
     }
 
@@ -115,10 +142,12 @@ public class GenBruteForce {
             for (int i = 0; i < alphabetsLen; i++) {
                 char c = alphabets[i];
                 buffer[cursor] = c;
+                currentCursorIndex[cursor] = i;
                 if (maskChar == '+') {
                     // TODO: no need to check
                 } else {
-                    notifyResult(new String(buffer, 0, cursor + 1));
+                    currentResult = new String(buffer, 0, cursor + 1);
+                    notifyResult(currentResult);
                 }
                 count++;
                 if (!terminate) {
@@ -133,8 +162,10 @@ public class GenBruteForce {
             if (log.isDebugEnabled()) {
                 log.debug("Found known char=" + maskChar + ", cursor=" + cursor);
             }
+            currentCursorIndex[cursor] = alphabetsLen - 1;
             buffer[cursor] = maskChar;
-            notifyResult(new String(buffer, 0, cursor + 1));
+            currentResult = new String(buffer, 0, cursor + 1);
+            notifyResult(currentResult);
             count++;
             if (!terminate) {
                 long n = generateString(buffer, bufferLen, mask, cursor + 1, alphabets, alphabetsLen);
@@ -207,4 +238,17 @@ public class GenBruteForce {
         log.info("actual=" + actual + ", expected=" + expected);
 
     }
+
+    public char[] getBuffer() {
+        return buffer;
+    }
+
+    public int[] getCurrentCursorIndex() {
+        return currentCursorIndex;
+    }
+
+    public String getCurrentResult() {
+        return currentResult;
+    }
+
 }
