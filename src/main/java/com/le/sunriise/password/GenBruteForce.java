@@ -26,6 +26,10 @@ import org.apache.log4j.Logger;
 public class GenBruteForce {
     private static final Logger log = Logger.getLogger(GenBruteForce.class);
 
+    private static final char DEFAULT_MASK_WILD_CHAR = '*';
+
+    private static final char DEFAULT_MASK_SKIP_CHAR = '+';
+
     public static char[] ALPHABET_UPPERS = genChars('A', 'Z');
     public static char[] ALPHABET_LOWERS = genChars('a', 'z');
     public static char[] ALPHABET_DIGITS = genChars('0', '9');
@@ -49,6 +53,10 @@ public class GenBruteForce {
     private String currentResult;
 
     private boolean terminate = false;
+
+    private char maskSkipChar = DEFAULT_MASK_SKIP_CHAR;
+
+    private char maskWildChar = DEFAULT_MASK_WILD_CHAR;
 
     private static char[] createUSKeyboardMnyAlphabets() {
         return appendCharArrays(ALPHABET_UPPERS, ALPHABET_DIGITS, ALPHABET_SPECIAL_CHARS_1, ALPHABET_SPECIAL_CHARS_2,
@@ -130,20 +138,20 @@ public class GenBruteForce {
             return count;
         }
 
-        char maskChar = '*';
+        char maskChar = maskWildChar;
         if (mask == null) {
-            maskChar = '*';
+            maskChar = maskWildChar;
         } else {
             maskChar = mask[cursor];
         }
 
-        if ((maskChar == '*') || (maskChar == '+')) {
+        if (isWildChar(maskChar) || isSkipChar(maskChar)) {
             // loop through the alphabets
             for (int i = 0; i < alphabetsLen; i++) {
                 char c = alphabets[i];
                 buffer[cursor] = c;
                 currentCursorIndex[cursor] = i;
-                if (maskChar == '+') {
+                if (isSkipChar(maskChar)) {
                     // TODO: no need to check
                 } else {
                     currentResult = new String(buffer, 0, cursor + 1);
@@ -175,6 +183,7 @@ public class GenBruteForce {
             }
         }
 
+        // for debug - want to see the start of the loop
         if (cursor == 1) {
             if (log.isDebugEnabled()) {
                 log.debug("count=" + count + ", cursor=" + cursor + ", alphabetLen=" + alphabetsLen);
@@ -184,11 +193,25 @@ public class GenBruteForce {
         return count;
     }
 
+    private boolean isSkipChar(char maskChar) {
+        boolean rv = false;
+
+        // TODO - not implement yet
+
+        rv = maskChar == maskSkipChar;
+
+        return rv;
+    }
+
+    private boolean isWildChar(char maskChar) {
+        return maskChar == maskWildChar;
+    }
+
     public void notifyResult(String string) {
         log.info(string);
     }
 
-/**
+    /**
      * {@literal
      * KS = L^(m) + L^(m+1) + L^(m+2) + ........ + L^(M)
      * where
@@ -249,6 +272,22 @@ public class GenBruteForce {
 
     public String getCurrentResult() {
         return currentResult;
+    }
+
+    public char getMaskSkipChar() {
+        return maskSkipChar;
+    }
+
+    public void setMaskSkipChar(char maskSkipChar) {
+        this.maskSkipChar = maskSkipChar;
+    }
+
+    public char getMaskWildChar() {
+        return maskWildChar;
+    }
+
+    public void setMaskWildChar(char maskWildChar) {
+        this.maskWildChar = maskWildChar;
     }
 
 }
