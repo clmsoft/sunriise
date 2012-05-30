@@ -93,14 +93,52 @@ public class PasswordCheckerApp {
         }
 
         private void startCheck() {
+            String fileName = null;
+
+            fileName = dataModel.getMnyFileName();
+            if ((fileName == null) || (fileName.trim().length() <= 0)) {
+                Component parentComponent = frame;
+                int messageType = JOptionPane.WARNING_MESSAGE;
+                String title = "Warning - bad input";
+                Object message = new String("Invalid *.mny path=" + fileName);
+                JOptionPane.showMessageDialog(parentComponent, message, title, messageType);
+                return;
+            } else {
+                File file = new File(fileName);
+                if (!file.exists()) {
+                    Component parentComponent = frame;
+                    int messageType = JOptionPane.WARNING_MESSAGE;
+                    String title = "Warning - bad input";
+                    Object message = new String("Invalid *.mny path=" + fileName);
+                    JOptionPane.showMessageDialog(parentComponent, message, title, messageType);
+                    return;
+                }
+            }
+
+            fileName = dataModel.getWordListPath();
+            if ((fileName == null) || (fileName.trim().length() <= 0)) {
+                Component parentComponent = frame;
+                int messageType = JOptionPane.WARNING_MESSAGE;
+                String title = "Warning - bad input";
+                Object message = new String("Invalid wordlist path=" + fileName);
+                JOptionPane.showMessageDialog(parentComponent, message, title, messageType);
+                return;
+            } else {
+                File file = new File(fileName);
+                if (!file.exists()) {
+                    Component parentComponent = frame;
+                    int messageType = JOptionPane.WARNING_MESSAGE;
+                    String title = "Warning - bad input";
+                    Object message = new String("Invalid wordlist path=" + fileName);
+                    JOptionPane.showMessageDialog(parentComponent, message, title, messageType);
+                    return;
+                }
+            }
+
             if (button != null) {
                 button.setText("Stop");
             }
             running.getAndSet(true);
-
-            log.info(dataModel.getMnyFileName());
-            log.info(dataModel.getWordListPath());
-            log.info(dataModel.getThreads());
 
             if (checker != null) {
                 try {
@@ -310,7 +348,7 @@ public class PasswordCheckerApp {
         view.add(lblNewLabel_2, "2, 6");
 
         spinner = new JSpinner();
-        spinner.setModel(new SpinnerNumberModel(new Integer(1), null, null, new Integer(1)));
+        spinner.setModel(new SpinnerNumberModel(new Integer(1), new Integer(1), null, new Integer(1)));
         view.add(spinner, "4, 6");
 
         JButton btnNewButton_2 = new JButton("Start");
