@@ -30,6 +30,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.log4j.Logger;
@@ -45,6 +46,10 @@ public class CheckPasswords {
 
     private final AtomicLong counter = new AtomicLong();
 
+    private final AtomicBoolean quit = new AtomicBoolean(false);
+
+    private File currentCandidatesFile;
+    
     public CheckPasswords(int threads) {
         super();
         pool = Executors.newFixedThreadPool(threads);
@@ -54,10 +59,14 @@ public class CheckPasswords {
         this(1);
     }
 
-    public String check(HeaderPage headerPage, File path) throws IOException {
-        return recursePath(headerPage, path);
+    public String check(HeaderPage headerPage, File candidatesPath) throws IOException {
+        return recursePath(headerPage, candidatesPath);
     }
 
+    public void stop() {
+        quit.getAndSet(true);
+    }
+    
     public static boolean checkUsingHeaderPage(HeaderPage headerPage, String testPassword) throws IOException {
         boolean result = false;
         try {
@@ -96,12 +105,12 @@ public class CheckPasswords {
         return result;
     }
 
-    private String recursePath(HeaderPage headerPage, File path) throws IOException {
-        if (acceptPathAsDirectory(path)) {
-            return recurseDirectory(headerPage, path);
+    private String recursePath(HeaderPage headerPage, File candidatesPath) throws IOException {
+        if (acceptPathAsDirectory(candidatesPath)) {
+            return recurseDirectory(headerPage, candidatesPath);
         } else {
-            if (acceptPathAsFile(path)) {
-                return consumeFile(headerPage, path);
+            if (acceptPathAsFile(candidatesPath)) {
+                return consumeFile(headerPage, candidatesPath);
             } else {
                 return null;
             }
@@ -129,6 +138,10 @@ public class CheckPasswords {
     }
 
     private String recurseDirectory(HeaderPage dbFile, File directory) throws IOException {
+        if (quit.get()) {
+            return null;
+        }
+        
         String value = null;
         log.info("> dir=" + directory);
         File[] files = directory.listFiles();
@@ -143,18 +156,24 @@ public class CheckPasswords {
         return null;
     }
 
-    private String consumeFile(HeaderPage headerPage, File file) {
+    private String consumeFile(HeaderPage headerPage, File candidatesFile) {
+        if (quit.get()) {
+            return null;
+        }
+        
         if (headerPage == null) {
             return null;
         }
-        if (file == null) {
+        if (candidatesFile == null) {
             return null;
         }
-        log.info("> file=" + file);
-        BufferedReader reader = null;
+        // single-thread here
+        this.currentCandidatesFile = candidatesFile;
+        log.info("> candidatesFile=" + candidatesFile);
+        BufferedReader candidatesReader = null;
         try {
-            reader = new BufferedReader(new FileReader(file));
-            return consumeReader(headerPage, reader);
+            candidatesReader = new BufferedReader(new FileReader(candidatesFile));
+            return consumeReader(headerPage, candidatesReader);
         } catch (IOException e) {
             log.error(e, e);
         }
@@ -168,17 +187,18 @@ public class CheckPasswords {
         List<Future<String>> runningJobs = new ArrayList<Future<String>>();
 
         try {
+            // LOOP
             while ((line = reader.readLine()) != null) {
+                if (quit.get()) {
+                    break;
+                }
+                
                 if (trim) {
                     line = line.trim();
                 }
-                if (line.length() <= 0) {
+                if (skipLine(line)) {
                     continue;
                 }
-                if (line.charAt(0) == '#') {
-                    continue;
-                }
-
                 lineCount++;
 
                 Callable<String> callable = createWorker(headerPage, line, counter);
@@ -188,59 +208,92 @@ public class CheckPasswords {
                 }
 
                 // check running jobs to see if any has done
-                ListIterator<Future<String>> iter = runningJobs.listIterator();
-                while (iter.hasNext()) {
-                    Future<String> job = iter.next();
-                    if (job.isDone()) {
-                        try {
-                            result = job.get();
-                            if (result != null) {
-                                log.info("111 runningJobs.size=" + runningJobs.size());
-                                return result;
-                            }
-                        } catch (ExecutionException e) {
-                            log.warn(e, e);
-                        } catch (InterruptedException e) {
-                            log.warn(e);
-                        } finally {
-                            iter.remove();
-                        }
-                    }
+                result = checkJobsForResult(runningJobs);
+                if (result != null) {
+                    // got result, time to quit
+                    break;
                 }
             }
 
             // flush the working list
-            while (runningJobs.size() > 0) {
-                ListIterator<Future<String>> iter = runningJobs.listIterator();
-                while (iter.hasNext()) {
-                    Future<String> job = iter.next();
-                    if (job.isDone()) {
-                        try {
-                            result = job.get();
-                            if (result != null) {
-                                log.info("222 runningJobs.size=" + runningJobs.size());
-                                return result;
-                            }
-                        } catch (ExecutionException e) {
-                            log.warn(e);
-                        } catch (InterruptedException e) {
-                            log.warn(e);
-                        } finally {
-                            iter.remove();
-                        }
-                    }
-                }
-                try {
-                    Thread.sleep(1000L);
-                } catch (InterruptedException e) {
-                    log.warn(e);
-                }
+            if (result == null) {
+                result = waitForEmptyWorkingList(runningJobs);
             }
         } catch (IOException e) {
             log.error(e);
         }
 
-        return null;
+        return result;
+    }
+
+    private boolean skipLine(String line) {
+        if (line.length() <= 0) {
+            return true;
+        }
+        if (line.charAt(0) == '#') {
+            return true;
+        }
+
+        return false;
+    }
+
+    private String checkJobsForResult(List<Future<String>> runningJobs) {
+        ListIterator<Future<String>> iter = runningJobs.listIterator();
+        String result = null;
+        
+        // LOOP
+        while (iter.hasNext()) {
+            if (quit.get()) {
+                break;
+            }
+            
+            Future<String> job = iter.next();
+            if (job.isDone()) {
+                try {
+                    result = job.get();
+                    if (result != null) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("111 runningJobs.size=" + runningJobs.size());
+                        }
+                        break;
+                    }
+                } catch (ExecutionException e) {
+                    log.warn(e, e);
+                } catch (InterruptedException e) {
+                    log.warn(e);
+                } finally {
+                    iter.remove();
+                }
+            }
+        }
+        return result;
+    }
+
+    private String waitForEmptyWorkingList(List<Future<String>> runningJobs) {
+        String result = null;
+        long sleepMs = 1000L;
+
+        // LOOP
+        while (runningJobs.size() > 0) {
+            if (quit.get()) {
+                break;
+            }
+            
+            result = checkJobsForResult(runningJobs);
+
+            if (result != null) {
+                if (quit.get()) {
+                    break;
+                }
+                try {
+                    Thread.sleep(sleepMs);
+                } catch (InterruptedException e) {
+                    log.warn(e);
+                }
+            }
+        }
+
+        return result;
     }
 
     public Callable<String> createWorker(HeaderPage headerPage, String testPassword, AtomicLong counter) {

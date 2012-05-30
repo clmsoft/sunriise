@@ -24,17 +24,25 @@ import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.IOException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 
+import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.JTabbedPane;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileFilter;
 
 import org.apache.log4j.Logger;
@@ -53,17 +61,94 @@ public class PasswordCheckerApp {
     private static final Logger log = Logger.getLogger(PasswordCheckerApp.class);
 
     private JFrame frame;
+
     private JTextField textField;
+
     private JTextField textField_1;
 
     private PasswordCheckerModel dataModel = new PasswordCheckerModel();
+
     private JSpinner spinner;
 
+    private ExecutorService pool = Executors.newCachedThreadPool();
+
     private final class StartSearchAction implements ActionListener {
-        public void actionPerformed(ActionEvent e) {
+        private CheckPasswords checker = null;
+
+        private JButton button;
+
+        private AtomicBoolean running = new AtomicBoolean(false);
+
+        public StartSearchAction(JButton button) {
+            this.button = button;
+        }
+
+        public void actionPerformed(ActionEvent event) {
+            if (running.get()) {
+                stopCheck();
+            } else {
+                startCheck();
+            }
+
+        }
+
+        private void startCheck() {
+            if (button != null) {
+                button.setText("Stop");
+            }
+            running.getAndSet(true);
+
             log.info(dataModel.getMnyFileName());
             log.info(dataModel.getWordListPath());
             log.info(dataModel.getThreads());
+
+            if (checker != null) {
+                try {
+                    checker.close();
+                } finally {
+                    checker = null;
+                }
+            }
+            checker = new CheckPasswords(dataModel.getThreads());
+            Runnable command = new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        HeaderPage headerPage = new HeaderPage(new File(dataModel.getMnyFileName()));
+                        String matchedPassword = checker.check(headerPage, new File(dataModel.getWordListPath()));
+                        notifyResult(matchedPassword);
+                    } catch (IOException e) {
+                        log.warn(e);
+                    } finally {
+                        if (checker != null) {
+                            try {
+                                checker.close();
+                            } finally {
+                                checker = null;
+                            }
+                        }
+                        running.getAndSet(false);
+
+                        if (button != null) {
+                            Runnable doRun = new Runnable() {
+                                @Override
+                                public void run() {
+                                    button.setText("Start");
+                                }
+                            };
+                            SwingUtilities.invokeLater(doRun);
+                        }
+                    }
+                }
+            };
+            pool.execute(command);
+        }
+
+        private void stopCheck() {
+            log.info("Got STOP request.");
+            if (checker != null) {
+                checker.stop();
+            }
         }
     }
 
@@ -82,12 +167,12 @@ public class PasswordCheckerApp {
                     if (f.isDirectory()) {
                         return true;
                     }
-                    
+
                     String name = f.getName();
                     if (name.endsWith(".mny")) {
                         return true;
                     }
-                    
+
                     return false;
                 }
 
@@ -96,7 +181,7 @@ public class PasswordCheckerApp {
                     String description = "*.mny - Money file";
                     return description;
                 }
-                
+
             };
             fc.addChoosableFileFilter(filter);
         }
@@ -153,10 +238,18 @@ public class PasswordCheckerApp {
             public void run() {
                 try {
                     PasswordCheckerApp window = new PasswordCheckerApp();
-                    window.frame.setVisible(true);
+                    showMainFrame(window);
                 } catch (Exception e) {
                     log.error(e, e);
                 }
+            }
+
+            private void showMainFrame(PasswordCheckerApp window) {
+                String title = "Mny Password Checker";
+                window.frame.setTitle(title);
+                // window.frame.pack();
+                window.frame.setLocationRelativeTo(null);
+                window.frame.setVisible(true);
             }
         });
     }
@@ -179,7 +272,7 @@ public class PasswordCheckerApp {
         JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
         frame.getContentPane().add(tabbedPane, BorderLayout.CENTER);
         JPanel view = new JPanel();
-        tabbedPane.addTab("Using word list", null, view, null);
+        tabbedPane.addTab("Word list", null, view, null);
 
         view.setLayout(new FormLayout(new ColumnSpec[] { FormFactory.UNRELATED_GAP_COLSPEC, FormFactory.DEFAULT_COLSPEC,
                 FormFactory.LABEL_COMPONENT_GAP_COLSPEC, ColumnSpec.decode("default:grow"), FormFactory.RELATED_GAP_COLSPEC,
@@ -220,8 +313,8 @@ public class PasswordCheckerApp {
         spinner.setModel(new SpinnerNumberModel(new Integer(1), null, null, new Integer(1)));
         view.add(spinner, "4, 6");
 
-        JButton btnNewButton_2 = new JButton("Start search");
-        btnNewButton_2.addActionListener(new StartSearchAction());
+        JButton btnNewButton_2 = new JButton("Start");
+        btnNewButton_2.addActionListener(new StartSearchAction(btnNewButton_2));
         view.add(btnNewButton_2, "6, 8");
 
         JPanel panel = new JPanel();
@@ -247,5 +340,30 @@ public class PasswordCheckerApp {
         AutoBinding<PasswordCheckerModel, Integer, JSpinner, Object> autoBinding_2 = Bindings.createAutoBinding(
                 UpdateStrategy.READ_WRITE, dataModel, passwordCheckerModelBeanProperty_2, spinner, jSpinnerBeanProperty);
         autoBinding_2.bind();
+    }
+
+    protected void notifyResult(final String matchedPassword) {
+        log.info("matchedPassword=" + matchedPassword);
+        Runnable doRun = new Runnable() {
+            @Override
+            public void run() {
+                Component parentComponent = frame;
+                if (matchedPassword == null) {
+                    JOptionPane.showMessageDialog(parentComponent, "Result of last search: NO password found.", "Search Result",
+                            JOptionPane.WARNING_MESSAGE);
+                } else {
+                    JTextArea textArea = new JTextArea();
+                    textArea.setEditable(false);
+                    textArea.setColumns(30);
+                    textArea.setLineWrap(true);
+                    textArea.setWrapStyleWord(true);
+                    textArea.append("Result of last search:\n");
+                    textArea.append("found password=" + matchedPassword);
+                    textArea.setSize(textArea.getPreferredSize().width, 1);
+                    JOptionPane.showMessageDialog(parentComponent, textArea, "Search Result", JOptionPane.INFORMATION_MESSAGE);
+                }
+            }
+        };
+        SwingUtilities.invokeLater(doRun);
     }
 }

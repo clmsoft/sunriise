@@ -33,6 +33,8 @@ public final class CheckPasswordWorker implements Callable<String> {
     private final String testPassword;
     private AtomicLong counter;
 
+    private boolean doubleCheck = true;
+
     public CheckPasswordWorker(File dbFile, HeaderPage headerPage, String testPassword, AtomicLong counter) {
         super();
         this.dbFile = dbFile;
@@ -76,6 +78,14 @@ public final class CheckPasswordWorker implements Callable<String> {
             result = CheckPasswords.checkUsingOpenDb(dbFile, testPassword);
         } else {
             result = CheckPasswords.checkUsingHeaderPage(headerPage, testPassword);
+            if (result) {
+                if (isDoubleCheck()) {
+                    if (headerPage.getDbFile() != null) {
+                        // double check using openDb
+                        result = CheckPasswords.checkUsingOpenDb(headerPage.getDbFile(), testPassword);
+                    }
+                }
+            }
         }
 
         return result;
@@ -83,6 +93,14 @@ public final class CheckPasswordWorker implements Callable<String> {
 
     public AtomicLong getCounter() {
         return counter;
+    }
+
+    public boolean isDoubleCheck() {
+        return doubleCheck;
+    }
+
+    public void setDoubleCheck(boolean doubleCheck) {
+        this.doubleCheck = doubleCheck;
     }
 
 }

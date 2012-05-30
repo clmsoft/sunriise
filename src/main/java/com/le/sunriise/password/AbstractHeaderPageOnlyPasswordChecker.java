@@ -147,10 +147,12 @@ public abstract class AbstractHeaderPageOnlyPasswordChecker {
             // throw new IllegalStateException("Incorrect password provided");
             return false;
         } else {
-            log.info("encrypted4BytesCheck=" + toHexString(encrypted4BytesCheck));
-            log.info("testKey=" + toHexString(testKey));
-            log.info("decrypted4BytesCheck=" + toHexString(decrypted4BytesCheck));
-            log.info("testBytes=" + toHexString(testBytes));
+            if (log.isDebugEnabled()) {
+                log.debug("encrypted4BytesCheck=" + toHexString(encrypted4BytesCheck));
+                log.debug("testKey=" + toHexString(testKey));
+                log.debug("decrypted4BytesCheck=" + toHexString(decrypted4BytesCheck));
+                log.debug("testBytes=" + toHexString(testBytes));
+            }
             return true;
         }
     }
