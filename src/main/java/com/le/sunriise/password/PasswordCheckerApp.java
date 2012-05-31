@@ -409,6 +409,9 @@ public class PasswordCheckerApp {
 
         JPanel panel = new JPanel();
         tabbedPane.addTab("Brute force", null, panel, null);
+        
+        JLabel lblNewLabel_4 = new JLabel("COMING SOON");
+        panel.add(lblNewLabel_4);
         initDataBindings();
     }
 
