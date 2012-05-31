@@ -28,6 +28,8 @@ import junit.framework.Assert;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
+import com.healthmarketscience.jackcess.JetFormat;
+
 public class GenBruteForceTest {
     private static final Logger log = Logger.getLogger(GenBruteForceTest.class);
 
@@ -51,6 +53,10 @@ public class GenBruteForceTest {
         }
     }
 
+    /**
+     * Test the GenBruteForce.calculateExpected() function against hard-code
+     * expected value.
+     */
     @Test
     public void testCalculateExpected() {
         int passwordLength;
@@ -79,7 +85,7 @@ public class GenBruteForceTest {
     }
 
     @Test
-    public void test() {
+    public void testForMatchingCount() {
         int passwordLength = 0;
         char[] alphabets = null;
 
@@ -112,6 +118,13 @@ public class GenBruteForceTest {
         testCount(passwordLength, alphabets);
     }
 
+    /**
+     * For a given password length and alphabets, simulate running the password
+     * checking and match it against the calculated expected value.
+     * 
+     * @param passwordLength
+     * @param alphabets
+     */
     private void testCount(int passwordLength, char[] alphabets) {
         log.info("Testing passwordLength=" + passwordLength + ", alphabets.length=" + alphabets.length);
 
@@ -128,64 +141,128 @@ public class GenBruteForceTest {
         Assert.assertEquals(expected, actual);
     }
 
+    /**
+     * Test brute-force method.
+     * 
+     * @throws IOException
+     */
     @Test
     public void testBruteForce() throws IOException {
         File dbFile = new File("src/test/data/sunset-sample-pwd-5.mny");
+        String expectedPassword = "12@a!";
+
         char[] mask = null;
         int passwordLength = 5;
         char[] alphabets = null;
         String password = null;
 
         mask = new String("12@a!").toCharArray();
-        logInputs(dbFile, mask, passwordLength, alphabets);        
+        logInputs(dbFile, mask, passwordLength, alphabets);
         password = CheckBruteForceUtils.checkUsingMask(dbFile, passwordLength, mask, alphabets);
         Assert.assertNotNull(password);
-        Assert.assertTrue(password.compareToIgnoreCase("12@a!") == 0);
+        Assert.assertTrue(password.compareToIgnoreCase(expectedPassword) == 0);
 
         mask = new String("12@a*").toCharArray();
-        logInputs(dbFile, mask, passwordLength, alphabets);  
+        logInputs(dbFile, mask, passwordLength, alphabets);
         password = CheckBruteForceUtils.checkUsingMask(dbFile, passwordLength, mask, alphabets);
         Assert.assertNotNull(password);
-        Assert.assertTrue(password.compareToIgnoreCase("12@a!") == 0);
+        Assert.assertTrue(password.compareToIgnoreCase(expectedPassword) == 0);
 
         mask = new String("12@**").toCharArray();
-        logInputs(dbFile, mask, passwordLength, alphabets);  
+        logInputs(dbFile, mask, passwordLength, alphabets);
         password = CheckBruteForceUtils.checkUsingMask(dbFile, passwordLength, mask, alphabets);
         Assert.assertNotNull(password);
-        Assert.assertTrue(password.compareToIgnoreCase("12@a!") == 0);
+        Assert.assertTrue(password.compareToIgnoreCase(expectedPassword) == 0);
 
         mask = new String("12***").toCharArray();
-        logInputs(dbFile, mask, passwordLength, alphabets);  
+        logInputs(dbFile, mask, passwordLength, alphabets);
         password = CheckBruteForceUtils.checkUsingMask(dbFile, passwordLength, mask, alphabets);
         Assert.assertNotNull(password);
-        Assert.assertTrue(password.compareToIgnoreCase("12@a!") == 0);
+        Assert.assertTrue(password.compareToIgnoreCase(expectedPassword) == 0);
 
         mask = new String("1****").toCharArray();
-        logInputs(dbFile, mask, passwordLength, alphabets);  
+        logInputs(dbFile, mask, passwordLength, alphabets);
         password = CheckBruteForceUtils.checkUsingMask(dbFile, passwordLength, mask, alphabets);
         Assert.assertNotNull(password);
-        Assert.assertTrue(password.compareToIgnoreCase("12@a!") == 0);
+        Assert.assertTrue(password.compareToIgnoreCase(expectedPassword) == 0);
 
         mask = new String("0****").toCharArray();
-        logInputs(dbFile, mask, passwordLength, alphabets);  
+        logInputs(dbFile, mask, passwordLength, alphabets);
         password = CheckBruteForceUtils.checkUsingMask(dbFile, passwordLength, mask, alphabets);
         Assert.assertNull(password);
-//        Assert.assertTrue(password.compareToIgnoreCase("12@a!") == 0);
-        
+
         boolean longRunning = false;
         if (longRunning) {
             mask = new String("*****").toCharArray();
-            logInputs(dbFile, mask, passwordLength, alphabets);  
+            logInputs(dbFile, mask, passwordLength, alphabets);
             password = CheckBruteForceUtils.checkUsingMask(dbFile, passwordLength, mask, alphabets);
             Assert.assertNotNull(password);
-            Assert.assertTrue(password.compareToIgnoreCase("12@a!") == 0);
+            Assert.assertTrue(password.compareToIgnoreCase(expectedPassword) == 0);
 
             mask = null;
-            logInputs(dbFile, mask, passwordLength, alphabets);  
+            logInputs(dbFile, mask, passwordLength, alphabets);
             password = CheckBruteForceUtils.checkUsingMask(dbFile, passwordLength, mask, alphabets);
             Assert.assertNotNull(password);
-            Assert.assertTrue(password.compareToIgnoreCase("12@a!") == 0);
+            Assert.assertTrue(password.compareToIgnoreCase(expectedPassword) == 0);
         }
+    }
+
+    @Test
+    public void testFalsePositive() throws IOException {
+        File dbFile = new File("src/test/data/sunset-sample-pwd.mny");
+
+        HeaderPage headerPage = new HeaderPage(dbFile);
+        HeaderPageOnlyPasswordChecker checker = new HeaderPageOnlyPasswordChecker(headerPage);
+
+        boolean matched = false;
+        String testPassword = "1238.NQE";
+        matched = checker.check(testPassword);
+        if (matched) {
+            matched = PasswordUtils.doubleCheck(headerPage, testPassword);
+        }
+        Assert.assertFalse(matched);
+    }
+
+    @Test
+    public void testLength8Password() throws IOException {
+        File dbFile = new File("src/test/data/sunset-sample-pwd.mny");
+        int passwordLength = -1; // don't know
+        // 123@ABC!
+        String expectedPassword = "123@ABC!";
+
+        char[] mask = "*******".toCharArray();
+        char[] alphabets = GenBruteForce.ALPHABET_US_KEYBOARD_MNY;
+        String password = null;
+
+        mask = "123@ABC!".toCharArray();
+        password = CheckBruteForceUtils.checkUsingMask(dbFile, passwordLength, mask, alphabets);
+        Assert.assertNotNull(password);
+        Assert.assertTrue(password.compareToIgnoreCase(expectedPassword) == 0);
+
+        mask = "123@ABC*".toCharArray();
+        password = CheckBruteForceUtils.checkUsingMask(dbFile, passwordLength, mask, alphabets);
+        Assert.assertNotNull(password);
+        Assert.assertTrue(password.compareToIgnoreCase(expectedPassword) == 0);
+
+        mask = "123@AB**".toCharArray();
+        password = CheckBruteForceUtils.checkUsingMask(dbFile, passwordLength, mask, alphabets);
+        Assert.assertNotNull(password);
+        Assert.assertTrue(password.compareToIgnoreCase(expectedPassword) == 0);
+
+        mask = "123@A***".toCharArray();
+        password = CheckBruteForceUtils.checkUsingMask(dbFile, passwordLength, mask, alphabets);
+        Assert.assertNotNull(password);
+        Assert.assertTrue(password.compareToIgnoreCase(expectedPassword) == 0);
+
+        mask = "123@****".toCharArray();
+        password = CheckBruteForceUtils.checkUsingMask(dbFile, passwordLength, mask, alphabets);
+        Assert.assertNotNull(password);
+        Assert.assertTrue(password.compareToIgnoreCase(expectedPassword) == 0);
+
+        mask = "123*****".toCharArray();
+        password = CheckBruteForceUtils.checkUsingMask(dbFile, passwordLength, mask, alphabets);
+        Assert.assertNotNull(password);
+        Assert.assertTrue(password.compareToIgnoreCase(expectedPassword) == 0);
     }
 
     private void logInputs(File dbFile, char[] mask, int passwordLength, char[] alphabets) {
@@ -193,6 +270,6 @@ public class GenBruteForceTest {
         log.info("dbFile=" + dbFile);
         log.info("passwordLength=" + passwordLength);
         log.info("mask=" + ((mask == null) ? null : new String(mask)));
-        log.info("alphabets=" + ((alphabets == null)? alphabets : new String(alphabets)));
+        log.info("alphabets=" + ((alphabets == null) ? alphabets : new String(alphabets)));
     }
 }

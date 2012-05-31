@@ -77,8 +77,8 @@ public class CheckBruteForceUtils {
         String password;
         CheckBruteForce checker = null;
         try {
-            checker = new CheckBruteForce(passwordLength, alphabets, mask, headerPage);
-            checker.generate();
+            checker = new CheckBruteForce(headerPage, passwordLength, mask, alphabets);
+            checker.check();
             password = checker.getPassword();
             log.info("password=" + password);
         } finally {

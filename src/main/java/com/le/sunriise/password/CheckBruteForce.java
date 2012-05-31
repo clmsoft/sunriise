@@ -44,10 +44,68 @@ public class CheckBruteForce extends GenBruteForce {
     private ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(2);
     private ScheduledFuture<?> periodicStatusFuture;
 
-    CheckBruteForce(int passwordLength, char[] alphabets, char[] mask, HeaderPage headerPage) {
+    private final class StatusTask implements Runnable {
+        @Override
+        public void run() {
+            long delta = stopWatch.click(false);
+            Duration duration = new Duration(delta);
+            BigInteger aCount = BigInteger.valueOf(count.get());
+            BigInteger percentage = null;
+
+            if (maxCount.longValue() > 0L) {
+                percentage = aCount.multiply(ONE_HUNDRED).divide(maxCount);
+            } else {
+                percentage = BigInteger.ZERO;
+            }
+            log.info("Tested " + count + " strings" + " (" + percentage + "% completed" + ", elapsed=" + duration.toString() + ")");
+            if (delta > 0) {
+                BigInteger seconds = BigInteger.valueOf(delta).divide(ONE_THOUSAND);
+                if (seconds.longValue() > 0) {
+                    logStatus(aCount, seconds);
+                }
+            }
+
+            if (isTerminate()) {
+                if (periodicStatusFuture != null) {
+                    periodicStatusFuture.cancel(true);
+                }
+            }
+        }
+
+        private void logStatus(BigInteger aCount, BigInteger seconds) {
+            log.info("  Rate=" + aCount.divide(seconds) + "/sec");
+            log.info("    currentResult=" + getCurrentResult());
+            log.info("    currentCursorIndex=" + printIntArray(getCurrentCursorIndex()));
+        }
+    }
+
+    /**
+     * For a given headerPage, passwordLength, mask, and alphabets, run
+     * brute-force checker to see if we can find a matching password.
+     * 
+     * @param headerPage
+     *            is a header page for a *.mny file
+     * @param passwordLength
+     *            how long is a password to check?
+     * @param mask
+     *            password mask
+     * @param alphabets
+     *            is an array of char representing the alphabets
+     */
+    public CheckBruteForce(HeaderPage headerPage, int passwordLength, char[] mask, char[] alphabets) {
         super(passwordLength, mask, alphabets);
         this.headerPage = headerPage;
         maxCount = GenBruteForce.calculateExpected(passwordLength, alphabets.length);
+    }
+
+    /**
+     * Run the brute-force check. Use getPassword() to see if there was a
+     * matching password or not.
+     * 
+     * @return how many items were checked.
+     */
+    public long check() {
+        return generate();
     }
 
     @Override
@@ -64,11 +122,11 @@ public class CheckBruteForce extends GenBruteForce {
         }
     }
 
-    public boolean accept(String string) {
+    protected boolean accept(String string) {
         return true;
     }
 
-    public boolean checkPassword(String testPassword) {
+    private boolean checkPassword(String testPassword) {
         boolean matched = false;
         matched = AbstractHeaderPageOnlyPasswordChecker.checkPassword(headerPage, testPassword);
         return matched;
@@ -83,9 +141,9 @@ public class CheckBruteForce extends GenBruteForce {
         if (periodicStatusFuture != null) {
             periodicStatusFuture.cancel(true);
         }
-        
+
         Runnable statusCommand = scheduleStatusCmd();
-        
+
         try {
             rv = super.generate();
         } finally {
@@ -98,36 +156,7 @@ public class CheckBruteForce extends GenBruteForce {
     }
 
     private Runnable scheduleStatusCmd() {
-        Runnable statusCommand = new Runnable() {
-            @Override
-            public void run() {
-                long delta = stopWatch.click(false);
-                Duration duration = new Duration(delta);
-                BigInteger aCount = BigInteger.valueOf(count.get());
-                BigInteger percentage = aCount.multiply(ONE_HUNDRED).divide(maxCount);
-                log.info("Tested " + count + " strings" + " (" + percentage + "% completed" + ", elapsed=" + duration.toString()
-                        + ")");
-                if (delta > 0) {
-                    BigInteger seconds = BigInteger.valueOf(delta).divide(ONE_THOUSAND);
-                    if (seconds.longValue() > 0) {
-                        logStatus(aCount, seconds);
-                    }
-                }
-
-                if (isTerminate()) {
-                    if (periodicStatusFuture != null) {
-                        periodicStatusFuture.cancel(true);
-                    }
-                }
-            }
-
-            private void logStatus(BigInteger aCount, BigInteger seconds) {
-                log.info("  Rate=" + aCount.divide(seconds) + "/sec");
-                log.info("    currentResult=" + getCurrentResult());
-                log.info("    currentCursorIndex=" + printIntArray(getCurrentCursorIndex()));
-            }
-
-        };
+        Runnable statusCommand = new StatusTask();
         long initialDelay = 0;
         long period = 30;
         TimeUnit unit = TimeUnit.SECONDS;

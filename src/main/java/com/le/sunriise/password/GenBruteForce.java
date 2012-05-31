@@ -90,6 +90,11 @@ public class GenBruteForce {
     }
 
     public GenBruteForce(int passwordLength, char[] mask, char[] alphabets) {
+        if (passwordLength < 0) {
+            if (mask != null) {
+                passwordLength = mask.length;
+            }
+        }
         this.passwordLength = passwordLength;
         this.mask = mask;
         this.alphabets = alphabets;
@@ -198,7 +203,7 @@ public class GenBruteForce {
 
         // TODO - not implement yet
 
-        rv = maskChar == maskSkipChar;
+        rv = (maskChar == maskSkipChar);
 
         return rv;
     }
@@ -211,7 +216,7 @@ public class GenBruteForce {
         log.info(string);
     }
 
-    /**
+/**
      * {@literal
      * KS = L^(m) + L^(m+1) + L^(m+2) + ........ + L^(M)
      * where
@@ -247,21 +252,6 @@ public class GenBruteForce {
         this.terminate = terminate;
     }
 
-    public static void main(String[] args) {
-        int passwordLength = 5;
-        char[] mask = null;
-        mask = new String("*****").toCharArray();
-        char[] alphabets = GenBruteForce.genChars('a', 'c');
-        GenBruteForce gen = new GenBruteForce(passwordLength, mask, alphabets);
-
-        long actual = gen.generate();
-
-        BigInteger expected = GenBruteForce.calculateExpected(passwordLength, alphabets.length);
-
-        log.info("actual=" + actual + ", expected=" + expected);
-
-    }
-
     public char[] getBuffer() {
         return buffer;
     }
@@ -288,6 +278,21 @@ public class GenBruteForce {
 
     public void setMaskWildChar(char maskWildChar) {
         this.maskWildChar = maskWildChar;
+    }
+
+    public static void main(String[] args) {
+        int passwordLength = 5;
+        char[] mask = null;
+        mask = new String("*****").toCharArray();
+        char[] alphabets = GenBruteForce.genChars('a', 'c');
+        GenBruteForce gen = new GenBruteForce(passwordLength, mask, alphabets);
+
+        long actual = gen.generate();
+
+        BigInteger expected = GenBruteForce.calculateExpected(passwordLength, alphabets.length);
+
+        log.info("actual=" + actual + ", expected=" + expected);
+
     }
 
 }

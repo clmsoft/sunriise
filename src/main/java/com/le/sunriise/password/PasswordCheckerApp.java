@@ -78,7 +78,7 @@ public class PasswordCheckerApp {
     private JTextField textField_2;
 
     private AtomicBoolean running = new AtomicBoolean(false);
-    private CheckPasswords checker = null;
+    private CheckUsingDictionary checker = null;
 
     private final class StartSearchAction implements ActionListener {
         private JButton button;
@@ -159,7 +159,7 @@ public class PasswordCheckerApp {
             lastCheckerThreads = dataModel.getThreads();
             if (checker == null) {
                 log.info("Created new checker, threads=" + lastCheckerThreads);
-                checker = new CheckPasswords(lastCheckerThreads);
+                checker = new CheckUsingDictionary(lastCheckerThreads);
             }
             Runnable command = new Runnable() {
                 @Override

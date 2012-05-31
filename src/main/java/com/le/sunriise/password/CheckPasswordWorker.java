@@ -75,15 +75,12 @@ public final class CheckPasswordWorker implements Callable<String> {
         boolean checkUsingOpenDb = (headerPage == null);
 
         if (checkUsingOpenDb) {
-            result = CheckPasswords.checkUsingOpenDb(dbFile, testPassword);
+            result = PasswordUtils.checkUsingOpenDb(dbFile, testPassword);
         } else {
-            result = CheckPasswords.checkUsingHeaderPage(headerPage, testPassword);
+            result = PasswordUtils.checkUsingHeaderPage(headerPage, testPassword);
             if (result) {
                 if (isDoubleCheck()) {
-                    if (headerPage.getDbFile() != null) {
-                        // double check using openDb
-                        result = CheckPasswords.checkUsingOpenDb(headerPage.getDbFile(), testPassword);
-                    }
+                    result = PasswordUtils.doubleCheck(headerPage, testPassword);
                 }
             }
         }

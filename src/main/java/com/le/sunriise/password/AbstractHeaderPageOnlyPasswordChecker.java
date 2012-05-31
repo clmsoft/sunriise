@@ -38,7 +38,7 @@ public abstract class AbstractHeaderPageOnlyPasswordChecker {
 
     protected final HeaderPage headerPage;
 
-    public static boolean checkPassword(HeaderPage headerPage, String password) {
+    public static boolean checkPassword(HeaderPage headerPage, String testPassword) {
         boolean matched = false;
         AbstractHeaderPageOnlyPasswordChecker checker = null;
         boolean useBouncycastle = true;
@@ -56,10 +56,13 @@ public abstract class AbstractHeaderPageOnlyPasswordChecker {
 
             try {
                 matched = false;
-                matched = checker.check(password);
+                matched = checker.check(testPassword);
+                if (matched) {
+                    matched = PasswordUtils.doubleCheck(headerPage, testPassword);
+                }
             } catch (IllegalStateException e) {
                 if (log.isDebugEnabled()) {
-                    log.warn("Not a valid password=" + password);
+                    log.warn("Not a valid testPassword=" + testPassword);
                 }
                 matched = false;
             }
@@ -83,7 +86,7 @@ public abstract class AbstractHeaderPageOnlyPasswordChecker {
         this.headerPage = headerPage;
     }
 
-    private boolean check(String password) throws IOException {
+    public boolean check(String password) throws IOException {
         return check(password, getHeaderPage().getCharset());
     }
 
@@ -116,13 +119,15 @@ public abstract class AbstractHeaderPageOnlyPasswordChecker {
         if (log.isDebugEnabled()) {
             log.debug("passwordDigest=" + HexDump.toHex(passwordDigest));
         }
-        // then a salt is append to the digest. This is is now known as the testKey
+        // then a salt is append to the digest. This is is now known as the
+        // testKey
         // Notes: important fact headerPage.getSalt()
         byte[] testKey = concat(passwordDigest, headerPage.getSalt());
         // Notes: important fact headerPage.getBaseSalt()
         byte[] testBytes = headerPage.getBaseSalt();
-        
-        // an embedded encrypted 4 bytes is retrieved from the db (encrypted4BytesCheck)
+
+        // an embedded encrypted 4 bytes is retrieved from the db
+        // (encrypted4BytesCheck)
         // decrypted4BytesCheck = f(encrypted4BytesCheck, testKey)
         // assert decrypted4BytesCheck == testBytes
         return verifyPassword(headerPage, testKey, testBytes);

@@ -35,30 +35,52 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.log4j.Logger;
 
-import com.le.sunriise.Utils;
 
-public class CheckPasswords {
-    private static final Logger log = Logger.getLogger(CheckPasswords.class);
+/**
+ * Check for matching password against a set of dictionary. Support multi-threads.
+ * 
+ * @author hle
+ *
+ */
+public class CheckUsingDictionary {
+    private static final Logger log = Logger.getLogger(CheckUsingDictionary.class);
 
     private boolean trim = true;
 
     private ExecutorService pool;
 
-    private final AtomicLong counter = new AtomicLong();
+    private final AtomicLong counter = new AtomicLong(0L);
 
     private final AtomicBoolean quit = new AtomicBoolean(false);
 
     private File currentCandidatesFile;
     
-    public CheckPasswords(int threads) {
+    /**
+     * 
+     * @param threads is number of threads to run
+     */
+    public CheckUsingDictionary(int threads) {
         super();
         pool = Executors.newFixedThreadPool(threads);
     }
 
-    public CheckPasswords() {
+    /**
+     * Default number of threads is 1.
+     */
+    public CheckUsingDictionary() {
         this(1);
     }
 
+    /**
+     * Check the given headerPage against a set of dictionary. The set of dictionary is formed
+     * by parsing the give file: one word per line, skip '#' comment line. If the given path is
+     * a directory, traverse the directory, skip 'hidden' file (with prefix dot '.').
+     * 
+     * @param headerPage
+     * @param candidatesPath
+     * @return a String which is a matched password. If null, no password found.
+     * @throws IOException
+     */
     public String check(HeaderPage headerPage, File candidatesPath) throws IOException {
         return recursePath(headerPage, candidatesPath);
     }
@@ -67,44 +89,6 @@ public class CheckPasswords {
         quit.getAndSet(true);
     }
     
-    public static boolean checkUsingHeaderPage(HeaderPage headerPage, String testPassword) throws IOException {
-        boolean result = false;
-        try {
-            if (AbstractHeaderPageOnlyPasswordChecker.checkPassword(headerPage, testPassword)) {
-                if (log.isDebugEnabled()) {
-                    log.debug("OK password=" + testPassword);
-                }
-                result = true;
-            } else {
-                if (log.isDebugEnabled()) {
-                    log.debug("NOT OK password=" + testPassword);
-                }
-                result = false;
-            }
-
-        } finally {
-
-        }
-        return result;
-    }
-
-    public static boolean checkUsingOpenDb(File dbFile, String testPassword) throws IOException {
-        boolean result = false;
-        try {
-            Utils.openDbReadOnly(dbFile, testPassword);
-            if (log.isDebugEnabled()) {
-                log.debug("testPassword=" + testPassword + ", YES");
-            }
-            result = true;
-        } catch (java.lang.IllegalStateException e) {
-            // wrong password
-            if (log.isDebugEnabled()) {
-                log.warn(e);
-            }
-        }
-        return result;
-    }
-
     private String recursePath(HeaderPage headerPage, File candidatesPath) throws IOException {
         if (acceptPathAsDirectory(candidatesPath)) {
             return recurseDirectory(headerPage, candidatesPath);
@@ -296,7 +280,7 @@ public class CheckPasswords {
         return result;
     }
 
-    public Callable<String> createWorker(HeaderPage headerPage, String testPassword, AtomicLong counter) {
+    protected Callable<String> createWorker(HeaderPage headerPage, String testPassword, AtomicLong counter) {
         return new CheckPasswordWorker(headerPage, testPassword, counter);
     }
 
@@ -314,4 +298,8 @@ public class CheckPasswords {
     public AtomicLong getCounter() {
         return counter;
     }
+
+    public File getCurrentCandidatesFile() {
+        return currentCandidatesFile;
+    }    
 }

@@ -48,13 +48,13 @@ public class CheckPasswordTest {
         headerPage = new HeaderPage(dbFile);
         Assert.assertEquals(true, headerPage.isNewEncryption());
         Assert.assertEquals(false, headerPage.isUseSha1());
-        testPassword(headerPage);
+        testSunsetSamplePassword(headerPage);
 
         dbFile = new File("src/test/data/money2005-pwd.mny");
         headerPage = new HeaderPage(dbFile);
         Assert.assertEquals(true, headerPage.isNewEncryption());
         Assert.assertEquals(false, headerPage.isUseSha1());
-        testPassword(headerPage);
+        testSunsetSamplePassword(headerPage);
 
         dbFile = new File("src/test/data/money2008-pwd.mny");
         headerPage = new HeaderPage(dbFile);
@@ -71,10 +71,10 @@ public class CheckPasswordTest {
         headerPage = new HeaderPage(dbFile);
         Assert.assertEquals(true, headerPage.isNewEncryption());
         Assert.assertEquals(true, headerPage.isUseSha1());
-        testPassword(headerPage);
+        testSunsetSamplePassword(headerPage);
     }
 
-    private void testPassword(HeaderPage headerPage) throws IOException {
+    private void testSunsetSamplePassword(HeaderPage headerPage) throws IOException {
         String password = null;
 
         boolean matched = false;
