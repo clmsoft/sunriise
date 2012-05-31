@@ -27,7 +27,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -70,14 +74,15 @@ public class PasswordCheckerApp {
     private JSpinner spinner;
 
     private ExecutorService pool = Executors.newCachedThreadPool();
+    private ScheduledExecutorService schedulers = Executors.newScheduledThreadPool(2);
+
     private JTextField textField_2;
 
+    private AtomicBoolean running = new AtomicBoolean(false);
+    private CheckPasswords checker = null;
+
     private final class StartSearchAction implements ActionListener {
-        private CheckPasswords checker = null;
-
         private JButton button;
-
-        private AtomicBoolean running = new AtomicBoolean(false);
 
         public StartSearchAction(JButton button) {
             this.button = button;
@@ -90,7 +95,6 @@ public class PasswordCheckerApp {
             } else {
                 startCheck();
             }
-
         }
 
         private void startCheck() {
@@ -149,6 +153,9 @@ public class PasswordCheckerApp {
                     checker = null;
                 }
             }
+            // TODO: don't need to initiate each START. Only if number of
+            // threads is more than
+            // the current pool
             checker = new CheckPasswords(dataModel.getThreads());
             Runnable command = new Runnable() {
                 @Override
@@ -303,6 +310,29 @@ public class PasswordCheckerApp {
      * Create the application.
      */
     public PasswordCheckerApp() {
+        Runnable command = new Runnable() {
+            @Override
+            public void run() {
+                if (log.isDebugEnabled()) {
+                    log.debug("> status scheduler ...");
+                }
+                if (!running.get()) {
+                    return;
+                }
+
+                if (checker == null) {
+                    return;
+                }
+
+                AtomicLong counter = checker.getCounter();
+                dataModel.setStatus("Running ... seached " + counter.get());
+            }
+        };
+        long period = 2L;
+        long initialDelay = 1L;
+        TimeUnit unit = TimeUnit.SECONDS;
+        schedulers.scheduleAtFixedRate(command, initialDelay, period, unit);
+
         initialize();
     }
 
