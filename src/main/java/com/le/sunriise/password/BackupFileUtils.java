@@ -43,7 +43,7 @@ public class BackupFileUtils {
             if (fileName.endsWith(".mbf")) {
                 File tempFile = File.createTempFile("sunriise", ".mny");
                 // tempFile.deleteOnExit();
-                long headerOffset = (long) findMagicHeader(dbFile);
+                long headerOffset = findMagicHeader(dbFile);
                 dbFile = copyBackupFile(dbFile, tempFile, headerOffset, headerOffset + 4096);
                 log.info("Temp converted backup file=" + dbFile);
             }

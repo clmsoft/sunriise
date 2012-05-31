@@ -4,6 +4,7 @@ public class PasswordCheckerModel {
     private String mnyFileName;
     private String wordListPath;
     private Integer threads = new Integer(1);
+    private String status = "Idle";
     
     public String getMnyFileName() {
         return mnyFileName;
@@ -27,5 +28,13 @@ public class PasswordCheckerModel {
 
     public void setThreads(Integer threads) {
         this.threads = threads;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

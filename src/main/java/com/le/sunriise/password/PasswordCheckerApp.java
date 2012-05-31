@@ -29,7 +29,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -71,6 +70,7 @@ public class PasswordCheckerApp {
     private JSpinner spinner;
 
     private ExecutorService pool = Executors.newCachedThreadPool();
+    private JTextField textField_2;
 
     private final class StartSearchAction implements ActionListener {
         private CheckPasswords checker = null;
@@ -83,6 +83,7 @@ public class PasswordCheckerApp {
             this.button = button;
         }
 
+        @Override
         public void actionPerformed(ActionEvent event) {
             if (running.get()) {
                 stopCheck();
@@ -139,6 +140,7 @@ public class PasswordCheckerApp {
                 button.setText("Stop");
             }
             running.getAndSet(true);
+            dataModel.setStatus("Running ...");
 
             if (checker != null) {
                 try {
@@ -151,9 +153,10 @@ public class PasswordCheckerApp {
             Runnable command = new Runnable() {
                 @Override
                 public void run() {
+                    String matchedPassword = null;
                     try {
                         HeaderPage headerPage = new HeaderPage(new File(dataModel.getMnyFileName()));
-                        String matchedPassword = checker.check(headerPage, new File(dataModel.getWordListPath()));
+                        matchedPassword = checker.check(headerPage, new File(dataModel.getWordListPath()));
                         notifyResult(matchedPassword);
                     } catch (IOException e) {
                         log.warn(e);
@@ -168,10 +171,12 @@ public class PasswordCheckerApp {
                         running.getAndSet(false);
 
                         if (button != null) {
+                            final String str = matchedPassword;
                             Runnable doRun = new Runnable() {
                                 @Override
                                 public void run() {
                                     button.setText("Start");
+                                    dataModel.setStatus("Idle - last result " + str);
                                 }
                             };
                             SwingUtilities.invokeLater(doRun);
@@ -224,6 +229,7 @@ public class PasswordCheckerApp {
             fc.addChoosableFileFilter(filter);
         }
 
+        @Override
         public void actionPerformed(ActionEvent e) {
             Component parent = frame;
             if (fc.showOpenDialog(parent) != JFileChooser.APPROVE_OPTION) {
@@ -251,6 +257,7 @@ public class PasswordCheckerApp {
             fc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
         }
 
+        @Override
         public void actionPerformed(ActionEvent e) {
             Component parent = frame;
             if (fc.showOpenDialog(parent) != JFileChooser.APPROVE_OPTION) {
@@ -307,7 +314,7 @@ public class PasswordCheckerApp {
         frame.setBounds(100, 100, 450, 300);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+        JTabbedPane tabbedPane = new JTabbedPane(SwingConstants.TOP);
         frame.getContentPane().add(tabbedPane, BorderLayout.CENTER);
         JPanel view = new JPanel();
         tabbedPane.addTab("Word list", null, view, null);
@@ -351,33 +358,22 @@ public class PasswordCheckerApp {
         spinner.setModel(new SpinnerNumberModel(new Integer(1), new Integer(1), null, new Integer(1)));
         view.add(spinner, "4, 6");
 
+        JLabel lblNewLabel_3 = new JLabel("Status");
+        lblNewLabel_3.setHorizontalAlignment(SwingConstants.TRAILING);
+        view.add(lblNewLabel_3, "2, 8, right, default");
+
+        textField_2 = new JTextField();
+        textField_2.setEditable(false);
+        view.add(textField_2, "4, 8, fill, default");
+        textField_2.setColumns(10);
+
         JButton btnNewButton_2 = new JButton("Start");
         btnNewButton_2.addActionListener(new StartSearchAction(btnNewButton_2));
-        view.add(btnNewButton_2, "6, 8");
+        view.add(btnNewButton_2, "6, 10");
 
         JPanel panel = new JPanel();
         tabbedPane.addTab("Brute force", null, panel, null);
         initDataBindings();
-    }
-
-    protected void initDataBindings() {
-        BeanProperty<PasswordCheckerModel, String> passwordCheckerModelBeanProperty = BeanProperty.create("mnyFileName");
-        BeanProperty<JTextField, String> jTextFieldBeanProperty = BeanProperty.create("text");
-        AutoBinding<PasswordCheckerModel, String, JTextField, String> autoBinding = Bindings.createAutoBinding(
-                UpdateStrategy.READ_WRITE, dataModel, passwordCheckerModelBeanProperty, textField, jTextFieldBeanProperty);
-        autoBinding.bind();
-        //
-        BeanProperty<PasswordCheckerModel, String> passwordCheckerModelBeanProperty_1 = BeanProperty.create("wordListPath");
-        BeanProperty<JTextField, String> jTextFieldBeanProperty_1 = BeanProperty.create("text");
-        AutoBinding<PasswordCheckerModel, String, JTextField, String> autoBinding_1 = Bindings.createAutoBinding(
-                UpdateStrategy.READ_WRITE, dataModel, passwordCheckerModelBeanProperty_1, textField_1, jTextFieldBeanProperty_1);
-        autoBinding_1.bind();
-        //
-        BeanProperty<PasswordCheckerModel, Integer> passwordCheckerModelBeanProperty_2 = BeanProperty.create("threads");
-        BeanProperty<JSpinner, Object> jSpinnerBeanProperty = BeanProperty.create("value");
-        AutoBinding<PasswordCheckerModel, Integer, JSpinner, Object> autoBinding_2 = Bindings.createAutoBinding(
-                UpdateStrategy.READ_WRITE, dataModel, passwordCheckerModelBeanProperty_2, spinner, jSpinnerBeanProperty);
-        autoBinding_2.bind();
     }
 
     protected void notifyResult(final String matchedPassword) {
@@ -403,5 +399,31 @@ public class PasswordCheckerApp {
             }
         };
         SwingUtilities.invokeLater(doRun);
+    }
+
+    protected void initDataBindings() {
+        BeanProperty<PasswordCheckerModel, String> passwordCheckerModelBeanProperty = BeanProperty.create("mnyFileName");
+        BeanProperty<JTextField, String> jTextFieldBeanProperty = BeanProperty.create("text");
+        AutoBinding<PasswordCheckerModel, String, JTextField, String> autoBinding = Bindings.createAutoBinding(
+                UpdateStrategy.READ_WRITE, dataModel, passwordCheckerModelBeanProperty, textField, jTextFieldBeanProperty);
+        autoBinding.bind();
+        //
+        BeanProperty<PasswordCheckerModel, String> passwordCheckerModelBeanProperty_1 = BeanProperty.create("wordListPath");
+        BeanProperty<JTextField, String> jTextFieldBeanProperty_1 = BeanProperty.create("text");
+        AutoBinding<PasswordCheckerModel, String, JTextField, String> autoBinding_1 = Bindings.createAutoBinding(
+                UpdateStrategy.READ_WRITE, dataModel, passwordCheckerModelBeanProperty_1, textField_1, jTextFieldBeanProperty_1);
+        autoBinding_1.bind();
+        //
+        BeanProperty<PasswordCheckerModel, Integer> passwordCheckerModelBeanProperty_2 = BeanProperty.create("threads");
+        BeanProperty<JSpinner, Object> jSpinnerBeanProperty = BeanProperty.create("value");
+        AutoBinding<PasswordCheckerModel, Integer, JSpinner, Object> autoBinding_2 = Bindings.createAutoBinding(
+                UpdateStrategy.READ_WRITE, dataModel, passwordCheckerModelBeanProperty_2, spinner, jSpinnerBeanProperty);
+        autoBinding_2.bind();
+        //
+        BeanProperty<PasswordCheckerModel, String> passwordCheckerModelBeanProperty_3 = BeanProperty.create("status");
+        BeanProperty<JTextField, String> jTextFieldBeanProperty_2 = BeanProperty.create("text");
+        AutoBinding<PasswordCheckerModel, String, JTextField, String> autoBinding_3 = Bindings.createAutoBinding(
+                UpdateStrategy.READ_WRITE, dataModel, passwordCheckerModelBeanProperty_3, textField_2, jTextFieldBeanProperty_2);
+        autoBinding_3.bind();
     }
 }
