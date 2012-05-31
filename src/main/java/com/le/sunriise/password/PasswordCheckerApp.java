@@ -28,7 +28,6 @@ import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
@@ -83,6 +82,8 @@ public class PasswordCheckerApp {
 
     private final class StartSearchAction implements ActionListener {
         private JButton button;
+        private boolean closeChecker = false;
+        private int lastCheckerThreads = 0;
 
         public StartSearchAction(JButton button) {
             this.button = button;
@@ -147,16 +148,19 @@ public class PasswordCheckerApp {
             dataModel.setStatus("Running ...");
 
             if (checker != null) {
-                try {
-                    checker.close();
-                } finally {
-                    checker = null;
+                if (dataModel.getThreads() > lastCheckerThreads) {
+                    try {
+                        checker.close();
+                    } finally {
+                        checker = null;
+                    }
                 }
             }
-            // TODO: don't need to initiate each START. Only if number of
-            // threads is more than
-            // the current pool
-            checker = new CheckPasswords(dataModel.getThreads());
+            lastCheckerThreads = dataModel.getThreads();
+            if (checker == null) {
+                log.info("Created new checker, threads=" + lastCheckerThreads);
+                checker = new CheckPasswords(lastCheckerThreads);
+            }
             Runnable command = new Runnable() {
                 @Override
                 public void run() {
@@ -168,11 +172,13 @@ public class PasswordCheckerApp {
                     } catch (IOException e) {
                         log.warn(e);
                     } finally {
-                        if (checker != null) {
-                            try {
-                                checker.close();
-                            } finally {
-                                checker = null;
+                        if (closeChecker) {
+                            if (checker != null) {
+                                try {
+                                    checker.close();
+                                } finally {
+                                    checker = null;
+                                }
                             }
                         }
                         running.getAndSet(false);

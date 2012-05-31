@@ -16,43 +16,15 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA
  *******************************************************************************/
-package com.le.sunriise.model.bean;
+package app;
 
-public class PasswordCheckerModel {
-    private String mnyFileName;
-    private String wordListPath;
-    private Integer threads = new Integer(1);
-    private String status = "Idle";
-    
-    public String getMnyFileName() {
-        return mnyFileName;
+public class PasswordCheckerApp {
+
+    /**
+     * @param args
+     */
+    public static void main(String[] args) {
+        com.le.sunriise.password.PasswordCheckerApp.main(args);
     }
 
-    public void setMnyFileName(String mnyFileName) {
-        this.mnyFileName = mnyFileName;
-    }
-
-    public String getWordListPath() {
-        return wordListPath;
-    }
-
-    public void setWordListPath(String wordListPath) {
-        this.wordListPath = wordListPath;
-    }
-
-    public Integer getThreads() {
-        return threads;
-    }
-
-    public void setThreads(Integer threads) {
-        this.threads = threads;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
 }
