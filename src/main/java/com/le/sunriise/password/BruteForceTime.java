@@ -31,11 +31,15 @@ public class BruteForceTime {
     public static void main(String[] args) {
         int alphabetsLenghth = 26;
         String message = null;
-        int ratePerSecond = 150000;
+        long ratePerSecond = 140000;
 
-        ratePerSecond = 220000;
+        if (args.length > 0) {
+            String dbFileName = args[0];
+            ratePerSecond = CalculateRateCmd.calculateRate(dbFileName);
+        }
+
         log.info("ratePerSecond=" + ratePerSecond);
-        
+
         alphabetsLenghth = 26;
         message = "Just lower OR upper case ... alphabetsLenghth=" + alphabetsLenghth;
         calc(alphabetsLenghth, message, ratePerSecond);
@@ -59,14 +63,14 @@ public class BruteForceTime {
         alphabetsLenghth = (26 * 2) + 10 + 3;
         message = "Both lower AND upper case + digits + 3 special chars ... alphabetsLenghth=" + alphabetsLenghth;
         calc(alphabetsLenghth, message, ratePerSecond);
-        
+
         alphabetsLenghth = 92;
         message = "us-keyboard ... alphabetsLenghth=" + alphabetsLenghth;
         calc(alphabetsLenghth, message, ratePerSecond);
 
     }
 
-    private static void calc(int alphabetsLenghth, String message, int ratePerSecond) {
+    private static void calc(int alphabetsLenghth, String message, long ratePerSecond) {
         log.info("#");
         log.info(message);
         int passwordLength;
@@ -80,7 +84,7 @@ public class BruteForceTime {
         }
     }
 
-    private static String calcHowLong(BigInteger count, int ratePerSecond) {
+    private static String calcHowLong(BigInteger count, long ratePerSecond) {
         count = count.divide(BigInteger.valueOf(ratePerSecond));
         BigInteger millis = count.multiply(BigInteger.valueOf(1000));
         Duration duration = new Duration(millis.longValue());
