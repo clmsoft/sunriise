@@ -14,7 +14,7 @@ public class PasswordUtils {
     public static boolean checkUsingHeaderPage(HeaderPage headerPage, String testPassword) throws IOException {
         boolean result = false;
         try {
-            if (AbstractHeaderPageOnlyPasswordChecker.checkPassword(headerPage, testPassword)) {
+            if (AbstractHeaderPagePasswordChecker.checkPassword(headerPage, testPassword)) {
                 if (log.isDebugEnabled()) {
                     log.debug("OK password=" + testPassword);
                 }

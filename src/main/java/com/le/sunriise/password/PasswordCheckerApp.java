@@ -78,7 +78,12 @@ public class PasswordCheckerApp {
     private JTextField textField_2;
 
     private AtomicBoolean running = new AtomicBoolean(false);
-    private CheckUsingDictionary checker = null;
+    private CheckDictionary checker = null;
+    private JTextField textField_3;
+    private JTextField textField_4;
+    private JTextField textField_5;
+    private JTextField textField_6;
+    private JTextField textField_7;
 
     private final class StartSearchAction implements ActionListener {
         private JButton button;
@@ -159,7 +164,7 @@ public class PasswordCheckerApp {
             lastCheckerThreads = dataModel.getThreads();
             if (checker == null) {
                 log.info("Created new checker, threads=" + lastCheckerThreads);
-                checker = new CheckUsingDictionary(lastCheckerThreads);
+                checker = new CheckDictionary(lastCheckerThreads);
             }
             Runnable command = new Runnable() {
                 @Override
@@ -352,10 +357,10 @@ public class PasswordCheckerApp {
 
         JTabbedPane tabbedPane = new JTabbedPane(SwingConstants.TOP);
         frame.getContentPane().add(tabbedPane, BorderLayout.CENTER);
-        JPanel view = new JPanel();
-        tabbedPane.addTab("Word list", null, view, null);
+        JPanel wordListView = new JPanel();
+        tabbedPane.addTab("Word list", null, wordListView, null);
 
-        view.setLayout(new FormLayout(new ColumnSpec[] { FormFactory.UNRELATED_GAP_COLSPEC, FormFactory.DEFAULT_COLSPEC,
+        wordListView.setLayout(new FormLayout(new ColumnSpec[] { FormFactory.UNRELATED_GAP_COLSPEC, FormFactory.DEFAULT_COLSPEC,
                 FormFactory.LABEL_COMPONENT_GAP_COLSPEC, ColumnSpec.decode("default:grow"), FormFactory.RELATED_GAP_COLSPEC,
                 FormFactory.DEFAULT_COLSPEC, FormFactory.UNRELATED_GAP_COLSPEC, }, new RowSpec[] { FormFactory.RELATED_GAP_ROWSPEC,
                 FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
@@ -364,54 +369,116 @@ public class PasswordCheckerApp {
 
         JLabel lblNewLabel = new JLabel("Money file");
         lblNewLabel.setHorizontalAlignment(SwingConstants.TRAILING);
-        view.add(lblNewLabel, "2, 2, right, default");
+        wordListView.add(lblNewLabel, "2, 2, right, default");
 
         textField = new JTextField();
-        view.add(textField, "4, 2, fill, default");
+        wordListView.add(textField, "4, 2, fill, default");
         textField.setColumns(10);
 
         JButton btnNewButton = new JButton("Open ...");
         btnNewButton.addActionListener(new OpenMnyAction(textField));
-        view.add(btnNewButton, "6, 2");
+        wordListView.add(btnNewButton, "6, 2");
 
         JLabel lblNewLabel_1 = new JLabel("Word list");
         lblNewLabel_1.setHorizontalAlignment(SwingConstants.TRAILING);
-        view.add(lblNewLabel_1, "2, 4, right, default");
+        wordListView.add(lblNewLabel_1, "2, 4, right, default");
 
         textField_1 = new JTextField();
-        view.add(textField_1, "4, 4, fill, default");
+        wordListView.add(textField_1, "4, 4, fill, default");
         textField_1.setColumns(10);
 
         JButton btnNewButton_1 = new JButton("Open ...");
         btnNewButton_1.addActionListener(new OpenWordListAction(textField_1));
-        view.add(btnNewButton_1, "6, 4");
+        wordListView.add(btnNewButton_1, "6, 4");
 
         JLabel lblNewLabel_2 = new JLabel("Threads");
         lblNewLabel_2.setHorizontalAlignment(SwingConstants.TRAILING);
-        view.add(lblNewLabel_2, "2, 6");
+        wordListView.add(lblNewLabel_2, "2, 6");
 
         spinner = new JSpinner();
         spinner.setModel(new SpinnerNumberModel(new Integer(1), new Integer(1), null, new Integer(1)));
-        view.add(spinner, "4, 6");
+        wordListView.add(spinner, "4, 6");
 
         JLabel lblNewLabel_3 = new JLabel("Status");
         lblNewLabel_3.setHorizontalAlignment(SwingConstants.TRAILING);
-        view.add(lblNewLabel_3, "2, 8, right, default");
+        wordListView.add(lblNewLabel_3, "2, 8, right, default");
 
         textField_2 = new JTextField();
         textField_2.setEditable(false);
-        view.add(textField_2, "4, 8, fill, default");
+        wordListView.add(textField_2, "4, 8, fill, default");
         textField_2.setColumns(10);
 
         JButton btnNewButton_2 = new JButton("Start");
         btnNewButton_2.addActionListener(new StartSearchAction(btnNewButton_2));
-        view.add(btnNewButton_2, "6, 10");
+        wordListView.add(btnNewButton_2, "6, 10");
 
-        JPanel panel = new JPanel();
-        tabbedPane.addTab("Brute force", null, panel, null);
+        JPanel bruteForceView = new JPanel();
+        tabbedPane.addTab("Brute force", null, bruteForceView, null);
+        bruteForceView.setLayout(new FormLayout(new ColumnSpec[] {
+                FormFactory.UNRELATED_GAP_COLSPEC,
+                FormFactory.DEFAULT_COLSPEC,
+                FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
+                ColumnSpec.decode("default:grow"),
+                FormFactory.RELATED_GAP_COLSPEC,
+                FormFactory.DEFAULT_COLSPEC,
+                FormFactory.UNRELATED_GAP_COLSPEC,},
+            new RowSpec[] {
+                FormFactory.RELATED_GAP_ROWSPEC,
+                FormFactory.DEFAULT_ROWSPEC,
+                FormFactory.RELATED_GAP_ROWSPEC,
+                FormFactory.DEFAULT_ROWSPEC,
+                FormFactory.RELATED_GAP_ROWSPEC,
+                FormFactory.DEFAULT_ROWSPEC,
+                FormFactory.RELATED_GAP_ROWSPEC,
+                FormFactory.DEFAULT_ROWSPEC,
+                FormFactory.RELATED_GAP_ROWSPEC,
+                FormFactory.DEFAULT_ROWSPEC,
+                FormFactory.RELATED_GAP_ROWSPEC,
+                FormFactory.DEFAULT_ROWSPEC,}));
         
-        JLabel lblNewLabel_4 = new JLabel("COMING SOON");
-        panel.add(lblNewLabel_4);
+        JLabel lblNewLabel_4 = new JLabel("Money file");
+        bruteForceView.add(lblNewLabel_4, "2, 2, right, default");
+        
+        textField_3 = new JTextField();
+        bruteForceView.add(textField_3, "4, 2, fill, default");
+        textField_3.setColumns(10);
+        
+        JButton btnNewButton_3 = new JButton("Open ...");
+        bruteForceView.add(btnNewButton_3, "6, 2");
+        
+        JLabel lblNewLabel_5 = new JLabel("Alphabets");
+        bruteForceView.add(lblNewLabel_5, "2, 4, right, default");
+        
+        textField_4 = new JTextField();
+        bruteForceView.add(textField_4, "4, 4, fill, default");
+        textField_4.setColumns(10);
+        
+        JLabel lblNewLabel_6 = new JLabel("Mask");
+        bruteForceView.add(lblNewLabel_6, "2, 6, right, default");
+        
+        textField_5 = new JTextField();
+        bruteForceView.add(textField_5, "4, 6, fill, default");
+        textField_5.setColumns(10);
+        
+        JLabel lblNewLabel_8 = new JLabel("Context");
+        bruteForceView.add(lblNewLabel_8, "2, 8, right, default");
+        
+        textField_7 = new JTextField();
+        bruteForceView.add(textField_7, "4, 8, fill, default");
+        textField_7.setColumns(10);
+        
+        JButton btnNewButton_5 = new JButton("Open ...");
+        bruteForceView.add(btnNewButton_5, "6, 8");
+        
+        JLabel lblNewLabel_7 = new JLabel("Status");
+        bruteForceView.add(lblNewLabel_7, "2, 10, right, default");
+        
+        textField_6 = new JTextField();
+        bruteForceView.add(textField_6, "4, 10, fill, default");
+        textField_6.setColumns(10);
+        
+        JButton btnNewButton_4 = new JButton("Start");
+        bruteForceView.add(btnNewButton_4, "6, 12");
         initDataBindings();
     }
 

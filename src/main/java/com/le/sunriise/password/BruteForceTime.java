@@ -29,7 +29,7 @@ public class BruteForceTime {
      * @param args
      */
     public static void main(String[] args) {
-        int alphabetsLenghth = 26;
+        int alphabetsLen = 26;
         String message = null;
         long ratePerSecond = 140000;
 
@@ -40,37 +40,41 @@ public class BruteForceTime {
 
         log.info("ratePerSecond=" + ratePerSecond);
 
-        alphabetsLenghth = 26;
-        message = "Just lower OR upper case ... alphabetsLenghth=" + alphabetsLenghth;
-        calc(alphabetsLenghth, message, ratePerSecond);
+        alphabetsLen = 26;
+        message = "Just lower OR upper case ... alphabetsLen=" + alphabetsLen;
+        calc(alphabetsLen, message, ratePerSecond);
 
-        alphabetsLenghth = 26 + 10;
-        message = "Just lower OR upper case + digits ... alphabetsLenghth=" + alphabetsLenghth;
-        calc(alphabetsLenghth, message, ratePerSecond);
+        alphabetsLen = 26 + 10;
+        message = "Just lower OR upper case + digits ... alphabetsLen=" + alphabetsLen;
+        calc(alphabetsLen, message, ratePerSecond);
 
-        alphabetsLenghth = 26 + 10 + 3;
-        message = "Just lower OR upper case + digits + 3 special chars ... alphabetsLenghth=" + alphabetsLenghth;
-        calc(alphabetsLenghth, message, ratePerSecond);
+        alphabetsLen = 26 + 10 + 3;
+        message = "Just lower OR upper case + digits + 3 special chars ... alphabetsLen=" + alphabetsLen;
+        calc(alphabetsLen, message, ratePerSecond);
 
-        alphabetsLenghth = 26 * 2;
-        message = "Both lower AND upper case ... alphabetsLenghth=" + alphabetsLenghth;
-        calc(alphabetsLenghth, message, ratePerSecond);
+        alphabetsLen = 26 * 2;
+        message = "Both lower AND upper case ... alphabetsLen=" + alphabetsLen;
+        calc(alphabetsLen, message, ratePerSecond);
 
-        alphabetsLenghth = (26 * 2) + 10;
-        message = "Both lower AND upper case + digits ... alphabetsLenghth=" + alphabetsLenghth;
-        calc(alphabetsLenghth, message, ratePerSecond);
+        alphabetsLen = GenBruteForce.ALPHABET_US_KEYBOARD_MNY.length;
+        message = "Just lower OR upper case + the rest of US keyboard ... alphabetsLen=" + alphabetsLen;
+        calc(alphabetsLen, message, ratePerSecond);
+        
+        alphabetsLen = (26 * 2) + 10;
+        message = "Both lower AND upper case + digits ... alphabetsLen=" + alphabetsLen;
+        calc(alphabetsLen, message, ratePerSecond);
 
-        alphabetsLenghth = (26 * 2) + 10 + 3;
-        message = "Both lower AND upper case + digits + 3 special chars ... alphabetsLenghth=" + alphabetsLenghth;
-        calc(alphabetsLenghth, message, ratePerSecond);
+        alphabetsLen = (26 * 2) + 10 + 3;
+        message = "Both lower AND upper case + digits + 3 special chars ... alphabetsLen=" + alphabetsLen;
+        calc(alphabetsLen, message, ratePerSecond);
 
-        alphabetsLenghth = 92;
-        message = "us-keyboard ... alphabetsLenghth=" + alphabetsLenghth;
-        calc(alphabetsLenghth, message, ratePerSecond);
+        alphabetsLen = 92;
+        message = "us-keyboard ... alphabetsLen=" + alphabetsLen;
+        calc(alphabetsLen, message, ratePerSecond);
 
     }
 
-    private static void calc(int alphabetsLenghth, String message, long ratePerSecond) {
+    private static void calc(int alphabetsLen, String message, long ratePerSecond) {
         log.info("#");
         log.info(message);
         int passwordLength;
@@ -79,8 +83,8 @@ public class BruteForceTime {
         int max = 8;
         for (int i = start; i <= max; i++) {
             passwordLength = i;
-            BigInteger count = GenBruteForce.calculateExpected(passwordLength, alphabetsLenghth);
-            log.info(passwordLength + ", " + alphabetsLenghth + ", " + count + ", " + calcHowLong(count, ratePerSecond));
+            BigInteger count = GenBruteForce.calculateExpected(passwordLength, alphabetsLen);
+            log.info(passwordLength + ", " + alphabetsLen + ", " + count + ", " + calcHowLong(count, ratePerSecond));
         }
     }
 

@@ -27,7 +27,7 @@ import junit.framework.Assert;
 import org.junit.Test;
 
 import com.le.sunriise.password.HeaderPage;
-import com.le.sunriise.password.AbstractHeaderPageOnlyPasswordChecker;
+import com.le.sunriise.password.AbstractHeaderPagePasswordChecker;
 
 public class CheckPasswordTest {
 
@@ -61,10 +61,10 @@ public class CheckPasswordTest {
         Assert.assertEquals(true, headerPage.isNewEncryption());
         Assert.assertEquals(true, headerPage.isUseSha1());
         password = "Test12345";
-        matched = AbstractHeaderPageOnlyPasswordChecker.checkPassword(headerPage, password);
+        matched = AbstractHeaderPagePasswordChecker.checkPassword(headerPage, password);
         Assert.assertEquals(true, matched);
         password = "TEST12345";
-        matched = AbstractHeaderPageOnlyPasswordChecker.checkPassword(headerPage, password);
+        matched = AbstractHeaderPagePasswordChecker.checkPassword(headerPage, password);
         Assert.assertEquals(true, matched);
         
         dbFile = new File("src/test/data/sunset-sample-pwd.mny");
@@ -80,47 +80,47 @@ public class CheckPasswordTest {
         boolean matched = false;
 
         password = null;
-        matched = AbstractHeaderPageOnlyPasswordChecker.checkPassword(headerPage, password);
+        matched = AbstractHeaderPagePasswordChecker.checkPassword(headerPage, password);
         Assert.assertEquals(false, matched);
 
         password = "";
-        matched = AbstractHeaderPageOnlyPasswordChecker.checkPassword(headerPage, password);
+        matched = AbstractHeaderPagePasswordChecker.checkPassword(headerPage, password);
         Assert.assertEquals(false, matched);
 
         password = "1";
-        matched = AbstractHeaderPageOnlyPasswordChecker.checkPassword(headerPage, password);
+        matched = AbstractHeaderPagePasswordChecker.checkPassword(headerPage, password);
         Assert.assertEquals(false, matched);
 
         password = "12345";
-        matched = AbstractHeaderPageOnlyPasswordChecker.checkPassword(headerPage, password);
+        matched = AbstractHeaderPagePasswordChecker.checkPassword(headerPage, password);
         Assert.assertEquals(false, matched);
 
         password = "123456";
-        matched = AbstractHeaderPageOnlyPasswordChecker.checkPassword(headerPage, password);
+        matched = AbstractHeaderPagePasswordChecker.checkPassword(headerPage, password);
         Assert.assertEquals(false, matched);
 
         password = "123@abc!";
-        matched = AbstractHeaderPageOnlyPasswordChecker.checkPassword(headerPage, password);
+        matched = AbstractHeaderPagePasswordChecker.checkPassword(headerPage, password);
         Assert.assertEquals(true, matched);
 
         password = "123@Abc!";
-        matched = AbstractHeaderPageOnlyPasswordChecker.checkPassword(headerPage, password);
+        matched = AbstractHeaderPagePasswordChecker.checkPassword(headerPage, password);
         Assert.assertEquals(true, matched);
 
         password = "123@aBc!";
-        matched = AbstractHeaderPageOnlyPasswordChecker.checkPassword(headerPage, password);
+        matched = AbstractHeaderPagePasswordChecker.checkPassword(headerPage, password);
         Assert.assertEquals(true, matched);
 
         password = "123@abC!";
-        matched = AbstractHeaderPageOnlyPasswordChecker.checkPassword(headerPage, password);
+        matched = AbstractHeaderPagePasswordChecker.checkPassword(headerPage, password);
         Assert.assertEquals(true, matched);
 
         password = "123@ABC!";
-        matched = AbstractHeaderPageOnlyPasswordChecker.checkPassword(headerPage, password);
+        matched = AbstractHeaderPagePasswordChecker.checkPassword(headerPage, password);
         Assert.assertEquals(true, matched);
 
         password = "123@abcd!";
-        matched = AbstractHeaderPageOnlyPasswordChecker.checkPassword(headerPage, password);
+        matched = AbstractHeaderPagePasswordChecker.checkPassword(headerPage, password);
         Assert.assertEquals(false, matched);
     }
 }

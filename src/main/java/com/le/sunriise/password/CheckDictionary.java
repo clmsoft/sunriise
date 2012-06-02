@@ -42,8 +42,8 @@ import org.apache.log4j.Logger;
  * @author hle
  *
  */
-public class CheckUsingDictionary {
-    private static final Logger log = Logger.getLogger(CheckUsingDictionary.class);
+public class CheckDictionary {
+    private static final Logger log = Logger.getLogger(CheckDictionary.class);
 
     private boolean trim = true;
 
@@ -59,7 +59,7 @@ public class CheckUsingDictionary {
      * 
      * @param threads is number of threads to run
      */
-    public CheckUsingDictionary(int threads) {
+    public CheckDictionary(int threads) {
         super();
         pool = Executors.newFixedThreadPool(threads);
     }
@@ -67,7 +67,7 @@ public class CheckUsingDictionary {
     /**
      * Default number of threads is 1.
      */
-    public CheckUsingDictionary() {
+    public CheckDictionary() {
         this(1);
     }
 

@@ -30,8 +30,8 @@ import org.apache.poi.util.HexDump;
 import com.healthmarketscience.jackcess.ByteUtil;
 import com.healthmarketscience.jackcess.JetFormat;
 
-public abstract class AbstractHeaderPageOnlyPasswordChecker {
-    private static final Logger log = Logger.getLogger(AbstractHeaderPageOnlyPasswordChecker.class);
+public abstract class AbstractHeaderPagePasswordChecker {
+    private static final Logger log = Logger.getLogger(AbstractHeaderPagePasswordChecker.class);
 
     private static final int PASSWORD_LENGTH = 0x28;
     private static final int PASSWORD_DIGEST_LENGTH = 0x10;
@@ -40,13 +40,13 @@ public abstract class AbstractHeaderPageOnlyPasswordChecker {
 
     public static boolean checkPassword(HeaderPage headerPage, String testPassword) {
         boolean matched = false;
-        AbstractHeaderPageOnlyPasswordChecker checker = null;
+        AbstractHeaderPagePasswordChecker checker = null;
         boolean useBouncycastle = true;
         try {
             if (useBouncycastle) {
-                checker = new HeaderPageOnlyPasswordChecker(headerPage);
+                checker = new HeaderPagePasswordChecker(headerPage);
             } else {
-                checker = new JDKHeaderPageOnlyPasswordChecker(headerPage);
+                checker = new JDKHeaderPagePasswordChecker(headerPage);
             }
             if (log.isDebugEnabled()) {
                 JetFormat jetFormat = checker.getJetFormat();
@@ -81,7 +81,7 @@ public abstract class AbstractHeaderPageOnlyPasswordChecker {
         return getHeaderPage().getJetFormat();
     }
 
-    public AbstractHeaderPageOnlyPasswordChecker(HeaderPage headerPage) throws IOException {
+    public AbstractHeaderPagePasswordChecker(HeaderPage headerPage) throws IOException {
         super();
         this.headerPage = headerPage;
     }

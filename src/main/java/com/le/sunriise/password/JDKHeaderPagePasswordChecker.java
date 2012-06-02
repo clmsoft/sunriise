@@ -32,10 +32,10 @@ import javax.crypto.spec.SecretKeySpec;
 
 import org.apache.log4j.Logger;
 
-public class JDKHeaderPageOnlyPasswordChecker extends AbstractHeaderPageOnlyPasswordChecker {
-    private static final Logger log = Logger.getLogger(JDKHeaderPageOnlyPasswordChecker.class);
+public class JDKHeaderPagePasswordChecker extends AbstractHeaderPagePasswordChecker {
+    private static final Logger log = Logger.getLogger(JDKHeaderPagePasswordChecker.class);
 
-    public JDKHeaderPageOnlyPasswordChecker(HeaderPage headerPage) throws IOException {
+    public JDKHeaderPagePasswordChecker(HeaderPage headerPage) throws IOException {
         super(headerPage);
     }
 

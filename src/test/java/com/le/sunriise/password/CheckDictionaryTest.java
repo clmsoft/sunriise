@@ -29,10 +29,10 @@ import junit.framework.Assert;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
-public class CheckUsingDictionaryTest {
-    private static final Logger log = Logger.getLogger(CheckUsingDictionaryTest.class);
+public class CheckDictionaryTest {
+    private static final Logger log = Logger.getLogger(CheckDictionaryTest.class);
 
-    private final class JustCountWorker extends CheckUsingDictionary {
+    private final class JustCountWorker extends CheckDictionary {
         @Override
         public Callable<String> createWorker(final HeaderPage headerPage, final String testPassword, final AtomicLong counter) {
             Callable<String> worker = null;
@@ -122,7 +122,7 @@ public class CheckUsingDictionaryTest {
     private void checkCounter(String dbFileName, String pathName, long expected) throws IOException {
         HeaderPage headerPage;
         File path;
-        CheckUsingDictionary checker = null;
+        CheckDictionary checker = null;
         try {
             checker = new JustCountWorker();
             File dbFile = new File(dbFileName);
@@ -143,9 +143,9 @@ public class CheckUsingDictionaryTest {
     private void checkPassword(String dbFileName, String pathName, String expected) throws IOException {
         HeaderPage headerPage;
         File path;
-        CheckUsingDictionary checker = null;
+        CheckDictionary checker = null;
         try {
-            checker = new CheckUsingDictionary();
+            checker = new CheckDictionary();
             File dbFile = new File(dbFileName);
             headerPage = new HeaderPage(dbFile);
             path = new File(pathName);

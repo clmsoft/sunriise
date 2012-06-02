@@ -49,7 +49,7 @@ public class CheckPasswordsCmd {
                 log.warn(e);
             }
         } else {
-            Class<CheckUsingDictionary> clz = CheckUsingDictionary.class;
+            Class<CheckDictionary> clz = CheckDictionary.class;
             System.out.println("Usage: java " + clz.getName() + " file.mny {passwordsFile.txt | path} threads");
             System.exit(1);
         }
@@ -72,10 +72,10 @@ public class CheckPasswordsCmd {
         log.info("threads=" + threads);
 
         String matchedPassword = null;
-        CheckUsingDictionary checker = null;
+        CheckDictionary checker = null;
         StopWatch stopWatch = new StopWatch();
         try {
-            checker = new CheckUsingDictionary(threads);
+            checker = new CheckDictionary(threads);
             HeaderPage headerPage = new HeaderPage(dbFile);
             matchedPassword = checker.check(headerPage, path);
             log.info("Have checked " + checker.getCounter().get());

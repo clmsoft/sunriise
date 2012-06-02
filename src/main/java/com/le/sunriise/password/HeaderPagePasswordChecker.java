@@ -28,12 +28,12 @@ import org.bouncycastle.crypto.digests.SHA1Digest;
 import org.bouncycastle.crypto.engines.RC4Engine;
 import org.bouncycastle.crypto.params.KeyParameter;
 
-public class HeaderPageOnlyPasswordChecker extends AbstractHeaderPageOnlyPasswordChecker {
-    private static final Logger log = Logger.getLogger(HeaderPageOnlyPasswordChecker.class);
+public class HeaderPagePasswordChecker extends AbstractHeaderPagePasswordChecker {
+    private static final Logger log = Logger.getLogger(HeaderPagePasswordChecker.class);
 
     private RC4Engine engine;
 
-    public HeaderPageOnlyPasswordChecker(HeaderPage headerPage) throws IOException {
+    public HeaderPagePasswordChecker(HeaderPage headerPage) throws IOException {
         super(headerPage);
 
     }
@@ -91,7 +91,7 @@ public class HeaderPageOnlyPasswordChecker extends AbstractHeaderPageOnlyPasswor
             fileName = args[0];
             password = args[1];
         } else {
-            Class<AbstractHeaderPageOnlyPasswordChecker> clz = AbstractHeaderPageOnlyPasswordChecker.class;
+            Class<AbstractHeaderPagePasswordChecker> clz = AbstractHeaderPagePasswordChecker.class;
             System.out.println("Usage: java " + clz.getName() + " samples.mny [password]");
             System.exit(1);
         }

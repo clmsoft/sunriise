@@ -40,23 +40,15 @@ public class GenBruteForce {
     public static char[] ALPHABET_US_KEYBOARD = createUSKeyboardAlphabets();
     public static char[] ALPHABET_US_KEYBOARD_MNY = createUSKeyboardMnyAlphabets();
 
-    private final char[] alphabets;
-
-    private final int passwordLength;
-
-    private char[] buffer;
-
-    private char[] mask;
-
-    private int[] currentCursorIndex;
-
-    private String currentResult;
-
     private boolean terminate = false;
 
     private char maskSkipChar = DEFAULT_MASK_SKIP_CHAR;
 
     private char maskWildChar = DEFAULT_MASK_WILD_CHAR;
+
+    private GenBruteForceContext context;
+
+    private String currentResult;
 
     private static char[] createUSKeyboardMnyAlphabets() {
         return appendCharArrays(ALPHABET_UPPERS, ALPHABET_DIGITS, ALPHABET_SPECIAL_CHARS_1, ALPHABET_SPECIAL_CHARS_2,
@@ -89,27 +81,6 @@ public class GenBruteForce {
         return results;
     }
 
-    public GenBruteForce(int passwordLength, char[] mask, char[] alphabets) {
-        if (passwordLength < 0) {
-            if (mask != null) {
-                passwordLength = mask.length;
-            }
-        }
-        this.passwordLength = passwordLength;
-        this.mask = mask;
-        this.alphabets = alphabets;
-
-        buffer = new char[this.passwordLength + 1];
-        for (int i = 0; i < buffer.length; i++) {
-            buffer[i] = '\0';
-        }
-
-        currentCursorIndex = new int[this.passwordLength];
-        for (int i = 0; i < currentCursorIndex.length; i++) {
-            currentCursorIndex[i] = -1;
-        }
-    }
-
     public static char[] genChars(char start, char end) {
         StringBuilder sb = new StringBuilder();
         for (char c = start; c <= end; c++) {
@@ -118,8 +89,12 @@ public class GenBruteForce {
         return sb.toString().toCharArray();
     }
 
+    public GenBruteForce(int passwordLength, char[] mask, char[] alphabets) {
+        this.context = new GenBruteForceContext(passwordLength, mask, alphabets);
+    }
+
     public long generate() {
-        return generateString(buffer, alphabets, mask);
+        return generateString(context.getBuffer(), context.getAlphabets(), context.getMask());
     }
 
     private long generateString(char[] buffer, char[] alphabets, char[] mask) {
@@ -127,72 +102,103 @@ public class GenBruteForce {
         int passwordLength = 0;
         int alphabetsLen = alphabets.length;
         if (!terminate) {
-            count += generateString(buffer, buffer.length, mask, passwordLength, alphabets, alphabetsLen);
+            GenBruteForceContext newContext = new GenBruteForceContext(buffer, buffer.length, mask, passwordLength, alphabets,
+                    alphabetsLen);
+            newContext.setCurrentCursorIndex(context.getCurrentCursorIndex());
+            count += generateString(newContext);
         } else {
             log.warn("Terminate early at passwordLength=" + passwordLength + ", alphabetsLen=" + alphabetsLen);
         }
         return count;
     }
 
-    private long generateString(char[] buffer, int bufferLen, char[] mask, int cursor, char[] alphabets, int alphabetsLen) {
+    private long generateString(GenBruteForceContext context) {
+        this.setContext(context);
+
         long count = 0;
 
         // cursor is zero-base index
-        if (cursor >= (bufferLen - 1)) {
+        if (context.getCursor() >= (context.getBufferLen() - 1)) {
             // done, nothing more to do
             return count;
         }
 
         char maskChar = maskWildChar;
-        if (mask == null) {
+        if (context.getMask() == null) {
             maskChar = maskWildChar;
         } else {
-            maskChar = mask[cursor];
+            maskChar = context.getMask()[context.getCursor()];
         }
 
         if (isWildChar(maskChar) || isSkipChar(maskChar)) {
-            // loop through the alphabets
-            for (int i = 0; i < alphabetsLen; i++) {
-                char c = alphabets[i];
-                buffer[cursor] = c;
-                currentCursorIndex[cursor] = i;
-                if (isSkipChar(maskChar)) {
-                    // TODO: no need to check
-                } else {
-                    currentResult = new String(buffer, 0, cursor + 1);
-                    notifyResult(currentResult);
-                }
-                count++;
-                if (!terminate) {
-                    long n = generateString(buffer, bufferLen, mask, cursor + 1, alphabets, alphabetsLen);
-                    count += n;
-                } else {
-                    log.warn("Terminate early at cursor=" + cursor + ", alphabet=" + c + ", alphabetLen=" + alphabetsLen);
-                    break;
-                }
-            }
+            count = handleSpecialCharInMask(context, maskChar, count);
         } else {
-            if (log.isDebugEnabled()) {
-                log.debug("Found known char=" + maskChar + ", cursor=" + cursor);
-            }
-            currentCursorIndex[cursor] = alphabetsLen - 1;
-            buffer[cursor] = maskChar;
-            currentResult = new String(buffer, 0, cursor + 1);
-            notifyResult(currentResult);
-            count++;
-            if (!terminate) {
-                long n = generateString(buffer, bufferLen, mask, cursor + 1, alphabets, alphabetsLen);
-                count += n;
-            } else {
-                log.warn("Terminate early at cursor=" + cursor + ", alphabet=" + maskChar + ", alphabetsLen=" + alphabetsLen);
-            }
+            count = handleKnownCharInMask(context, maskChar, count);
         }
 
         // for debug - want to see the start of the loop
-        if (cursor == 1) {
+        if (context.getCursor() == 1) {
             if (log.isDebugEnabled()) {
-                log.debug("count=" + count + ", cursor=" + cursor + ", alphabetLen=" + alphabetsLen);
+                log.debug("count=" + count + ", cursor=" + context.getCursor() + ", alphabetLen=" + context.getAlphabetsLen());
             }
+        }
+
+        return count;
+    }
+
+    private long handleSpecialCharInMask(GenBruteForceContext context, char maskChar, long count) {
+        // loop through the alphabets
+        for (int i = 0; i < context.getAlphabetsLen(); i++) {
+            char c = context.getAlphabets()[i];
+
+            context.getBuffer()[context.getCursor()] = c;
+            context.getCurrentCursorIndex()[context.getCursor()] = i;
+
+            if (isSkipChar(maskChar)) {
+                // TODO: no need to check
+            } else {
+                currentResult = new String(context.getBuffer(), 0, (context.getCursor() + 1));
+                notifyResult(currentResult);
+            }
+
+            count++;
+
+            if (!terminate) {
+                GenBruteForceContext newContext = new GenBruteForceContext(context.getBuffer(), context.getBufferLen(),
+                        context.getMask(), context.getCursor() + 1, context.getAlphabets(), context.getAlphabetsLen());
+                newContext.setCurrentCursorIndex(context.getCurrentCursorIndex());
+                long n = generateString(newContext);
+                count += n;
+            } else {
+                log.warn("Terminate early at cursor=" + context.getCursor() + ", alphabet=" + c + ", alphabetLen="
+                        + context.getAlphabetsLen());
+                break;
+            }
+        }
+        return count;
+    }
+
+    private long handleKnownCharInMask(GenBruteForceContext context, char maskChar, long count) {
+        if (log.isDebugEnabled()) {
+            log.debug("Found known char=" + maskChar + ", cursor=" + context.getCursor());
+        }
+
+        context.getCurrentCursorIndex()[context.getCursor()] = context.getAlphabetsLen() - 1;
+        context.getBuffer()[context.getCursor()] = maskChar;
+
+        currentResult = new String(context.getBuffer(), 0, (context.getCursor() + 1));
+        notifyResult(currentResult);
+        count++;
+
+        if (!terminate) {
+            GenBruteForceContext newContext = new GenBruteForceContext(context.getBuffer(), context.getBufferLen(),
+                    context.getMask(), context.getCursor() + 1, context.getAlphabets(), context.getAlphabetsLen());
+            newContext.setCurrentCursorIndex(context.getCurrentCursorIndex());
+            long n = generateString(newContext);
+            count += n;
+        } else {
+            log.warn("Terminate early at cursor=" + context.getCursor() + ", alphabet=" + maskChar + ", alphabetsLen="
+                    + context.getAlphabetsLen());
         }
 
         return count;
@@ -252,16 +258,8 @@ public class GenBruteForce {
         this.terminate = terminate;
     }
 
-    public char[] getBuffer() {
-        return buffer;
-    }
-
     public int[] getCurrentCursorIndex() {
-        return currentCursorIndex;
-    }
-
-    public String getCurrentResult() {
-        return currentResult;
+        return context.getCurrentCursorIndex();
     }
 
     public char getMaskSkipChar() {
@@ -293,6 +291,18 @@ public class GenBruteForce {
 
         log.info("actual=" + actual + ", expected=" + expected);
 
+    }
+
+    public GenBruteForceContext getContext() {
+        return context;
+    }
+
+    public void setContext(GenBruteForceContext context) {
+        this.context = context;
+    }
+
+    public String getCurrentResult() {
+        return currentResult;
     }
 
 }

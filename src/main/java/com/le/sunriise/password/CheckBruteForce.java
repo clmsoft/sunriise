@@ -41,8 +41,11 @@ public class CheckBruteForce extends GenBruteForce {
     private String password = null;
     private BigInteger maxCount;
     private StopWatch stopWatch;
+
     private ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(2);
     private ScheduledFuture<?> periodicStatusFuture;
+
+    private BruteForceStat stat = new BruteForceStat();
 
     private final class StatusTask implements Runnable {
         @Override
@@ -57,11 +60,16 @@ public class CheckBruteForce extends GenBruteForce {
             } else {
                 percentage = BigInteger.ZERO;
             }
+            stat.setCount(aCount);
+            stat.setPercentage(percentage);
             log.info("Tested " + count + " strings" + " (" + percentage + "% completed" + ", elapsed=" + duration.toString() + ")");
             if (delta > 0) {
                 BigInteger seconds = BigInteger.valueOf(delta).divide(ONE_THOUSAND);
+                stat.setSeconds(seconds);
+                stat.setCurrentResult(getCurrentResult());
+                stat.setCurrentCursorIndex(getCurrentCursorIndex());
                 if (seconds.longValue() > 0) {
-                    logStatus(aCount, seconds);
+                    logStatus(stat);
                 }
             }
 
@@ -72,10 +80,10 @@ public class CheckBruteForce extends GenBruteForce {
             }
         }
 
-        private void logStatus(BigInteger aCount, BigInteger seconds) {
-            log.info("  Rate=" + aCount.divide(seconds) + "/sec");
-            log.info("    currentResult=" + getCurrentResult());
-            log.info("    currentCursorIndex=" + printIntArray(getCurrentCursorIndex()));
+        private void logStatus(BruteForceStat stat) {
+            log.info("  Rate=" + stat.getCount().divide(stat.getSeconds()) + "/sec");
+            log.info("    currentResult=" + stat.getCurrentResult());
+            log.info("    currentCursorIndex=" + printIntArray(stat.getCurrentCursorIndex()));
         }
     }
 
@@ -128,7 +136,7 @@ public class CheckBruteForce extends GenBruteForce {
 
     private boolean checkPassword(String testPassword) {
         boolean matched = false;
-        matched = AbstractHeaderPageOnlyPasswordChecker.checkPassword(headerPage, testPassword);
+        matched = AbstractHeaderPagePasswordChecker.checkPassword(headerPage, testPassword);
         return matched;
     }
 
@@ -168,6 +176,10 @@ public class CheckBruteForce extends GenBruteForce {
         if (currentCursorIndex == null) {
             return "";
         }
+        char[] alphabets = null;
+        if (getContext() != null) {
+            alphabets = getContext().getAlphabets();
+        }
 
         StringBuilder sb = new StringBuilder();
 
@@ -177,7 +189,12 @@ public class CheckBruteForce extends GenBruteForce {
                 if (i > 0) {
                     sb.append(", ");
                 }
-                sb.append("" + currentCursorIndex[i]);
+                int index = currentCursorIndex[i];
+                sb.append("" + index);
+
+                if ((alphabets != null) && (index < alphabets.length)) {
+                    sb.append(" (" + alphabets[index] + ")");
+                }
             }
         } finally {
             sb.append("]");
