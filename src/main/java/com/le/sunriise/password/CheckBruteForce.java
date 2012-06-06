@@ -18,6 +18,8 @@
  *******************************************************************************/
 package com.le.sunriise.password;
 
+import java.io.File;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -26,6 +28,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.log4j.Logger;
+import org.codehaus.jackson.JsonGenerationException;
+import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jackson.map.ObjectMapper;
 
 import com.le.sunriise.StopWatch;
 
@@ -42,10 +47,12 @@ public class CheckBruteForce extends GenBruteForce {
     private BigInteger maxCount;
     private StopWatch stopWatch;
 
-    private ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(2);
+    private ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(3);
     private ScheduledFuture<?> periodicStatusFuture;
 
     private BruteForceStat stat = new BruteForceStat();
+
+    private boolean writeContextFile = true;
 
     private final class StatusTask implements Runnable {
         @Override
@@ -73,6 +80,27 @@ public class CheckBruteForce extends GenBruteForce {
                 }
             }
 
+            if (writeContextFile) {
+                GenBruteForceContext context = getContext();
+                if (context != null) {
+                    int cursor = context.getCursor();
+
+                    File file = new File("bruteForceContext.json");
+                    ObjectMapper mapper = new ObjectMapper();
+                    try {
+                        mapper.writeValue(file, context);
+                    } catch (JsonGenerationException e) {
+                        log.warn(e);
+                    } catch (JsonMappingException e) {
+                        log.warn(e);
+                    } catch (IOException e) {
+                        log.warn(e);
+                    } finally {
+                        log.info("Wrote context file=" + file + ", cursor=" + cursor);
+                    }
+                }
+            }
+
             if (isTerminate()) {
                 if (periodicStatusFuture != null) {
                     periodicStatusFuture.cancel(true);
@@ -83,7 +111,11 @@ public class CheckBruteForce extends GenBruteForce {
         private void logStatus(BruteForceStat stat) {
             log.info("  Rate=" + stat.getCount().divide(stat.getSeconds()) + "/sec");
             log.info("    currentResult=" + stat.getCurrentResult());
-            log.info("    currentCursorIndex=" + printIntArray(stat.getCurrentCursorIndex()));
+            char[] alphabets = null;
+            if (getContext() != null) {
+                alphabets = getContext().getAlphabets();
+            }
+            log.info("    currentCursorIndex=" + printIntArray(stat.getCurrentCursorIndex(), alphabets));
         }
     }
 
@@ -104,6 +136,12 @@ public class CheckBruteForce extends GenBruteForce {
         super(passwordLength, mask, alphabets);
         this.headerPage = headerPage;
         maxCount = GenBruteForce.calculateExpected(passwordLength, alphabets.length);
+    }
+
+    public CheckBruteForce(HeaderPage headerPage, GenBruteForceContext context) {
+        super(context);
+        this.headerPage = headerPage;
+        maxCount = GenBruteForce.calculateExpected(context.getMask().length, context.getAlphabets().length);
     }
 
     /**
@@ -150,7 +188,7 @@ public class CheckBruteForce extends GenBruteForce {
             periodicStatusFuture.cancel(true);
         }
 
-        Runnable statusCommand = scheduleStatusCmd();
+        Runnable statusCommand = createScheduleStatusCmd();
 
         try {
             rv = super.generate();
@@ -163,7 +201,7 @@ public class CheckBruteForce extends GenBruteForce {
         return rv;
     }
 
-    private Runnable scheduleStatusCmd() {
+    private Runnable createScheduleStatusCmd() {
         Runnable statusCommand = new StatusTask();
         long initialDelay = 0;
         long period = 30;
@@ -172,15 +210,10 @@ public class CheckBruteForce extends GenBruteForce {
         return statusCommand;
     }
 
-    private String printIntArray(int[] currentCursorIndex) {
+    public static final String printIntArray(int[] currentCursorIndex, char[] alphabets) {
         if (currentCursorIndex == null) {
             return "";
         }
-        char[] alphabets = null;
-        if (getContext() != null) {
-            alphabets = getContext().getAlphabets();
-        }
-
         StringBuilder sb = new StringBuilder();
 
         sb.append("[");

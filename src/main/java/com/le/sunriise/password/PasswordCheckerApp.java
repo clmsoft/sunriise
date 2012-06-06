@@ -150,7 +150,6 @@ public class PasswordCheckerApp {
                 button.setText("Stop");
             }
             running.getAndSet(true);
-            dataModel.setStatus("Running ...");
 
             if (checker != null) {
                 if (dataModel.getThreads() > lastCheckerThreads) {
@@ -165,7 +164,12 @@ public class PasswordCheckerApp {
             if (checker == null) {
                 log.info("Created new checker, threads=" + lastCheckerThreads);
                 checker = new CheckDictionary(lastCheckerThreads);
+            } else {
+                checker.getCounter().getAndSet(0);
             }
+            AtomicLong counter = checker.getCounter();
+            dataModel.setStatus("Running ... seached " + counter.get());
+
             Runnable command = new Runnable() {
                 @Override
                 public void run() {

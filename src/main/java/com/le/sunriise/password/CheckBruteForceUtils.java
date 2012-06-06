@@ -93,4 +93,9 @@ public class CheckBruteForceUtils {
         return password;
     }
 
+    public static String checkUsingMask(File dbFile, char[] mask, char[] alphabets) throws IOException {
+        int passwordLength = -1;
+        return checkUsingMask(dbFile, passwordLength, mask, alphabets);
+    }
+
 }
