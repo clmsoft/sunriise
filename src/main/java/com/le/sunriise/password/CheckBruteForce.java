@@ -115,7 +115,7 @@ public class CheckBruteForce extends GenBruteForce {
             if (getContext() != null) {
                 alphabets = getContext().getAlphabets();
             }
-            log.info("    currentCursorIndex=" + printIntArray(stat.getCurrentCursorIndex(), alphabets));
+            log.info("    currentCursorIndex=" + GenBruteForce.printIntArray(stat.getCurrentCursorIndex(), alphabets));
         }
     }
 
@@ -208,31 +208,6 @@ public class CheckBruteForce extends GenBruteForce {
         TimeUnit unit = TimeUnit.SECONDS;
         this.periodicStatusFuture = scheduledExecutorService.scheduleAtFixedRate(statusCommand, initialDelay, period, unit);
         return statusCommand;
-    }
-
-    public static final String printIntArray(int[] currentCursorIndex, char[] alphabets) {
-        if (currentCursorIndex == null) {
-            return "";
-        }
-        StringBuilder sb = new StringBuilder();
-
-        sb.append("[");
-        try {
-            for (int i = 0; i < currentCursorIndex.length; i++) {
-                if (i > 0) {
-                    sb.append(", ");
-                }
-                int index = currentCursorIndex[i];
-                sb.append("" + index);
-
-                if ((alphabets != null) && (index < alphabets.length)) {
-                    sb.append(" (" + alphabets[index] + ")");
-                }
-            }
-        } finally {
-            sb.append("]");
-        }
-        return sb.toString();
     }
 
     public String getPassword() {

@@ -16,23 +16,37 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA
  *******************************************************************************/
-package com.le.sunriise.password;
+package com.le.sunriise.model.bean;
 
-import org.apache.log4j.Logger;
+public class BruteForceCheckerModel {
+    private String mnyFileName;
 
-public class GenBruteForce2Chars {
-    private static final Logger log = Logger.getLogger(GenBruteForce2Chars.class);
+    private String alphabets;
 
-    /**
-     * @param args
-     */
-    public static void main(String[] args) {
-        char[] mask = "**".toCharArray();
-        char[] alphabets = GenBruteForce.genChars('a', 'd');
-        
-        GenBruteForceContext context = new GenBruteForceContext(mask, alphabets);
-        GenBruteForce gen = new GenBruteForce(context);
-        gen.generate();
+    private String mask;
+
+    public String getMnyFileName() {
+        return mnyFileName;
+    }
+
+    public void setMnyFileName(String mnyFileName) {
+        this.mnyFileName = mnyFileName;
+    }
+
+    public String getAlphabets() {
+        return alphabets;
+    }
+
+    public void setAlphabets(String alphabets) {
+        this.alphabets = alphabets;
+    }
+
+    public String getMask() {
+        return mask;
+    }
+
+    public void setMask(String mask) {
+        this.mask = mask;
     }
 
 }

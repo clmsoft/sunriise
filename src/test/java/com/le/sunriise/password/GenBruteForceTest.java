@@ -26,7 +26,6 @@ import java.math.BigInteger;
 import junit.framework.Assert;
 
 import org.apache.log4j.Logger;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class GenBruteForceTest {

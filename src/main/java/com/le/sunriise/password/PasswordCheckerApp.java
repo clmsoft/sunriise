@@ -57,6 +57,7 @@ import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
+import com.le.sunriise.model.bean.BruteForceCheckerModel;
 import com.le.sunriise.model.bean.PasswordCheckerModel;
 
 public class PasswordCheckerApp {
@@ -69,6 +70,8 @@ public class PasswordCheckerApp {
     private JTextField textField_1;
 
     private PasswordCheckerModel dataModel = new PasswordCheckerModel();
+
+    private BruteForceCheckerModel bruteForceDataModel = new BruteForceCheckerModel();
 
     private JSpinner spinner;
 
@@ -84,6 +87,20 @@ public class PasswordCheckerApp {
     private JTextField textField_5;
     private JTextField textField_6;
     private JTextField textField_7;
+
+    private final class StartBruteForceSearchAction implements ActionListener {
+        private JButton button;
+
+        public StartBruteForceSearchAction(JButton button) {
+            this.button = button;
+        }
+
+        public void actionPerformed(ActionEvent event) {
+            log.info(bruteForceDataModel.getMnyFileName());
+            log.info(bruteForceDataModel.getAlphabets());
+            log.info(bruteForceDataModel.getMask());
+        }
+    }
 
     private final class StartSearchAction implements ActionListener {
         private JButton button;
@@ -217,7 +234,7 @@ public class PasswordCheckerApp {
         }
     }
 
-    private final class OpenMnyAction implements ActionListener {
+    private abstract class OpenMnyAction implements ActionListener {
         private JFileChooser fc = null;
         private JTextField textField;
 
@@ -261,11 +278,13 @@ public class PasswordCheckerApp {
             File path = fc.getSelectedFile();
             log.info("path=" + path);
             String str = path.getAbsolutePath();
-            dataModel.setMnyFileName(str);
+            setMnyFileName(str);
             if (textField != null) {
                 textField.setCaretPosition(str.length());
             }
         }
+
+        protected abstract void setMnyFileName(String fileName);
     }
 
     private final class OpenWordListAction implements ActionListener {
@@ -380,7 +399,13 @@ public class PasswordCheckerApp {
         textField.setColumns(10);
 
         JButton btnNewButton = new JButton("Open ...");
-        btnNewButton.addActionListener(new OpenMnyAction(textField));
+        btnNewButton.addActionListener(new OpenMnyAction(textField) {
+            @Override
+            protected void setMnyFileName(String fileName) {
+                dataModel.setMnyFileName(fileName);
+            }
+
+        });
         wordListView.add(btnNewButton, "6, 2");
 
         JLabel lblNewLabel_1 = new JLabel("Word list");
@@ -418,70 +443,65 @@ public class PasswordCheckerApp {
 
         JPanel bruteForceView = new JPanel();
         tabbedPane.addTab("Brute force", null, bruteForceView, null);
-        bruteForceView.setLayout(new FormLayout(new ColumnSpec[] {
-                FormFactory.UNRELATED_GAP_COLSPEC,
-                FormFactory.DEFAULT_COLSPEC,
-                FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
-                ColumnSpec.decode("default:grow"),
-                FormFactory.RELATED_GAP_COLSPEC,
-                FormFactory.DEFAULT_COLSPEC,
-                FormFactory.UNRELATED_GAP_COLSPEC,},
-            new RowSpec[] {
-                FormFactory.RELATED_GAP_ROWSPEC,
-                FormFactory.DEFAULT_ROWSPEC,
-                FormFactory.RELATED_GAP_ROWSPEC,
-                FormFactory.DEFAULT_ROWSPEC,
-                FormFactory.RELATED_GAP_ROWSPEC,
-                FormFactory.DEFAULT_ROWSPEC,
-                FormFactory.RELATED_GAP_ROWSPEC,
-                FormFactory.DEFAULT_ROWSPEC,
-                FormFactory.RELATED_GAP_ROWSPEC,
-                FormFactory.DEFAULT_ROWSPEC,
-                FormFactory.RELATED_GAP_ROWSPEC,
-                FormFactory.DEFAULT_ROWSPEC,}));
-        
+        bruteForceView.setLayout(new FormLayout(new ColumnSpec[] { FormFactory.UNRELATED_GAP_COLSPEC, FormFactory.DEFAULT_COLSPEC,
+                FormFactory.LABEL_COMPONENT_GAP_COLSPEC, ColumnSpec.decode("default:grow"), FormFactory.RELATED_GAP_COLSPEC,
+                FormFactory.DEFAULT_COLSPEC, FormFactory.UNRELATED_GAP_COLSPEC, }, new RowSpec[] { FormFactory.RELATED_GAP_ROWSPEC,
+                FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+                FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC,
+                FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+                FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC, }));
+
         JLabel lblNewLabel_4 = new JLabel("Money file");
         bruteForceView.add(lblNewLabel_4, "2, 2, right, default");
-        
+
         textField_3 = new JTextField();
         bruteForceView.add(textField_3, "4, 2, fill, default");
         textField_3.setColumns(10);
-        
+
         JButton btnNewButton_3 = new JButton("Open ...");
+        btnNewButton_3.addActionListener(new OpenMnyAction(textField_3) {
+            @Override
+            protected void setMnyFileName(String fileName) {
+                bruteForceDataModel.setMnyFileName(fileName);
+            }
+        });
         bruteForceView.add(btnNewButton_3, "6, 2");
-        
-        JLabel lblNewLabel_5 = new JLabel("Alphabets");
+
+        JLabel lblNewLabel_5 = new JLabel("Character set");
         bruteForceView.add(lblNewLabel_5, "2, 4, right, default");
-        
+
         textField_4 = new JTextField();
         bruteForceView.add(textField_4, "4, 4, fill, default");
         textField_4.setColumns(10);
-        
-        JLabel lblNewLabel_6 = new JLabel("Mask");
+
+        JLabel lblNewLabel_6 = new JLabel("Password length/mask");
         bruteForceView.add(lblNewLabel_6, "2, 6, right, default");
-        
+
         textField_5 = new JTextField();
         bruteForceView.add(textField_5, "4, 6, fill, default");
         textField_5.setColumns(10);
-        
+
         JLabel lblNewLabel_8 = new JLabel("Context");
         bruteForceView.add(lblNewLabel_8, "2, 8, right, default");
-        
+
         textField_7 = new JTextField();
+        textField_7.setEnabled(false);
         bruteForceView.add(textField_7, "4, 8, fill, default");
         textField_7.setColumns(10);
-        
+
         JButton btnNewButton_5 = new JButton("Open ...");
+        btnNewButton_5.setEnabled(false);
         bruteForceView.add(btnNewButton_5, "6, 8");
-        
+
         JLabel lblNewLabel_7 = new JLabel("Status");
         bruteForceView.add(lblNewLabel_7, "2, 10, right, default");
-        
+
         textField_6 = new JTextField();
         bruteForceView.add(textField_6, "4, 10, fill, default");
         textField_6.setColumns(10);
-        
+
         JButton btnNewButton_4 = new JButton("Start");
+        btnNewButton_4.addActionListener(new StartBruteForceSearchAction(btnNewButton_4));
         bruteForceView.add(btnNewButton_4, "6, 12");
         initDataBindings();
     }
@@ -535,5 +555,26 @@ public class PasswordCheckerApp {
         AutoBinding<PasswordCheckerModel, String, JTextField, String> autoBinding_3 = Bindings.createAutoBinding(
                 UpdateStrategy.READ_WRITE, dataModel, passwordCheckerModelBeanProperty_3, textField_2, jTextFieldBeanProperty_2);
         autoBinding_3.bind();
+        //
+        BeanProperty<BruteForceCheckerModel, String> bruteForceCheckerModelBeanProperty = BeanProperty.create("mnyFileName");
+        BeanProperty<JTextField, String> jTextFieldBeanProperty_3 = BeanProperty.create("text");
+        AutoBinding<BruteForceCheckerModel, String, JTextField, String> autoBinding_4 = Bindings.createAutoBinding(
+                UpdateStrategy.READ_WRITE, bruteForceDataModel, bruteForceCheckerModelBeanProperty, textField_3,
+                jTextFieldBeanProperty_3);
+        autoBinding_4.bind();
+        //
+        BeanProperty<BruteForceCheckerModel, String> bruteForceCheckerModelBeanProperty_1 = BeanProperty.create("alphabets");
+        BeanProperty<JTextField, String> jTextFieldBeanProperty_4 = BeanProperty.create("text");
+        AutoBinding<BruteForceCheckerModel, String, JTextField, String> autoBinding_5 = Bindings.createAutoBinding(
+                UpdateStrategy.READ_WRITE, bruteForceDataModel, bruteForceCheckerModelBeanProperty_1, textField_4,
+                jTextFieldBeanProperty_4);
+        autoBinding_5.bind();
+        //
+        BeanProperty<BruteForceCheckerModel, String> bruteForceCheckerModelBeanProperty_2 = BeanProperty.create("mask");
+        BeanProperty<JTextField, String> jTextFieldBeanProperty_5 = BeanProperty.create("text");
+        AutoBinding<BruteForceCheckerModel, String, JTextField, String> autoBinding_6 = Bindings.createAutoBinding(
+                UpdateStrategy.READ_WRITE, bruteForceDataModel, bruteForceCheckerModelBeanProperty_2, textField_5,
+                jTextFieldBeanProperty_5);
+        autoBinding_6.bind();
     }
 }
