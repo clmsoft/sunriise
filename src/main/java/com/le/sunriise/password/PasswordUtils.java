@@ -87,4 +87,29 @@ public class PasswordUtils {
         return matched;
     }
 
+    public static final int compareCursorIndexes(int[] index1, int[] index2, int radix) {
+        long value1 = PasswordUtils.intArrayToLong(index1, radix);
+        long value2 = PasswordUtils.intArrayToLong(index2, radix);
+    
+        long diff = value1 - value2;
+        if (diff == 0L) {
+            return 0;
+        } else if (diff > 0L) {
+            return 1;
+        } else {
+            return -1;
+        }
+    }
+
+    public static final long intArrayToLong(int[] intArray, int radix) {
+        long value = 0L;
+    
+        int j = 0;
+        for (int i = intArray.length - 1; i >= 0; i--) {
+            value += intArray[i] * Math.pow((double) radix, (double) j++);
+        }
+    
+        return value;
+    }
+
 }

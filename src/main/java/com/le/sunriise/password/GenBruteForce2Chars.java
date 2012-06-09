@@ -27,9 +27,10 @@ public class GenBruteForce2Chars {
      * @param args
      */
     public static void main(String[] args) {
-        char[] mask = "**".toCharArray();
+        char[] mask = "***".toCharArray();
         char[] alphabets = GenBruteForce.genChars('a', 'd');
         
+        log.info("> START GenBruteForce2Chars");
         GenBruteForceContext context = new GenBruteForceContext(mask, alphabets);
         GenBruteForce gen = new GenBruteForce(context);
         gen.generate();

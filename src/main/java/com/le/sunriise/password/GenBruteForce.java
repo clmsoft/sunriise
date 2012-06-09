@@ -47,6 +47,7 @@ public class GenBruteForce {
     private char maskWildChar = DEFAULT_MASK_WILD_CHAR;
 
     private GenBruteForceContext context;
+    private GenBruteForceContext resumeContext;
 
     private String currentResult;
 
@@ -168,9 +169,26 @@ public class GenBruteForce {
             log.debug("START alphabets loop - startIndex=" + startIndex);
         }
 
+        boolean terminateEarly = false;
         try {
             for (int index = startIndex; index < len; index++) {
                 char c = context.getAlphabet(index);
+
+                if (terminate) {
+                    log.warn("Terminate early at cursor=" + context.getCursor() + ", index=" + index + ", alphabet=" + c
+                            + ", alphabetLen=" + context.getAlphabetsLen());
+                    terminateEarly = true;
+                    break;
+                }
+
+                if (resumeContext != null) {
+                    int n = PasswordUtils.compareCursorIndexes(context.getCurrentCursorIndex(),
+                            resumeContext.getCurrentCursorIndex(), context.getAlphabetsLen());
+                    if (n < 0) {
+                        continue;
+                    }
+                }
+
                 if (log.isDebugEnabled()) {
                     log.debug("IN alphabets loop - [" + context.getCursor() + "/" + index + "/"
                             + context.getCurrentCursorIndex()[context.getCursor()] + "/" + c + "]");
@@ -183,12 +201,19 @@ public class GenBruteForce {
                 }
 
                 context.getBuffer()[context.getCursor()] = c;
+                // log.info("XXX " +
+                // context.getCurrentCursorIndex()[context.getCursor()] +
+                // ", cursor=" + context.getCursor());
                 context.getCurrentCursorIndex()[context.getCursor()] = index;
+                // log.info("YYY " +
+                // context.getCurrentCursorIndex()[context.getCursor()] +
+                // ", cursor=" + context.getCursor());
 
                 if (isSkipChar(maskChar)) {
                     // TODO: no need to check
                 } else {
                     currentResult = new String(context.getBuffer(), 0, (context.getCursor() + 1));
+
                     if (log.isDebugEnabled()) {
                         notifyResult(currentResult + ", " + GenBruteForce.printCursorsIndex(context));
                     } else {
@@ -199,8 +224,9 @@ public class GenBruteForce {
                 count++;
 
                 if (terminate) {
-                    log.warn("Terminate early at cursor=" + context.getCursor() + ", alphabet=" + c + ", alphabetLen="
-                            + context.getAlphabetsLen());
+                    log.warn("Terminate early at cursor=" + context.getCursor() + ", index=" + index + ", alphabet=" + c
+                            + ", alphabetLen=" + context.getAlphabetsLen());
+                    terminateEarly = true;
                     break;
                 } else {
                     GenBruteForceContext newContext = createNextContext(context);
@@ -209,7 +235,20 @@ public class GenBruteForce {
                 }
             }
         } finally {
-            context.getCurrentCursorIndex()[context.getCursor()] = -1;
+            if (!terminateEarly) {
+                if (log.isDebugEnabled()) {
+                    log.debug("***" + GenBruteForce.printCursorsIndex(context));
+                }
+
+                int cursor = context.getCursor();
+                int oldIndex = context.getCurrentCursorIndex()[cursor];
+                int newIndex = -1;
+                context.getCurrentCursorIndex()[cursor] = newIndex;
+
+                if (log.isDebugEnabled()) {
+                    log.debug("   Reseting cursor index, cursor=" + cursor + ", " + oldIndex + " -> " + newIndex);
+                }
+            }
         }
 
         return count;
@@ -223,7 +262,9 @@ public class GenBruteForce {
         }
 
         context.getBuffer()[context.getCursor()] = c;
-        int index = context.getAlphabetsLen() - 1;
+        int index = -1;
+        // index = context.getAlphabetsLen() - 1;
+        index = findCharIndex(c, context.getAlphabets());
         context.getCurrentCursorIndex()[context.getCursor()] = index;
 
         currentResult = new String(context.getBuffer(), 0, (context.getCursor() + 1));
@@ -245,6 +286,15 @@ public class GenBruteForce {
         }
 
         return count;
+    }
+
+    private int findCharIndex(char c, char[] alphabets) {
+        for (int i = 0; i < alphabets.length; i++) {
+            if ((alphabets[i] == c) || (Character.toUpperCase(alphabets[i]) == Character.toUpperCase(c))) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     private boolean isSkipChar(char maskChar) {
@@ -349,7 +399,7 @@ public class GenBruteForce {
         return currentResult;
     }
 
-    public static final String printIntArray(int[] currentCursorIndex, char[] alphabets) {
+    static final String printIntArray(int[] currentCursorIndex, char[] alphabets) {
         if (currentCursorIndex == null) {
             return "";
         }
@@ -376,6 +426,14 @@ public class GenBruteForce {
 
     public static String printCursorsIndex(GenBruteForceContext context) {
         return GenBruteForce.printIntArray(context.getCurrentCursorIndex(), context.getAlphabets());
+    }
+
+    public GenBruteForceContext getResumeContext() {
+        return resumeContext;
+    }
+
+    public void setResumeContext(GenBruteForceContext resumeContext) {
+        this.resumeContext = resumeContext;
     }
 
 }

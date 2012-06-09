@@ -30,6 +30,22 @@ import org.junit.Test;
 public class CheckBruteForceTest {
     private static final Logger log = Logger.getLogger(CheckBruteForceTest.class);
 
+    @Test
+    public void forDebug() throws IOException {
+        File dbFile = new File("src/test/data/sunset-sample-pwd-5.mny");
+        String expectedPassword = "12@a!";
+
+        char[] mask = null;
+        char[] alphabets = null;
+        String password = null;
+
+        mask = new String("12@**").toCharArray();
+        logInputs(dbFile, mask, alphabets);
+        password = CheckBruteForceUtils.checkUsingMask(dbFile, mask, alphabets);
+        Assert.assertNotNull(password);
+        Assert.assertTrue(password.compareToIgnoreCase(expectedPassword) == 0);
+    }
+
     /**
      * Test brute-force method.
      * 

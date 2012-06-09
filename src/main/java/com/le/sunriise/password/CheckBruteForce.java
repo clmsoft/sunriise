@@ -75,9 +75,8 @@ public class CheckBruteForce extends GenBruteForce {
                 stat.setSeconds(seconds);
                 stat.setCurrentResult(getCurrentResult());
                 stat.setCurrentCursorIndex(getCurrentCursorIndex());
-                if (seconds.longValue() > 0) {
-                    logStatus(stat);
-                }
+
+                logStatus(stat);
             }
 
             if (writeContextFile) {
@@ -109,7 +108,11 @@ public class CheckBruteForce extends GenBruteForce {
         }
 
         private void logStatus(BruteForceStat stat) {
-            log.info("  Rate=" + stat.getCount().divide(stat.getSeconds()) + "/sec");
+            if (stat.getSeconds().longValue() > 0) {
+                log.info("  Rate=" + stat.getCount().divide(stat.getSeconds()) + "/sec");
+            } else {
+                log.info("  Rate=" + "N/A" + ", count=" + stat.getCount());
+            }
             log.info("    currentResult=" + stat.getCurrentResult());
             char[] alphabets = null;
             if (getContext() != null) {
@@ -151,6 +154,9 @@ public class CheckBruteForce extends GenBruteForce {
      * @return how many items were checked.
      */
     public long check() {
+        if (getResumeContext() != null) {
+            writeContextFile = false;
+        }
         return generate();
     }
 
@@ -189,15 +195,16 @@ public class CheckBruteForce extends GenBruteForce {
         }
 
         Runnable statusCommand = createScheduleStatusCmd();
-
         try {
             rv = super.generate();
         } finally {
-            statusCommand.run();
             if (this.periodicStatusFuture != null) {
                 this.periodicStatusFuture.cancel(true);
             }
+            log.info("pre final statusCommand.run()");
+            statusCommand.run();
         }
+
         return rv;
     }
 

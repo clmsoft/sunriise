@@ -1,1 +1,1 @@
-{"buffer":"234#ABC!\u0000","bufferLen":9,"mask":"****ABC!","cursor":7,"alphabets":"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=[]\\{}|;':\",./<>?","alphabetsLen":66,"currentCursorIndex":[-1,-1,-1,-1,65,65,65,65]}
+{"buffer":"123@ABC!\u0000","bufferLen":9,"mask":"****ABC!","cursor":7,"alphabets":"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=[]\\{}|;':\",./<>?","alphabetsLen":66,"currentCursorIndex":[27,28,29,37,0,1,2,36]}
