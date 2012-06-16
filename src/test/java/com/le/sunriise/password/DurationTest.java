@@ -138,9 +138,8 @@ public class DurationTest {
     }
 
     private long calculateDuration(long days, long hours, long minutes, long seconds, long millis) {
-        // TODO: does not check valid range.
-        // hours: 0-23
-        return ((days * 24 * 60 * 60 * 1000) + (hours * 60 * 60 * 1000) + (minutes * 60 * 1000) + (seconds * 1000) + millis);
+        return ((days * Duration.MILLISECONDS_PER_DAY) + (hours * Duration.MILLISECONDS_PER_HOUR)
+                + (minutes * Duration.MILLISECONDS_PER_MINUTE) + (seconds * Duration.MILLISECONDS_PER_SECOND) + millis);
     }
 
 }

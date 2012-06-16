@@ -22,6 +22,17 @@ import java.util.concurrent.TimeUnit;
 
 public class Duration implements Comparable<Duration> {
     public static final long DAYS_IN_YEAR = 365L;
+    
+    private static final long MILLISECONDS = 1000L;
+    private static final long SECONDS = 60L;
+    private static final long MINUTES = 60L;
+    private static final long HOURS = 24L;
+    
+    public static final long MILLISECONDS_PER_SECOND = MILLISECONDS;
+    public static final long MILLISECONDS_PER_MINUTE = MILLISECONDS_PER_SECOND * SECONDS;
+    public static final long MILLISECONDS_PER_HOUR = MILLISECONDS_PER_MINUTE * MINUTES;
+    public static final long MILLISECONDS_PER_DAY = MILLISECONDS_PER_HOUR * HOURS;
+    
     private long years;
     private long days;
     private final long hours;
