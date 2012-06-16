@@ -162,7 +162,14 @@ public abstract class AbstractHeaderPagePasswordChecker {
         }
     }
 
-    protected abstract byte[] decryptUsingRC4(byte[] encrypted4BytesCheck, byte[] testKey);
+    /**
+     * For a given ciphertext and key, decrypt using RC4.
+     * 
+     * @param ciphertext
+     * @param key
+     * @return a String plaintext
+     */
+    protected abstract byte[] decryptUsingRC4(byte[] ciphertext, byte[] key);
 
     private static String toHexString(byte[] bytes) {
         return HexDump.toHex(bytes);
@@ -184,7 +191,7 @@ public abstract class AbstractHeaderPagePasswordChecker {
         return passwordDigestBytes;
     }
 
-    protected abstract byte[] createDigestBytes(byte[] passwordBytes, boolean useSha1);
+    protected abstract byte[] createDigestBytes(byte[] bytes, boolean useSha1);
 
     private static byte[] toPasswordBytes(String password, Charset charset, boolean toUpperCase) {
         byte[] passwordBytes = new byte[PASSWORD_LENGTH];

@@ -22,11 +22,7 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.log4j.Logger;
-import org.bouncycastle.crypto.Digest;
-import org.bouncycastle.crypto.digests.MD5Digest;
-import org.bouncycastle.crypto.digests.SHA1Digest;
 import org.bouncycastle.crypto.engines.RC4Engine;
-import org.bouncycastle.crypto.params.KeyParameter;
 
 public class HeaderPagePasswordChecker extends AbstractHeaderPagePasswordChecker {
     private static final Logger log = Logger.getLogger(HeaderPagePasswordChecker.class);
@@ -46,36 +42,16 @@ public class HeaderPagePasswordChecker extends AbstractHeaderPagePasswordChecker
     }
 
     @Override
-    protected byte[] createDigestBytes(byte[] passwordBytes, boolean useSha1) {
-//        boolean useSha1 = headerPage.isUseSha1();
-        Digest digest = (useSha1 ? new SHA1Digest() : new MD5Digest());
-        if (log.isDebugEnabled()) {
-            log.debug("digest=" + digest.getAlgorithmName());
-        }
-
-        digest.update(passwordBytes, 0, passwordBytes.length);
-
-        // Get digest value
-        byte[] digestBytes = new byte[digest.getDigestSize()];
-        digest.doFinal(digestBytes, 0);
-        return digestBytes;
+    protected byte[] createDigestBytes(byte[] bytes, boolean useSha1) {
+        return BouncyCastleUtils.createDigestBytes(bytes, useSha1);
     }
 
     @Override
-    protected byte[] decryptUsingRC4(byte[] encrypted4BytesCheck, byte[] testKey) {
+    protected byte[] decryptUsingRC4(byte[] ciphertext, byte[] key) {
         RC4Engine engine = null;
         engine = getEngine();
-        // engine = new RC4Engine();
 
-        boolean forEncryption = false;
-        if (log.isDebugEnabled()) {
-            log.debug("testKey.length=" + testKey.length + ", " + (testKey.length * 8));
-        }
-        engine.init(forEncryption, new KeyParameter(testKey));
-
-        byte[] decrypted4BytesCheck = new byte[4];
-        engine.processBytes(encrypted4BytesCheck, 0, encrypted4BytesCheck.length, decrypted4BytesCheck, 0);
-        return decrypted4BytesCheck;
+        return BouncyCastleUtils.decryptUsingRC4(engine, ciphertext, key);
     }
 
     /**
