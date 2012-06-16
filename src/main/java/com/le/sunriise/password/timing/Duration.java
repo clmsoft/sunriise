@@ -16,12 +16,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA
  *******************************************************************************/
-package com.le.sunriise.password;
+package com.le.sunriise.password.timing;
 
 import java.util.concurrent.TimeUnit;
 
 public class Duration implements Comparable<Duration> {
-    private final long days;
+    private long years;
+    private long days;
     private final long hours;
     private final long minutes;
     private final long seconds;
@@ -33,8 +34,15 @@ public class Duration implements Comparable<Duration> {
 
         long millis = duration;
 
+        years = 0L;
+
         days = TimeUnit.MILLISECONDS.toDays(millis);
         millis -= TimeUnit.DAYS.toMillis(days);
+
+        if (days > 365) {
+            years = days / 365L;
+            days = days % 365L;
+        }
 
         hours = TimeUnit.MILLISECONDS.toHours(millis);
         millis -= TimeUnit.HOURS.toMillis(hours);
@@ -48,9 +56,34 @@ public class Duration implements Comparable<Duration> {
         this.millis = millis;
     }
 
-    @Override
-    public String toString() {
-        return String.format("%d days, %d hours, %d mins, %d secs, %d millis", days, hours, minutes, seconds, millis);
+    public String toString(boolean compact) {
+        if (compact) {
+            StringBuilder sb = new StringBuilder();
+            int n = 0;
+
+            n = appendIfPositive(sb, years, "years", n);
+            n = appendIfPositive(sb, days, "days", n);
+            n = appendIfPositive(sb, hours, "hours", n);
+            n = appendIfPositive(sb, minutes, "minutes", n);
+            n = appendIfPositive(sb, seconds, "seconds", n);
+            n = appendIfPositive(sb, millis, "millis", n);
+
+            return sb.toString();
+        } else {
+            return String.format("%d years %d days, %d hours, %d mins, %d secs, %d millis", years, days, hours, minutes, seconds,
+                    millis);
+        }
+    }
+
+    private int appendIfPositive(StringBuilder sb, long value, String label, int n) {
+        if (value > 0) {
+            if (n > 0) {
+                sb.append(" ");
+            }
+            sb.append(String.format("%d " + label, value));
+            n++;
+        }
+        return n;
     }
 
     @Override
@@ -117,5 +150,10 @@ public class Duration implements Comparable<Duration> {
 
     public long getMillis() {
         return millis;
+    }
+
+    @Override
+    public String toString() {
+        return toString(true);
     }
 }

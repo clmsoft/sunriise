@@ -53,6 +53,7 @@ import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 import com.le.sunriise.model.bean.BruteForceCheckerModel;
 import com.le.sunriise.model.bean.PasswordCheckerModel;
+import com.le.sunriise.password.timing.Duration;
 
 public class PasswordCheckerApp {
     private static final Logger log = Logger.getLogger(PasswordCheckerApp.class);

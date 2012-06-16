@@ -1,9 +1,11 @@
-package com.le.sunriise.password;
+package com.le.sunriise.password.timing;
 
 import org.apache.log4j.Logger;
 import org.bouncycastle.crypto.engines.RC4Engine;
 
 import com.le.sunriise.StopWatch;
+import com.le.sunriise.password.BouncyCastleUtils;
+import com.le.sunriise.password.PasswordUtils;
 
 public class RC4TimingCmd {
     private static final Logger log = Logger.getLogger(PasswordUtils.class);
@@ -25,17 +27,21 @@ public class RC4TimingCmd {
         if (args.length == 0) {
             // default is above
         } else if (args.length == 1) {
-            keyLength = valueOf(args[0], keyLength);
-            cipherTextLength = valueOf(args[1], cipherTextLength);
+            keyLength = intValueOf(args[0], keyLength);
         } else if (args.length == 2) {
-            keyLength = valueOf(args[0], keyLength);
-            cipherTextLength = valueOf(args[1], cipherTextLength);
+            keyLength = intValueOf(args[0], keyLength);
+            cipherTextLength = intValueOf(args[1], cipherTextLength);
         } else if (args.length == 3) {
-            keyLength = valueOf(args[0], keyLength);
-            cipherTextLength = valueOf(args[1], cipherTextLength);
-            maxIteration = valueOf(args[2], maxIteration);
+            keyLength = intValueOf(args[0], keyLength);
+            cipherTextLength = intValueOf(args[1], cipherTextLength);
+            maxIteration = intValueOf(args[2], maxIteration);
         } else {
             Class<RC4TimingCmd> clz = RC4TimingCmd.class;
+            System.out.println("Usage: java " + clz.getName() + "[keyLength cipherTextLength maxIteration]");
+            System.out.println("  keyLength (default=" + keyLength + ")");
+            System.out.println("  cipherTextLength (default=" + cipherTextLength + ")");
+            System.out.println("  maxIteration (default=" + maxIteration + ")");
+
             System.exit(1);
         }
 
@@ -78,13 +84,14 @@ public class RC4TimingCmd {
         }
     }
 
-    private static int valueOf(String strValue, int defaultValue) {
+    public static int intValueOf(String strValue, int defaultValue) {
+        int value = defaultValue;
         try {
-            defaultValue = Integer.valueOf(strValue);
+            value = Integer.valueOf(strValue);
         } catch (NumberFormatException e) {
             log.warn(e);
-            defaultValue = 8;
+            value = defaultValue;
         }
-        return defaultValue;
+        return value;
     }
 }

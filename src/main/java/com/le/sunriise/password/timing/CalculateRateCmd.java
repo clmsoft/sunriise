@@ -16,7 +16,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA
  *******************************************************************************/
-package com.le.sunriise.password;
+package com.le.sunriise.password.timing;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,6 +28,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.log4j.Logger;
+
+import com.le.sunriise.password.GenBruteForce;
+import com.le.sunriise.password.HeaderPage;
+import com.le.sunriise.password.PasswordUtils;
 
 public class CalculateRateCmd {
     private static final int DEFAULT_SECONDS = 60;

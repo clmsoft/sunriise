@@ -23,6 +23,8 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
+import com.le.sunriise.password.timing.Duration;
+
 public class DurationTest {
 
     @Test

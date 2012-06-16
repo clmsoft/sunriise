@@ -33,6 +33,7 @@ import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import com.le.sunriise.StopWatch;
+import com.le.sunriise.password.timing.Duration;
 
 public class CheckBruteForce extends GenBruteForce {
     private static final Logger log = Logger.getLogger(CheckBruteForce.class);
