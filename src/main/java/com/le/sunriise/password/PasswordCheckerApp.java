@@ -24,7 +24,6 @@ import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -36,17 +35,12 @@ import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.JTabbedPane;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
-import javax.swing.filechooser.FileFilter;
-
 import org.apache.log4j.Logger;
 import org.jdesktop.beansbinding.AutoBinding;
 import org.jdesktop.beansbinding.AutoBinding.UpdateStrategy;
@@ -80,212 +74,12 @@ public class PasswordCheckerApp {
 
     private JTextField textField_2;
 
-    private AtomicBoolean running = new AtomicBoolean(false);
     private CheckDictionary checker = null;
     private JTextField textField_3;
     private JTextField textField_4;
     private JTextField textField_5;
     private JTextField textField_6;
-    private JTextField textField_7;
-
-    private final class StartBruteForceSearchAction implements ActionListener {
-        private JButton button;
-
-        public StartBruteForceSearchAction(JButton button) {
-            this.button = button;
-        }
-
-        public void actionPerformed(ActionEvent event) {
-            log.info(bruteForceDataModel.getMnyFileName());
-            log.info(bruteForceDataModel.getAlphabets());
-            log.info(bruteForceDataModel.getMask());
-        }
-    }
-
-    private final class StartSearchAction implements ActionListener {
-        private JButton button;
-        private boolean closeChecker = false;
-        private int lastCheckerThreads = 0;
-
-        public StartSearchAction(JButton button) {
-            this.button = button;
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent event) {
-            if (running.get()) {
-                stopCheck();
-            } else {
-                startCheck();
-            }
-        }
-
-        private void startCheck() {
-            String fileName = null;
-
-            fileName = dataModel.getMnyFileName();
-            if ((fileName == null) || (fileName.trim().length() <= 0)) {
-                Component parentComponent = frame;
-                int messageType = JOptionPane.WARNING_MESSAGE;
-                String title = "Warning - bad input";
-                Object message = new String("Invalid *.mny path=" + fileName);
-                JOptionPane.showMessageDialog(parentComponent, message, title, messageType);
-                return;
-            } else {
-                File file = new File(fileName);
-                if (!file.exists()) {
-                    Component parentComponent = frame;
-                    int messageType = JOptionPane.WARNING_MESSAGE;
-                    String title = "Warning - bad input";
-                    Object message = new String("Invalid *.mny path=" + fileName);
-                    JOptionPane.showMessageDialog(parentComponent, message, title, messageType);
-                    return;
-                }
-            }
-
-            fileName = dataModel.getWordListPath();
-            if ((fileName == null) || (fileName.trim().length() <= 0)) {
-                Component parentComponent = frame;
-                int messageType = JOptionPane.WARNING_MESSAGE;
-                String title = "Warning - bad input";
-                Object message = new String("Invalid wordlist path=" + fileName);
-                JOptionPane.showMessageDialog(parentComponent, message, title, messageType);
-                return;
-            } else {
-                File file = new File(fileName);
-                if (!file.exists()) {
-                    Component parentComponent = frame;
-                    int messageType = JOptionPane.WARNING_MESSAGE;
-                    String title = "Warning - bad input";
-                    Object message = new String("Invalid wordlist path=" + fileName);
-                    JOptionPane.showMessageDialog(parentComponent, message, title, messageType);
-                    return;
-                }
-            }
-
-            if (button != null) {
-                button.setText("Stop");
-            }
-            running.getAndSet(true);
-
-            if (checker != null) {
-                if (dataModel.getThreads() > lastCheckerThreads) {
-                    try {
-                        checker.close();
-                    } finally {
-                        checker = null;
-                    }
-                }
-            }
-            lastCheckerThreads = dataModel.getThreads();
-            if (checker == null) {
-                log.info("Created new checker, threads=" + lastCheckerThreads);
-                checker = new CheckDictionary(lastCheckerThreads);
-            } else {
-                checker.getCounter().getAndSet(0);
-            }
-            AtomicLong counter = checker.getCounter();
-            dataModel.setStatus("Running ... seached " + counter.get());
-
-            Runnable command = new Runnable() {
-                @Override
-                public void run() {
-                    String matchedPassword = null;
-                    try {
-                        HeaderPage headerPage = new HeaderPage(new File(dataModel.getMnyFileName()));
-                        matchedPassword = checker.check(headerPage, new File(dataModel.getWordListPath()));
-                        notifyResult(matchedPassword);
-                    } catch (IOException e) {
-                        log.warn(e);
-                    } finally {
-                        if (closeChecker) {
-                            if (checker != null) {
-                                try {
-                                    checker.close();
-                                } finally {
-                                    checker = null;
-                                }
-                            }
-                        }
-                        running.getAndSet(false);
-
-                        if (button != null) {
-                            final String str = matchedPassword;
-                            Runnable doRun = new Runnable() {
-                                @Override
-                                public void run() {
-                                    button.setText("Start");
-                                    dataModel.setStatus("Idle - last result " + str);
-                                }
-                            };
-                            SwingUtilities.invokeLater(doRun);
-                        }
-                    }
-                }
-            };
-            pool.execute(command);
-        }
-
-        private void stopCheck() {
-            log.info("Got STOP request.");
-            if (checker != null) {
-                checker.stop();
-            }
-        }
-    }
-
-    private abstract class OpenMnyAction implements ActionListener {
-        private JFileChooser fc = null;
-        private JTextField textField;
-
-        public OpenMnyAction(JTextField textField) {
-            super();
-            this.textField = textField;
-            fc = new JFileChooser(new File("."));
-            FileFilter filter = new FileFilter() {
-
-                @Override
-                public boolean accept(File f) {
-                    if (f.isDirectory()) {
-                        return true;
-                    }
-
-                    String name = f.getName();
-                    if (name.endsWith(".mny")) {
-                        return true;
-                    }
-
-                    return false;
-                }
-
-                @Override
-                public String getDescription() {
-                    String description = "*.mny - Money file";
-                    return description;
-                }
-
-            };
-            fc.addChoosableFileFilter(filter);
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            Component parent = frame;
-            if (fc.showOpenDialog(parent) != JFileChooser.APPROVE_OPTION) {
-                return;
-            }
-
-            File path = fc.getSelectedFile();
-            log.info("path=" + path);
-            String str = path.getAbsolutePath();
-            setMnyFileName(str);
-            if (textField != null) {
-                textField.setCaretPosition(str.length());
-            }
-        }
-
-        protected abstract void setMnyFileName(String fileName);
-    }
+    private JTextField txtNotImplementedYet;
 
     private final class OpenWordListAction implements ActionListener {
         private JFileChooser fc = null;
@@ -300,7 +94,7 @@ public class PasswordCheckerApp {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            Component parent = frame;
+            Component parent = getFrame();
             if (fc.showOpenDialog(parent) != JFileChooser.APPROVE_OPTION) {
                 return;
             }
@@ -332,10 +126,10 @@ public class PasswordCheckerApp {
 
             private void showMainFrame(PasswordCheckerApp window) {
                 String title = "Mny Password Checker";
-                window.frame.setTitle(title);
+                window.getFrame().setTitle(title);
                 // window.frame.pack();
-                window.frame.setLocationRelativeTo(null);
-                window.frame.setVisible(true);
+                window.getFrame().setLocationRelativeTo(null);
+                window.getFrame().setVisible(true);
             }
         });
     }
@@ -344,29 +138,6 @@ public class PasswordCheckerApp {
      * Create the application.
      */
     public PasswordCheckerApp() {
-        Runnable command = new Runnable() {
-            @Override
-            public void run() {
-                if (log.isDebugEnabled()) {
-                    log.debug("> status scheduler ...");
-                }
-                if (!running.get()) {
-                    return;
-                }
-
-                if (checker == null) {
-                    return;
-                }
-
-                AtomicLong counter = checker.getCounter();
-                dataModel.setStatus("Running ... seached " + counter.get());
-            }
-        };
-        long period = 2L;
-        long initialDelay = 1L;
-        TimeUnit unit = TimeUnit.SECONDS;
-        schedulers.scheduleAtFixedRate(command, initialDelay, period, unit);
-
         initialize();
     }
 
@@ -374,12 +145,12 @@ public class PasswordCheckerApp {
      * Initialize the contents of the frame.
      */
     private void initialize() {
-        frame = new JFrame();
-        frame.setBounds(100, 100, 450, 300);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setFrame(new JFrame());
+        getFrame().setBounds(100, 100, 600, 300);
+        getFrame().setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         JTabbedPane tabbedPane = new JTabbedPane(SwingConstants.TOP);
-        frame.getContentPane().add(tabbedPane, BorderLayout.CENTER);
+        getFrame().getContentPane().add(tabbedPane, BorderLayout.CENTER);
         JPanel wordListView = new JPanel();
         tabbedPane.addTab("Word list", null, wordListView, null);
 
@@ -399,7 +170,7 @@ public class PasswordCheckerApp {
         textField.setColumns(10);
 
         JButton btnNewButton = new JButton("Open ...");
-        btnNewButton.addActionListener(new OpenMnyAction(textField) {
+        btnNewButton.addActionListener(new OpenMnyAction(this.getFrame(), textField) {
             @Override
             protected void setMnyFileName(String fileName) {
                 dataModel.setMnyFileName(fileName);
@@ -438,7 +209,9 @@ public class PasswordCheckerApp {
         textField_2.setColumns(10);
 
         JButton btnNewButton_2 = new JButton("Start");
-        btnNewButton_2.addActionListener(new StartSearchAction(btnNewButton_2));
+        final StartDictionarySearchAction action = new StartDictionarySearchAction(this, dataModel, btnNewButton_2);
+        scheduleDictionaryStatusCommand(action);
+        btnNewButton_2.addActionListener(action);
         wordListView.add(btnNewButton_2, "6, 10");
 
         JPanel bruteForceView = new JPanel();
@@ -459,7 +232,7 @@ public class PasswordCheckerApp {
         textField_3.setColumns(10);
 
         JButton btnNewButton_3 = new JButton("Open ...");
-        btnNewButton_3.addActionListener(new OpenMnyAction(textField_3) {
+        btnNewButton_3.addActionListener(new OpenMnyAction(this.getFrame(), textField_3) {
             @Override
             protected void setMnyFileName(String fileName) {
                 bruteForceDataModel.setMnyFileName(fileName);
@@ -467,14 +240,14 @@ public class PasswordCheckerApp {
         });
         bruteForceView.add(btnNewButton_3, "6, 2");
 
-        JLabel lblNewLabel_5 = new JLabel("Character set");
+        JLabel lblNewLabel_5 = new JLabel("Password length/mask");
         bruteForceView.add(lblNewLabel_5, "2, 4, right, default");
 
         textField_4 = new JTextField();
         bruteForceView.add(textField_4, "4, 4, fill, default");
         textField_4.setColumns(10);
 
-        JLabel lblNewLabel_6 = new JLabel("Password length/mask");
+        JLabel lblNewLabel_6 = new JLabel("Character set");
         bruteForceView.add(lblNewLabel_6, "2, 6, right, default");
 
         textField_5 = new JTextField();
@@ -484,10 +257,11 @@ public class PasswordCheckerApp {
         JLabel lblNewLabel_8 = new JLabel("Context");
         bruteForceView.add(lblNewLabel_8, "2, 8, right, default");
 
-        textField_7 = new JTextField();
-        textField_7.setEnabled(false);
-        bruteForceView.add(textField_7, "4, 8, fill, default");
-        textField_7.setColumns(10);
+        txtNotImplementedYet = new JTextField();
+        txtNotImplementedYet.setText("Not implemented yet.");
+        txtNotImplementedYet.setEnabled(false);
+        bruteForceView.add(txtNotImplementedYet, "4, 8, fill, default");
+        txtNotImplementedYet.setColumns(10);
 
         JButton btnNewButton_5 = new JButton("Open ...");
         btnNewButton_5.setEnabled(false);
@@ -497,38 +271,92 @@ public class PasswordCheckerApp {
         bruteForceView.add(lblNewLabel_7, "2, 10, right, default");
 
         textField_6 = new JTextField();
+        textField_6.setEditable(false);
         bruteForceView.add(textField_6, "4, 10, fill, default");
         textField_6.setColumns(10);
 
         JButton btnNewButton_4 = new JButton("Start");
-        btnNewButton_4.addActionListener(new StartBruteForceSearchAction(btnNewButton_4));
+        AbstractBackgroundCommand bruteForceAction = new StartBruteForceSearchAction(btnNewButton_4, PasswordCheckerApp.this,
+                bruteForceDataModel);
+        btnNewButton_4.addActionListener(bruteForceAction);
+        scheduleBruteForceStatusCommand(bruteForceAction);
         bruteForceView.add(btnNewButton_4, "6, 12");
         initDataBindings();
     }
 
-    protected void notifyResult(final String matchedPassword) {
-        log.info("matchedPassword=" + matchedPassword);
-        Runnable doRun = new Runnable() {
+    private void scheduleBruteForceStatusCommand(final AbstractBackgroundCommand action) {
+        Runnable cmd = new Runnable() {
+            private final AtomicBoolean running = action.getRunning();
+
             @Override
             public void run() {
-                Component parentComponent = frame;
-                if (matchedPassword == null) {
-                    JOptionPane.showMessageDialog(parentComponent, "Result of last search: NO password found.", "Search Result",
-                            JOptionPane.WARNING_MESSAGE);
-                } else {
-                    JTextArea textArea = new JTextArea();
-                    textArea.setEditable(false);
-                    textArea.setColumns(30);
-                    textArea.setLineWrap(true);
-                    textArea.setWrapStyleWord(true);
-                    textArea.append("Result of last search:\n");
-                    textArea.append("found password=" + matchedPassword);
-                    textArea.setSize(textArea.getPreferredSize().width, 1);
-                    JOptionPane.showMessageDialog(parentComponent, textArea, "Search Result", JOptionPane.INFORMATION_MESSAGE);
+                if (log.isDebugEnabled()) {
+                    log.debug("> bruteforce status scheduler ...");
                 }
+                if (!running.get()) {
+                    return;
+                }
+
+                long delta = action.getElapsed();
+                Duration duration = new Duration(delta);
+                action.setStatus("Running ... " + duration.toString());
             }
         };
-        SwingUtilities.invokeLater(doRun);
+        long period = 1L;
+        long initialDelay = 1L;
+        TimeUnit unit = TimeUnit.SECONDS;
+        schedulers.scheduleAtFixedRate(cmd, initialDelay, period, unit);
+    }
+
+    private void scheduleDictionaryStatusCommand(final StartDictionarySearchAction action) {
+        Runnable cmd = new Runnable() {
+            private final AtomicBoolean running = action.getRunning();
+
+            @Override
+            public void run() {
+                if (log.isDebugEnabled()) {
+                    log.debug("> status scheduler ...");
+                }
+                if (!running.get()) {
+                    return;
+                }
+
+                if (getChecker() == null) {
+                    return;
+                }
+
+                AtomicLong counter = getChecker().getCounter();
+                dataModel.setStatus("Running ... searched " + counter.get());
+            }
+        };
+        long period = 2L;
+        long initialDelay = 1L;
+        TimeUnit unit = TimeUnit.SECONDS;
+        schedulers.scheduleAtFixedRate(cmd, initialDelay, period, unit);
+    }
+
+    JFrame getFrame() {
+        return frame;
+    }
+
+    void setFrame(JFrame frame) {
+        this.frame = frame;
+    }
+
+    CheckDictionary getChecker() {
+        return checker;
+    }
+
+    void setChecker(CheckDictionary checker) {
+        this.checker = checker;
+    }
+
+    public ExecutorService getPool() {
+        return pool;
+    }
+
+    public void setPool(ExecutorService pool) {
+        this.pool = pool;
     }
 
     protected void initDataBindings() {
@@ -563,18 +391,25 @@ public class PasswordCheckerApp {
                 jTextFieldBeanProperty_3);
         autoBinding_4.bind();
         //
-        BeanProperty<BruteForceCheckerModel, String> bruteForceCheckerModelBeanProperty_1 = BeanProperty.create("alphabets");
+        BeanProperty<BruteForceCheckerModel, String> bruteForceCheckerModelBeanProperty_1 = BeanProperty.create("mask");
         BeanProperty<JTextField, String> jTextFieldBeanProperty_4 = BeanProperty.create("text");
         AutoBinding<BruteForceCheckerModel, String, JTextField, String> autoBinding_5 = Bindings.createAutoBinding(
                 UpdateStrategy.READ_WRITE, bruteForceDataModel, bruteForceCheckerModelBeanProperty_1, textField_4,
                 jTextFieldBeanProperty_4);
         autoBinding_5.bind();
         //
-        BeanProperty<BruteForceCheckerModel, String> bruteForceCheckerModelBeanProperty_2 = BeanProperty.create("mask");
+        BeanProperty<BruteForceCheckerModel, String> bruteForceCheckerModelBeanProperty_2 = BeanProperty.create("alphabets");
         BeanProperty<JTextField, String> jTextFieldBeanProperty_5 = BeanProperty.create("text");
         AutoBinding<BruteForceCheckerModel, String, JTextField, String> autoBinding_6 = Bindings.createAutoBinding(
                 UpdateStrategy.READ_WRITE, bruteForceDataModel, bruteForceCheckerModelBeanProperty_2, textField_5,
                 jTextFieldBeanProperty_5);
         autoBinding_6.bind();
+        //
+        BeanProperty<BruteForceCheckerModel, String> bruteForceCheckerModelBeanProperty_3 = BeanProperty.create("status");
+        BeanProperty<JTextField, String> jTextFieldBeanProperty_6 = BeanProperty.create("text");
+        AutoBinding<BruteForceCheckerModel, String, JTextField, String> autoBinding_7 = Bindings.createAutoBinding(
+                UpdateStrategy.READ_WRITE, bruteForceDataModel, bruteForceCheckerModelBeanProperty_3, textField_6,
+                jTextFieldBeanProperty_6);
+        autoBinding_7.bind();
     }
 }

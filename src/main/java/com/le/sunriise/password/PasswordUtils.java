@@ -106,7 +106,7 @@ public class PasswordUtils {
     
         int j = 0;
         for (int i = intArray.length - 1; i >= 0; i--) {
-            value += intArray[i] * Math.pow((double) radix, (double) j++);
+            value += intArray[i] * Math.pow(radix, j++);
         }
     
         return value;
