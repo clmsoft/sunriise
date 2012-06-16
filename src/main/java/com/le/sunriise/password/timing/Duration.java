@@ -21,6 +21,7 @@ package com.le.sunriise.password.timing;
 import java.util.concurrent.TimeUnit;
 
 public class Duration implements Comparable<Duration> {
+    public static final long DAYS_IN_YEAR = 365L;
     private long years;
     private long days;
     private final long hours;
@@ -39,7 +40,7 @@ public class Duration implements Comparable<Duration> {
         days = TimeUnit.MILLISECONDS.toDays(millis);
         millis -= TimeUnit.DAYS.toMillis(days);
 
-        if (days > 365) {
+        if (days > DAYS_IN_YEAR) {
             years = days / 365L;
             days = days % 365L;
         }
@@ -155,5 +156,21 @@ public class Duration implements Comparable<Duration> {
     @Override
     public String toString() {
         return toString(true);
+    }
+
+    public long getYears() {
+        return years;
+    }
+
+    public void setYears(long years) {
+        this.years = years;
+    }
+
+    public long getDuration() {
+        return duration;
+    }
+
+    public void setDays(long days) {
+        this.days = days;
     }
 }

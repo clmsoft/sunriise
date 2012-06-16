@@ -125,6 +125,11 @@ public class DurationTest {
 
     private void testDuration(long days, long hours, long minutes, long seconds, long millis) {
         Duration d = new Duration(calculateDuration(days, hours, minutes, seconds, millis));
+
+        long years = days / Duration.DAYS_IN_YEAR;
+        days = days % Duration.DAYS_IN_YEAR;
+
+        Assert.assertEquals(years, d.getYears());
         Assert.assertEquals(days, d.getDays());
         Assert.assertEquals(hours, d.getHours());
         Assert.assertEquals(minutes, d.getMinutes());
