@@ -29,9 +29,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.log4j.Logger;
 
-import com.le.sunriise.password.GenBruteForce;
 import com.le.sunriise.password.HeaderPage;
 import com.le.sunriise.password.PasswordUtils;
+import com.le.sunriise.password.bruteforce.GenBruteForce;
 
 public class CalculateRateCmd {
     private static final int DEFAULT_SECONDS = 60;

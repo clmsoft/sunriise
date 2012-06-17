@@ -24,7 +24,7 @@ public class CheckPasswordsUsingMask {
      * @param args
      */
     public static void main(String[] args) {
-        com.le.sunriise.password.CheckPasswordsUsingMaskCmd.main(args);
+        com.le.sunriise.password.bruteforce.CheckPasswordsUsingMaskCmd.main(args);
     }
 
 }

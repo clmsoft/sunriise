@@ -16,7 +16,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA
  *******************************************************************************/
-package com.le.sunriise.password;
+package com.le.sunriise.password.bruteforce;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,6 +24,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+
+import com.le.sunriise.password.HeaderPage;
 
 public class CheckBruteForceUtils {
     private static final Logger log = Logger.getLogger(CheckBruteForceUtils.class);
@@ -106,6 +108,9 @@ public class CheckBruteForceUtils {
 
     public static String checkUsingMask(File dbFile, char[] mask, char[] alphabets) throws IOException {
         int passwordLength = -1;
+        if ((mask == null) || (mask.length <= 0)) {
+            passwordLength = 5;
+        }
         return checkUsingMask(dbFile, passwordLength, mask, alphabets);
     }
 

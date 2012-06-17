@@ -16,7 +16,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA
  *******************************************************************************/
-package com.le.sunriise.password;
+package com.le.sunriise.password.bruteforce;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,6 +26,9 @@ import junit.framework.Assert;
 import org.apache.log4j.Logger;
 import org.junit.Ignore;
 import org.junit.Test;
+
+import com.le.sunriise.password.bruteforce.CheckBruteForceUtils;
+import com.le.sunriise.password.bruteforce.GenBruteForce;
 
 public class CheckBruteForceTest {
     private static final Logger log = Logger.getLogger(CheckBruteForceTest.class);
@@ -186,6 +189,10 @@ public class CheckBruteForceTest {
 
     @Ignore
     @Test
+    /**
+     * Finish about Tested 712870836 strings (0% completed, elapsed=1 hours 23 minutes 17 seconds 126 millis)
+     * @throws IOException
+     */
     public void testLength8Password1() throws IOException {
         File dbFile = new File("src/test/data/sunset-sample-pwd.mny");
         // 123@ABC!

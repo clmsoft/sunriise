@@ -16,7 +16,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA
  *******************************************************************************/
-package com.le.sunriise.password;
+package com.le.sunriise.password.dict;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,6 +24,9 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.log4j.Logger;
+
+import com.le.sunriise.password.HeaderPage;
+import com.le.sunriise.password.PasswordUtils;
 
 public final class CheckPasswordWorker implements Callable<String> {
     private static final Logger log = Logger.getLogger(CheckPasswordWorker.class);

@@ -16,12 +16,14 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA
  *******************************************************************************/
-package com.le.sunriise.password;
+package com.le.sunriise.password.bruteforce;
 
 import java.io.CharArrayWriter;
 import java.io.IOException;
 import java.math.BigInteger;
 import org.apache.log4j.Logger;
+
+import com.le.sunriise.password.PasswordUtils;
 
 public class GenBruteForce {
     private static final Logger log = Logger.getLogger(GenBruteForce.class);
@@ -370,21 +372,6 @@ public class GenBruteForce {
 
     public void setMaskWildChar(char maskWildChar) {
         this.maskWildChar = maskWildChar;
-    }
-
-    public static void main(String[] args) {
-        int passwordLength = 5;
-        char[] mask = null;
-        mask = new String("*****").toCharArray();
-        char[] alphabets = GenBruteForce.genChars('a', 'c');
-        GenBruteForce gen = new GenBruteForce(passwordLength, mask, alphabets);
-
-        long actual = gen.generate();
-
-        BigInteger expected = GenBruteForce.calculateExpected(passwordLength, alphabets.length);
-
-        log.info("actual=" + actual + ", expected=" + expected);
-
     }
 
     public GenBruteForceContext getContext() {

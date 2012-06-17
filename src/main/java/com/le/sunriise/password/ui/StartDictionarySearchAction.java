@@ -16,7 +16,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA
  *******************************************************************************/
-package com.le.sunriise.password;
+package com.le.sunriise.password.ui;
 
 import java.awt.Component;
 import java.awt.event.ActionEvent;
@@ -34,6 +34,8 @@ import javax.swing.SwingUtilities;
 import org.apache.log4j.Logger;
 
 import com.le.sunriise.model.bean.PasswordCheckerModel;
+import com.le.sunriise.password.HeaderPage;
+import com.le.sunriise.password.dict.CheckDictionary;
 
 final class StartDictionarySearchAction implements ActionListener {
     private static final Logger log = Logger.getLogger(StartDictionarySearchAction.class);

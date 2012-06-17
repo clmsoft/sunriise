@@ -16,7 +16,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA
  *******************************************************************************/
-package com.le.sunriise.password;
+package com.le.sunriise.password.dict;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,6 +24,7 @@ import java.io.IOException;
 import org.apache.log4j.Logger;
 
 import com.le.sunriise.StopWatch;
+import com.le.sunriise.password.HeaderPage;
 import com.le.sunriise.password.timing.Duration;
 
 // http://essayweb.net/mathematics/permcomb.shtml
@@ -50,7 +51,7 @@ public class CheckPasswordsCmd {
                 log.warn(e);
             }
         } else {
-            Class<CheckDictionary> clz = CheckDictionary.class;
+            Class<CheckPasswordsCmd> clz = CheckPasswordsCmd.class;
             System.out.println("Usage: java " + clz.getName() + " file.mny {passwordsFile.txt | path} threads");
             System.exit(1);
         }

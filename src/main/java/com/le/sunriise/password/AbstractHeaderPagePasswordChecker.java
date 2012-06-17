@@ -38,6 +38,12 @@ public abstract class AbstractHeaderPagePasswordChecker {
 
     protected final HeaderPage headerPage;
 
+    private byte[] encodingKey;
+
+    private byte[] testKey;
+
+    private byte[] testBytes;
+
     public static boolean checkPassword(HeaderPage headerPage, String testPassword) {
         boolean matched = false;
         AbstractHeaderPagePasswordChecker checker = null;
@@ -69,6 +75,33 @@ public abstract class AbstractHeaderPagePasswordChecker {
         } catch (IOException e) {
             log.error(e, e);
         } finally {
+        }
+
+        if (matched) {
+            if (checker != null) {
+                byte[] bytes = null;
+                bytes = checker.getEncodingKey();
+                if (bytes == null) {
+                    log.info("encodingKey=" + bytes);
+                } else {
+                    log.info("encodingKey.length=" + bytes.length + " (" + (bytes.length * 8) + ")");
+                    log.info("    encodingKey=" + toHexString(bytes));
+                }
+                bytes = checker.getTestKey();
+                if (bytes == null) {
+                    log.info("testKey=" + bytes);
+                } else {
+                    log.info("testKey.length=" + bytes.length + " (" + (bytes.length * 8) + ")");
+                    log.info("    testKey=" + toHexString(bytes));
+                }
+                bytes = checker.getTestBytes();
+                if (bytes == null) {
+                    log.info("testBytes=" + bytes);
+                } else {
+                    log.info("testBytes.length=" + bytes.length + " (" + (bytes.length * 8) + ")");
+                    log.info("    testBytes=" + toHexString(bytes));
+                }
+            }
         }
         return matched;
     }
@@ -122,15 +155,20 @@ public abstract class AbstractHeaderPagePasswordChecker {
         // then a salt is append to the digest. This is is now known as the
         // testKey
         // Notes: important fact headerPage.getSalt()
-        byte[] testKey = concat(passwordDigest, headerPage.getSalt());
+        testKey = concat(passwordDigest, headerPage.getSalt());
         // Notes: important fact headerPage.getBaseSalt()
-        byte[] testBytes = headerPage.getBaseSalt();
+        testBytes = headerPage.getBaseSalt();
 
         // an embedded encrypted 4 bytes is retrieved from the db
         // (encrypted4BytesCheck)
         // decrypted4BytesCheck = f(encrypted4BytesCheck, testKey)
         // assert decrypted4BytesCheck == testBytes
-        return verifyPassword(headerPage, testKey, testBytes);
+        boolean rv = verifyPassword(headerPage, testKey, testBytes);
+
+        // create final key
+        encodingKey = concat(passwordDigest, testBytes);
+
+        return rv;
     }
 
     private boolean verifyPassword(HeaderPage headerPage, byte[] testKey, byte[] testBytes) {
@@ -234,6 +272,18 @@ public abstract class AbstractHeaderPagePasswordChecker {
 
     public HeaderPage getHeaderPage() {
         return headerPage;
+    }
+
+    public byte[] getEncodingKey() {
+        return encodingKey;
+    }
+
+    public byte[] getTestKey() {
+        return testKey;
+    }
+
+    public byte[] getTestBytes() {
+        return testBytes;
     }
 
 }

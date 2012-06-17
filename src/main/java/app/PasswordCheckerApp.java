@@ -24,7 +24,7 @@ public class PasswordCheckerApp {
      * @param args
      */
     public static void main(String[] args) {
-        com.le.sunriise.password.PasswordCheckerApp.main(args);
+        com.le.sunriise.password.ui.PasswordCheckerApp.main(args);
     }
 
 }

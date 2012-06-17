@@ -16,7 +16,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA
  *******************************************************************************/
-package com.le.sunriise.password;
+package com.le.sunriise.password.bruteforce;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,6 +33,8 @@ import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import com.le.sunriise.StopWatch;
+import com.le.sunriise.password.AbstractHeaderPagePasswordChecker;
+import com.le.sunriise.password.HeaderPage;
 import com.le.sunriise.password.timing.Duration;
 
 public class CheckBruteForce extends GenBruteForce {

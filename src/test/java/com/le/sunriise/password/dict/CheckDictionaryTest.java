@@ -17,7 +17,7 @@
  * USA
  *******************************************************************************/
 
-package com.le.sunriise.password;
+package com.le.sunriise.password.dict;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,6 +28,9 @@ import junit.framework.Assert;
 
 import org.apache.log4j.Logger;
 import org.junit.Test;
+
+import com.le.sunriise.password.HeaderPage;
+import com.le.sunriise.password.dict.CheckDictionary;
 
 public class CheckDictionaryTest {
     private static final Logger log = Logger.getLogger(CheckDictionaryTest.class);

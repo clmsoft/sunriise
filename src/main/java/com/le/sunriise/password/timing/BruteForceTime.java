@@ -21,7 +21,7 @@ package com.le.sunriise.password.timing;
 import java.math.BigInteger;
 import org.apache.log4j.Logger;
 
-import com.le.sunriise.password.GenBruteForce;
+import com.le.sunriise.password.bruteforce.GenBruteForce;
 
 public class BruteForceTime {
 
@@ -39,7 +39,8 @@ public class BruteForceTime {
             String dbFileName = args[0];
             ratePerSecond = CalculateRateCmd.calculateRate(dbFileName);
         }
-
+        ratePerSecond = 240000;
+        
         log.info("ratePerSecond=" + ratePerSecond);
 
         alphabetsLen = 26;

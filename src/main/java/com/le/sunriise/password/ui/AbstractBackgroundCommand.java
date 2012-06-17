@@ -16,7 +16,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA
  *******************************************************************************/
-package com.le.sunriise.password;
+package com.le.sunriise.password.ui;
 
 import java.awt.Component;
 import java.awt.event.ActionEvent;
@@ -33,7 +33,7 @@ import org.apache.log4j.Logger;
 import com.le.sunriise.StopWatch;
 
 public abstract class AbstractBackgroundCommand implements ActionListener {
-    private static final Logger log = Logger.getLogger(StartBruteForceSearchAction.class);
+    private static final Logger log = Logger.getLogger(AbstractBackgroundCommand.class);
 
     private AtomicBoolean running = new AtomicBoolean(false);
 

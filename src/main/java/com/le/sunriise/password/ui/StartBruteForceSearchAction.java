@@ -16,7 +16,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA
  *******************************************************************************/
-package com.le.sunriise.password;
+package com.le.sunriise.password.ui;
 
 import java.awt.Component;
 import java.io.File;
@@ -29,6 +29,9 @@ import javax.swing.SwingUtilities;
 import org.apache.log4j.Logger;
 
 import com.le.sunriise.model.bean.BruteForceCheckerModel;
+import com.le.sunriise.password.HeaderPage;
+import com.le.sunriise.password.bruteforce.CheckBruteForce;
+import com.le.sunriise.password.bruteforce.GenBruteForce;
 
 final class StartBruteForceSearchAction extends AbstractBackgroundCommand {
     private static final Logger log = Logger.getLogger(StartBruteForceSearchAction.class);

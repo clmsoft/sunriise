@@ -16,9 +16,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA
  *******************************************************************************/
-package com.le.sunriise.password;
+package com.le.sunriise.password.bruteforce;
 
 import org.apache.log4j.Logger;
+
 
 public class GenBruteForce2Chars {
     private static final Logger log = Logger.getLogger(GenBruteForce2Chars.class);

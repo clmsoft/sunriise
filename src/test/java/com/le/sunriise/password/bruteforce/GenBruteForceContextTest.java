@@ -16,7 +16,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA
  *******************************************************************************/
-package com.le.sunriise.password;
+package com.le.sunriise.password.bruteforce;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,6 +25,8 @@ import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Test;
+
+import com.le.sunriise.password.bruteforce.GenBruteForceContext;
 
 public class GenBruteForceContextTest {
     private static final Logger log = Logger.getLogger(GenBruteForceContextTest.class);

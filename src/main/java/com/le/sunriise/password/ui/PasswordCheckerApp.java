@@ -16,7 +16,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA
  *******************************************************************************/
-package com.le.sunriise.password;
+package com.le.sunriise.password.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -53,6 +53,7 @@ import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 import com.le.sunriise.model.bean.BruteForceCheckerModel;
 import com.le.sunriise.model.bean.PasswordCheckerModel;
+import com.le.sunriise.password.dict.CheckDictionary;
 import com.le.sunriise.password.timing.Duration;
 
 public class PasswordCheckerApp {
