@@ -67,7 +67,7 @@ public class HeaderPagePasswordChecker extends AbstractHeaderPagePasswordChecker
             fileName = args[0];
             password = args[1];
         } else {
-            Class<AbstractHeaderPagePasswordChecker> clz = AbstractHeaderPagePasswordChecker.class;
+            Class<HeaderPagePasswordChecker> clz = HeaderPagePasswordChecker.class;
             System.out.println("Usage: java " + clz.getName() + " samples.mny [password]");
             System.exit(1);
         }

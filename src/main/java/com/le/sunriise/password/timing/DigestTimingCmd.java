@@ -58,7 +58,13 @@ public class DigestTimingCmd {
         doTiming(passwordLength, maxIteration, useSha1);
     }
 
-    private static void doTiming(int passwordLength, int maxIteration, boolean useSha1) {
+    public static long doTiming(int maxIteration) {
+        return doTiming(PASSWORD_LENGTH, maxIteration, true);
+    }
+
+    public static long doTiming(int passwordLength, int maxIteration, boolean useSha1) {
+        long delta = 0L;
+
         log.info("passwordLength=" + passwordLength);
         log.info("maxIteration=" + maxIteration);
         log.info("useSha1=" + useSha1);
@@ -79,12 +85,14 @@ public class DigestTimingCmd {
                 bytes += byteArray.length;
             }
         } finally {
-            long delta = watch.click();
+            delta = watch.click();
             log.info("delta=" + delta);
             log.info("    rate=" + (max / (delta / 1000)) + "/sec");
             log.info("    rate(bytes)=" + ((bytes / 1024) / (delta / 1000)) + "K/sec");
             log.info("< END");
         }
+
+        return delta;
     }
 
     public static boolean boolValueOf(String strValue, boolean defaultValue) {

@@ -66,7 +66,12 @@ public class RC4TimingCmd {
         doTiming(keyLength, cipherTextLength, maxIteration);
     }
 
-    private static void doTiming(int keyLength, int cipherTextLength, int maxIteration) {
+    public static long doTiming(int maxIteration) {
+        return doTiming(DEFAULT_KEY_LENGTH, DEFAULT_CIPHERTEXT_LENGTH, maxIteration);
+    }
+
+    public static long doTiming(int keyLength, int cipherTextLength, int maxIteration) {
+        long delta = 0L;
         RC4Engine engine = new RC4Engine();
 
         byte[] key = new byte[keyLength];
@@ -94,12 +99,14 @@ public class RC4TimingCmd {
                 bytes += ciphertext.length;
             }
         } finally {
-            long delta = watch.click();
+            delta = watch.click();
             log.info("delta=" + delta);
             log.info("    rate=" + (max / (delta / 1000)) + "/sec");
             log.info("    rate(bytes)=" + ((bytes / 1024) / (delta / 1000)) + "K/sec");
             log.info("< END");
         }
+
+        return delta;
     }
 
     public static int intValueOf(String strValue, int defaultValue) {
