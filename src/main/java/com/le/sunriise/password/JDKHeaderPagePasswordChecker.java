@@ -19,18 +19,11 @@
 package com.le.sunriise.password;
 
 import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.ShortBufferException;
-import javax.crypto.spec.SecretKeySpec;
 
 import org.apache.log4j.Logger;
+
+import com.le.sunriise.password.crypt.JDKUtils;
 
 public class JDKHeaderPagePasswordChecker extends AbstractHeaderPagePasswordChecker {
     private static final Logger log = Logger.getLogger(JDKHeaderPagePasswordChecker.class);
@@ -41,32 +34,14 @@ public class JDKHeaderPagePasswordChecker extends AbstractHeaderPagePasswordChec
 
     @Override
     protected byte[] createDigestBytes(byte[] passwordBytes, boolean useSha1) {
-        byte[] digestBytes = null;
-//        boolean useSha1 = headerPage.isUseSha1();
-
-        MessageDigest digest = null;
-
-        try {
-            if (useSha1) {
-                digest = MessageDigest.getInstance("SHA-1");
-            } else {
-                digest = MessageDigest.getInstance("MD5");
-            }
-            digest.update(passwordBytes, 0, passwordBytes.length);
-            digestBytes = digest.digest();
-        } catch (NoSuchAlgorithmException e) {
-            log.error(e, e);
-            throw new RuntimeException(e);
-        }
-
-        return digestBytes;
+        return JDKUtils.createDigestBytes(passwordBytes, useSha1);
     }
 
     @Override
     protected byte[] decryptUsingRC4(byte[] encrypted4BytesCheck, byte[] testKey) {
         boolean useJDK = true;
         if (useJDK) {
-            return decryptUsingJDKRC4(encrypted4BytesCheck, testKey);
+            return JDKUtils.decryptUsingRC4(encrypted4BytesCheck, testKey);
         } else {
             return decryptUsingLocalRC4(encrypted4BytesCheck, testKey);
         }
@@ -74,38 +49,6 @@ public class JDKHeaderPagePasswordChecker extends AbstractHeaderPagePasswordChec
 
     private byte[] decryptUsingLocalRC4(byte[] encrypted4BytesCheck, byte[] testKey) {
         byte[] decrypted4BytesCheck = new byte[4];
-        return decrypted4BytesCheck;
-    }
-
-    private byte[] decryptUsingJDKRC4(byte[] encrypted4BytesCheck, byte[] testKey) {
-
-        byte[] decrypted4BytesCheck = new byte[4];
-
-        try {
-            Cipher rc4 = Cipher.getInstance("ARCFOUR");
-            SecretKeySpec secretKeySpec = new SecretKeySpec(testKey, "ARCFOUR");
-            rc4.init(Cipher.DECRYPT_MODE, secretKeySpec);
-            rc4.doFinal(encrypted4BytesCheck, 0, encrypted4BytesCheck.length, decrypted4BytesCheck, 0);
-        } catch (NoSuchAlgorithmException e) {
-            log.error(e, e);
-            throw new RuntimeException(e);
-        } catch (NoSuchPaddingException e) {
-            log.error(e, e);
-            throw new RuntimeException(e);
-        } catch (InvalidKeyException e) {
-            log.error(e, e);
-            throw new RuntimeException(e);
-        } catch (ShortBufferException e) {
-            log.error(e, e);
-            throw new RuntimeException(e);
-        } catch (IllegalBlockSizeException e) {
-            log.error(e, e);
-            throw new RuntimeException(e);
-        } catch (BadPaddingException e) {
-            log.error(e, e);
-            throw new RuntimeException(e);
-        }
-
         return decrypted4BytesCheck;
     }
 

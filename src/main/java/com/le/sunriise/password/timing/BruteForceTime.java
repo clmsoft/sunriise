@@ -19,6 +19,7 @@
 package com.le.sunriise.password.timing;
 
 import java.math.BigInteger;
+
 import org.apache.log4j.Logger;
 
 import com.le.sunriise.password.bruteforce.GenBruteForce;

@@ -18,12 +18,17 @@
  *******************************************************************************/
 package com.le.sunriise.password.timing;
 
+import java.security.SecureRandom;
+import java.util.Random;
+
 import org.apache.log4j.Logger;
 import org.bouncycastle.crypto.engines.RC4Engine;
 
 import com.le.sunriise.StopWatch;
-import com.le.sunriise.password.BouncyCastleUtils;
 import com.le.sunriise.password.PasswordUtils;
+import com.le.sunriise.password.crypt.BouncyCastleUtils;
+import com.le.sunriise.password.crypt.JDKUtils;
+import com.le.sunriise.password.crypt.LocalUtils;
 
 public class RC4TimingCmd {
     private static final Logger log = Logger.getLogger(PasswordUtils.class);
@@ -33,6 +38,71 @@ public class RC4TimingCmd {
     private static final int DEFAULT_MAX_ITERATIONS = 10000000;
 
     private static final int DEFAULT_CIPHERTEXT_LENGTH = 4;
+
+    public interface CryptoProvider {
+        public byte[] decryptUsingRC4(byte[] ciphertext, byte[] key);
+
+        public String getName();
+    };
+
+    private static final class BouncyCastleProvider implements CryptoProvider {
+        private final String name;
+        private RC4Engine engine;
+
+        public BouncyCastleProvider() {
+            super();
+            this.name = "BouncyCastleProvider";
+            this.engine = new RC4Engine();
+        }
+
+        @Override
+        public byte[] decryptUsingRC4(byte[] ciphertext, byte[] key) {
+            return BouncyCastleUtils.decryptUsingRC4(engine, ciphertext, key);
+        }
+
+        @Override
+        public String getName() {
+            return name;
+        }
+    }
+
+    private static final class JDKProvider implements CryptoProvider {
+        private final String name;
+
+        public JDKProvider() {
+            super();
+            this.name = "JDKProvider";
+        }
+
+        @Override
+        public byte[] decryptUsingRC4(byte[] ciphertext, byte[] key) {
+            return JDKUtils.decryptUsingRC4(ciphertext, key);
+        }
+
+        @Override
+        public String getName() {
+            return name;
+        }
+    }
+
+    private static final class LocalProvider implements CryptoProvider {
+        private final String name;
+
+        public LocalProvider() {
+            super();
+            this.name = "LocalProvider";
+        }
+
+        @Override
+        public byte[] decryptUsingRC4(byte[] ciphertext, byte[] key) {
+            return LocalUtils.decryptUsingRC4(ciphertext, key);
+        }
+
+        @Override
+        public String getName() {
+            return name;
+        }
+    }
 
     /**
      * @param args
@@ -63,50 +133,70 @@ public class RC4TimingCmd {
             System.exit(1);
         }
 
-        doTiming(keyLength, cipherTextLength, maxIteration);
-    }
-
-    public static long doTiming(int maxIteration) {
-        return doTiming(DEFAULT_KEY_LENGTH, DEFAULT_CIPHERTEXT_LENGTH, maxIteration);
-    }
-
-    public static long doTiming(int keyLength, int cipherTextLength, int maxIteration) {
-        long delta = 0L;
-        RC4Engine engine = new RC4Engine();
-
-        byte[] key = new byte[keyLength];
-        byte[] ciphertext = new byte[cipherTextLength];
-
-        for (int i = 0; i < key.length; i++) {
-            key[i] = Byte.valueOf("" + i);
-        }
-
-        for (int i = 0; i < ciphertext.length; i++) {
-            ciphertext[i] = Byte.valueOf("" + i);
-        }
-
-        log.info("key.length=" + key.length);
-        log.info("ciphertext.length=" + ciphertext.length);
+        log.info("keyLength=" + keyLength);
+        log.info("cipherTextLength=" + cipherTextLength);
         log.info("maxIteration=" + maxIteration);
 
-        log.info("> START");
+        CryptoProvider provider = null;
+
+        provider = new LocalProvider();
+        doTiming(keyLength, cipherTextLength, maxIteration, provider);
+
+        provider = new BouncyCastleProvider();
+        doTiming(keyLength, cipherTextLength, maxIteration, provider);
+
+        // provider = new JDKProvider();
+        // doTiming(keyLength, cipherTextLength, maxIteration, provider);
+
+    }
+
+    private static long doTiming(int keyLength, int cipherTextLength, int maxIteration, CryptoProvider provider) {
+        long delta = 0L;
+
+        Random rand = new SecureRandom();
+
+        int maxPool = 100;
+
+        byte[][] keys = new byte[maxPool][];
+        for (int i = 0; i < maxPool; i++) {
+            keys[i] = new byte[keyLength];
+            rand.nextBytes(keys[i]);
+        }
+        byte[][] ciphertexts = new byte[maxPool][];
+        for (int i = 0; i < maxPool; i++) {
+            ciphertexts[i] = new byte[cipherTextLength];
+            rand.nextBytes(ciphertexts[i]);
+        }
+
+        log.info("> START, provider=" + provider.getName());
         StopWatch watch = new StopWatch();
         final int max = maxIteration;
         long bytes = 0L;
         try {
             for (int i = 0; i < max; i++) {
-                BouncyCastleUtils.decryptUsingRC4(engine, ciphertext, key);
-                bytes += ciphertext.length;
+                // int ranIndex = rand.nextInt(maxPool);
+                int ranIndex = i % maxPool;
+                provider.decryptUsingRC4(ciphertexts[ranIndex], keys[ranIndex]);
+                bytes += ciphertexts[ranIndex].length;
             }
         } finally {
             delta = watch.click();
             log.info("delta=" + delta);
             log.info("    rate=" + (max / (delta / 1000)) + "/sec");
             log.info("    rate(bytes)=" + ((bytes / 1024) / (delta / 1000)) + "K/sec");
-            log.info("< END");
+            log.info("< END, provider=" + provider.getName());
         }
 
         return delta;
+    }
+
+    public static long doTiming(int maxIteration, CryptoProvider provider) {
+        return doTiming(DEFAULT_KEY_LENGTH, DEFAULT_CIPHERTEXT_LENGTH, maxIteration, provider);
+    }
+
+    public static long doTiming(int maxIteration) {
+        CryptoProvider provider = new BouncyCastleProvider();
+        return doTiming(maxIteration, provider);
     }
 
     public static int intValueOf(String strValue, int defaultValue) {

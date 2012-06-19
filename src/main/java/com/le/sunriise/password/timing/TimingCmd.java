@@ -13,23 +13,30 @@ public class TimingCmd {
     public static void main(String[] args) {
         int maxIteration = DEFAULT_MAX_ITERATIONS;
 
+        log.info("#");
         long digestDelta = DigestTimingCmd.doTiming(maxIteration);
 
+        log.info("#");
         long rc4Delta = RC4TimingCmd.doTiming(maxIteration);
 
+        log.info("#");
         long checkerDelta = PasswordCheckerTimingCmd.doTiming(maxIteration);
 
+        log.info("#");
         log.info("digestDelta=" + digestDelta);
         log.info("rc4Delta=" + rc4Delta);
         long sum = (digestDelta + rc4Delta);
         log.info("sum=" + sum);
-        log.info("  rate=" + (maxIteration/(sum/1000L)));
+        
+        long rate1 = maxIteration/(sum/1000L);
+        log.info("  rate=" + rate1 + "/sec");
 
         log.info("checkerDelta=" + checkerDelta);
-        log.info("  rate=" + (maxIteration/(checkerDelta/1000L)));
+        long rate2 = maxIteration/(checkerDelta/1000L);
+        log.info("  rate=" + rate2 + "/sec");
         
-        long diff = checkerDelta - sum;
-        log.info("diff=" + diff);
+        long percentage = ((rate1 - rate2) * 100) / rate1;
+        log.info("  percentage=" + percentage + "%");
     }
 
 }

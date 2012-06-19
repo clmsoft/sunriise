@@ -19,9 +19,10 @@
 package com.le.sunriise.password.timing;
 
 import org.apache.log4j.Logger;
+
 import com.le.sunriise.StopWatch;
-import com.le.sunriise.password.BouncyCastleUtils;
 import com.le.sunriise.password.PasswordUtils;
+import com.le.sunriise.password.crypt.BouncyCastleUtils;
 
 public class DigestTimingCmd {
     private static final Logger log = Logger.getLogger(PasswordUtils.class);
@@ -58,11 +59,7 @@ public class DigestTimingCmd {
         doTiming(passwordLength, maxIteration, useSha1);
     }
 
-    public static long doTiming(int maxIteration) {
-        return doTiming(PASSWORD_LENGTH, maxIteration, true);
-    }
-
-    public static long doTiming(int passwordLength, int maxIteration, boolean useSha1) {
+    private static long doTiming(int passwordLength, int maxIteration, boolean useSha1) {
         long delta = 0L;
 
         log.info("passwordLength=" + passwordLength);
@@ -93,6 +90,10 @@ public class DigestTimingCmd {
         }
 
         return delta;
+    }
+
+    public static long doTiming(int maxIteration) {
+        return doTiming(PASSWORD_LENGTH, maxIteration, true);
     }
 
     public static boolean boolValueOf(String strValue, boolean defaultValue) {
