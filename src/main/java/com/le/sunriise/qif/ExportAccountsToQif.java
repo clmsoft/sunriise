@@ -34,7 +34,7 @@ import com.le.sunriise.Utils;
 import com.le.sunriise.viewer.OpenedDb;
 
 public class ExportAccountsToQif {
-    private static final Logger log = Logger.getLogger(Logger.class);
+    private static final Logger log = Logger.getLogger(ExportAccountsToQif.class);
 
     /**
      * @param args
