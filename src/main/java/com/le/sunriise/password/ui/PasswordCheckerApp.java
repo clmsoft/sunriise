@@ -21,6 +21,7 @@ package com.le.sunriise.password.ui;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.EventQueue;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -31,6 +32,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -42,6 +44,7 @@ import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
 import org.apache.log4j.Logger;
+import org.apache.poi.poifs.property.Parent;
 import org.jdesktop.beansbinding.AutoBinding;
 import org.jdesktop.beansbinding.AutoBinding.UpdateStrategy;
 import org.jdesktop.beansbinding.BeanProperty;
@@ -216,8 +219,12 @@ public class PasswordCheckerApp {
         btnNewButton_2.addActionListener(action);
         wordListView.add(btnNewButton_2, "6, 10");
 
+        JPanel bruteForceViewParent = new JPanel();
+        bruteForceViewParent.setLayout(new BoxLayout(bruteForceViewParent, BoxLayout.PAGE_AXIS));
+        tabbedPane.addTab("Brute force", null, bruteForceViewParent, null);
+        
         JPanel bruteForceView = new JPanel();
-        tabbedPane.addTab("Brute force", null, bruteForceView, null);
+        bruteForceViewParent.add(bruteForceView);
         bruteForceView.setLayout(new FormLayout(new ColumnSpec[] { FormFactory.UNRELATED_GAP_COLSPEC, FormFactory.DEFAULT_COLSPEC,
                 FormFactory.LABEL_COMPONENT_GAP_COLSPEC, ColumnSpec.decode("default:grow"), FormFactory.RELATED_GAP_COLSPEC,
                 FormFactory.DEFAULT_COLSPEC, FormFactory.UNRELATED_GAP_COLSPEC, }, new RowSpec[] { FormFactory.RELATED_GAP_ROWSPEC,
@@ -283,6 +290,17 @@ public class PasswordCheckerApp {
         btnNewButton_4.addActionListener(bruteForceAction);
         scheduleBruteForceStatusCommand(bruteForceAction);
         bruteForceView.add(btnNewButton_4, "6, 12");
+        
+        JPanel progressView = new JPanel();
+        bruteForceViewParent.add(progressView);
+        progressView.setLayout(new GridLayout(3, 12));
+        for(int i = 0; i < 3; i++) {
+            for(int j = 0; j < 12; j++) {
+                progressView.add(new JLabel(i +"/" + j));
+            }
+        }
+        
+        
         initDataBindings();
     }
 

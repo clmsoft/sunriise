@@ -38,9 +38,11 @@ final class StartBruteForceSearchAction extends AbstractBackgroundCommand {
 
     private BruteForceCheckerModel dataModel;
     private final PasswordCheckerApp app;
-    private CheckBruteForce checker = null;
+    private BackgroundTask backgroundTask;
 
     private final class BackgroundTask implements Runnable {
+        private CheckBruteForce checker = null;
+
         @Override
         public void run() {
             setStatus("Running ... ");
@@ -49,38 +51,25 @@ final class StartBruteForceSearchAction extends AbstractBackgroundCommand {
             try {
                 HeaderPage headerPage = new HeaderPage(new File(dataModel.getMnyFileName()));
 
-                String maskString = dataModel.getMask();
-                char[] mask = maskString.toCharArray();
-                int passwordLength = -1;
-                try {
-                    passwordLength = Integer.valueOf(maskString);
-                    mask = null;
-                } catch (NumberFormatException e) {
-                    passwordLength = -1;
-                }
-
-                char[] alphabets = null;
-                String alphabetsString = dataModel.getAlphabets();
-                if ((alphabetsString != null) && alphabetsString.length() > 0) {
-                    alphabets = alphabetsString.toCharArray();
-                } else {
-                    alphabets = GenBruteForce.ALPHABET_US_KEYBOARD_MNY;
-                }
-
-                if (checker != null) {
+                if (headerPage.isNewEncryption()) {
+                    String maskString = dataModel.getMask();
+                    char[] mask = maskString.toCharArray();
+                    int passwordLength = -1;
                     try {
-                        checker.shutdown();
-                    } finally {
-                        checker = null;
+                        passwordLength = Integer.valueOf(maskString);
+                        mask = null;
+                    } catch (NumberFormatException e) {
+                        passwordLength = -1;
                     }
-                }
-                try {
-                    checker = new CheckBruteForce(headerPage, passwordLength, mask, alphabets);
-                    checker.check();
-                    password = checker.getPassword();
-                    log.info("password=" + password);
-                    notifyResult(app.getFrame(), password);
-                } finally {
+
+                    char[] alphabets = null;
+                    String alphabetsString = dataModel.getAlphabets();
+                    if ((alphabetsString != null) && alphabetsString.length() > 0) {
+                        alphabets = alphabetsString.toCharArray();
+                    } else {
+                        alphabets = GenBruteForce.ALPHABET_US_KEYBOARD_MNY;
+                    }
+
                     if (checker != null) {
                         try {
                             checker.shutdown();
@@ -88,6 +77,25 @@ final class StartBruteForceSearchAction extends AbstractBackgroundCommand {
                             checker = null;
                         }
                     }
+                    try {
+                        checker = new CheckBruteForce(headerPage, passwordLength, mask, alphabets);
+                        checker.check();
+                        password = checker.getPassword();
+                        log.info("password=" + password);
+                        notifyResult(app.getFrame(), password);
+                    } finally {
+                        if (checker != null) {
+                            try {
+                                checker.shutdown();
+                            } finally {
+                                checker = null;
+                            }
+                        }
+                    }
+                } else {
+                    password = headerPage.getEmbeddedDatabasePassword();
+                    log.info("password=" + password);
+                    notifyResult(app.getFrame(), password);
                 }
             } catch (IOException e) {
                 log.warn(e);
@@ -103,6 +111,12 @@ final class StartBruteForceSearchAction extends AbstractBackgroundCommand {
                     };
                     SwingUtilities.invokeLater(doRun);
                 }
+            }
+        }
+
+        public void notifyBackgroundToStop() {
+            if (checker != null) {
+                checker.setTerminate(true);
             }
         }
     }
@@ -153,8 +167,8 @@ final class StartBruteForceSearchAction extends AbstractBackgroundCommand {
 
     @Override
     protected Runnable createCommand() {
-        Runnable command = new BackgroundTask();
-        return command;
+        backgroundTask = new BackgroundTask();
+        return backgroundTask;
     }
 
     @Override
@@ -165,8 +179,9 @@ final class StartBruteForceSearchAction extends AbstractBackgroundCommand {
     @Override
     protected void notifyBackgroundToStop() {
         super.notifyBackgroundToStop();
-        if (checker != null) {
-            checker.setTerminate(true);
+
+        if (backgroundTask != null) {
+            backgroundTask.notifyBackgroundToStop();
         }
     }
 

@@ -27,6 +27,10 @@ public class BruteForceCheckerModel {
     
     private String status;
 
+    public BruteForceCheckerModel() {
+        this.mask = "*****";
+    }
+    
     public String getMnyFileName() {
         return mnyFileName;
     }
