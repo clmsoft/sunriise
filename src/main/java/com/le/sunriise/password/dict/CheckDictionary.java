@@ -84,7 +84,11 @@ public class CheckDictionary {
      * @throws IOException
      */
     public String check(HeaderPage headerPage, File candidatesPath) throws IOException {
-        return recursePath(headerPage, candidatesPath);
+        if (headerPage.isNewEncryption()) {
+            return recursePath(headerPage, candidatesPath);
+        } else {
+            return headerPage.getEmbeddedDatabasePassword();
+        }
     }
 
     public void stop() {

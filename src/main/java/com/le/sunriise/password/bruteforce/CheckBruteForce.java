@@ -55,7 +55,7 @@ public class CheckBruteForce extends GenBruteForce {
 
     private BruteForceStat stat = new BruteForceStat();
 
-    private boolean writeContextFile = true;
+    private boolean writeContextFile = false;
 
     private final class StatusTask implements Runnable {
         @Override
@@ -72,14 +72,17 @@ public class CheckBruteForce extends GenBruteForce {
             }
             stat.setCount(aCount);
             stat.setPercentage(percentage);
-            log.info("Tested " + count + " strings" + " (" + percentage + "% completed" + ", elapsed=" + duration.toString() + ")");
             if (delta > 0) {
                 BigInteger seconds = BigInteger.valueOf(delta).divide(ONE_THOUSAND);
                 stat.setSeconds(seconds);
                 stat.setCurrentResult(getCurrentResult());
                 stat.setCurrentCursorIndex(getCurrentCursorIndex());
 
-                logStatus(stat);
+                if ((seconds.longValue() % 30) == 0) {
+                    log.info("Tested " + count + " strings" + " (" + percentage + "% completed" + ", elapsed="
+                            + duration.toString() + ")");
+                    logStat(stat);
+                }
             }
 
             if (writeContextFile) {
@@ -109,20 +112,20 @@ public class CheckBruteForce extends GenBruteForce {
                 }
             }
         }
+    }
 
-        private void logStatus(BruteForceStat stat) {
-            if (stat.getSeconds().longValue() > 0) {
-                log.info("  Rate=" + stat.getCount().divide(stat.getSeconds()) + "/sec");
-            } else {
-                log.info("  Rate=" + "N/A" + ", count=" + stat.getCount());
-            }
-            log.info("    currentResult=" + stat.getCurrentResult());
-            char[] alphabets = null;
-            if (getContext() != null) {
-                alphabets = getContext().getAlphabets();
-            }
-            log.info("    currentCursorIndex=" + GenBruteForce.printIntArray(stat.getCurrentCursorIndex(), alphabets));
+    protected void logStat(BruteForceStat stat) {
+        if (stat.getSeconds().longValue() > 0) {
+            log.info("  Rate=" + GenBruteForce.calcRate(stat) + "/sec");
+        } else {
+            log.info("  Rate=" + "N/A" + ", count=" + stat.getCount());
         }
+        log.info("    currentResult=" + stat.getCurrentResult());
+        char[] alphabets = null;
+        if (getContext() != null) {
+            alphabets = getContext().getAlphabets();
+        }
+        log.info("    currentCursorIndex=" + GenBruteForce.printIntArray(stat.getCurrentCursorIndex(), alphabets));
     }
 
     /**
@@ -214,7 +217,7 @@ public class CheckBruteForce extends GenBruteForce {
     private Runnable createScheduleStatusCmd() {
         Runnable statusCommand = new StatusTask();
         long initialDelay = 0;
-        long period = 30;
+        long period = 1;
         TimeUnit unit = TimeUnit.SECONDS;
         this.periodicStatusFuture = scheduledExecutorService.scheduleAtFixedRate(statusCommand, initialDelay, period, unit);
         return statusCommand;
@@ -228,5 +231,20 @@ public class CheckBruteForce extends GenBruteForce {
         if (this.scheduledExecutorService != null) {
             this.scheduledExecutorService.shutdown();
         }
+    }
+
+    public BruteForceStat getStat() {
+        return stat;
+    }
+
+    public char[] getAlphabets() {
+        if (getContext() == null) {
+            return null;
+        }
+        char[] alphabets = getContext().getAlphabets();
+        if (alphabets == null) {
+            return null;
+        }
+        return alphabets;
     }
 }

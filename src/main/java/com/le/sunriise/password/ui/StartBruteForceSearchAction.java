@@ -119,6 +119,10 @@ final class StartBruteForceSearchAction extends AbstractBackgroundCommand {
                 checker.setTerminate(true);
             }
         }
+
+        public CheckBruteForce getChecker() {
+            return checker;
+        }
     }
 
     public StartBruteForceSearchAction(JButton button, PasswordCheckerApp app, BruteForceCheckerModel dataModel) {
@@ -191,5 +195,13 @@ final class StartBruteForceSearchAction extends AbstractBackgroundCommand {
             return;
         }
         dataModel.setStatus(status);
+    }
+
+    public BackgroundTask getBackgroundTask() {
+        return backgroundTask;
+    }
+
+    public CheckBruteForce getChecker() {
+        return getBackgroundTask().getChecker();
     }
 }

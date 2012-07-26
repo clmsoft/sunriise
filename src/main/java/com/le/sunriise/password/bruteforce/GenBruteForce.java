@@ -423,4 +423,8 @@ public class GenBruteForce {
         this.resumeContext = resumeContext;
     }
 
+    public static BigInteger calcRate(BruteForceStat stat) {
+        return stat.getCount().divide(stat.getSeconds());
+    }
+
 }
