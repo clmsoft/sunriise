@@ -24,8 +24,11 @@ import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.EventQueue;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
@@ -38,8 +41,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.prefs.Preferences;
 
 import javax.swing.AbstractAction;
@@ -63,6 +69,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.JViewport;
 import javax.swing.ListSelectionModel;
 import javax.swing.RowFilter;
 import javax.swing.RowSorter;
@@ -104,6 +111,7 @@ import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 import com.le.sunriise.BuildNumber;
 import com.le.sunriise.StopWatch;
+import com.le.sunriise.index.IndexLookup;
 import com.le.sunriise.model.bean.MnyViewerDataModel;
 import com.le.sunriise.model.bean.TableListItem;
 
@@ -155,6 +163,78 @@ public class MynViewer {
 
     private JMenu toolsMenu;
 
+    private JMenu gotoColumnMenu;
+
+    private int labelColumnIndex;
+
+    private AtomicBoolean settingNewSorter = new AtomicBoolean(false);
+
+    private final class GotoToColumnAction extends AbstractAction {
+        private String columnName;
+
+        private GotoToColumnAction(String name) {
+            super(name);
+            this.columnName = name;
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent event) {
+            int row = 0;
+
+            int rowIndex = table.getSelectedRow();
+            if (rowIndex > 0) {
+                // row = getRowIndex(rowIndex);
+                row = rowIndex;
+            }
+
+            int column = 0;
+            column = getColumnIndex(columnName);
+
+            log.info("GotoToColumnAction" + ", columnName=" + columnName + ", row=" + row + ", column=" + column);
+
+            Rectangle aRect = table.getCellRect(row, column, true);
+
+            // table.scrollRectToVisible(aRect);
+            scrollToCenter(table, row, column);
+        }
+
+        public void scrollToCenter(JTable table, int rowIndex, int vColIndex) {
+            if (!(table.getParent() instanceof JViewport)) {
+                return;
+            }
+            JViewport viewport = (JViewport) table.getParent();
+
+            // This rectangle is relative to the table where the
+            // northwest corner of cell (0,0) is always (0,0).
+            Rectangle rect = table.getCellRect(rowIndex, vColIndex, true);
+
+            // The location of the view relative to the table
+            Rectangle viewRect = viewport.getViewRect();
+
+            // Translate the cell location so that it is relative
+            // to the view, assuming the northwest corner of the
+            // view is (0,0).
+            rect.setLocation(rect.x - viewRect.x, rect.y - viewRect.y);
+
+            // Calculate location of rect if it were at the center of view
+            int centerX = (viewRect.width - rect.width) / 2;
+            int centerY = (viewRect.height - rect.height) / 2;
+
+            // Fake the location of the cell so that scrollRectToVisible
+            // will move the cell to the center
+            if (rect.x < centerX) {
+                centerX = -centerX;
+            }
+            if (rect.y < centerY) {
+                centerY = -centerY;
+            }
+            rect.translate(centerX, centerY);
+
+            // Scroll the area into view.
+            viewport.scrollRectToVisible(rect);
+        }
+    }
+
     /**
      * Launch the application.
      */
@@ -163,7 +243,7 @@ public class MynViewer {
         // Toolkit.getDefaultToolkit().getSystemEventQueue().push(waitQueue);
 
         String builNumber = BuildNumber.findBuilderNumber();
-        
+
         EventQueue.invokeLater(new Runnable() {
             @Override
             public void run() {
@@ -323,44 +403,7 @@ public class MynViewer {
                 try {
                     TableListItem item = (TableListItem) list.getSelectedValue();
                     if (item != null) {
-                        final Table table = item.getTable();
-                        String tableName = table.getName();
-                        log.info("> new table is selected, table=" + tableName);
-
-                        dataModel.setTable(table);
-                        dataModel.setTableName(tableName);
-                        dataModel.setTableMetaData(TableUtils.parseTableMetaData(table));
-                        dataModel.setHeaderInfo(TableUtils.parseHeaderInfo(table, openedDb));
-                        dataModel.setKeyInfo(TableUtils.parseKeyInfo(table));
-                        dataModel.setIndexInfo(TableUtils.parseIndexInfo(table));
-                        selectRowValues1 = null;
-                        selectRowValues2 = null;
-
-                        if (log.isDebugEnabled()) {
-                            log.debug("clearing old filter text ...");
-                        }
-                        filterTextField.setText("");
-                        if (tableModel != null) {
-                            try {
-                                tableModel.close();
-                            } finally {
-                                tableModel = null;
-                            }
-                        }
-
-                        if (log.isDebugEnabled()) {
-                            log.debug("creating new tableModel ...");
-                        }
-                        tableModel = new MnyTableModel(table);
-                        tableModel.setDbReadOnly(dbReadOnly);
-
-                        toggleTableSorting();
-
-                        if (log.isDebugEnabled()) {
-                            log.debug("setting new tableModel ...");
-                        }
-                        dataModel.setTableModel(tableModel);
-                        rightStatusLabel.setText("open table=" + table.getName());
+                        tableSelected(item);
                     }
                 } catch (IOException e) {
                     log.error(e);
@@ -427,19 +470,26 @@ public class MynViewer {
         });
         tablePopupMenu.add(menuItem);
 
+        menuItem = new JMenuItem(new AbstractAction("Select Column as Label") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int rowIndex = table.getSelectedRow();
+                int columnIndex = table.getSelectedColumn();
+                selectColumnAsLabel(rowIndex, columnIndex);
+            }
+        });
+        tablePopupMenu.add(menuItem);
+
+        gotoColumnMenu = new JMenu("Go to Column");
+        tablePopupMenu.add(gotoColumnMenu);
+
         tablePopupMenu.addSeparator();
         JMenu diffMenu = new JMenu("Diff");
         menuItem = new JMenuItem(new AbstractAction("Select as Row 1") {
             @Override
             public void actionPerformed(ActionEvent event) {
                 int rowIndex = table.getSelectedRow();
-                log.info("Selected rowIndex=" + rowIndex + " as row #1");
-                try {
-                    Map<String, Object> rowValues = tableModel.getRowValues(rowIndex);
-                    selectRowValues1 = rowValues;
-                } catch (IOException e) {
-                    log.error(e, e);
-                }
+                selectAsRow1ForDiff(rowIndex);
             }
         });
         diffMenu.add(menuItem);
@@ -447,49 +497,7 @@ public class MynViewer {
             @Override
             public void actionPerformed(ActionEvent event) {
                 int rowIndex = table.getSelectedRow();
-                log.info("Selected rowIndex=" + rowIndex + " as row #2");
-                try {
-                    Map<String, Object> rowValues = tableModel.getRowValues(rowIndex);
-                    selectRowValues2 = rowValues;
-                    if (selectRowValues1 != null) {
-                        int n1 = selectRowValues1.size();
-                        int n2 = selectRowValues2.size();
-                        if (n1 != n2) {
-                            log.warn("Two rows do not have same size!");
-                            return;
-                        }
-                        for (String key : selectRowValues1.keySet()) {
-                            Object obj1 = selectRowValues1.get(key);
-                            Object obj2 = selectRowValues2.get(key);
-                            boolean same = false;
-                            if ((obj1 == null) && (obj2 == null)) {
-                                same = true;
-                            } else if (obj1 == null) {
-                                same = false;
-                            } else if (obj2 == null) {
-                                same = false;
-                            } else {
-                                if ((obj1 instanceof Comparable) && (obj2 instanceof Comparable)) {
-                                    same = ((Comparable) obj1).compareTo(obj2) == 0;
-                                } else {
-                                    same = obj1.equals(obj2);
-                                }
-                            }
-                            if (!same) {
-                                if (obj1 instanceof byte[]) {
-                                    log.info("DIFF columm=" + key + ", value1=" + obj1 + ", value2=" + obj2);
-                                } else {
-                                    log.info("DIFF columm=" + key + ", value1=" + "byte[]-instance" + ", value2="
-                                            + "byte[]-instance");
-                                }
-                            }
-                        }
-                    } else {
-                        log.info("Please select the first row");
-                    }
-                } catch (IOException e) {
-                    log.error(e, e);
-                }
+                selectAsRow2ForDiff(rowIndex);
             }
         });
         diffMenu.add(menuItem);
@@ -505,6 +513,39 @@ public class MynViewer {
         panel_6.add(scrollPane_1);
 
         table = new JTable() {
+
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
+                super.valueChanged(e);
+
+                if (e.getValueIsAdjusting()) {
+                    return;
+                }
+
+                if (settingNewSorter.get()) {
+                    return;
+                }
+
+                ListSelectionModel rowSM = (ListSelectionModel) e.getSource();
+                int selectedIndex = rowSM.getMinSelectionIndex();
+
+                int columnIndex = 0;
+                int rowIndex = selectedIndex;
+
+                if (labelColumnIndex >= 0) {
+                    columnIndex = labelColumnIndex;
+                }
+                rowIndex = getRowIndex(rowIndex);
+                if (log.isDebugEnabled()) {
+                    log.debug("rowIndex=" + rowIndex + ", columnIndex=" + columnIndex);
+                }
+
+                if ((columnIndex >= 0) && (columnIndex >= 0)) {
+                    Object value = tableModel.getValueAt(rowIndex, columnIndex);
+                    String text = value.toString();
+                    rightStatusLabel.setText(text);
+                }
+            }
 
             @Override
             public void setModel(TableModel dataModel) {
@@ -575,6 +616,26 @@ public class MynViewer {
             }
         });
         table.addMouseListener(tablePopupListener);
+        table.addMouseListener(new MouseAdapter() {
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+                super.mousePressed(e);
+
+                Point point = e.getPoint();
+                int rowIndex = table.rowAtPoint(point);
+                int columnIndex = table.columnAtPoint(point);
+
+                // if (labelColumnIndex >= 0) {
+                // columnIndex = labelColumnIndex;
+                // }
+                // rowIndex = getRowIndex(rowIndex);
+                // Object value = tableModel.getValueAt(rowIndex, columnIndex);
+                // String text = value.toString();
+                // rightStatusLabel.setText(text);
+            }
+
+        });
 
         // TODO: try to install our mouselistener first
         // insertListenerToHead();
@@ -782,19 +843,27 @@ public class MynViewer {
 
     protected void copyColumn(int rowIndex, int columnIndex) {
         if (tableModel != null) {
-            tableModel.copyColumn(table.convertRowIndexToModel(rowIndex), columnIndex);
+            tableModel.copyColumn(getRowIndex(rowIndex), columnIndex);
         }
+    }
+
+    protected void selectColumnAsLabel(int rowIndex, int columnIndex) {
+        labelColumnIndex = columnIndex;
+    }
+
+    private int getRowIndex(int rowIndex) {
+        return table.convertRowIndexToModel(rowIndex);
     }
 
     protected void deleteRow(int rowIndex) {
         if (tableModel != null) {
-            tableModel.deleteRow(table.convertRowIndexToModel(rowIndex));
+            tableModel.deleteRow(getRowIndex(rowIndex));
         }
     }
 
     protected void duplicateRow(int rowIndex) {
         if (tableModel != null) {
-            tableModel.duplicateRow(table.convertRowIndexToModel(rowIndex), this.getFrame());
+            tableModel.duplicateRow(getRowIndex(rowIndex), this.getFrame());
         }
     }
 
@@ -1020,7 +1089,12 @@ public class MynViewer {
                 sorter = createTableRowSorter(tableModel);
 
                 log.info("setting new sorter ...");
-                MynViewer.this.table.setRowSorter(sorter);
+                settingNewSorter.set(true);
+                try {
+                    MynViewer.this.table.setRowSorter(sorter);
+                } finally {
+                    settingNewSorter.set(false);
+                }
             }
         } else {
             filterTextField.setEnabled(false);
@@ -1032,5 +1106,189 @@ public class MynViewer {
                 MynViewer.this.table.setRowSorter(sorter);
             }
         }
+    }
+
+    private void selectAsRow1ForDiff(int rowIndex) {
+        rowIndex = getRowIndex(rowIndex);
+
+        log.info("Selected rowIndex=" + rowIndex + " as row #1");
+        try {
+            Map<String, Object> rowValues = tableModel.getRowValues(rowIndex);
+            selectRowValues1 = rowValues;
+        } catch (IOException e) {
+            log.error(e, e);
+        }
+    }
+
+    private void selectAsRow2ForDiff(int rowIndex) {
+        rowIndex = getRowIndex(rowIndex);
+
+        log.info("Selected rowIndex=" + rowIndex + " as row #2");
+        try {
+            Map<String, Object> rowValues = tableModel.getRowValues(rowIndex);
+            selectRowValues2 = rowValues;
+            if (selectRowValues1 != null) {
+                int n1 = selectRowValues1.size();
+                int n2 = selectRowValues2.size();
+                if (n1 != n2) {
+                    log.warn("Two rows do not have same size!");
+                    return;
+                }
+                for (String key : selectRowValues1.keySet()) {
+
+                    Object obj1 = selectRowValues1.get(key);
+                    Object obj2 = selectRowValues2.get(key);
+
+                    if (log.isDebugEnabled()) {
+                        log.debug("key=" + key + ", obj1=" + obj1 + ", obj2=" + obj2);
+                    }
+
+                    boolean same = false;
+                    String className = null;
+                    if ((obj1 == null) && (obj2 == null)) {
+                        same = true;
+                        className = null;
+                    } else if (obj1 == null) {
+                        same = false;
+                        className = obj2.getClass().getName();
+                    } else if (obj2 == null) {
+                        same = false;
+                        className = obj1.getClass().getName();
+                    } else {
+                        if ((obj1 instanceof Comparable) && (obj2 instanceof Comparable)) {
+                            same = ((Comparable) obj1).compareTo(obj2) == 0;
+                        } else {
+                            same = obj1.equals(obj2);
+                        }
+                    }
+                    if (log.isDebugEnabled()) {
+                        log.debug("key=" + key + ", className=" + className);
+                    }
+
+                    if (!same) {
+                        if (obj1 instanceof byte[]) {
+                            log.info("DIFF columm=" + key + ", value1=" + "byte[]-instance" + ", value2=" + "byte[]-instance");
+                        } else {
+
+                            log.info("DIFF columm=" + key + ", value1=" + obj1 + ", value2=" + obj2);
+                        }
+                    }
+                }
+            } else {
+                log.info("Please select the first row");
+            }
+        } catch (IOException e) {
+            log.error(e, e);
+        }
+    }
+
+    private void tableSelected(TableListItem item) throws IOException {
+        final Table jackcessTable = item.getTable();
+        String tableName = jackcessTable.getName();
+        log.info("> new table is selected, table=" + tableName);
+
+        dataModel.setTable(jackcessTable);
+        dataModel.setTableName(tableName);
+        dataModel.setTableMetaData(TableUtils.parseTableMetaData(jackcessTable));
+        dataModel.setHeaderInfo(TableUtils.parseHeaderInfo(jackcessTable, openedDb));
+        dataModel.setKeyInfo(TableUtils.parseKeyInfo(jackcessTable));
+        dataModel.setIndexInfo(TableUtils.parseIndexInfo(jackcessTable));
+        selectRowValues1 = null;
+        selectRowValues2 = null;
+
+        if (log.isDebugEnabled()) {
+            log.debug("clearing old filter text ...");
+        }
+        filterTextField.setText("");
+        if (tableModel != null) {
+            try {
+                tableModel.close();
+            } finally {
+                tableModel = null;
+            }
+        }
+
+        if (log.isDebugEnabled()) {
+            log.debug("creating new tableModel ...");
+        }
+        tableModel = new MnyTableModel(jackcessTable);
+        tableModel.setDbReadOnly(dbReadOnly);
+
+        toggleTableSorting();
+
+        if (log.isDebugEnabled()) {
+            log.debug("setting new tableModel ...");
+        }
+        dataModel.setTableModel(tableModel);
+
+        updateGotoColumnMenu();
+        setLabelColumnIndex(jackcessTable);
+
+        rightStatusLabel.setText("open table=" + jackcessTable.getName());
+    }
+
+    private void setLabelColumnIndex(Table jackcessTable) {
+        labelColumnIndex = -1;
+        IndexLookup indexLookup = new IndexLookup();
+        for (Column column : jackcessTable.getColumns()) {
+            if (indexLookup.isPrimaryKeyColumn(column)) {
+                labelColumnIndex = getColumnIndex(column.getName());
+                break;
+            }
+        }
+        log.info("setLabelColumnIndex, labelColumnIndex=" + labelColumnIndex);
+    }
+
+    private void updateGotoColumnMenu() {
+        if (log.isDebugEnabled()) {
+            log.debug("> updateGotoColumnMenu");
+        }
+
+        SortedSet<String> columnNames = new TreeSet<String>();
+
+        int count = tableModel.getColumnCount();
+        for (int i = 0; i < count; i++) {
+            String columnName = tableModel.getColumnName(i);
+            columnNames.add(columnName);
+        }
+        gotoColumnMenu.removeAll();
+        if (count < 10) {
+            for (String columnName : columnNames) {
+                JMenuItem menuItem = new JMenuItem(new GotoToColumnAction(columnName));
+                gotoColumnMenu.add(menuItem);
+            }
+        } else {
+            JMenu parentMenu = null;
+            int i = 0;
+            for (String columnName : columnNames) {
+                if ((i % 10) == 0) {
+                    parentMenu = new JMenu(columnName + " ...");
+                    gotoColumnMenu.add(parentMenu);
+                }
+                JMenuItem menuItem = new JMenuItem(new GotoToColumnAction(columnName));
+                parentMenu.add(menuItem);
+                i++;
+            }
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("< updateGotoColumnMenu" + ", count=" + count);
+        }
+    }
+
+    private int getColumnIndex(String columnName) {
+        int count = tableModel.getColumnCount();
+        for (int i = 0; i < count; i++) {
+            String aName = tableModel.getColumnName(i);
+            if (log.isDebugEnabled()) {
+                log.debug("aName=" + aName);
+            }
+            if (columnName.compareTo(aName) == 0) {
+                if (log.isDebugEnabled()) {
+                    log.debug("MATCHED: column=" + i);
+                }
+                return i;
+            }
+        }
+        return -1;
     }
 }

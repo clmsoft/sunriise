@@ -250,8 +250,9 @@ public class MnyTableModel extends AbstractTableModel {
             log.debug("> copyColumn rowIndex=" + rowIndex + ", columnIndex=" + columnIndex);
         }
         try {
-            String columnName = getColumnName(columnIndex);
             Object value = getValueAt(rowIndex, columnIndex);
+
+            String columnName = getColumnName(columnIndex);
             log.info("columnName=" + columnName + ", value=" + value + ", className="
                     + ((value == null) ? null : value.getClass().getName()));
             if (valueIsFlag(columnName)) {
