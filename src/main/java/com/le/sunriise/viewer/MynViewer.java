@@ -24,10 +24,12 @@ import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.EventQueue;
+import java.awt.Font;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -54,12 +56,14 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JCheckBox;
 import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
@@ -91,6 +95,7 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
+import javax.swing.text.DefaultEditorKit;
 
 import org.apache.log4j.Logger;
 import org.jdesktop.beansbinding.AutoBinding;
@@ -169,6 +174,8 @@ public class MynViewer {
 
     private AtomicBoolean settingNewSorter = new AtomicBoolean(false);
 
+    private JPopupMenu filterCcpPopupMenu;
+
     private final class GotoToColumnAction extends AbstractAction {
         private String columnName;
 
@@ -188,7 +195,7 @@ public class MynViewer {
             }
 
             int column = 0;
-            column = getColumnIndex(columnName);
+            column = tableModel.getColumnIndex(columnName);
 
             log.info("GotoToColumnAction" + ", columnName=" + columnName + ", row=" + row + ", column=" + column);
 
@@ -460,7 +467,7 @@ public class MynViewer {
 
         tablePopupMenu.addSeparator();
 
-        menuItem = new JMenuItem(new AbstractAction("Copy Column") {
+        menuItem = new JMenuItem(new AbstractAction("Copy Selected Cell Value") {
             @Override
             public void actionPerformed(ActionEvent e) {
                 int rowIndex = table.getSelectedRow();
@@ -475,16 +482,21 @@ public class MynViewer {
             public void actionPerformed(ActionEvent e) {
                 int rowIndex = table.getSelectedRow();
                 int columnIndex = table.getSelectedColumn();
+
+                if (log.isDebugEnabled()) {
+                    log.debug("Select Column as Label: rowIndex=" + rowIndex + ", columnIndex=" + columnIndex);
+                }
+
                 selectColumnAsLabel(rowIndex, columnIndex);
             }
         });
         tablePopupMenu.add(menuItem);
 
-        gotoColumnMenu = new JMenu("Go to Column");
+        gotoColumnMenu = new JMenu("Scroll to Column");
         tablePopupMenu.add(gotoColumnMenu);
 
         tablePopupMenu.addSeparator();
-        JMenu diffMenu = new JMenu("Diff");
+        JMenu diffMenu = new JMenu("Diff Two Rows");
         menuItem = new JMenuItem(new AbstractAction("Select as Row 1") {
             @Override
             public void actionPerformed(ActionEvent event) {
@@ -497,7 +509,8 @@ public class MynViewer {
             @Override
             public void actionPerformed(ActionEvent event) {
                 int rowIndex = table.getSelectedRow();
-                selectAsRow2ForDiff(rowIndex);
+                JMenuItem source = (JMenuItem) event.getSource();
+                selectAsRow2ForDiff(rowIndex, source);
             }
         });
         diffMenu.add(menuItem);
@@ -526,25 +539,10 @@ public class MynViewer {
                     return;
                 }
 
-                ListSelectionModel rowSM = (ListSelectionModel) e.getSource();
-                int selectedIndex = rowSM.getMinSelectionIndex();
+                ListSelectionModel model = (ListSelectionModel) e.getSource();
+                int selectedIndex = model.getMinSelectionIndex();
 
-                int columnIndex = 0;
-                int rowIndex = selectedIndex;
-
-                if (labelColumnIndex >= 0) {
-                    columnIndex = labelColumnIndex;
-                }
-                rowIndex = getRowIndex(rowIndex);
-                if (log.isDebugEnabled()) {
-                    log.debug("rowIndex=" + rowIndex + ", columnIndex=" + columnIndex);
-                }
-
-                if ((columnIndex >= 0) && (columnIndex >= 0)) {
-                    Object value = tableModel.getValueAt(rowIndex, columnIndex);
-                    String text = value.toString();
-                    rightStatusLabel.setText(text);
-                }
+                updateRowLabel(selectedIndex);
             }
 
             @Override
@@ -722,6 +720,28 @@ public class MynViewer {
                 }
             }
         });
+        filterCcpPopupMenu = new JPopupMenu();
+        populateCCPMenu(filterCcpPopupMenu);
+        filterTextField.addMouseListener(new PopupListener(filterCcpPopupMenu) {
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if (!filterTextField.isEnabled()) {
+                    return;
+                }
+                super.mousePressed(e);
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                if (!filterTextField.isEnabled()) {
+                    return;
+                }
+
+                super.mouseReleased(e);
+            }
+
+        });
         panel_7.add(filterTextField);
         filterTextField.setColumns(10);
 
@@ -848,7 +868,7 @@ public class MynViewer {
     }
 
     protected void selectColumnAsLabel(int rowIndex, int columnIndex) {
-        labelColumnIndex = columnIndex;
+        setLabelColumnIndex(columnIndex);
     }
 
     private int getRowIndex(int rowIndex) {
@@ -1088,13 +1108,7 @@ public class MynViewer {
                 log.info("creating new sorter ...");
                 sorter = createTableRowSorter(tableModel);
 
-                log.info("setting new sorter ...");
-                settingNewSorter.set(true);
-                try {
-                    MynViewer.this.table.setRowSorter(sorter);
-                } finally {
-                    settingNewSorter.set(false);
-                }
+                setNewRowSorter(sorter);
             }
         } else {
             filterTextField.setEnabled(false);
@@ -1103,8 +1117,17 @@ public class MynViewer {
 
             if (tableModel != null) {
                 sorter = null;
-                MynViewer.this.table.setRowSorter(sorter);
+                setNewRowSorter(sorter);
             }
+        }
+    }
+
+    private void setNewRowSorter(TableRowSorter<TableModel> sorter) {
+        settingNewSorter.set(true);
+        try {
+            MynViewer.this.table.setRowSorter(sorter);
+        } finally {
+            settingNewSorter.set(false);
         }
     }
 
@@ -1120,7 +1143,8 @@ public class MynViewer {
         }
     }
 
-    private void selectAsRow2ForDiff(int rowIndex) {
+    private void selectAsRow2ForDiff(int rowIndex, JComponent source) {
+
         rowIndex = getRowIndex(rowIndex);
 
         log.info("Selected rowIndex=" + rowIndex + " as row #2");
@@ -1134,52 +1158,91 @@ public class MynViewer {
                     log.warn("Two rows do not have same size!");
                     return;
                 }
-                for (String key : selectRowValues1.keySet()) {
+                List<DiffData> diffs = diffRowsValues(selectRowValues1, selectRowValues2);
 
-                    Object obj1 = selectRowValues1.get(key);
-                    Object obj2 = selectRowValues2.get(key);
-
-                    if (log.isDebugEnabled()) {
-                        log.debug("key=" + key + ", obj1=" + obj1 + ", obj2=" + obj2);
-                    }
-
-                    boolean same = false;
-                    String className = null;
-                    if ((obj1 == null) && (obj2 == null)) {
-                        same = true;
-                        className = null;
-                    } else if (obj1 == null) {
-                        same = false;
-                        className = obj2.getClass().getName();
-                    } else if (obj2 == null) {
-                        same = false;
-                        className = obj1.getClass().getName();
-                    } else {
-                        if ((obj1 instanceof Comparable) && (obj2 instanceof Comparable)) {
-                            same = ((Comparable) obj1).compareTo(obj2) == 0;
+                if (log.isDebugEnabled()) {
+                    for (DiffData diff : diffs) {
+                        if (diff.getValue1() instanceof byte[]) {
+                            log.debug("DIFF columm=" + diff.getKey() + ", value1=" + "byte[]-instance" + ", value2="
+                                    + "byte[]-instance");
                         } else {
-                            same = obj1.equals(obj2);
-                        }
-                    }
-                    if (log.isDebugEnabled()) {
-                        log.debug("key=" + key + ", className=" + className);
-                    }
-
-                    if (!same) {
-                        if (obj1 instanceof byte[]) {
-                            log.info("DIFF columm=" + key + ", value1=" + "byte[]-instance" + ", value2=" + "byte[]-instance");
-                        } else {
-
-                            log.info("DIFF columm=" + key + ", value1=" + obj1 + ", value2=" + obj2);
+                            log.debug("DIFF columm=" + diff.getKey() + ", value1=" + diff.getValue1() + ", value2="
+                                    + diff.getValue2());
                         }
                     }
                 }
+                Component parentComponent = frame;
+                final JTextArea textArea = new JTextArea();
+                // textArea.setFont(new Font("Sans-Serif", Font.PLAIN, 10));
+                textArea.setEditable(false);
+                StringBuilder sb = new StringBuilder();
+                for (DiffData diff : diffs) {
+                    if (diff.getValue1() instanceof byte[]) {
+                        sb.append("columm=" + diff.getKey() + ", value1=" + "byte[]-instance" + ", value2=" + "byte[]-instance");
+                        sb.append("\n");
+//                        sb.append("\n");
+                    } else {
+                        sb.append("columm=" + diff.getKey() + ", value1=" + diff.getValue1() + ", value2=" + diff.getValue2());
+                        sb.append("\n");
+//                        sb.append("\n");
+                    }
+                }
+                textArea.setText(sb.toString());
+
+                // stuff it in a scrollpane with a controlled size.
+                JScrollPane scrollPane = new JScrollPane(textArea);
+                scrollPane.setPreferredSize(new Dimension(350, 150));
+                Object message = scrollPane;
+                JOptionPane.showMessageDialog(parentComponent, message, "Diff Result", JOptionPane.INFORMATION_MESSAGE);
             } else {
-                log.info("Please select the first row");
+                Component parentComponent = frame;
+                String message = "Please select a first row";
+                int messageType = JOptionPane.ERROR_MESSAGE;
+                String title = "Missing required arguments";
+                JOptionPane.showMessageDialog(parentComponent, message, title, messageType);
             }
         } catch (IOException e) {
             log.error(e, e);
         }
+    }
+
+    private List<DiffData> diffRowsValues(Map<String, Object> rowValues1, Map<String, Object> rowValues2) {
+        List<DiffData> diffs = new ArrayList<DiffData>();
+        for (String key : rowValues1.keySet()) {
+
+            Object value1 = rowValues1.get(key);
+            Object value2 = rowValues2.get(key);
+
+            if (log.isDebugEnabled()) {
+                log.debug("key=" + key + ", value1=" + value1 + ", value1=" + value2);
+            }
+
+            boolean same = rowValuesAreSame(value1, value2);
+
+            if (!same) {
+                DiffData diffData = new DiffData(key, value1, value2);
+                diffs.add(diffData);
+            }
+        }
+        return diffs;
+    }
+
+    private boolean rowValuesAreSame(Object value1, Object value2) {
+        boolean same = false;
+        if ((value1 == null) && (value2 == null)) {
+            same = true;
+        } else if (value1 == null) {
+            same = false;
+        } else if (value2 == null) {
+            same = false;
+        } else {
+            if ((value1 instanceof Comparable) && (value2 instanceof Comparable)) {
+                same = ((Comparable) value1).compareTo(value2) == 0;
+            } else {
+                same = value1.equals(value2);
+            }
+        }
+        return same;
     }
 
     private void tableSelected(TableListItem item) throws IOException {
@@ -1229,14 +1292,59 @@ public class MynViewer {
 
     private void setLabelColumnIndex(Table jackcessTable) {
         labelColumnIndex = -1;
-        IndexLookup indexLookup = new IndexLookup();
-        for (Column column : jackcessTable.getColumns()) {
-            if (indexLookup.isPrimaryKeyColumn(column)) {
-                labelColumnIndex = getColumnIndex(column.getName());
-                break;
+
+        int index = findDefaulLlabelColumnIndex(jackcessTable);
+        labelColumnIndex = index;
+
+        setLabelColumnIndex(labelColumnIndex);
+    }
+
+    private int findDefaulLlabelColumnIndex(Table jackcessTable) {
+        String[] columnNames = { "szFull", "szName" };
+        int primaryKeyColumn = -1;
+        int columnIndex = -1;
+        if (jackcessTable != null) {
+            IndexLookup indexLookup = new IndexLookup();
+            for (Column column : jackcessTable.getColumns()) {
+                if (indexLookup.isPrimaryKeyColumn(column)) {
+                    if (primaryKeyColumn < 0) {
+                        primaryKeyColumn = tableModel.getColumnIndex(column.getName());
+                    }
+                }
+                if (columnNames != null) {
+                    for (String name : columnNames) {
+                        if (column.getName().compareTo(name) == 0) {
+                            if (columnIndex < 0) {
+                                columnIndex = column.getColumnIndex();
+                            }
+                        }
+                    }
+                }
             }
         }
+
+        int index = -1;
+        if (columnIndex >= 0) {
+            index = columnIndex;
+        }
+        if (index < 0) {
+            index = primaryKeyColumn;
+        }
+        if (index < 0) {
+            index = 0;
+        }
+        return index;
+    }
+
+    private void setLabelColumnIndex(int columnIndex) {
+        labelColumnIndex = columnIndex;
         log.info("setLabelColumnIndex, labelColumnIndex=" + labelColumnIndex);
+
+        int rowIndex = table.getSelectedRow();
+        log.info("setLabelColumnIndex, rowIndex=" + rowIndex);
+        if (rowIndex >= 0) {
+            updateRowLabel(rowIndex);
+        }
     }
 
     private void updateGotoColumnMenu() {
@@ -1251,6 +1359,7 @@ public class MynViewer {
             String columnName = tableModel.getColumnName(i);
             columnNames.add(columnName);
         }
+
         gotoColumnMenu.removeAll();
         if (count < 10) {
             for (String columnName : columnNames) {
@@ -1275,20 +1384,49 @@ public class MynViewer {
         }
     }
 
-    private int getColumnIndex(String columnName) {
-        int count = tableModel.getColumnCount();
-        for (int i = 0; i < count; i++) {
-            String aName = tableModel.getColumnName(i);
-            if (log.isDebugEnabled()) {
-                log.debug("aName=" + aName);
-            }
-            if (columnName.compareTo(aName) == 0) {
-                if (log.isDebugEnabled()) {
-                    log.debug("MATCHED: column=" + i);
-                }
-                return i;
-            }
+    private void updateRowLabel(int rowIndex) {
+        if (rowIndex < 0) {
+            return;
         }
-        return -1;
+
+        int columnIndex = 0;
+        if (labelColumnIndex >= 0) {
+            columnIndex = labelColumnIndex;
+        }
+        rowIndex = getRowIndex(rowIndex);
+
+        if (log.isDebugEnabled()) {
+            log.debug("updateRowLabel: rowIndex=" + rowIndex + ", columnIndex=" + columnIndex);
+        }
+
+        if ((columnIndex >= 0) && (columnIndex >= 0)) {
+            Object value = tableModel.getValueAt(rowIndex, columnIndex);
+            String text = null;
+            if (value != null) {
+                text = value.toString();
+            } else {
+                text = "";
+            }
+            rightStatusLabel.setText(text);
+        }
+    }
+
+    private void populateCCPMenu(JPopupMenu mainMenu) {
+        JMenuItem menuItem = null;
+
+        menuItem = new JMenuItem(new DefaultEditorKit.CutAction());
+        menuItem.setText("Cut");
+        menuItem.setMnemonic(KeyEvent.VK_T);
+        mainMenu.add(menuItem);
+
+        menuItem = new JMenuItem(new DefaultEditorKit.CopyAction());
+        menuItem.setText("Copy");
+        menuItem.setMnemonic(KeyEvent.VK_C);
+        mainMenu.add(menuItem);
+
+        menuItem = new JMenuItem(new DefaultEditorKit.PasteAction());
+        menuItem.setText("Paste");
+        menuItem.setMnemonic(KeyEvent.VK_P);
+        mainMenu.add(menuItem);
     }
 }

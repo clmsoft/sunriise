@@ -246,6 +246,13 @@ public class MnyTableModel extends AbstractTableModel {
     }
 
     public void copyColumn(int rowIndex, int columnIndex) {
+        if (rowIndex < 0) {
+            return;
+        }
+        if (columnIndex < 0) {
+            return;
+        }
+        
         if (log.isDebugEnabled()) {
             log.debug("> copyColumn rowIndex=" + rowIndex + ", columnIndex=" + columnIndex);
         }
@@ -349,6 +356,23 @@ public class MnyTableModel extends AbstractTableModel {
         }
     }
 
+    public int getColumnIndex(String columnName) {
+        int count = this.getColumnCount();
+        for (int i = 0; i < count; i++) {
+            String aName = this.getColumnName(i);
+            if (log.isDebugEnabled()) {
+                log.debug("aName=" + aName);
+            }
+            if (columnName.compareTo(aName) == 0) {
+                if (log.isDebugEnabled()) {
+                    log.debug("MATCHED: column=" + i);
+                }
+                return i;
+            }
+        }
+        return -1;
+    }
+
     public boolean isPrimaryKeyColumn(int i) {
         List<Column> columns = table.getColumns();
         if (columns == null) {
@@ -390,6 +414,5 @@ public class MnyTableModel extends AbstractTableModel {
         if (rowsCache != null) {
             rowsCache.clear();
         }
-
     }
 }
