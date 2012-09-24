@@ -156,22 +156,31 @@ public class EncryptionUtils {
         FileChannel channel = null;
         try {
             channel = openChannel(mdbFile, readOnly);
+            PageChannel pageChannel = null;
+            try {
+                boolean closeChannel = true;
+                JetFormat format = JetFormat.getFormat(channel);
+                boolean autoSync = true;
 
-            JetFormat format = JetFormat.getFormat(channel);
-            boolean autoSync = true;
-            PageChannel pageChannel = new PageChannel(channel, format, autoSync);
+                pageChannel = new PageChannel(channel, closeChannel, format, autoSync);
 
-            Charset charset = getDefaultCharset(format);
+                Charset charset = getDefaultCharset(format);
 
-            ByteBuffer buffer = pageChannel.createPageBuffer();
-            pageChannel.readPage(buffer, 0);
+                ByteBuffer buffer = pageChannel.createPageBuffer();
+                pageChannel.readPage(buffer, 0);
 
-            StringBuilder sb = new StringBuilder();
-            if (format.CODEC_TYPE == CodecType.MSISAM) {
-                EncryptionUtils.appendMSISAMInfo(buffer, password, charset, sb);
+                StringBuilder sb = new StringBuilder();
+                if (format.CODEC_TYPE == CodecType.MSISAM) {
+                    EncryptionUtils.appendMSISAMInfo(buffer, password, charset, sb);
+                }
+                System.out.println(sb.toString());
+            } finally {
+                if (pageChannel != null) {
+                    pageChannel.close();
+                    pageChannel = null;
+                }
             }
             
-            System.out.println(sb.toString());
         } finally {
             if (channel != null) {
                 try {
