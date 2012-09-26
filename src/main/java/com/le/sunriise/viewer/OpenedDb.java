@@ -24,6 +24,8 @@ import java.io.IOException;
 import org.apache.log4j.Logger;
 
 import com.healthmarketscience.jackcess.Database;
+import com.le.sunriise.JackcessFileChannelAdapter;
+import com.le.sunriise.ROMemoryMappedFileChannel;
 
 public class OpenedDb {
     private static final Logger log = Logger.getLogger(OpenedDb.class);
@@ -32,6 +34,15 @@ public class OpenedDb {
     private File dbLockFile;
     private Database db;
     private String password;
+    private ROMemoryMappedFileChannel memoryMappedFileChannel;
+
+    public JackcessFileChannelAdapter getMemoryMappedFileChannel() {
+        return memoryMappedFileChannel;
+    }
+
+    public void setMemoryMappedFileChannel(ROMemoryMappedFileChannel memoryMappedFileChannel) {
+        this.memoryMappedFileChannel = memoryMappedFileChannel;
+    }
 
     public File getDbFile() {
         return dbFile;
@@ -62,6 +73,18 @@ public class OpenedDb {
             log.info("Closing dbFile=" + dbFile);
             try {
                 db.close();
+                
+                // since we specify the channel ourselves. We will need to close it ourselves.
+                if (memoryMappedFileChannel != null) {
+                    try {
+                        log.info("Closing memoryMappedFileChannel for dbFile=" + memoryMappedFileChannel.getDbFile());
+                        memoryMappedFileChannel.close();
+                    } catch (IOException e) {
+                        log.warn(e);
+                    } finally {
+                        memoryMappedFileChannel = null;
+                    }
+                }
             } catch (IOException e) {
                 log.warn(e);
             } finally {
@@ -83,5 +106,9 @@ public class OpenedDb {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+    
+    public boolean isMemoryMapped() {
+        return getMemoryMappedFileChannel() != null;
     }
 }

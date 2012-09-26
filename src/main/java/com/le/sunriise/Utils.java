@@ -26,6 +26,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 import java.util.TimeZone;
 
@@ -35,16 +36,17 @@ import com.healthmarketscience.jackcess.CodecHandler;
 import com.healthmarketscience.jackcess.CodecProvider;
 import com.healthmarketscience.jackcess.CryptCodecProvider;
 import com.healthmarketscience.jackcess.Database;
+import com.healthmarketscience.jackcess.DatabaseBuilder;
 import com.healthmarketscience.jackcess.PageChannel;
 import com.le.sunriise.viewer.OpenedDb;
 
 public class Utils {
-    private static final Logger log = Logger.getLogger(Utils.class);
+    static final Logger log = Logger.getLogger(Utils.class);
 
     private static String EMPTY_FILE = "empty-db.mdb";
 
     public static OpenedDb openDb(File dbFile, String password, boolean readOnly) throws IOException {
-        return openDb(dbFile, password, readOnly, true);
+        return Utils.openDb(dbFile, password, readOnly, true);
     }
 
     public static OpenedDb openDbReadOnly(File dbFile, String password) throws IOException {
@@ -66,7 +68,7 @@ public class Utils {
         name = name.substring(0, i);
         File lockFile = new File(parentDir, name + ".lrd");
         if (lockFile.exists()) {
-            log.warn("Cannot lock dbFile=" + name + ". Lock file exists");
+            log.warn("Cannot lock dbFile=" + name + ". Lock file exists, lockFile=" + lockFile.getAbsolutePath());
             return null;
         }
 
@@ -88,59 +90,10 @@ public class Utils {
 
     public static OpenedDb openDb(String dbFileName, String password, boolean readOnly, boolean encrypted) throws IOException {
         File dbFile = new File(dbFileName);
-        return openDb(dbFile, password, readOnly, encrypted);
+        return Utils.openDb(dbFile, password, readOnly, encrypted);
     }
 
-    private static OpenedDb openDb(File dbFile, String password, boolean readOnly, boolean encrypted) throws IOException {
-        OpenedDb openedDb = new OpenedDb();
-        openedDb.setDbFile(dbFile);
-
-        CodecProvider cryptCodecProvider = null;
-
-        cryptCodecProvider = new CryptCodecProvider(password) {
-            @Override
-            public CodecHandler createHandler(PageChannel channel, Charset charset) throws IOException {
-                CodecHandler codecHandler =  super.createHandler(channel, charset);
-                return codecHandler;
-            }
-        };
-        
-        if (!encrypted) {
-            cryptCodecProvider = null;
-        }
-
-        try {
-            if (log.isDebugEnabled()) {
-                log.debug("> Database.open, dbFile=" + dbFile);
-            }
-
-            if ((!readOnly) && (isMnyFile(dbFile))) {
-                File dbLockFile = null;
-                if ((dbLockFile = lockDb(dbFile)) == null) {
-                    throw new IOException("Cannot lock dbFile=" + dbFile);
-                } else {
-                    log.info("Created db lock file=" + dbLockFile);
-                }
-                openedDb.setDbLockFile(dbLockFile);
-            }
-            boolean autoSync = true;
-            Charset charset = null;
-            TimeZone timeZone = null;
-            Database db = Database.open(dbFile, readOnly, autoSync, charset, timeZone, cryptCodecProvider);
-            openedDb.setDb(db);
-            openedDb.setPassword(password);
-        } catch (UnsupportedOperationException e) {
-            throw new IOException(e);
-        } finally {
-            if (log.isDebugEnabled()) {
-                log.debug("< Database.open, dbFile=" + dbFile);
-            }
-        }
-
-        return openedDb;
-    }
-
-    private static boolean isMnyFile(File dbFile) {
+    static boolean isMnyFile(File dbFile) {
         String dbFileName = dbFile.getName();
         return dbFileName.endsWith(".mny");
     }
@@ -210,6 +163,64 @@ public class Utils {
         while ((n = in.read(buffer, 0, bufSize)) != -1) {
             out.write(buffer, 0, n);
         }
+    }
+
+    static OpenedDb openDb(File dbFile, String password, boolean readOnly, boolean encrypted) throws IOException {
+        OpenedDb openedDb = new OpenedDb();
+        openedDb.setDbFile(dbFile);
+    
+        CodecProvider cryptCodecProvider = null;
+    
+        cryptCodecProvider = new CryptCodecProvider(password) {
+            @Override
+            public CodecHandler createHandler(PageChannel channel, Charset charset) throws IOException {
+                CodecHandler codecHandler =  super.createHandler(channel, charset);
+                return codecHandler;
+            }
+        };
+        
+        if (!encrypted) {
+            cryptCodecProvider = null;
+        }
+    
+        try {
+            if (log.isDebugEnabled()) {
+                log.debug("> Database.open, dbFile=" + dbFile);
+            }
+    
+            if ((!readOnly) && (isMnyFile(dbFile))) {
+                File dbLockFile = null;
+                if ((dbLockFile = lockDb(dbFile)) == null) {
+                    throw new IOException("Cannot lock dbFile=" + dbFile);
+                } else {
+                    log.info("Created db lock file=" + dbLockFile);
+                }
+                openedDb.setDbLockFile(dbLockFile);
+            }
+            boolean autoSync = true;
+            Charset charset = null;
+            TimeZone timeZone = null;
+            // TODO
+            boolean provideFileChannelForReadOnly = true;
+            Database db = null;
+            if (provideFileChannelForReadOnly && readOnly) {
+                ROMemoryMappedFileChannel channel =  new ROMemoryMappedFileChannel(dbFile);
+                openedDb.setMemoryMappedFileChannel(channel);
+                db = new DatabaseBuilder().setChannel(channel).setReadOnly(readOnly).setAutoSync(autoSync).setCharset(charset).setTimeZone(timeZone).setCodecProvider(cryptCodecProvider).open();
+            } else {
+                db = Database.open(dbFile, readOnly, autoSync, charset, timeZone, cryptCodecProvider);
+            }
+            openedDb.setDb(db);
+            openedDb.setPassword(password);
+        } catch (UnsupportedOperationException e) {
+            throw new IOException(e);
+        } finally {
+            if (log.isDebugEnabled()) {
+                log.debug("< Database.open, dbFile=" + dbFile);
+            }
+        }
+    
+        return openedDb;
     }
 
 }

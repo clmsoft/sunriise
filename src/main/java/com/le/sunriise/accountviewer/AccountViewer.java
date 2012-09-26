@@ -26,6 +26,8 @@ import java.awt.EventQueue;
 import java.awt.ScrollPane;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -94,7 +96,7 @@ public class AccountViewer {
 
     private OpenedDb openedDb = new OpenedDb();
 
-//    private boolean dbReadOnly;
+    // private boolean dbReadOnly;
 
     private AccountViewerDataModel dataModel = new AccountViewerDataModel();
     private JList accountList;
@@ -120,7 +122,6 @@ public class AccountViewer {
             setDisableReadOnlyCheckBox(true);
         }
 
-        
         @Override
         public void dbFileOpened(OpenedDb newOpenedDb, OpenDbDialog dialog) {
             if (newOpenedDb != null) {
@@ -140,7 +141,7 @@ public class AccountViewer {
                 AccountViewer.this.dataModel.setAccounts(accounts);
 
                 Runnable doRun = new Runnable() {
-                    
+
                     @Override
                     public void run() {
                         Account account = null;
@@ -175,6 +176,24 @@ public class AccountViewer {
         // frame.setBounds(100, 100, 450, 300);
         getFrame().setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
+        getFrame().addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                super.windowClosing(e);
+                log.info("> windowClosing");
+                if (openedDb != null) {
+                    appClosed();
+                }
+            }
+
+            @Override
+            public void windowClosed(WindowEvent e) {
+                super.windowClosed(e);
+                log.info("> windowClosed");
+            }
+
+        });
+
         initMainMenuBar();
 
         JPanel leftComponent = createLeftComponent();
@@ -196,9 +215,11 @@ public class AccountViewer {
 
         JMenuItem exitMenuItem = new JMenuItem("Exit");
         exitMenuItem.addActionListener(new ActionListener() {
-            
+
             @Override
             public void actionPerformed(ActionEvent e) {
+                appClosed();
+
                 System.exit(0);
             }
         });
@@ -213,7 +234,7 @@ public class AccountViewer {
 
     private JPanel createLeftComponent() {
         JPanel leftComponent = new JPanel();
-//        leftComponent.setPreferredSize(new Dimension(80, -1));
+        // leftComponent.setPreferredSize(new Dimension(80, -1));
         leftComponent.setLayout(new BorderLayout());
 
         JScrollPane scrollPane = new JScrollPane();
@@ -221,7 +242,7 @@ public class AccountViewer {
 
         accountList = new JList();
         accountList.addListSelectionListener(new ListSelectionListener() {
-            
+
             @Override
             public void valueChanged(ListSelectionEvent event) {
                 if (event.getValueIsAdjusting()) {
@@ -302,7 +323,6 @@ public class AccountViewer {
 
         table = new JTable() {
 
-            
             @Override
             public void setModel(TableModel dataModel) {
                 super.setModel(dataModel);
@@ -319,13 +339,14 @@ public class AccountViewer {
 
         };
         table.setDefaultRenderer(BigDecimal.class, new DefaultTableCellRenderer() {
-            
+
             @Override
             public void setValue(Object value) {
                 if (log.isDebugEnabled()) {
                     log.debug("cellRenderer: value=" + value + ", " + value.getClass().getName());
                 }
-                String renderedValue = ((value == null) || (selectedAccount == null)) ? "" : selectedAccount.formatAmmount((BigDecimal) value);
+                String renderedValue = ((value == null) || (selectedAccount == null)) ? "" : selectedAccount
+                        .formatAmmount((BigDecimal) value);
                 if (log.isDebugEnabled()) {
                     log.debug("cellRenderer: renderedValue=" + renderedValue);
                 }
@@ -342,7 +363,7 @@ public class AccountViewer {
         });
         // table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
         table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-            
+
             @Override
             public void valueChanged(ListSelectionEvent event) {
                 if (event.getValueIsAdjusting()) {
@@ -463,14 +484,14 @@ public class AccountViewer {
 
     protected void initDataBindings() {
         BeanProperty<AccountViewerDataModel, List<Account>> accountViewerDataModelBeanProperty = BeanProperty.create("accounts");
-        JListBinding<Account, AccountViewerDataModel, JList> jListBinding = SwingBindings.createJListBinding(UpdateStrategy.READ, dataModel,
-                accountViewerDataModelBeanProperty, accountList);
+        JListBinding<Account, AccountViewerDataModel, JList> jListBinding = SwingBindings.createJListBinding(UpdateStrategy.READ,
+                dataModel, accountViewerDataModelBeanProperty, accountList);
         jListBinding.bind();
         //
         BeanProperty<AccountViewerDataModel, TableModel> accountViewerDataModelBeanProperty_1 = BeanProperty.create("tableModel");
         ELProperty<JTable, Object> jTableEvalutionProperty = ELProperty.create("${model}");
-        AutoBinding<AccountViewerDataModel, TableModel, JTable, Object> autoBinding = Bindings.createAutoBinding(UpdateStrategy.READ, dataModel,
-                accountViewerDataModelBeanProperty_1, table, jTableEvalutionProperty);
+        AutoBinding<AccountViewerDataModel, TableModel, JTable, Object> autoBinding = Bindings.createAutoBinding(
+                UpdateStrategy.READ, dataModel, accountViewerDataModelBeanProperty_1, table, jTableEvalutionProperty);
         autoBinding.bind();
     }
 
@@ -486,8 +507,9 @@ public class AccountViewer {
 
                 BigDecimal currentBalance = AccountUtil.calculateCurrentBalance(account);
 
-                log.info(account.getName() + ", " + account.getAccountType() + ", " + Currency.getName(account.getCurrencyId(), mnyContext.getCurrencies())
-                        + ", " + account.getStartingBalance() + ", " + currentBalance + ", " + account.getAmountLimit());
+                log.info(account.getName() + ", " + account.getAccountType() + ", "
+                        + Currency.getName(account.getCurrencyId(), mnyContext.getCurrencies()) + ", "
+                        + account.getStartingBalance() + ", " + currentBalance + ", " + account.getAmountLimit());
 
                 // UI
                 updateStartingBalanceLabel(account.getStartingBalance(), account);
@@ -524,7 +546,7 @@ public class AccountViewer {
             dataModel.setTableModel(tableModel);
 
             updateAccountInfoPane(account);
-            
+
             transactionQifTextArea.setText("");
         } finally {
             long delta = stopWatch.click();
@@ -554,7 +576,8 @@ public class AccountViewer {
             if (account.getAccountType() == AccountType.INVESTMENT) {
                 insertKeyValueToStyleDocument("    Retirement", account.getRetirement().toString(), doc, keyWord);
             }
-            insertKeyValueToStyleDocument("Currency", Currency.getName(account.getCurrencyId(), mnyContext.getCurrencies()), doc, keyWord);
+            insertKeyValueToStyleDocument("Currency", Currency.getName(account.getCurrencyId(), mnyContext.getCurrencies()), doc,
+                    keyWord);
             insertKeyValueToStyleDocument("Starting balance", account.formatAmmount(account.getStartingBalance()), doc, keyWord);
             insertKeyValueToStyleDocument("Ending balance", account.formatAmmount(account.getCurrentBalance()), doc, keyWord);
             if (account.getAccountType() == AccountType.INVESTMENT) {
@@ -578,10 +601,12 @@ public class AccountViewer {
             if (relatedToAccount != null) {
                 if (account.getAccountType() == AccountType.INVESTMENT) {
                     insertKeyValueToStyleDocument("Cash account", relatedToAccount.getName(), doc, keyWord);
-                    insertKeyValueToStyleDocument("Cash account aalance", relatedToAccount.formatAmmount(relatedToAccount.getCurrentBalance()), doc, keyWord);
+                    insertKeyValueToStyleDocument("Cash account aalance",
+                            relatedToAccount.formatAmmount(relatedToAccount.getCurrentBalance()), doc, keyWord);
                 } else {
                     insertKeyValueToStyleDocument("Related account", relatedToAccount.getName(), doc, keyWord);
-                    insertKeyValueToStyleDocument("Related account balance", relatedToAccount.formatAmmount(relatedToAccount.getCurrentBalance()), doc, keyWord);
+                    insertKeyValueToStyleDocument("Related account balance",
+                            relatedToAccount.formatAmmount(relatedToAccount.getCurrentBalance()), doc, keyWord);
                 }
             }
 
@@ -590,20 +615,22 @@ public class AccountViewer {
                 if (amountLimit == null) {
                     amountLimit = new BigDecimal(0.0);
                 }
-                insertKeyValueToStyleDocument("Limit amount", account.formatAmmount(new BigDecimal(Math.abs(amountLimit.doubleValue()))), doc, keyWord);
+                insertKeyValueToStyleDocument("Limit amount",
+                        account.formatAmmount(new BigDecimal(Math.abs(amountLimit.doubleValue()))), doc, keyWord);
             }
         } catch (BadLocationException e) {
             log.warn(e);
         }
     }
 
-    private void insertKeyValueToStyleDocument(String key, String value, StyledDocument doc, SimpleAttributeSet keyWord) throws BadLocationException {
+    private void insertKeyValueToStyleDocument(String key, String value, StyledDocument doc, SimpleAttributeSet keyWord)
+            throws BadLocationException {
         boolean newLine = true;
         insertKeyValueToStyleDocument(key, value, doc, keyWord, newLine);
     }
 
-    private void insertKeyValueToStyleDocument(String key, String value, StyledDocument doc, SimpleAttributeSet keyWord, boolean newLine)
-            throws BadLocationException {
+    private void insertKeyValueToStyleDocument(String key, String value, StyledDocument doc, SimpleAttributeSet keyWord,
+            boolean newLine) throws BadLocationException {
         if (newLine) {
             doc.insertString(doc.getLength(), "\n", null);
         }
@@ -618,7 +645,7 @@ public class AccountViewer {
      */
     public static void main(String[] args) {
         EventQueue.invokeLater(new Runnable() {
-            
+
             @Override
             public void run() {
                 try {
@@ -653,7 +680,7 @@ public class AccountViewer {
         final List<Transaction> transactions = account.getTransactions();
 
         Runnable command = new Runnable() {
-            
+
             @Override
             public void run() {
                 logFlags(id);
@@ -678,7 +705,7 @@ public class AccountViewer {
 
                             if (transactionQifTextArea != null) {
                                 Runnable doRun = new Runnable() {
-                                    
+
                                     @Override
                                     public void run() {
                                         transactionQifTextArea.setText(qifStr);
@@ -723,5 +750,12 @@ public class AccountViewer {
 
     public JLabel getAccountTypeLabel() {
         return accountTypeLabel;
+    }
+
+    protected void appClosed() {
+        if (openedDb != null) {
+            openedDb.close();
+        }
+        openedDb = null;
     }
 }

@@ -101,7 +101,8 @@ public class OpenDbDialog extends JDialog {
         public void actionPerformed(ActionEvent event) {
             String dbFileName = (String) dbFileNames.getSelectedItem();
             if ((dbFileName == null) || (dbFileName.length() <= 0)) {
-                JOptionPane.showMessageDialog(dbFileNames, "Please enter a database filename.", "Missing database filename", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(dbFileNames, "Please enter a database filename.", "Missing database filename",
+                        JOptionPane.ERROR_MESSAGE);
                 return;
             }
             try {
@@ -111,14 +112,16 @@ public class OpenDbDialog extends JDialog {
 
                 OpenDbDialog.this.openedDb = Utils.openDb(dbFileName, passwordField.getPassword(), readOnlyCheckBox.isSelected(),
                         encryptedCheckBox.isSelected());
-                log.info("Opened dbFile=" + OpenDbDialog.this.openedDb.getDbFile());
+                dbOpenedCallback();
             } catch (IllegalStateException e) {
                 log.error(e, e);
-                JOptionPane.showMessageDialog(dbFileNames, dbFileName + " \n" + e.toString(), "Error open db file", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(dbFileNames, dbFileName + " \n" + e.toString(), "Error open db file",
+                        JOptionPane.ERROR_MESSAGE);
                 return;
             } catch (IOException e) {
-                log.error(e);
-                JOptionPane.showMessageDialog(dbFileNames, dbFileName + " \n" + e.toString(), "Error open db file", JOptionPane.ERROR_MESSAGE);
+                log.error(e, e);
+                JOptionPane.showMessageDialog(dbFileNames, dbFileName + " \n" + e.toString(), "Error open db file",
+                        JOptionPane.ERROR_MESSAGE);
                 return;
             }
             File file = OpenDbDialog.this.openedDb.getDbFile();
@@ -144,13 +147,19 @@ public class OpenDbDialog extends JDialog {
         }
     }
 
-    public static OpenDbDialog showDialog(OpenedDb opendDb, List<String> recentOpenFileNames, Component locationRelativeTo, boolean disablekReadOnlyCheckBox) {
+    public static OpenDbDialog showDialog(OpenedDb opendDb, List<String> recentOpenFileNames, Component locationRelativeTo,
+            boolean disablekReadOnlyCheckBox) {
         String title = null;
         OpenDbDialog dialog = new OpenDbDialog(opendDb, title, recentOpenFileNames);
 
         showDialog(dialog, locationRelativeTo, disablekReadOnlyCheckBox);
 
         return dialog;
+    }
+
+    protected void dbOpenedCallback() {
+        log.info("Opened dbFile=" + openedDb.getDbFile());
+        log.info("    isMemoryMapped=" + openedDb.isMemoryMapped());
     }
 
     protected boolean preHideDialog() {
@@ -193,10 +202,11 @@ public class OpenDbDialog extends JDialog {
         contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
         getContentPane().add(contentPanel, BorderLayout.CENTER);
         contentPanel.setLayout(new FormLayout(new ColumnSpec[] { FormFactory.UNRELATED_GAP_COLSPEC, FormFactory.DEFAULT_COLSPEC,
-                FormFactory.LABEL_COMPONENT_GAP_COLSPEC, ColumnSpec.decode("default:grow"), FormFactory.RELATED_GAP_COLSPEC, FormFactory.DEFAULT_COLSPEC,
-                FormFactory.UNRELATED_GAP_COLSPEC, }, new RowSpec[] { FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
-                FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
-                FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC, }));
+                FormFactory.LABEL_COMPONENT_GAP_COLSPEC, ColumnSpec.decode("default:grow"), FormFactory.RELATED_GAP_COLSPEC,
+                FormFactory.DEFAULT_COLSPEC, FormFactory.UNRELATED_GAP_COLSPEC, }, new RowSpec[] { FormFactory.RELATED_GAP_ROWSPEC,
+                FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+                FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC,
+                FormFactory.DEFAULT_ROWSPEC, }));
         {
             JLabel lblNewLabel = new JLabel("DB Filename");
             lblNewLabel.setHorizontalAlignment(SwingConstants.TRAILING);
@@ -331,9 +341,10 @@ public class OpenDbDialog extends JDialog {
     }
 
     protected void initDataBindings() {
-        BeanProperty<OpenDbDialogDataModel, List<String>> openDbDialogDataModelBeanProperty = BeanProperty.create("recentOpenFileNames");
-        JComboBoxBinding<String, OpenDbDialogDataModel, JComboBox> jComboBinding = SwingBindings.createJComboBoxBinding(UpdateStrategy.READ, dataModel,
-                openDbDialogDataModelBeanProperty, dbFileNames);
+        BeanProperty<OpenDbDialogDataModel, List<String>> openDbDialogDataModelBeanProperty = BeanProperty
+                .create("recentOpenFileNames");
+        JComboBoxBinding<String, OpenDbDialogDataModel, JComboBox> jComboBinding = SwingBindings.createJComboBoxBinding(
+                UpdateStrategy.READ, dataModel, openDbDialogDataModelBeanProperty, dbFileNames);
         jComboBinding.bind();
     }
 

@@ -32,6 +32,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -280,7 +282,23 @@ public class MynViewer {
         setFrame(new JFrame());
         getFrame().setBounds(100, 100, 800, 600);
         getFrame().setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        getFrame().addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                super.windowClosing(e);
+                log.info("> windowClosing");
+                if (openedDb != null) {
+                    appClosed();
+                }
+            }
 
+            @Override
+            public void windowClosed(WindowEvent e) {
+                super.windowClosed(e);
+                log.info("> windowClosed");
+            }            
+        });
+        
         JMenuBar menuBar = new JMenuBar();
         getFrame().setJMenuBar(menuBar);
         getFrame().setTitle("No opened db");
@@ -1545,5 +1563,12 @@ public class MynViewer {
         } else {
             log.info("NO CLEAR setCusror");
         }
+    }
+
+    protected void appClosed() {
+        if (openedDb != null) {
+            openedDb.close();
+        }
+        openedDb = null;
     }
 }

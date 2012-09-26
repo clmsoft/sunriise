@@ -68,5 +68,6 @@ public class OpenMnyFileTest {
         List<Transaction> transactions = AccountUtil.retrieveTransactions(openedDb.getDb(), account);
         Assert.assertNotNull(transactions);
         Assert.assertEquals(3, transactions.size());
+        openedDb.close();
     }
 }
