@@ -86,8 +86,6 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.MouseInputAdapter;
-import javax.swing.event.RowSorterEvent;
-import javax.swing.event.RowSorterEvent.Type;
 import javax.swing.event.RowSorterListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -130,7 +128,7 @@ public class MynViewer {
 
     private static final Executor threadPool = Executors.newCachedThreadPool();
 
-    private JFrame frame;
+    JFrame frame;
     // private File dbFile;
     // private Database db;
     private OpenedDb openedDb = new OpenedDb();
@@ -162,7 +160,7 @@ public class MynViewer {
 
     private JCheckBox filterOnSelectedColumnCheckBox;
 
-    private JLabel rightStatusLabel;
+    JLabel rightStatusLabel;
 
     // private JTextField rightStatusLabel;
 
@@ -309,14 +307,8 @@ public class MynViewer {
         mntmNewMenuItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent event) {
-                if (getDb() != null) {
-                    try {
-                        getDb().close();
-                    } catch (IOException e) {
-                        log.warn(e);
-                    } finally {
-                        setDb(null);
-                    }
+                if (openedDb != null) {
+                    appClosed();
                 }
                 System.exit(1);
             }
@@ -1060,153 +1052,8 @@ public class MynViewer {
     }
 
     private TableRowSorter<TableModel> createTableRowSorter(final MnyTableModel tableModel) {
-        TableRowSorter<TableModel> sorter = new TableRowSorter<TableModel>(tableModel) {
-
-            @Override
-            public void setSortKeys(final List<? extends SortKey> sortKeys) {
-                log.info("> setSortKeys, sortKeys.size=" + sortKeys.size());
-                for(SortKey key: sortKeys) {
-                    log.info("  column=" + key.getColumn() + ", order=" + key.getSortOrder());
-                }
-                
-//                JOptionPane.showConfirmDialog(frame, "setSortKeys");
-                boolean background = true;
-                log.info("Background sorting:  " + background);
-                
-                if (background) {
-                    int parties = 2;
-                    Runnable barrierAction = new Runnable() {
-                        @Override
-                        public void run() {
-                            log.info("Background sorting thread is DONE.");
-                        }
-                    };
-                    final CyclicBarrier barrier = new CyclicBarrier(parties, barrierAction);
-                    Runnable command = new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                parentSetSortKeys(sortKeys);
-                                barrier.await();
-                            } catch (InterruptedException e) {
-                                log.warn(e);
-                            } catch (BrokenBarrierException e) {
-                                log.warn(e);
-                            }
-                        }
-                    };
-
-                    Component parent = SwingUtilities.getRoot(MynViewer.this.frame);
-                    Cursor waitCursor = setWaitCursor(parent);
-                    try {
-                        getThreadPool().execute(command);
-
-                        barrier.await();
-                    } catch (InterruptedException e) {
-                        log.warn(e);
-                    } catch (BrokenBarrierException e) {
-                        log.warn(e);
-                    } finally {
-                        clearWaitCursor(parent, waitCursor);
-                    }
-                } else {
-                    Component parent = SwingUtilities.getRoot(MynViewer.this.frame);
-                    Cursor waitCursor = setWaitCursor(parent);
-                    try {
-                        parentSetSortKeys(sortKeys);
-                    } finally {
-                        clearWaitCursor(parent, waitCursor);
-                    }
-                }
-            }
-
-            private void parentSetSortKeys(List<? extends SortKey> sortKeys) {
-                super.setSortKeys(sortKeys);
-            }
-            
-            @Override
-            public void toggleSortOrder(int column) {
-                StopWatch stopWatch = new StopWatch();
-                String columnName = tableModel.getColumnName(column);
-                log.info("> toggleSortOrder, count=" + getViewRowCount() + ", column=" + column + ", columnName=" + columnName);
-                try {
-//                     JOptionPane.showConfirmDialog(frame, "Hello");
-                    super.toggleSortOrder(column);
-                } finally {
-                    long delta = stopWatch.click();
-                    rightStatusLabel.setText("sort: rows=" + getViewRowCount() + ", millisecond=" + delta);
-                    log.info("< toggleSortOrder, delta=" + delta);
-                }
-            }
-
-            @Override
-            public void sort() {
-                StopWatch stopWatch = new StopWatch();
-                log.info("> sort");
-
-                String message = "### STARTING to sort " + " " + this.getViewRowCount() + "/" + this.getModelRowCount()
-                        + " ... please wait ...";
-                log.info(message);
-
-//                JOptionPane.showConfirmDialog(frame, message);
-                
-                // rightStatusLabel.setText(message);
-
-                // Component parentComponent = MnyViewer.this.frame;
-                // JOptionPane.showConfirmDialog(parentComponent, message);
-
-                // Frame owner = MnyViewer.this.frame;
-                // JDialog dialog = new JDialog(owner);
-                // JPanel dialogMainView = new JPanel();
-                // dialogMainView.setLayout(new BorderLayout());
-                // JLabel dialogLabel = new JLabel(message);
-                // dialogMainView.add(dialogLabel, BorderLayout.CENTER);
-                // dialog.getContentPane().add(dialogMainView);
-                // dialog.setModal(false);
-                // dialog.pack();
-                // dialog.setLocationRelativeTo(null);
-                // dialog.show();
-
-//                Component parent = SwingUtilities.getRoot(MynViewer.this.frame);
-                // parent = MnyViewer.this.frame.getTopLevelAncestor();
-//                Cursor waitCursor = setWaitCursor(parent);
-                try {
-                    super.sort();
-                } finally {
-                    // dialog.dispose();
-//                    clearWaitCursor(parent, waitCursor);
-                    
-                    final long delta = stopWatch.click();
-                    log.info("< sort, delta=" + delta);
-                }
-            }
-
-        };
-        RowSorterListener listener = new RowSorterListener() {
-            private long startTime = -1L;
-
-            @Override
-            public void sorterChanged(RowSorterEvent event) {
-                log.info("> sorterChanged");
-                Type type = event.getType();
-                log.info("  " + type);
-                switch (type) {
-                case SORT_ORDER_CHANGED:
-                    startTime = System.currentTimeMillis();
-                    break;
-                case SORTED:
-                    if (startTime > 0) {
-                        long now = System.currentTimeMillis();
-                        long delta = now - startTime;
-                        startTime = -1L;
-                        log.info("sorterChanged, delta=" + delta);
-                    }
-                    break;
-                default:
-                    break;
-                }
-            }
-        };
+        TableRowSorter<TableModel> sorter = new MnyTableRowSorter(this, tableModel, tableModel);
+        RowSorterListener listener = new MnyRowSorterListener();
         sorter.addRowSorterListener(listener);
         return sorter;
     }
@@ -1544,7 +1391,7 @@ public class MynViewer {
         mainMenu.add(menuItem);
     }
 
-    private Cursor setWaitCursor(Component parent) {
+    Cursor setWaitCursor(Component parent) {
         Cursor waitCursor = null;
         if ((parent != null) && (parent.isShowing())) {
             waitCursor = Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR);
@@ -1556,7 +1403,7 @@ public class MynViewer {
         return waitCursor;
     }
 
-    private void clearWaitCursor(Component parent, Cursor waitCursor) {
+    void clearWaitCursor(Component parent, Cursor waitCursor) {
         if (waitCursor != null) {
             log.info("YES CLEAR setCusror");
             parent.setCursor(null);
@@ -1570,5 +1417,11 @@ public class MynViewer {
             openedDb.close();
         }
         openedDb = null;
+    }
+
+    public void toggleSortOrderStarted(int column) {
+        log.info("> toggleSortOrderStarted, column=" + column);
+        tableModel.clearCache();
+        tableModel.fillCacheForSorting(column);
     }
 }

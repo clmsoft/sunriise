@@ -39,6 +39,7 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.DatabaseBuilder;
 import com.healthmarketscience.jackcess.PageChannel;
 import com.le.sunriise.viewer.OpenedDb;
+import com.le.sunriise.viewer.ROMemoryMappedFileChannel;
 
 public class Utils {
     static final Logger log = Logger.getLogger(Utils.class);

@@ -24,8 +24,6 @@ import java.io.IOException;
 import org.apache.log4j.Logger;
 
 import com.healthmarketscience.jackcess.Database;
-import com.le.sunriise.JackcessFileChannelAdapter;
-import com.le.sunriise.ROMemoryMappedFileChannel;
 
 public class OpenedDb {
     private static final Logger log = Logger.getLogger(OpenedDb.class);

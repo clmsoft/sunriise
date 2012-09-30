@@ -1,4 +1,4 @@
-package com.le.sunriise;
+package com.le.sunriise.viewer;
 
 import java.io.File;
 import java.io.IOException;
