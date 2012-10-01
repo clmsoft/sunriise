@@ -93,6 +93,7 @@ final class MnyTableRowSorter extends TableRowSorter<TableModel> {
 
     @Override
     public void toggleSortOrder(int column) {
+        tableModel.setIsSorting(true);
         StopWatch stopWatch = new StopWatch();
         String columnName = tableModel.getColumnName(column);
         log.info("> toggleSortOrder, count=" + getViewRowCount() + ", column=" + column + ", columnName=" + columnName);
@@ -101,6 +102,7 @@ final class MnyTableRowSorter extends TableRowSorter<TableModel> {
             this.mynViewer.toggleSortOrderStarted(column);
             super.toggleSortOrder(column);
         } finally {
+            tableModel.setIsSorting(false);
             long delta = stopWatch.click();
             this.mynViewer.rightStatusLabel.setText("sort: rows=" + getViewRowCount() + ", millisecond=" + delta);
             log.info("< toggleSortOrder, delta=" + delta);

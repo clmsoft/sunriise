@@ -31,6 +31,7 @@ import java.util.Map;
 import javax.swing.table.AbstractTableModel;
 
 import org.apache.log4j.Logger;
+import org.python.antlr.op.IsDerived;
 
 import com.healthmarketscience.jackcess.ByteUtil;
 import com.healthmarketscience.jackcess.Column;
@@ -60,6 +61,8 @@ public class MnyTableModel extends AbstractTableModel {
 
     private CellValueCache cellValueCache;
 
+    private boolean isSorting = false;
+
     public MnyTableModel(Table table) throws IOException {
         this.table = table;
         this.columns = table.getColumns();
@@ -85,51 +88,61 @@ public class MnyTableModel extends AbstractTableModel {
 
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
-        if (log.isDebugEnabled()) {
-            log.debug("> getValueAt: rowIndex=" + rowIndex + ", columnIndex=" + columnIndex);
-        }
 
         Object value = null;
         String cachedKey = createCachedKey(rowIndex, columnIndex);
         Object cachedValue = null;
+        
+        
         if (cellValueCache != null) {
-            cachedValue = cellValueCache.get(cachedKey);
-        }
-        if (cachedValue != null) {
-            if (log.isDebugEnabled()) {
-                log.debug("cached HIT");
+            cachedValue = cellValueCache.getIfPresent(cachedKey);
+            if (cachedValue != null) {
+                cachedValue = cellValueCache.get(cachedKey);
+                if (log.isDebugEnabled()) {
+                    log.debug("cached HIT");
+                }
+                return cachedValue;
             }
-            return cachedValue;
         }
 
         try {
-            Map<String, Object> rowData = null;
-            if (cellValueCache != null) {
-                rowData = cellValueCache.getRowsCache(rowIndex);
-            }
-            if (rowData == null) {
-                moveCursorToRow(rowIndex);
-                rowData = cursor.getCurrentRow();
+            boolean cacheRow = false;
+            if (cacheRow) {
+                Map<String, Object> rowData = null;
                 if (cellValueCache != null) {
-                    cellValueCache.putRowsCache(rowIndex, rowData);
+                    rowData = cellValueCache.getRowsCache(rowIndex);
                 }
-            }
-            String columnName = getColumnName(columnIndex);
-            value = rowData.get(columnName);
-            if (value instanceof byte[]) {
-                value = ByteUtil.toHexString((byte[]) value);
+                if (rowData == null) {
+                    moveCursorToRow(rowIndex);
+                    rowData = cursor.getCurrentRow();
+                    if (cellValueCache != null) {
+                        cellValueCache.putRowsCache(rowIndex, rowData);
+                    }
+                }
+                String columnName = getColumnName(columnIndex);
+                value = rowData.get(columnName);
+                if (value instanceof byte[]) {
+                    value = ByteUtil.toHexString((byte[]) value);
+                }
+            } else {
+                moveCursorToRow(rowIndex);
+                List<Column> cols = table.getColumns();
+                Column column = cols.get(columnIndex);
+                value = cursor.getCurrentRowValue(column);
+                if (value instanceof byte[]) {
+                    value = ByteUtil.toHexString((byte[]) value);
+                }
             }
         } catch (IOException e) {
             log.error(e, e);
         }
 
         if (cellValueCache != null) {
-            if (log.isDebugEnabled()) {
-                log.debug("cached MISSED");
+            if (isSorting) {
+                log.info("cached MISSED, rowIndex=" + rowIndex + ", columnIndex=" + columnIndex);
+                log.info("  cachedKey=" + cachedKey + ", value=" + value);
             }
-            if (value != null) {
-                cellValueCache.put(cachedKey, value);
-            }
+            cellValueCache.put(cachedKey, value);
         }
         return value;
     }
@@ -438,11 +451,9 @@ public class MnyTableModel extends AbstractTableModel {
             int rowIndex = 0;
             while (cursor.moveToNextRow()) {
                 value = cursor.getCurrentRowValue(column);
-                if (value != null) {
-                    if (cellValueCache != null) {
-                        String cachedKey = createCachedKey(rowIndex, columnIndex);
-                        cellValueCache.put(cachedKey, value);
-                    }
+                if (cellValueCache != null) {
+                    String cachedKey = createCachedKey(rowIndex, columnIndex);
+                    cellValueCache.put(cachedKey, value);
                 }
                 rowIndex++;
             }
@@ -453,5 +464,9 @@ public class MnyTableModel extends AbstractTableModel {
                 cursor = null;
             }
         }
+    }
+
+    public void setIsSorting(boolean b) {
+        this.isSorting = b;
     }
 }
