@@ -7,7 +7,6 @@ import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
 
 import javax.swing.SwingUtilities;
-import javax.swing.RowSorter.SortKey;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
