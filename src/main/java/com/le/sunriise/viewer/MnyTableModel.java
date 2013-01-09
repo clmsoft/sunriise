@@ -31,6 +31,7 @@ import java.util.Map;
 import javax.swing.table.AbstractTableModel;
 
 import org.apache.log4j.Logger;
+
 import com.healthmarketscience.jackcess.ByteUtil;
 import com.healthmarketscience.jackcess.Column;
 import com.healthmarketscience.jackcess.Cursor;

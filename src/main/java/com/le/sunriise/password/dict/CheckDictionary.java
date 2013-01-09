@@ -22,27 +22,31 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.RejectedExecutionHandler;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.log4j.Logger;
 
+import com.le.sunriise.password.AbstractHeaderPagePasswordChecker;
 import com.le.sunriise.password.HeaderPage;
 
-
 /**
- * Check for matching password against a set of dictionary. Support multi-threads.
+ * Check for matching password against a set of dictionary. Support
+ * multi-threads.
  * 
  * @author hle
- *
+ * 
  */
 public class CheckDictionary {
     private static final Logger log = Logger.getLogger(CheckDictionary.class);
@@ -51,21 +55,40 @@ public class CheckDictionary {
 
     private ExecutorService pool;
 
+    // per run that might need to be reset if this instance is being re-use
     private final AtomicLong counter = new AtomicLong(0L);
 
     private final AtomicBoolean quit = new AtomicBoolean(false);
 
-    private File currentCandidatesFile;
-    
+    private String result;
+
     /**
      * 
-     * @param threads is number of threads to run
+     * @param nThreads
+     *            is number of threads to run
      */
-    public CheckDictionary(int threads) {
+    public CheckDictionary(int nThreads) {
         super();
-        pool = Executors.newFixedThreadPool(threads);
+
+        if (nThreads < 1) {
+            nThreads = 1;
+        }
+
+        // like newFixedThreadPool but with an ArrayBlockingQueue
+        int corePoolSize = nThreads;
+        int maximumPoolsize = nThreads;
+        long keepAliveTime = 0L;
+        TimeUnit unit = TimeUnit.MINUTES;
+        BlockingQueue<Runnable> workQueue = new ArrayBlockingQueue<Runnable>(100, true);
+        RejectedExecutionHandler handler = new ThreadPoolExecutor.CallerRunsPolicy();
+        this.pool = new ThreadPoolExecutor(corePoolSize, maximumPoolsize, keepAliveTime, unit, workQueue, handler);
     }
 
+    public void reset() {
+        counter.getAndSet(0L);
+        quit.getAndSet(false);
+        setResult(null);
+    }
     /**
      * Default number of threads is 1.
      */
@@ -74,9 +97,10 @@ public class CheckDictionary {
     }
 
     /**
-     * Check the given headerPage against a set of dictionary. The set of dictionary is formed
-     * by parsing the give file: one word per line, skip '#' comment line. If the given path is
-     * a directory, traverse the directory, skip 'hidden' file (with prefix dot '.').
+     * Check the given headerPage against a set of dictionary. The set of
+     * dictionary is formed by parsing the give file: one word per line, skip
+     * '#' comment line. If the given path is a directory, traverse the
+     * directory, skip 'hidden' file (with prefix dot '.').
      * 
      * @param headerPage
      * @param candidatesPath
@@ -85,29 +109,52 @@ public class CheckDictionary {
      */
     public String check(HeaderPage headerPage, File candidatesPath) throws IOException {
         if (headerPage.isNewEncryption()) {
-            return recursePath(headerPage, candidatesPath);
+            // short-cut: if password is blank, quit immediately
+            byte[] encrypted4BytesCheck = headerPage.getEncrypted4BytesCheck();
+            if (AbstractHeaderPagePasswordChecker.isBlankKey(encrypted4BytesCheck)) {
+                // no password?
+                log.warn("Found blank encrypted4BytesCheck=" + AbstractHeaderPagePasswordChecker.toHexString(encrypted4BytesCheck));
+                return null;
+            }
+            recursePath(headerPage, candidatesPath);
+            pool.shutdown();
+
+            log.info("> Waiting for all background tasks to complete ...");
+            long timeout = 3L;
+            TimeUnit unit = TimeUnit.MINUTES;
+            String result = null;
+            try {
+                pool.awaitTermination(timeout, unit);
+            } catch (InterruptedException e) {
+                log.warn("Interrupted while waiting for background to complete. Result might not be completed.");
+            } finally {
+                result = getResult();
+                log.info("< DONE waiting, result=" + result);
+            }
+
+            return result;
         } else {
+            log.info("Found embeddedDatabasePassword");
             return headerPage.getEmbeddedDatabasePassword();
         }
     }
 
     public void stop() {
+        log.info("> STOP");
         quit.getAndSet(true);
     }
-    
-    private String recursePath(HeaderPage headerPage, File candidatesPath) throws IOException {
+
+    private void recursePath(HeaderPage headerPage, File candidatesPath) throws IOException {
         if (acceptPathAsDirectory(candidatesPath)) {
-            return recurseDirectory(headerPage, candidatesPath);
+            recurseDirectory(headerPage, candidatesPath);
         } else {
             if (acceptPathAsFile(candidatesPath)) {
-                return consumeFile(headerPage, candidatesPath);
-            } else {
-                return null;
+                consumeFile(headerPage, candidatesPath);
             }
         }
     }
 
-    private boolean acceptPathAsFile(File path) {
+    protected boolean acceptPathAsFile(File path) {
         if (path == null) {
             return false;
         }
@@ -117,7 +164,7 @@ public class CheckDictionary {
         return path.isFile();
     }
 
-    private boolean acceptPathAsDirectory(File path) {
+    protected boolean acceptPathAsDirectory(File path) {
         if (path == null) {
             return false;
         }
@@ -127,93 +174,84 @@ public class CheckDictionary {
         return path.isDirectory();
     }
 
-    private String recurseDirectory(HeaderPage dbFile, File directory) throws IOException {
+    private void recurseDirectory(HeaderPage dbFile, File directory) throws IOException {
         if (quit.get()) {
-            return null;
+            notifyQuitEarly("Quit early in recurseDirectory");
+            return;
         }
-        
-        String value = null;
+
         log.info("> dir=" + directory);
         File[] files = directory.listFiles();
         if (files != null) {
             for (File file : files) {
-                value = recursePath(dbFile, file);
-                if (value != null) {
-                    return value;
-                }
+                recursePath(dbFile, file);
             }
         }
-        return null;
     }
 
-    private String consumeFile(HeaderPage headerPage, File candidatesFile) {
+    private void consumeFile(HeaderPage headerPage, File candidatesFile) {
         if (quit.get()) {
-            return null;
+            notifyQuitEarly("Quit early in consumeFile");
+            return;
         }
-        
+
         if (headerPage == null) {
-            return null;
+            return;
         }
         if (candidatesFile == null) {
-            return null;
+            return;
         }
-        // single-thread here
-        this.currentCandidatesFile = candidatesFile;
+
         log.info("> candidatesFile=" + candidatesFile);
         BufferedReader candidatesReader = null;
+        int lines = 0;
         try {
             candidatesReader = new BufferedReader(new FileReader(candidatesFile));
-            return consumeReader(headerPage, candidatesReader);
-        } catch (IOException e) {
+            lines = consumeReader(headerPage, candidatesReader);
+        } catch (Exception e) {
             log.error(e, e);
+        } finally {
+            log.info("> candidatesFile=" + candidatesFile  + ", lines=" + lines);
+            if (candidatesReader != null) {
+                try {
+                    candidatesReader.close();
+                } catch (IOException e) {
+                    log.warn(e);
+                } finally {
+                    candidatesReader = null;
+                }
+            }
         }
-        return null;
+        return;
     }
 
-    private String consumeReader(HeaderPage headerPage, BufferedReader reader) {
-        String result = null;
+    private int consumeReader(HeaderPage headerPage, BufferedReader reader) throws IOException {
         String line = null;
-        int lineCount = 1;
-        List<Future<String>> runningJobs = new ArrayList<Future<String>>();
-
-        try {
-            // LOOP
-            while ((line = reader.readLine()) != null) {
-                if (quit.get()) {
-                    break;
-                }
-                
-                if (trim) {
-                    line = line.trim();
-                }
-                if (skipLine(line)) {
-                    continue;
-                }
-                lineCount++;
-
-                Callable<String> callable = createWorker(headerPage, line, counter);
-                if (callable != null) {
-                    Future<String> future = pool.submit(callable);
-                    runningJobs.add(future);
-                }
-
-                // check running jobs to see if any has done
-                result = checkJobsForResult(runningJobs);
-                if (result != null) {
-                    // got result, time to quit
-                    break;
-                }
+        int lines = 0;
+        
+        // LOOP
+        while ((line = reader.readLine()) != null) {
+            if (quit.get()) {
+                notifyQuitEarly("Quit early in consumeReader");
+                break;
             }
 
-            // flush the working list
-            if (result == null) {
-                result = waitForEmptyWorkingList(runningJobs);
+            if (trim) {
+                line = line.trim();
             }
-        } catch (IOException e) {
-            log.error(e);
+
+            if (skipLine(line)) {
+                continue;
+            }
+
+            lines++;
+            Callable<String> callable = createWorker(headerPage, line);
+            if (callable != null) {
+                pool.submit(callable);
+            }
         }
-
-        return result;
+        
+        return lines;
     }
 
     private boolean skipLine(String line) {
@@ -230,13 +268,15 @@ public class CheckDictionary {
     private String checkJobsForResult(List<Future<String>> runningJobs) {
         ListIterator<Future<String>> iter = runningJobs.listIterator();
         String result = null;
-        
+
+        // log.info("> checkJobsForResult");
         // LOOP
         while (iter.hasNext()) {
             if (quit.get()) {
+                notifyQuitEarly("Quit early in checkJobsForResult");
                 break;
             }
-            
+
             Future<String> job = iter.next();
             if (job.isDone()) {
                 try {
@@ -256,23 +296,33 @@ public class CheckDictionary {
                 }
             }
         }
+
+        // log.info("< checkJobsForResult");
         return result;
     }
 
-    private String waitForEmptyWorkingList(List<Future<String>> runningJobs) {
+    private void notifyQuitEarly(String reason) {
+        log.warn(reason);
+    }
+
+    private String flushJobs(List<Future<String>> runningJobs) {
         String result = null;
         long sleepMs = 1000L;
+
+        log.info("runningJobs.size=" + runningJobs.size());
 
         // LOOP
         while (runningJobs.size() > 0) {
             if (quit.get()) {
+                notifyQuitEarly("Quit early in flushJobs");
                 break;
             }
-            
+
             result = checkJobsForResult(runningJobs);
 
             if (result != null) {
                 if (quit.get()) {
+                    notifyQuitEarly("Quit early in flushJobs");
                     break;
                 }
                 try {
@@ -283,11 +333,23 @@ public class CheckDictionary {
             }
         }
 
+        log.info("In waitForEmptyWorkingList - ready to return, has result=" + result);
         return result;
     }
 
-    protected Callable<String> createWorker(HeaderPage headerPage, String testPassword, AtomicLong counter) {
-        return new CheckPasswordWorker(headerPage, testPassword, counter);
+    private Callable<String> createWorker(HeaderPage headerPage, String testPassword) {
+        ResultCollector resultCollector = new ResultCollector() {
+            @Override
+            public void setResult(String result) {
+                CheckDictionary.this.setResult(result);
+            }
+        };
+        PasswordWorkerContext context = new PasswordWorkerContext(null, headerPage, counter, quit, resultCollector);
+        return createWorker(context, testPassword);
+    }
+
+    protected Callable<String> createWorker(PasswordWorkerContext context, String testPassword) {
+        return new CheckPasswordWorker(context, testPassword);
     }
 
     public void close() {
@@ -305,7 +367,11 @@ public class CheckDictionary {
         return counter;
     }
 
-    public File getCurrentCandidatesFile() {
-        return currentCandidatesFile;
-    }    
+    public String getResult() {
+        return result;
+    }
+
+    public void setResult(String result) {
+        this.result = result;
+    }
 }

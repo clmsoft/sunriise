@@ -20,7 +20,6 @@ package com.le.sunriise.password;
 
 import java.io.IOException;
 
-
 import org.apache.log4j.Logger;
 
 import com.le.sunriise.password.crypt.JDKUtils;

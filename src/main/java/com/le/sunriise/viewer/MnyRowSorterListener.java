@@ -1,8 +1,8 @@
 package com.le.sunriise.viewer;
 
 import javax.swing.event.RowSorterEvent;
-import javax.swing.event.RowSorterListener;
 import javax.swing.event.RowSorterEvent.Type;
+import javax.swing.event.RowSorterListener;
 
 import org.apache.log4j.Logger;
 

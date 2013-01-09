@@ -22,32 +22,21 @@ import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.io.IOException;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicLong;
 
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 
-import org.apache.log4j.Logger;
-
 import com.le.sunriise.model.bean.PasswordCheckerModel;
-import com.le.sunriise.password.HeaderPage;
-import com.le.sunriise.password.dict.CheckDictionary;
 
-final class StartDictionarySearchAction implements ActionListener {
-    private static final Logger log = Logger.getLogger(StartDictionarySearchAction.class);
-
+final class DictionarySearchAction extends DictionarySearch implements ActionListener {
     private final PasswordCheckerApp app;
-    private JButton button;
-    private boolean closeChecker = false;
-    private int lastCheckerThreads = 0;
-    private PasswordCheckerModel dataModel;
-    private AtomicBoolean running = new AtomicBoolean(false);
+    private final PasswordCheckerModel dataModel;
+    private final JButton button;
 
-    public StartDictionarySearchAction(PasswordCheckerApp app, PasswordCheckerModel dataModel, JButton button) {
+    public DictionarySearchAction(PasswordCheckerApp app, PasswordCheckerModel dataModel, JButton button) {
+        super();
         this.app = app;
         this.dataModel = dataModel;
         this.button = button;
@@ -58,80 +47,14 @@ final class StartDictionarySearchAction implements ActionListener {
         if (this.getRunning().get()) {
             stopCheck();
         } else {
-            startCheck();
+            Integer nThreads = dataModel.getThreads();
+            File headerPageFile = new File(dataModel.getMnyFileName());
+            File candidatesPath = new File(dataModel.getWordListPath());
+            startCheck(nThreads, headerPageFile, candidatesPath);
         }
     }
 
-    private void startCheck() {
-        if (!validateInputs()) {
-            return;
-        }
-
-        if (button != null) {
-            button.setText("Stop");
-        }
-        this.getRunning().getAndSet(true);
-
-        if (this.app.getChecker() != null) {
-            if (dataModel.getThreads() > lastCheckerThreads) {
-                try {
-                    this.app.getChecker().close();
-                } finally {
-                    this.app.setChecker(null);
-                }
-            }
-        }
-        lastCheckerThreads = dataModel.getThreads();
-        if (this.app.getChecker() == null) {
-            log.info("Created new checker, threads=" + lastCheckerThreads);
-            this.app.setChecker(new CheckDictionary(lastCheckerThreads));
-        } else {
-            this.app.getChecker().getCounter().getAndSet(0);
-        }
-        AtomicLong counter = this.app.getChecker().getCounter();
-        dataModel.setStatus("Running ... searched " + counter.get());
-
-        Runnable command = new Runnable() {
-            @Override
-            public void run() {
-                String matchedPassword = null;
-                try {
-                    HeaderPage headerPage = new HeaderPage(new File(dataModel.getMnyFileName()));
-                    matchedPassword = StartDictionarySearchAction.this.app.getChecker().check(headerPage,
-                            new File(dataModel.getWordListPath()));
-                    notifyResult(app.getFrame(), matchedPassword);
-                } catch (IOException e) {
-                    log.warn(e);
-                } finally {
-                    if (closeChecker) {
-                        if (StartDictionarySearchAction.this.app.getChecker() != null) {
-                            try {
-                                StartDictionarySearchAction.this.app.getChecker().close();
-                            } finally {
-                                StartDictionarySearchAction.this.app.setChecker(null);
-                            }
-                        }
-                    }
-                    StartDictionarySearchAction.this.getRunning().getAndSet(false);
-
-                    if (button != null) {
-                        final String str = matchedPassword;
-                        Runnable doRun = new Runnable() {
-                            @Override
-                            public void run() {
-                                button.setText("Start");
-                                dataModel.setStatus("Idle - last result " + str);
-                            }
-                        };
-                        SwingUtilities.invokeLater(doRun);
-                    }
-                }
-            }
-        };
-        this.app.getPool().execute(command);
-    }
-
-    private boolean validateInputs() {
+    protected boolean validateInputs() {
         String fileName = null;
 
         fileName = dataModel.getMnyFileName();
@@ -177,27 +100,35 @@ final class StartDictionarySearchAction implements ActionListener {
         return true;
     }
 
-    private void stopCheck() {
-        log.info("Got STOP request.");
-        if (this.app.getChecker() != null) {
-            this.app.getChecker().stop();
+    protected void preStart() {
+        if (button != null) {
+            button.setText("Stop");
         }
     }
 
-    public AtomicBoolean getRunning() {
-        return running;
+    protected void postStart(String matchedPassword) {
+        if (button != null) {
+            final String str = matchedPassword;
+            Runnable doRun = new Runnable() {
+                @Override
+                public void run() {
+                    button.setText("Start");
+                    dataModel.setStatus("Idle - last result " + str);
+                }
+            };
+            SwingUtilities.invokeLater(doRun);
+        }
     }
 
-    public void setRunning(AtomicBoolean running) {
-        this.running = running;
-    }
+    protected void notifyResult(final String matchedPassword) {
+        super.notifyResult(matchedPassword);
 
-    protected void notifyResult(final Component parentComponent, final String matchedPassword) {
-        log.info("matchedPassword=" + matchedPassword);
-        Runnable doRun = new Runnable() {
+        final Component parentComponent = app.getFrame();
+
+        Runnable command = new Runnable() {
             @Override
             public void run() {
-//                Component parentComponent = app.getFrame();
+                // Component parentComponent = app.getFrame();
                 if (matchedPassword == null) {
                     JOptionPane.showMessageDialog(parentComponent, "Result of last search: NO password found.", "Search Result",
                             JOptionPane.WARNING_MESSAGE);
@@ -214,6 +145,14 @@ final class StartDictionarySearchAction implements ActionListener {
                 }
             }
         };
-        SwingUtilities.invokeLater(doRun);
+        SwingUtilities.invokeLater(command);
+    }
+
+    protected void logStatus(String message) {
+        dataModel.setStatus(message);
+    }
+
+    protected void runCommand(Runnable command) {
+        this.app.getPool().execute(command);
     }
 }

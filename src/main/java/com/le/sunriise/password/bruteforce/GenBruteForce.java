@@ -21,6 +21,7 @@ package com.le.sunriise.password.bruteforce;
 import java.io.CharArrayWriter;
 import java.io.IOException;
 import java.math.BigInteger;
+
 import org.apache.log4j.Logger;
 
 import com.le.sunriise.password.PasswordUtils;

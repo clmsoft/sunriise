@@ -18,15 +18,15 @@
  *******************************************************************************/
 package com.le.sunriise.misc;
 
+import java.awt.Component;
 import java.awt.EventQueue;
 
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 
 import org.apache.log4j.Logger;
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.Box;
-import java.awt.Component;
 
 public class SunriiseLauncher {
     private static final Logger log = Logger.getLogger(SunriiseLauncher.class);

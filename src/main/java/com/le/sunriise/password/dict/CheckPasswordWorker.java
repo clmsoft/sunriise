@@ -18,45 +18,32 @@
  *******************************************************************************/
 package com.le.sunriise.password.dict;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.Callable;
-import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.log4j.Logger;
 
-import com.le.sunriise.password.HeaderPage;
 import com.le.sunriise.password.PasswordUtils;
 
-public final class CheckPasswordWorker implements Callable<String> {
+public class CheckPasswordWorker implements Callable<String> {
     private static final Logger log = Logger.getLogger(CheckPasswordWorker.class);
 
-    private final File dbFile;
-    private final HeaderPage headerPage;
+    private final PasswordWorkerContext context;
+
     private final String testPassword;
-    private AtomicLong counter;
 
     private boolean doubleCheck = true;
 
-    public CheckPasswordWorker(File dbFile, HeaderPage headerPage, String testPassword, AtomicLong counter) {
+    public CheckPasswordWorker(PasswordWorkerContext context, String testPassword) {
         super();
-        this.dbFile = dbFile;
-        this.headerPage = headerPage;
+
+        this.context = context;
         this.testPassword = testPassword;
-        this.counter = counter;
-    }
-
-    public CheckPasswordWorker(File dbFile, String testPassword, AtomicLong counter) {
-        this(dbFile, null, testPassword, counter);
-    }
-
-    public CheckPasswordWorker(HeaderPage headerPage, String testPassword, AtomicLong counter) {
-        this(null, headerPage, testPassword, counter);
     }
 
     @Override
     public String call() throws Exception {
-        long counterValue = this.counter.incrementAndGet();
+        long counterValue = this.context.getCounter().incrementAndGet();
         int max = 100000;
         if ((max > 0) && ((counterValue % max) == 0)) {
             log.info("Have checked " + counterValue);
@@ -64,6 +51,8 @@ public final class CheckPasswordWorker implements Callable<String> {
 
         if (checkPassword(testPassword)) {
             log.info("testPassword=" + testPassword + ", YES");
+            context.getResultCollector().setResult(testPassword);
+            context.getQuit().getAndSet(true);
             return testPassword;
         } else {
             if (log.isDebugEnabled()) {
@@ -75,15 +64,15 @@ public final class CheckPasswordWorker implements Callable<String> {
 
     private boolean checkPassword(String testPassword) throws IOException {
         boolean result = false;
-        boolean checkUsingOpenDb = (headerPage == null);
+        boolean checkUsingOpenDb = (context.getHeaderPage() == null);
 
         if (checkUsingOpenDb) {
-            result = PasswordUtils.checkUsingOpenDb(dbFile, testPassword);
+            result = PasswordUtils.checkUsingOpenDb(context.getDbFile(), testPassword);
         } else {
-            result = PasswordUtils.checkUsingHeaderPage(headerPage, testPassword);
+            result = PasswordUtils.checkUsingHeaderPage(context.getHeaderPage(), testPassword);
             if (result) {
-                if (isDoubleCheck()) {
-                    result = PasswordUtils.doubleCheck(headerPage, testPassword);
+                if (doubleCheck) {
+                    result = PasswordUtils.doubleCheck(context.getHeaderPage(), testPassword);
                 }
             }
         }
@@ -91,16 +80,7 @@ public final class CheckPasswordWorker implements Callable<String> {
         return result;
     }
 
-    public AtomicLong getCounter() {
-        return counter;
+    public PasswordWorkerContext getContext() {
+        return context;
     }
-
-    public boolean isDoubleCheck() {
-        return doubleCheck;
-    }
-
-    public void setDoubleCheck(boolean doubleCheck) {
-        this.doubleCheck = doubleCheck;
-    }
-
 }

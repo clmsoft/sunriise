@@ -27,6 +27,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import junit.framework.Assert;
 
 import org.apache.log4j.Logger;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.le.sunriise.password.HeaderPage;
@@ -36,22 +37,33 @@ public class CheckDictionaryTest {
     private static final Logger log = Logger.getLogger(CheckDictionaryTest.class);
 
     private final class JustCountWorker extends CheckDictionary {
-        @Override
-        public Callable<String> createWorker(final HeaderPage headerPage, final String testPassword, final AtomicLong counter) {
-            Callable<String> worker = null;
 
-            worker = new Callable<String>() {
+        @Override
+        protected Callable<String> createWorker(PasswordWorkerContext context, String testPassword) {
+            CheckPasswordWorker worker = new CheckPasswordWorker(context, testPassword) {
                 @Override
                 public String call() throws Exception {
-                    counter.getAndIncrement();
-                    if (log.isDebugEnabled()) {
-                        log.debug("testPassword=" + testPassword);
-                    }
+                    this.getContext().getCounter().getAndIncrement();
                     return null;
                 }
             };
             return worker;
         }
+
+    }
+
+    @Test
+    @Ignore
+    public void testEmptyPassword() throws IOException {
+        String dbFileName = null;
+        String pathName = null;
+        String expected = null;
+
+        dbFileName = "src/test/data/money2002.mny";
+
+        pathName = "src/test/data/dict/";
+        expected = null;
+        checkPassword(dbFileName, pathName, expected);
     }
 
     @Test
@@ -66,10 +78,12 @@ public class CheckDictionaryTest {
         pathName = "src/test/data/dict/matched/matched01.txt";
         expected = "123@ABC!";
         checkPassword(dbFileName, pathName, expected);
+
         // last entry
         pathName = "src/test/data/dict/matched/matched02.txt";
         expected = "123@ABC!";
         checkPassword(dbFileName, pathName, expected);
+
         // middle
         pathName = "src/test/data/dict/matched/matched03.txt";
         expected = "123@ABC!";
@@ -118,7 +132,7 @@ public class CheckDictionaryTest {
 
         // 370 + 306706 + 3106 + 500 + (3107 *3)
         pathName = "src/test/data/dict/";
-        expected = 320003L;
+        expected = 320005L;
         checkCounter(dbFileName, pathName, expected);
     }
 
@@ -134,7 +148,7 @@ public class CheckDictionaryTest {
             String result = checker.check(headerPage, path);
             Assert.assertNull(result);
             AtomicLong counter = checker.getCounter();
-            Assert.assertEquals(counter.get(), expected);
+            Assert.assertEquals(expected, counter.get());
         } finally {
             if (checker != null) {
                 checker.close();
@@ -153,8 +167,13 @@ public class CheckDictionaryTest {
             headerPage = new HeaderPage(dbFile);
             path = new File(pathName);
             String result = checker.check(headerPage, path);
-            Assert.assertNotNull(result);
-            Assert.assertTrue(result.compareTo(expected) == 0);
+            log.info("result=" + result);
+            if (expected != null) {
+                Assert.assertNotNull(result);
+                Assert.assertTrue(result.compareTo(expected) == 0);
+            } else {
+                Assert.assertNull(result);
+            }
         } finally {
             if (checker != null) {
                 checker.close();

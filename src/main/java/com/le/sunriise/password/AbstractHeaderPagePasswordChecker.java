@@ -209,7 +209,7 @@ public abstract class AbstractHeaderPagePasswordChecker {
      */
     protected abstract byte[] decryptUsingRC4(byte[] ciphertext, byte[] key);
 
-    private static String toHexString(byte[] bytes) {
+    public static String toHexString(byte[] bytes) {
         return HexDump.toHex(bytes);
     }
 
@@ -256,7 +256,7 @@ public abstract class AbstractHeaderPagePasswordChecker {
      * @return {@code true} if the given bytes are all 0, {@code false}
      *         otherwise
      */
-    private static boolean isBlankKey(byte[] key) {
+    public static boolean isBlankKey(byte[] key) {
         for (byte byteVal : key) {
             if (byteVal != 0) {
                 return false;

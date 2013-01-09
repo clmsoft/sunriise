@@ -60,7 +60,6 @@ import com.le.sunriise.model.bean.PasswordCheckerModel;
 import com.le.sunriise.password.bruteforce.BruteForceStat;
 import com.le.sunriise.password.bruteforce.CheckBruteForce;
 import com.le.sunriise.password.bruteforce.GenBruteForce;
-import com.le.sunriise.password.dict.CheckDictionary;
 import com.le.sunriise.password.timing.Duration;
 
 public class PasswordCheckerApp {
@@ -83,7 +82,6 @@ public class PasswordCheckerApp {
 
     private JTextField textField_2;
 
-    private CheckDictionary checker = null;
     private JTextField textField_3;
     private JTextField textField_4;
     private JTextField textField_5;
@@ -91,6 +89,8 @@ public class PasswordCheckerApp {
     private JTextField txtNotImplementedYet;
 
     private JLabel[][] scoreboards;
+
+    private AtomicLong counter = new AtomicLong(0L);
 
     private final class OpenWordListAction implements ActionListener {
         private JFileChooser fc = null;
@@ -220,7 +220,7 @@ public class PasswordCheckerApp {
         textField_2.setColumns(10);
 
         JButton btnNewButton_2 = new JButton("Start");
-        final StartDictionarySearchAction action = new StartDictionarySearchAction(this, dataModel, btnNewButton_2);
+        final DictionarySearchAction action = new DictionarySearchAction(this, dataModel, btnNewButton_2);
         scheduleDictionaryStatusCommand(action);
         btnNewButton_2.addActionListener(action);
         wordListView.add(btnNewButton_2, "6, 10");
@@ -367,6 +367,9 @@ public class PasswordCheckerApp {
             private void updateScoreboardsUI(final BruteForceStat stat, char[] alphabets) {
                 JLabel[][] scoreboards = getScoreboards();
                 int[] cursorIndex = stat.getCurrentCursorIndex();
+                if ((cursorIndex == null) || (cursorIndex.length <= 0)) {
+                    return;
+                }
 
                 int i = 2;
                 int columns = scoreboards[i].length;
@@ -408,8 +411,8 @@ public class PasswordCheckerApp {
         schedulers.scheduleAtFixedRate(cmd, initialDelay, period, unit);
     }
 
-    private void scheduleDictionaryStatusCommand(final StartDictionarySearchAction action) {
-        Runnable cmd = new Runnable() {
+    private void scheduleDictionaryStatusCommand(final DictionarySearch action) {
+        Runnable command = new Runnable() {
             private final AtomicBoolean running = action.getRunning();
 
             @Override
@@ -420,19 +423,13 @@ public class PasswordCheckerApp {
                 if (!running.get()) {
                     return;
                 }
-
-                if (getChecker() == null) {
-                    return;
-                }
-
-                AtomicLong counter = getChecker().getCounter();
-                dataModel.setStatus("Running ... searched " + counter.get());
+                dataModel.setStatus("Running ... searched count " + action.getCounter());
             }
         };
         long period = 2L;
         long initialDelay = 1L;
         TimeUnit unit = TimeUnit.SECONDS;
-        schedulers.scheduleAtFixedRate(cmd, initialDelay, period, unit);
+        schedulers.scheduleAtFixedRate(command, initialDelay, period, unit);
     }
 
     JFrame getFrame() {
@@ -441,14 +438,6 @@ public class PasswordCheckerApp {
 
     void setFrame(JFrame frame) {
         this.frame = frame;
-    }
-
-    CheckDictionary getChecker() {
-        return checker;
-    }
-
-    void setChecker(CheckDictionary checker) {
-        this.checker = checker;
     }
 
     public ExecutorService getPool() {
