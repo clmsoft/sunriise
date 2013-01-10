@@ -20,6 +20,7 @@ package com.le.sunriise.tax;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 
@@ -46,8 +47,20 @@ public class TaxInfoCmd {
 
         log.info("dbFile=" + dbFile);
         try {
-            TaxInfo cmd = new TaxInfo();
-            cmd.visit(dbFile, password);
+            List<TaxInfo> taxInfoList = TaxInfo.parse(dbFile, password);
+            for (TaxInfo taxInfo : taxInfoList) {
+                System.out.println(taxInfo.getlTaxYear() + "." + taxInfo.getSzFull());
+                List<IncomeRate> incomeRates = taxInfo.getIncomeRates();
+                int index = 0;
+                for (IncomeRate incomeRate : incomeRates) {
+                    System.out.println("  " + "Income" + "_" + index + ", " + incomeRate);
+                    index++;
+                }
+                List<RateInfo> otherRates = taxInfo.getOtherRates();
+                for (RateInfo otherRate : otherRates) {
+                    System.out.println("  " + otherRate.getDescription() + ", " + otherRate.getRate());
+                }
+            }
         } catch (IOException e) {
             log.error(e, e);
         } finally {

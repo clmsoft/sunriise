@@ -1,1 +1,3 @@
-mvn clean source:jar package assembly:single site
+#!/bin/sh
+
+mvn -Dmaven.test.skip=true clean source:jar package assembly:single site

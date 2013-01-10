@@ -20,7 +20,9 @@ package com.le.sunriise.tax;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -33,172 +35,179 @@ import com.le.sunriise.Utils;
 import com.le.sunriise.viewer.OpenedDb;
 
 public class TaxInfo {
-    private class IncomeRate {
-        private Double amountLow;
-        private Double amountHigh;
-        private Double rate;
-
-        public Double getAmountLow() {
-            return amountLow;
-        }
-
-        public void setAmountLow(Double amountLow) {
-            this.amountLow = amountLow;
-        }
-
-        public Double getAmountHigh() {
-            return amountHigh;
-        }
-
-        public void setAmountHigh(Double amountHigh) {
-            this.amountHigh = amountHigh;
-        }
-
-        public Double getRate() {
-            return rate;
-        }
-
-        public void setRate(Double rate) {
-            this.rate = rate;
-        }
-
-        @Override
-        public String toString() {
-            StringBuilder sb = new StringBuilder();
-
-            sb.append(amountLow);
-            sb.append(", ");
-
-            if (amountHigh != null) {
-                sb.append(amountHigh);
-            } else {
-                sb.append("");
-            }
-            sb.append(", ");
-
-            if (rate != null) {
-                sb.append(rate);
-            } else {
-                sb.append("");
-            }
-            // sb.append(", ");
-
-            return sb.toString();
-        }
-    }
-
     private static final Logger log = Logger.getLogger(TaxInfo.class);
 
-    public void visit(File dbFile, String password) throws IOException {
-        OpenedDb openedDb = Utils.openDbReadOnly(dbFile, password);
-        visit(openedDb);
+    private List<RateInfo> otherRates;
+
+    private List<IncomeRate> incomeRates;
+
+    private String szFull;
+
+    private Integer lTaxYear;
+
+    public TaxInfo() {
+        super();
+        otherRates = new ArrayList<RateInfo>();
+
+        otherRates.add(new RateInfo("dRateCapGains", "Long-Term Capital Gains"));
+        otherRates.add(new RateInfo("dRateDividends", "Dividends"));
+        otherRates.add(new RateInfo("damtStdDed", "Standard Deduction"));
+        otherRates.add(new RateInfo("damtStdEx", "Exemption Amount"));
+        otherRates.add(new RateInfo("damtThreshExemp", "Exemption Cutoff"));
+        otherRates.add(new RateInfo("damtMaxCapLoss", "Maximum Capital Loss"));
+        otherRates.add(new RateInfo("damtDedBlind", "Blind"));
+        otherRates.add(new RateInfo("damtDedOver65", "Over 65"));
+        otherRates.add(new RateInfo("damtThreshDed", "Deduction Cutoff"));
     }
 
-    public void visit(OpenedDb openedDb) throws IOException {
+    public static List<TaxInfo> parse(File dbFile, String password) throws IOException {
+        OpenedDb openedDb = Utils.openDbReadOnly(dbFile, password);
+        return parse(openedDb);
+    }
+
+    public static List<TaxInfo> parse(OpenedDb openedDb) throws IOException {
+        List<TaxInfo> taxInfoList = new ArrayList<TaxInfo>();
+
         Database db = openedDb.getDb();
         Set<String> tableNames = db.getTableNames();
         for (String tableName : tableNames) {
             Table table = db.getTable(tableName);
-            if (!acceptTable(table)) {
+            if (!TaxInfo.acceptTable(table)) {
                 continue;
             }
-            visit(table);
+            TaxInfo.parse(table, taxInfoList);
         }
+
+        return taxInfoList;
     }
 
-    public boolean acceptTable(Table table) {
+    private static boolean acceptTable(Table table) {
         return true;
     }
 
-    public void visit(Table table) {
+    private static void parse(Table table, List<TaxInfo> taxInfoList) {
         String tableName = table.getName();
-
         if (tableName.compareToIgnoreCase("TAXLINE") == 0) {
-            Cursor cursor = Cursor.createCursor(table);
-            Iterator<Map<String, Object>> rows = cursor.iterator();
-            while (rows.hasNext()) {
-                Map<String, Object> row = rows.next();
-                // log.info(row);
-            }
+            visitTable_TAXLINE(table);
         } else if (tableName.compareToIgnoreCase("Tax Rate Custom Pool") == 0) {
-            Cursor cursor = Cursor.createCursor(table);
-            Iterator<Map<String, Object>> rows = cursor.iterator();
-            while (rows.hasNext()) {
-                Map<String, Object> row = rows.next();
-                Integer lTaxYear = (Integer) row.get("lTaxYear");
-                if (lTaxYear != null) {
-                    if (lTaxYear == 2012) {
-                        String szFull = (String) row.get("szFull");
-                        // log.info(szFull);
-
-                        // System.out.println("#");
-
-                        IncomeRate incomeRate = null;
-                        String separator = ", ";
-                        for (int i = 0; i < 6; i++) {
-                            incomeRate = new IncomeRate();
-
-                            Double dRate = (Double) row.get("dRate" + (i + 1));
-                            incomeRate.setRate(dRate);
-
-                            // damtLow1
-                            Double damtLow = (Double) row.get("damtLow" + (i + 1));
-                            incomeRate.setAmountLow(damtLow);
-
-                            // damtHigh1
-                            Double damtHigh = (Double) row.get("damtHigh" + (i + 1));
-                            incomeRate.setAmountHigh(damtHigh);
-
-                            System.out.println(szFull + "." + "Income" + "_" + (i + 1) + separator + incomeRate);
-                        }
-
-                        // Long-Term Capital Gains: dRateCapGains
-                        Double dRateCapGains = (Double) row.get("dRateCapGains");
-                        System.out.println(szFull + "." + "Long-Term Capital Gains" + separator + dRateCapGains);
-
-                        // Dividends: dRateDividends
-                        Double dRateDividends = (Double) row.get("dRateDividends");
-                        System.out.println(szFull + "." + "Dividends" + separator + dRateDividends);
-
-                        // Standard Deduction: damtStdDed
-                        Double damtStdDed = (Double) row.get("damtStdDed");
-                        System.out.println(szFull + "." + "Standard Deduction" + separator + damtStdDed);
-
-                        // Exemption Amount: damtStdEx
-                        Double damtStdEx = (Double) row.get("damtStdEx");
-                        System.out.println(szFull + "." + "Exemption Amount" + separator + damtStdEx);
-
-                        // Exemption Cutoff: damtThreshExemp
-                        Double damtThreshExemp = (Double) row.get("damtThreshExemp");
-                        System.out.println(szFull + "." + "Exemption Cutoff" + separator + damtThreshExemp);
-
-                        // Maximum Capital Loss: damtMaxCapLoss
-                        Double damtMaxCapLoss = (Double) row.get("damtMaxCapLoss");
-                        System.out.println(szFull + "." + "Maximum Capital Loss" + separator + damtMaxCapLoss);
-
-                        // Blind : damtDedBlind
-                        Double damtDedBlind = (Double) row.get("damtDedBlind");
-                        System.out.println(szFull + "." + "Blind" + separator + damtDedBlind);
-
-                        // Over 65: damtDedOver65
-                        Double damtDedOver65 = (Double) row.get("damtDedOver65");
-                        System.out.println(szFull + "." + "Over 65" + separator + damtDedOver65);
-
-                        // Deduction Cutoff: damtThreshDed
-                        Double damtThreshDed = (Double) row.get("damtThreshDed");
-                        System.out.println(szFull + "." + "Deduction Cutoff" + separator + damtThreshDed);
-                    }
-                }
-            }
+            visitTable_Tax_Rate_Custom_Pool(table, taxInfoList);
         } else if (tableName.compareToIgnoreCase("Tax Scenario Custom Pool") == 0) {
-            Cursor cursor = Cursor.createCursor(table);
-            Iterator<Map<String, Object>> rows = cursor.iterator();
-            while (rows.hasNext()) {
-                Map<String, Object> row = rows.next();
-                // log.info(row);
+            visitTable_Tax_Scenario_Custom_Pool(table);
+        }
+    }
+
+    private static void visitTable_Tax_Rate_Custom_Pool(Table table, List<TaxInfo> taxInfoList) {
+        Cursor cursor = Cursor.createCursor(table);
+        Iterator<Map<String, Object>> rows = cursor.iterator();
+        while (rows.hasNext()) {
+            Map<String, Object> row = rows.next();
+            Integer lTaxYear = (Integer) row.get("lTaxYear");
+            if (lTaxYear != null) {
+                TaxInfo taxInfo = vitsitTaxYear(row, lTaxYear);
+                taxInfoList.add(taxInfo);
             }
         }
+    }
 
+    private static TaxInfo vitsitTaxYear(final Map<String, Object> row, final Integer lTaxYear) {
+        TaxInfo taxInfo = new TaxInfo();
+
+        taxInfo.setSzFull((String) row.get("szFull"));
+        taxInfo.setlTaxYear(lTaxYear);
+
+        visitIncomeRate(row, taxInfo);
+
+        visitOtherRates(row, taxInfo);
+
+        return taxInfo;
+    }
+
+    private static void visitIncomeRate(final Map<String, Object> row, final TaxInfo taxInfo) {
+        List<IncomeRate> incomeRates = new ArrayList<IncomeRate>();
+
+        IncomeRate incomeRate = null;
+        int max = 6;
+        for (int i = 0; i < max; i++) {
+            incomeRate = new IncomeRate();
+
+            int index = i + 1;
+            Double dRate = (Double) row.get("dRate" + index);
+            incomeRate.setRate(dRate);
+
+            // damtLow1
+            Double damtLow = (Double) row.get("damtLow" + index);
+            incomeRate.setAmountLow(damtLow);
+
+            // damtHigh1
+            Double damtHigh = (Double) row.get("damtHigh" + index);
+            incomeRate.setAmountHigh(damtHigh);
+
+            incomeRates.add(incomeRate);
+        }
+        taxInfo.setIncomeRates(incomeRates);
+    }
+
+    private static void visitOtherRates(final Map<String, Object> row, final TaxInfo taxInfo) {
+        for (RateInfo otherRate : taxInfo.getOtherRates()) {
+            Double rate = (Double) row.get(otherRate.getColumnName());
+            otherRate.setRate(rate);
+            // System.out.println(szFull + "." + columnName.getKey() + separator
+            // + rate);
+        }
+    }
+
+    private static void visitTable_Tax_Scenario_Custom_Pool(Table table) {
+        Cursor cursor = Cursor.createCursor(table);
+        Iterator<Map<String, Object>> rows = cursor.iterator();
+        while (rows.hasNext()) {
+            Map<String, Object> row = rows.next();
+            if (log.isDebugEnabled()) {
+                log.debug(row);
+            }
+        }
+    }
+
+    private static void visitTable_TAXLINE(Table table) {
+        Cursor cursor = Cursor.createCursor(table);
+        Iterator<Map<String, Object>> rows = cursor.iterator();
+        while (rows.hasNext()) {
+            Map<String, Object> row = rows.next();
+            if (log.isDebugEnabled()) {
+                log.debug(row);
+            }
+        }
+    }
+
+    public List<RateInfo> getOtherRates() {
+        return otherRates;
+    }
+
+    public void setOtherRates(List<RateInfo> otherRates) {
+        this.otherRates = otherRates;
+    }
+
+    public List<IncomeRate> getIncomeRates() {
+        return incomeRates;
+    }
+
+    public void setIncomeRates(List<IncomeRate> incomeRates) {
+        this.incomeRates = incomeRates;
+    }
+
+    public String getSzFull() {
+        return szFull;
+    }
+
+    public void setSzFull(String szFull) {
+        this.szFull = szFull;
+    }
+
+    public Integer getlTaxYear() {
+        return lTaxYear;
+    }
+
+    public void setlTaxYear(Integer lTaxYear) {
+        this.lTaxYear = lTaxYear;
     }
 
 }
