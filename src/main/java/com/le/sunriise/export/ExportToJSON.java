@@ -130,6 +130,9 @@ public class ExportToJSON extends DefaultAccountVisitor {
         if (c == '"') {
             return '_';
         }
+        if (c == '*') {
+            return '_';
+        }
     
         return safeC;
     }

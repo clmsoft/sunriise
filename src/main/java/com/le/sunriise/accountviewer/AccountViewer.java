@@ -33,6 +33,10 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.math.BigDecimal;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -120,9 +124,12 @@ public class AccountViewer {
 
     private JTextArea transactionQifTextArea;
 
+    private Connection jdbcConn;
+
     private static final ExecutorService threadPool = Executors.newCachedThreadPool();
 
     private final class MyOpenDbAction extends OpenDbAction {
+
         private MyOpenDbAction(Component locationRelativeTo, Preferences prefs, OpenedDb openedDb) {
             super(locationRelativeTo, prefs, openedDb);
             setDisableReadOnlyCheckBox(true);
@@ -137,6 +144,15 @@ public class AccountViewer {
             File dbFile = openedDb.getDbFile();
             if (dbFile != null) {
                 getFrame().setTitle(dbFile.getAbsolutePath());
+
+//                String dbUrl = UcanaccessDriver.URL_PREFIX + dbFile.getAbsolutePath() + 
+//                        ";codecprovider=;password=";
+//                try {
+//                    jdbcConn = DriverManager.getConnection(dbUrl);
+//                    log.info("jdbcConn=" + jdbcConn);
+//                } catch (SQLException e) {
+//                    log.warn(e);
+//                }
             } else {
                 getFrame().setTitle("No opened db");
             }
@@ -501,6 +517,23 @@ public class AccountViewer {
         autoBinding.bind();
     }
 
+    private static void dump(ResultSet rs, String exName) throws SQLException {
+        System.out.println("-------------------------------------------------");
+        System.out.println();
+        System.out.println(exName + " result:");
+        System.out.println();
+        while (rs.next()) {
+            System.out.print("| ");
+            int j = rs.getMetaData().getColumnCount();
+            for (int i = 1; i <= j; ++i) {
+                Object o = rs.getObject(i);
+                System.out.print(o + " | ");
+            }
+            System.out.println();
+            System.out.println();
+        }
+    }
+
     protected void accountSelected(final Account account) throws IOException {
         StopWatch stopWatch = new StopWatch();
         log.info("> accountSelected");
@@ -511,6 +544,28 @@ public class AccountViewer {
                 log.info("select account=" + account);
                 AccountUtil.retrieveTransactions(openedDb.getDb(), account);
 
+                // JDBC
+                if (jdbcConn != null) {
+                    Statement statement = null;
+                    try {
+                        statement = jdbcConn.createStatement();
+                        ResultSet rs = statement.executeQuery("select * from ACCT");
+                        dump(rs, "select * from ACCT");
+                    } catch (SQLException e) {
+                        log.warn(e);
+                    } finally {
+                        if (statement != null) {
+                            try {
+                                statement.close();
+                            } catch (SQLException e) {
+                                log.warn(e);
+                            } finally {
+                                statement = null;
+                            }
+                        }
+                    }
+                } 
+                
                 BigDecimal currentBalance = AccountUtil.calculateCurrentBalance(account);
 
                 log.info(account.getName() + ", " + account.getAccountType() + ", "
@@ -650,6 +705,13 @@ public class AccountViewer {
      * Launch the application.
      */
     public static void main(String[] args) {
+//        try {
+//            Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
+//        } catch (ClassNotFoundException e1) {
+//            log.error(e1);
+//            System.exit(1);
+//        }
+
         EventQueue.invokeLater(new Runnable() {
 
             @Override
@@ -766,5 +828,14 @@ public class AccountViewer {
             openedDb.close();
         }
         openedDb = null;
+
+        if (jdbcConn != null) {
+            try {
+                jdbcConn.close();
+            } catch (SQLException e) {
+                log.warn(e);
+            }
+            jdbcConn = null;
+        }
     }
 }

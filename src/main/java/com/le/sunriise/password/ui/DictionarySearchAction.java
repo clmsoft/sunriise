@@ -54,6 +54,7 @@ final class DictionarySearchAction extends DictionarySearch implements ActionLis
         }
     }
 
+    @Override
     protected boolean validateInputs() {
         String fileName = null;
 
@@ -100,12 +101,14 @@ final class DictionarySearchAction extends DictionarySearch implements ActionLis
         return true;
     }
 
+    @Override
     protected void preStart() {
         if (button != null) {
             button.setText("Stop");
         }
     }
 
+    @Override
     protected void postStart(String matchedPassword) {
         if (button != null) {
             final String str = matchedPassword;
@@ -120,6 +123,7 @@ final class DictionarySearchAction extends DictionarySearch implements ActionLis
         }
     }
 
+    @Override
     protected void notifyResult(final String matchedPassword) {
         super.notifyResult(matchedPassword);
 
@@ -148,10 +152,12 @@ final class DictionarySearchAction extends DictionarySearch implements ActionLis
         SwingUtilities.invokeLater(command);
     }
 
+    @Override
     protected void logStatus(String message) {
         dataModel.setStatus(message);
     }
 
+    @Override
     protected void runCommand(Runnable command) {
         this.app.getPool().execute(command);
     }

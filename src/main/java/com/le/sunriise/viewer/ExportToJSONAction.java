@@ -133,6 +133,8 @@ public class ExportToJSONAction implements ActionListener {
                     }
                 };
                 destDb = exporter.export(srcDb, destDir);
+                // XXX - don't close it
+                destDb = null;
             } catch (IOException e) {
                 log.error(e);
                 exception = e;

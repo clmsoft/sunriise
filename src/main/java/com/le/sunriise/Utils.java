@@ -201,7 +201,7 @@ public class Utils {
             Charset charset = null;
             TimeZone timeZone = null;
             // TODO
-            boolean provideFileChannelForReadOnly = true;
+            boolean provideFileChannelForReadOnly = false;
             Database db = null;
             if (provideFileChannelForReadOnly && readOnly) {
                 ROMemoryMappedFileChannel channel =  new ROMemoryMappedFileChannel(dbFile);
