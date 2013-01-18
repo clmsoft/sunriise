@@ -26,9 +26,9 @@ import org.apache.log4j.Logger;
 
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Table;
-import com.le.sunriise.accountviewer.Account;
-import com.le.sunriise.accountviewer.AccountType;
 import com.le.sunriise.accountviewer.AccountUtil;
+import com.le.sunriise.mnyobject.Account;
+import com.le.sunriise.mnyobject.AccountType;
 import com.le.sunriise.viewer.OpenedDb;
 import com.le.sunriise.viewer.TableUtils;
 
@@ -51,6 +51,7 @@ public class SanityCheck extends DefaultAccountVisitor {
         for (String tableName : tableNames) {
             Table table = db.getTable(tableName);
             if (table == null) {
+                log.warn("Cannot find tableName=" + tableName);
                 continue;
             }
             log.info("> table=" + tableName);
@@ -86,6 +87,9 @@ public class SanityCheck extends DefaultAccountVisitor {
             case INVESTMENT:
                 Double marketValue = AccountUtil.calculateInvestmentBalance(account, mnyContext);
                 account.setCurrentBalance(new BigDecimal(marketValue));
+                break;
+            default:
+                log.warn("Not handle accountType=" + accountType);
                 break;
             }
         }

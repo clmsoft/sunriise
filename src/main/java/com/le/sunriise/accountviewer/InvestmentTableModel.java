@@ -20,6 +20,9 @@ package com.le.sunriise.accountviewer;
 
 import java.util.List;
 
+import com.le.sunriise.mnyobject.Account;
+import com.le.sunriise.mnyobject.Transaction;
+
 public class InvestmentTableModel extends DefaultAccountViewerTableModel {
     public InvestmentTableModel(Account account) {
         super(account);

@@ -50,20 +50,56 @@ class IncomeRate {
 
     @Override
     public String toString() {
+        return toString(",", false, true);
+    }
+
+    public String toString(String sep, boolean quote, boolean space) {
         StringBuilder sb = new StringBuilder();
 
+        if (quote) {
+            sb.append("\"");
+        }
         sb.append(amountLow);
-        sb.append(", ");
+        if (quote) {
+            sb.append("\"");
+        }
+
+        sb.append(sep);
+        if (space) {
+            sb.append(" ");
+        }
 
         if (amountHigh != null) {
+            if (quote) {
+                sb.append("\"");
+            }
             sb.append(amountHigh);
+            if (quote) {
+                sb.append("\"");
+            }
         } else {
+            if (quote) {
+                sb.append("\"");
+            }
             sb.append("");
+            if (quote) {
+                sb.append("\"");
+            }
         }
-        sb.append(", ");
+
+        sb.append(sep);
+        if (space) {
+            sb.append(" ");
+        }
 
         if (rate != null) {
+            if (quote) {
+                sb.append("\"");
+            }
             sb.append(rate);
+            if (quote) {
+                sb.append("\"");
+            }
         } else {
             sb.append("");
         }

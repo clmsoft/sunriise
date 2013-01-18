@@ -20,7 +20,7 @@ column szFull TRSingle
 # Married filing jointly
 #column szFull TRJoint
 
-# Married filing separatedly 
+# Married filing separately 
 #column szFull TRSeparate
 
 # Head of household

@@ -28,14 +28,14 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
-import com.le.sunriise.accountviewer.Account;
 import com.le.sunriise.accountviewer.AccountUtil;
-import com.le.sunriise.accountviewer.Category;
-import com.le.sunriise.accountviewer.InvestmentActivity;
 import com.le.sunriise.accountviewer.MnyContext;
-import com.le.sunriise.accountviewer.Payee;
-import com.le.sunriise.accountviewer.Transaction;
-import com.le.sunriise.accountviewer.TransactionSplit;
+import com.le.sunriise.mnyobject.Account;
+import com.le.sunriise.mnyobject.Category;
+import com.le.sunriise.mnyobject.InvestmentActivity;
+import com.le.sunriise.mnyobject.Payee;
+import com.le.sunriise.mnyobject.Transaction;
+import com.le.sunriise.mnyobject.TransactionSplit;
 
 public class QifExportUtils {
     private static final Logger log = Logger.getLogger(QifExportUtils.class);

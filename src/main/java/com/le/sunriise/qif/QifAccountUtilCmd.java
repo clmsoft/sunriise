@@ -30,9 +30,9 @@ import org.apache.log4j.Logger;
 
 import com.healthmarketscience.jackcess.Database;
 import com.le.sunriise.Utils;
-import com.le.sunriise.accountviewer.Account;
 import com.le.sunriise.accountviewer.AccountUtil;
-import com.le.sunriise.accountviewer.Currency;
+import com.le.sunriise.mnyobject.Account;
+import com.le.sunriise.mnyobject.Currency;
 import com.le.sunriise.viewer.OpenedDb;
 
 public class QifAccountUtilCmd {

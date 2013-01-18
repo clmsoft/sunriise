@@ -21,7 +21,7 @@ package com.le.sunriise.report;
 import java.math.BigDecimal;
 import java.util.Date;
 
-import com.le.sunriise.accountviewer.Account;
+import com.le.sunriise.mnyobject.Account;
 
 class AccountBalance {
     private Account account;

@@ -16,13 +16,14 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA
  *******************************************************************************/
-package com.le.sunriise.accountviewer;
+package com.le.sunriise.mnyobject;
 
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+
 
 public class Transaction extends MnyObject implements Comparable<Transaction> {
     private static final Logger log = Logger.getLogger(Transaction.class);

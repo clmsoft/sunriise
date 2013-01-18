@@ -1,0 +1,90 @@
+# Thu Jan 10 13:15:31 PST 2013
+
+# Notes: number should NOT have group separator such as ','
+# OK: 1230
+# NOT OK: 1,230
+
+# http://www.irs.gov/newsroom/article/0,,id=248485,00.html
+
+# tax rate table.DO NOT CHANGE THIS VALUE
+table "Tax Rate Custom Pool"
+
+# tax year
+column lTaxYear 2012
+
+# START of filing status
+# Choose one ONLY
+# Single
+column szFull TRSingle
+
+# Married filing jointly
+#column szFull TRJoint
+
+# Married filing separately 
+#column szFull TRSeparate
+
+# Head of household
+#column szFull TRHHouse
+# END of filing status
+
+# START of bracket
+
+# Income:10% bracket 
+set column dRate1 10
+set column damtLow1 0
+set column damtHigh1 8700
+
+# Income:15% bracket
+set column dRate2 15
+set column damtLow2 8701
+set column damtHigh2 35350
+
+# Income: 25% bracket
+set column dRate3 25
+set column damtLow3 35351
+set column damtHigh3 85650
+
+# Income: 28% bracket
+set column dRate4 28
+set column damtLow4 85651
+set column damtHigh4 178650
+
+# Income: 33% bracket
+set column dRate5 33
+set column damtLow5 178651
+set column damtHigh5 388350
+
+# Income: 35% bracket
+set column dRate6 35
+set column damtLow6 388351
+set column damtHigh6 
+
+# END of brackets
+
+# Long-Term Capital Gain rate
+set column  dRateCapGains 15
+
+# Dividends rate
+set column  dRateDividends 15
+
+# Standard Deduction: damtStdDed
+set column  damtStdDed 5950
+
+# Exemption Amount: damtStdEx
+set column  damtStdEx 3800
+
+# Exemption Cutoff: damtThreshExemp
+set column  damtThreshExemp 145950
+
+# Maximum Capital Loss: damtMaxCapLoss
+set column  damtMaxCapLoss 3000
+
+# Blind : damtDedBlind
+set column  damtDedBlind 1450
+
+# Over 65: damtDedOver65
+set column  damtDedOver65 1450
+
+# Deduction Cutoff: damtThreshDed
+set column  damtThreshDed 150500
+

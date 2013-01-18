@@ -39,11 +39,11 @@ import com.healthmarketscience.jackcess.JetFormat;
 import com.healthmarketscience.jackcess.JetFormat.CodecType;
 import com.healthmarketscience.jackcess.PageChannel;
 import com.healthmarketscience.jackcess.Table;
-import com.le.sunriise.accountviewer.Account;
 import com.le.sunriise.accountviewer.AccountUtil;
-import com.le.sunriise.accountviewer.Transaction;
 import com.le.sunriise.encryption.EncryptionUtils;
 import com.le.sunriise.index.IndexLookup;
+import com.le.sunriise.mnyobject.Account;
+import com.le.sunriise.mnyobject.Transaction;
 
 public class TableUtils {
     private static final Logger log = Logger.getLogger(TableUtils.class);

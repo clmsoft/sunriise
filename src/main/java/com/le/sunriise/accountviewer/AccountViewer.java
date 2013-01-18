@@ -78,7 +78,13 @@ import org.jdesktop.swingbinding.SwingBindings;
 import com.healthmarketscience.jackcess.Cursor;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Table;
+import com.le.sunriise.JavaInfo;
 import com.le.sunriise.StopWatch;
+import com.le.sunriise.mnyobject.Account;
+import com.le.sunriise.mnyobject.AccountType;
+import com.le.sunriise.mnyobject.Currency;
+import com.le.sunriise.mnyobject.SecurityHolding;
+import com.le.sunriise.mnyobject.Transaction;
 import com.le.sunriise.model.bean.AccountViewerDataModel;
 import com.le.sunriise.qif.QifExportUtils;
 import com.le.sunriise.viewer.MyTableCellRenderer;
@@ -653,6 +659,9 @@ public class AccountViewer {
                     window.getFrame().pack();
                     window.getFrame().setLocationRelativeTo(null);
                     window.getFrame().setVisible(true);
+                    
+                    JavaInfo.logInfo();
+                    
                 } catch (Exception e) {
                     log.error(e, e);
                 }

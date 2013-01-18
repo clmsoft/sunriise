@@ -16,7 +16,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA
  *******************************************************************************/
-package com.le.sunriise.accountviewer;
+package com.le.sunriise.mnyobject;
 
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
@@ -24,7 +24,11 @@ import java.text.NumberFormat;
 import java.util.List;
 import java.util.Locale;
 
+
 public class Account extends MnyObject implements Comparable<Account> {
+    /* 
+     * Internal MsMoney id
+     */
     private Integer id;
 
     private Integer relatedToAccountId;
@@ -97,6 +101,11 @@ public class Account extends MnyObject implements Comparable<Account> {
         this.accountType = AccountType.toAccountType(type);
     }
 
+    /**
+     * Get the internal MsMoney id for this account.
+     * 
+     * @return an Integer which is the internal MsMoney id for this account.
+     */
     public Integer getId() {
         return id;
     }

@@ -1,4 +1,4 @@
-# Mon Jan 30 11:36:34 PST 2012
+# Thu Jan 10 13:15:31 PST 2013
 
 # Notes: number should NOT have group separator such as ','
 # OK: 1230
@@ -15,13 +15,13 @@ column lTaxYear 2012
 # START of filing status
 # Choose one ONLY
 # Single
-column szFull TRSingle
+#column szFull TRSingle
 
 # Married filing jointly
 #column szFull TRJoint
 
-# Married filing separatedly 
-#column szFull TRSeparate
+# Married filing separately 
+column szFull TRSeparate
 
 # Head of household
 #column szFull TRHHouse

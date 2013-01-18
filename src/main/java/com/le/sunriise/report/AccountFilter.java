@@ -18,7 +18,7 @@
  *******************************************************************************/
 package com.le.sunriise.report;
 
-import com.le.sunriise.accountviewer.Account;
+import com.le.sunriise.mnyobject.Account;
 
 public interface AccountFilter {
     public boolean accept(Account account);

@@ -29,6 +29,9 @@ import org.apache.log4j.Logger;
 
 import com.healthmarketscience.jackcess.Database;
 import com.le.sunriise.Utils;
+import com.le.sunriise.mnyobject.Account;
+import com.le.sunriise.mnyobject.Transaction;
+import com.le.sunriise.mnyobject.TransactionSplit;
 import com.le.sunriise.viewer.OpenedDb;
 
 public class ExportAccountsToMd {

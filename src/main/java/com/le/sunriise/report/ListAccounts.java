@@ -26,8 +26,8 @@ import org.apache.log4j.Logger;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
 
-import com.le.sunriise.accountviewer.Account;
 import com.le.sunriise.json.JSONUtils;
+import com.le.sunriise.mnyobject.Account;
 
 public class ListAccounts extends DefaultAccountVisitor {
     private static final Logger log = Logger.getLogger(ListAccounts.class);
@@ -66,7 +66,7 @@ public class ListAccounts extends DefaultAccountVisitor {
     public void visitAccount(Account account) {
         log.info(account.getName());
 
-        boolean toJSON = false;
+        boolean toJSON = true;
         if (toJSON) {
             CharArrayWriter writer = new CharArrayWriter();
             try {

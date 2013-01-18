@@ -26,10 +26,10 @@ import org.apache.log4j.Logger;
 
 import com.healthmarketscience.jackcess.Database;
 import com.le.sunriise.Utils;
-import com.le.sunriise.accountviewer.Account;
 import com.le.sunriise.accountviewer.AccountUtil;
 import com.le.sunriise.accountviewer.MnyContext;
-import com.le.sunriise.accountviewer.Transaction;
+import com.le.sunriise.mnyobject.Account;
+import com.le.sunriise.mnyobject.Transaction;
 import com.le.sunriise.viewer.OpenedDb;
 
 public abstract class AbstractAccountVisitor {
@@ -58,7 +58,7 @@ public abstract class AbstractAccountVisitor {
 
     public abstract void visitFilteredTransaction(Transaction transaction) throws IOException;
 
-    private void _visit(OpenedDb openedDb) throws IOException {
+    protected void _visit(OpenedDb openedDb) throws IOException {
         preVisit(openedDb);
         try {
             this.mnyContext = AccountUtil.createMnyContext(openedDb);

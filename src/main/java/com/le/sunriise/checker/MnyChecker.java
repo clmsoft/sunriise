@@ -1,15 +1,12 @@
 package com.le.sunriise.checker;
 
-import org.apache.log4j.Logger;
+import com.le.sunriise.report.SanityCheckCmd;
 
 public class MnyChecker {
-    private static final Logger log = Logger.getLogger(MnyChecker.class);
-    
     /**
      * @param args
      */
     public static void main(String[] args) {
-        MnyChecker mnyChecker = new MnyChecker();
+        SanityCheckCmd.main(args);
     }
-
 }

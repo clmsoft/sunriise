@@ -24,8 +24,8 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
-import com.le.sunriise.accountviewer.Account;
-import com.le.sunriise.accountviewer.AccountType;
+import com.le.sunriise.mnyobject.Account;
+import com.le.sunriise.mnyobject.AccountType;
 
 public class QifAccountUtil {
     private static final Logger log = Logger.getLogger(QifAccountUtil.class);

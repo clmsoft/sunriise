@@ -28,14 +28,14 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.le.sunriise.accountviewer.Account;
 import com.le.sunriise.accountviewer.AccountUtil;
-import com.le.sunriise.accountviewer.Transaction;
+import com.le.sunriise.mnyobject.Account;
+import com.le.sunriise.mnyobject.Transaction;
 import com.le.sunriise.viewer.OpenedDb;
 
 public class OpenMnyFileTest {
     @Test
-    public void test1() throws IOException {
+    public void testSunset() throws IOException {
         File dbFile = new File("src/test/data/sunset01.mny");
         String password = null;
         openDB(dbFile, password);
@@ -43,7 +43,6 @@ public class OpenMnyFileTest {
         dbFile = new File("src/test/data/sunset02.mny");
         password = "12345678";
         openDB(dbFile, password);
-
     }
 
     private void openDB(File dbFile, String password) throws IOException {

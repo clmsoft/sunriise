@@ -49,16 +49,15 @@ public class TaxInfoCmd {
         try {
             List<TaxInfo> taxInfoList = TaxInfo.parse(dbFile, password);
             for (TaxInfo taxInfo : taxInfoList) {
-                System.out.println(taxInfo.getlTaxYear() + "." + taxInfo.getSzFull());
                 List<IncomeRate> incomeRates = taxInfo.getIncomeRates();
-                int index = 0;
+                int index = 1;
                 for (IncomeRate incomeRate : incomeRates) {
-                    System.out.println("  " + "Income" + "_" + index + ", " + incomeRate);
+                    printIncomeRate(taxInfo.getlTaxYear(), taxInfo.getSzFull(), index, incomeRate);
                     index++;
                 }
                 List<RateInfo> otherRates = taxInfo.getOtherRates();
                 for (RateInfo otherRate : otherRates) {
-                    System.out.println("  " + otherRate.getDescription() + ", " + otherRate.getRate());
+                    printRateInfo(taxInfo.getlTaxYear(), taxInfo.getSzFull(), otherRate);
                 }
             }
         } catch (IOException e) {
@@ -69,4 +68,39 @@ public class TaxInfoCmd {
 
     }
 
+    private static void printRateInfo(Integer getlTaxYear, String szFull, RateInfo otherRate) {
+        StringBuilder sb = new StringBuilder();
+        String sep = ",";
+
+        sb.append("\"" + getlTaxYear + "\"");
+
+        sb.append(sep);
+        sb.append("\"" + szFull + "\"");
+
+        sb.append(sep);
+        sb.append("\"" + otherRate.getDescription() + "\"");
+
+        sb.append(sep);
+        sb.append("\"" + otherRate.getRate() + "\"");
+
+        System.out.println(sb.toString());
+    }
+
+    private static void printIncomeRate(Integer getlTaxYear, String szFull, int index, IncomeRate incomeRate) {
+        StringBuilder sb = new StringBuilder();
+        String sep = ",";
+
+        sb.append("\"" + getlTaxYear + "\"");
+
+        sb.append(sep);
+        sb.append("\"" + szFull + "\"");
+
+        sb.append(sep);
+        sb.append("\"" + "Income_" + index + "\"");
+
+        sb.append(sep);
+        sb.append(incomeRate.toString(sep, true, false));
+
+        System.out.println(sb.toString());
+    }
 }

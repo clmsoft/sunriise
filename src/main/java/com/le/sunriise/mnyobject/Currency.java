@@ -16,36 +16,55 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA
  *******************************************************************************/
-package com.le.sunriise.accountviewer;
+package com.le.sunriise.mnyobject;
 
-public class TransactionSplit extends MnyObject {
-    private Integer parentId;
+import java.util.Map;
 
-    private Integer rowId;
 
-    private Transaction transaction;
+public class Currency extends MnyObject implements Comparable<Currency> {
+    private Integer id;
+
+    private String name;
+
+    private String isoCode;
+
     
-    public Integer getParentId() {
-        return parentId;
+    @Override
+    public int compareTo(Currency o) {
+        return id.compareTo(o.getId());
     }
 
-    public void setParentId(Integer parentId) {
-        this.parentId = parentId;
+    public Integer getId() {
+        return id;
     }
 
-    public Integer getRowId() {
-        return rowId;
+    public void setId(Integer id) {
+        this.id = id;
     }
 
-    public void setRowId(Integer rowId) {
-        this.rowId = rowId;
+    public String getName() {
+        return name;
     }
 
-    public Transaction getTransaction() {
-        return transaction;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public void setTransaction(Transaction transaction) {
-        this.transaction = transaction;
+    public String getIsoCode() {
+        return isoCode;
     }
+
+    public void setIsoCode(String isoCode) {
+        this.isoCode = isoCode;
+    }
+
+    public static String getName(Integer currencyId, Map<Integer, Currency> currencies) {
+        Currency currency = currencies.get(currencyId);
+        if (currency != null) {
+            return currency.getIsoCode();
+        } else {
+            return null;
+        }
+    }
+
 }

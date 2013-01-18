@@ -21,8 +21,8 @@ package com.le.sunriise.report;
 import java.io.IOException;
 import java.util.List;
 
-import com.le.sunriise.accountviewer.Account;
-import com.le.sunriise.accountviewer.Transaction;
+import com.le.sunriise.mnyobject.Account;
+import com.le.sunriise.mnyobject.Transaction;
 import com.le.sunriise.viewer.OpenedDb;
 
 public class DefaultAccountVisitor extends AbstractAccountVisitor {

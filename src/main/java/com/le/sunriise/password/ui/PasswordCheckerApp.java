@@ -55,6 +55,7 @@ import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
+import com.le.sunriise.JavaInfo;
 import com.le.sunriise.model.bean.BruteForceCheckerModel;
 import com.le.sunriise.model.bean.PasswordCheckerModel;
 import com.le.sunriise.password.bruteforce.BruteForceStat;
@@ -130,6 +131,8 @@ public class PasswordCheckerApp {
                 try {
                     PasswordCheckerApp window = new PasswordCheckerApp();
                     showMainFrame(window);
+                    
+                    JavaInfo.logInfo();
                 } catch (Exception e) {
                     log.error(e, e);
                 }

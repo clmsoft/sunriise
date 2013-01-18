@@ -126,12 +126,16 @@ public class TaxInfo {
         List<IncomeRate> incomeRates = new ArrayList<IncomeRate>();
 
         IncomeRate incomeRate = null;
-        int max = 6;
-        for (int i = 0; i < max; i++) {
+        boolean hasRate = true;
+        int index = 1;
+        while (hasRate) {
             incomeRate = new IncomeRate();
 
-            int index = i + 1;
             Double dRate = (Double) row.get("dRate" + index);
+            if (dRate == null) {
+                hasRate = false;
+                break;
+            }
             incomeRate.setRate(dRate);
 
             // damtLow1
@@ -143,6 +147,8 @@ public class TaxInfo {
             incomeRate.setAmountHigh(damtHigh);
 
             incomeRates.add(incomeRate);
+            
+            index++;
         }
         taxInfo.setIncomeRates(incomeRates);
     }

@@ -25,6 +25,8 @@ import java.util.Properties;
 import org.apache.log4j.Logger;
 import org.python.util.PythonInterpreter;
 
+import com.le.sunriise.mnyobject.Transaction;
+
 public class JythonTransactionFilters {
     private static final Logger log = Logger.getLogger(JythonTransactionFilters.class);
     static {

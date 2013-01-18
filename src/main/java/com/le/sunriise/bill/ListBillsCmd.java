@@ -31,9 +31,9 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Index;
 import com.healthmarketscience.jackcess.Joiner;
 import com.healthmarketscience.jackcess.Table;
-import com.le.sunriise.accountviewer.Account;
-import com.le.sunriise.accountviewer.Frequency;
-import com.le.sunriise.accountviewer.Transaction;
+import com.le.sunriise.mnyobject.Account;
+import com.le.sunriise.mnyobject.Frequency;
+import com.le.sunriise.mnyobject.Transaction;
 import com.le.sunriise.report.DefaultAccountVisitor;
 import com.le.sunriise.viewer.OpenedDb;
 

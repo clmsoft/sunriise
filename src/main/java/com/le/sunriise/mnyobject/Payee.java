@@ -16,9 +16,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA
  *******************************************************************************/
-package com.le.sunriise.accountviewer;
+package com.le.sunriise.mnyobject;
 
 import java.util.Map;
+
 
 public class Payee extends MnyObject implements Comparable<Payee>{
     private Integer id;

@@ -22,6 +22,11 @@ import java.util.List;
 import java.util.Map;
 
 import com.healthmarketscience.jackcess.Database;
+import com.le.sunriise.mnyobject.Account;
+import com.le.sunriise.mnyobject.Category;
+import com.le.sunriise.mnyobject.Currency;
+import com.le.sunriise.mnyobject.Payee;
+import com.le.sunriise.mnyobject.Security;
 
 public class MnyContext {
     private List<Account> accounts;

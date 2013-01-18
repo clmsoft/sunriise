@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.le.sunriise.accountviewer.Account;
+import com.le.sunriise.mnyobject.Account;
 
 public class FilteredAccountVisitor extends DefaultAccountVisitor {
     private File filterFile;

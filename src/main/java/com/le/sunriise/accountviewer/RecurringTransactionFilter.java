@@ -20,6 +20,8 @@ package com.le.sunriise.accountviewer;
 
 import java.util.Map;
 
+import com.le.sunriise.mnyobject.Transaction;
+
 public class RecurringTransactionFilter implements TransactionFilter {
 
     

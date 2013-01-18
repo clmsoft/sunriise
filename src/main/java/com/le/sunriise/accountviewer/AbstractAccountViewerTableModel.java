@@ -20,6 +20,8 @@ package com.le.sunriise.accountviewer;
 
 import javax.swing.table.AbstractTableModel;
 
+import com.le.sunriise.mnyobject.Account;
+
 public abstract class AbstractAccountViewerTableModel extends AbstractTableModel {
 
     private Account account;

@@ -227,7 +227,7 @@
     <dependency>
       <groupId>org.codehaus.jackson</groupId>
       <artifactId>jackson-mapper-asl</artifactId>
-      <version>1.9.3</version>
+      <version>1.9.9</version>
     </dependency>
     <dependency>
       <groupId>net.java.dev.jna</groupId>
@@ -243,11 +243,6 @@
       <groupId>com.healthmarketscience.jackcess</groupId>
       <artifactId>jackcess</artifactId>
       <version>1.2.9-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>net.ucanaccess</groupId>
-      <artifactId>ucanaccess</artifactId>
-      <version>0.1.1-SNAPSHOT</version>
     </dependency>
   </dependencies>
   <reporting>

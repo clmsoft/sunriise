@@ -116,6 +116,7 @@ import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 import com.le.sunriise.BuildNumber;
+import com.le.sunriise.JavaInfo;
 import com.le.sunriise.StopWatch;
 import com.le.sunriise.index.IndexLookup;
 import com.le.sunriise.model.bean.MnyViewerDataModel;
@@ -259,6 +260,8 @@ public class MynViewer {
                     MynViewer window = new MynViewer();
                     window.getFrame().setLocationRelativeTo(null);
                     window.getFrame().setVisible(true);
+                    
+                    JavaInfo.logInfo();
                 } catch (Exception e) {
                     log.error(e, e);
                 }
@@ -372,6 +375,10 @@ public class MynViewer {
         JMenuItem mntmNewMenuItem_4 = new JMenuItem("To *.mdb");
         mntmNewMenuItem_4.addActionListener(new ExportToMdbAction(this));
         mnNewMenu_1.add(mntmNewMenuItem_4);
+        
+        JMenuItem mntmTojson = new JMenuItem("To *.json");
+        mntmTojson.addActionListener(new ExportToJSONAction(this));
+        mnNewMenu_1.add(mntmTojson);
 
         JSeparator separator_1 = new JSeparator();
         mnNewMenu.add(separator_1);

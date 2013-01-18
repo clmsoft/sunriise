@@ -23,8 +23,8 @@ import java.io.IOException;
 
 import org.apache.log4j.Logger;
 
-import com.le.sunriise.accountviewer.Account;
-import com.le.sunriise.accountviewer.Transaction;
+import com.le.sunriise.mnyobject.Account;
+import com.le.sunriise.mnyobject.Transaction;
 
 public class PrintRecurringBillsCmd extends DefaultAccountVisitor {
     private static final Logger log = Logger.getLogger(PrintRecurringBillsCmd.class);

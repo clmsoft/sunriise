@@ -16,14 +16,35 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA
  *******************************************************************************/
-package com.le.sunriise.accountviewer;
+package com.le.sunriise.mnyobject;
 
-import java.util.HashMap;
-import java.util.Map;
+public enum AccountType {
+    BANKING(0), CREDIT_CARD(1), CASH(2), ASSET(3), LIABILITY(4), INVESTMENT(5), LOAN(6), UNKNOWN(-1);
 
-import org.codehaus.jackson.annotate.JsonIgnore;
+    private final int mnyType;
 
-public abstract class MnyObject {
-    @JsonIgnore
-    protected Map<String, Object> columnValues = new HashMap<String, Object>();
+    AccountType(int mnyType) {
+        this.mnyType = mnyType;
+    }
+
+    public static AccountType toAccountType(int mnyType) {
+        switch (mnyType) {
+        case 0:
+            return BANKING;
+        case 1:
+            return CREDIT_CARD;
+        case 2:
+            return CASH;
+        case 3:
+            return ASSET;
+        case 4:
+            return LIABILITY;
+        case 5:
+            return INVESTMENT;
+        case 6:
+            return LOAN;
+        default:
+            return UNKNOWN;
+        }
+    }
 }
