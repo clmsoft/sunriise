@@ -31,7 +31,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import com.le.sunriise.password.HeaderPage;
-import com.le.sunriise.password.dict.CheckDictionary;
 
 public class CheckDictionaryTest {
     private static final Logger log = Logger.getLogger(CheckDictionaryTest.class);

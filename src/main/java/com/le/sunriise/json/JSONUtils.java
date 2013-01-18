@@ -18,6 +18,7 @@
  *******************************************************************************/
 package com.le.sunriise.json;
 
+import java.io.CharArrayWriter;
 import java.io.IOException;
 import java.io.Writer;
 
@@ -45,4 +46,29 @@ public class JSONUtils {
         boolean prettyPrint = true;
         writeValue(value, w, prettyPrint);
     }
+
+    public static String valueToString(Object value) throws IOException {
+        String str = null;
+        CharArrayWriter writer = new CharArrayWriter();
+        try {
+            try {
+                JSONUtils.writeValue(value, writer);
+            } catch (JsonGenerationException e) {
+                throw new IOException(e);
+            } catch (JsonMappingException e) {
+                throw new IOException(e);
+            }
+        } finally {
+            if (writer != null) {
+                try {
+                    writer.close();
+                    str = new String(writer.toCharArray());
+                } finally {
+                    writer = null;
+                }
+            }
+        }
+        return str;
+    }
+
 }

@@ -26,8 +26,6 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.le.sunriise.password.bruteforce.GenBruteForceContext;
-
 public class GenBruteForceContextTest {
     private static final Logger log = Logger.getLogger(GenBruteForceContextTest.class);
 

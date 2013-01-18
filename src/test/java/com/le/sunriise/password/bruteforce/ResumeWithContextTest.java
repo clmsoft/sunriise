@@ -30,9 +30,6 @@ import org.junit.Test;
 
 import com.le.sunriise.password.HeaderPage;
 import com.le.sunriise.password.PasswordUtils;
-import com.le.sunriise.password.bruteforce.CheckBruteForce;
-import com.le.sunriise.password.bruteforce.GenBruteForce;
-import com.le.sunriise.password.bruteforce.GenBruteForceContext;
 
 public class ResumeWithContextTest {
     private static final Logger log = Logger.getLogger(ResumeWithContextTest.class);

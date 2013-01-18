@@ -71,6 +71,9 @@ import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 
 import org.apache.log4j.Logger;
+import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
+import org.fife.ui.rtextarea.RTextScrollPane;
 import org.jdesktop.beansbinding.AutoBinding;
 import org.jdesktop.beansbinding.AutoBinding.UpdateStrategy;
 import org.jdesktop.beansbinding.BeanProperty;
@@ -84,6 +87,7 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Table;
 import com.le.sunriise.JavaInfo;
 import com.le.sunriise.StopWatch;
+import com.le.sunriise.json.JSONUtils;
 import com.le.sunriise.mnyobject.Account;
 import com.le.sunriise.mnyobject.AccountType;
 import com.le.sunriise.mnyobject.Currency;
@@ -124,6 +128,8 @@ public class AccountViewer {
 
     private JTextArea transactionQifTextArea;
 
+    private JTextArea transactionJsonTextArea;
+
     private Connection jdbcConn;
 
     private static final ExecutorService threadPool = Executors.newCachedThreadPool();
@@ -145,14 +151,15 @@ public class AccountViewer {
             if (dbFile != null) {
                 getFrame().setTitle(dbFile.getAbsolutePath());
 
-//                String dbUrl = UcanaccessDriver.URL_PREFIX + dbFile.getAbsolutePath() + 
-//                        ";codecprovider=;password=";
-//                try {
-//                    jdbcConn = DriverManager.getConnection(dbUrl);
-//                    log.info("jdbcConn=" + jdbcConn);
-//                } catch (SQLException e) {
-//                    log.warn(e);
-//                }
+                // String dbUrl = UcanaccessDriver.URL_PREFIX +
+                // dbFile.getAbsolutePath() +
+                // ";codecprovider=;password=";
+                // try {
+                // jdbcConn = DriverManager.getConnection(dbUrl);
+                // log.info("jdbcConn=" + jdbcConn);
+                // } catch (SQLException e) {
+                // log.warn(e);
+                // }
             } else {
                 getFrame().setTitle("No opened db");
             }
@@ -426,10 +433,35 @@ public class AccountViewer {
 
     private Component createBottomComponent() {
         JTabbedPane tabPane = new JTabbedPane();
+
         tabPane.addTab("Transaction info", createTransactionInfoView());
+
         tabPane.addTab("QIF", createTransactionQif());
 
+        tabPane.addTab("JSON", createTransactionJson());
+
         return tabPane;
+    }
+
+    private Component createTransactionJson() {
+        JPanel view = new JPanel();
+        view.setLayout(new BorderLayout());
+
+        // ScrollPane scrollPane = new ScrollPane();
+        //
+        // transactionJsonTextArea = new JTextArea();
+        // transactionJsonTextArea.setEditable(false);
+        //
+        // scrollPane.add(transactionJsonTextArea);
+
+        RSyntaxTextArea textArea = new RSyntaxTextArea();
+        textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JAVASCRIPT);
+        RTextScrollPane sp = new RTextScrollPane(textArea);
+        transactionJsonTextArea = textArea;
+        transactionJsonTextArea.setEditable(false);
+        view.add(sp, BorderLayout.CENTER);
+
+        return view;
     }
 
     private Component createTransactionQif() {
@@ -564,8 +596,8 @@ public class AccountViewer {
                             }
                         }
                     }
-                } 
-                
+                }
+
                 BigDecimal currentBalance = AccountUtil.calculateCurrentBalance(account);
 
                 log.info(account.getName() + ", " + account.getAccountType() + ", "
@@ -609,6 +641,7 @@ public class AccountViewer {
             updateAccountInfoPane(account);
 
             transactionQifTextArea.setText("");
+            transactionJsonTextArea.setText("");
         } finally {
             long delta = stopWatch.click();
             log.info("< accountSelected, delta=" + delta);
@@ -705,12 +738,12 @@ public class AccountViewer {
      * Launch the application.
      */
     public static void main(String[] args) {
-//        try {
-//            Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
-//        } catch (ClassNotFoundException e1) {
-//            log.error(e1);
-//            System.exit(1);
-//        }
+        // try {
+        // Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
+        // } catch (ClassNotFoundException e1) {
+        // log.error(e1);
+        // System.exit(1);
+        // }
 
         EventQueue.invokeLater(new Runnable() {
 
@@ -721,9 +754,9 @@ public class AccountViewer {
                     window.getFrame().pack();
                     window.getFrame().setLocationRelativeTo(null);
                     window.getFrame().setVisible(true);
-                    
+
                     JavaInfo.logInfo();
-                    
+
                 } catch (Exception e) {
                     log.error(e, e);
                 }
@@ -755,43 +788,76 @@ public class AccountViewer {
             @Override
             public void run() {
                 logFlags(id);
-                logQif(id);
+                logDetails(id);
             }
 
-            private void logQif(Integer id) {
+            private void logDetails(Integer id) {
                 // TODO: Better look up
                 for (Transaction transaction : transactions) {
                     if (transaction.getId().equals(id)) {
                         log.info("Selected transactionId=" + transaction.getId());
-                        StringWriter stringWriter = new StringWriter();
-                        PrintWriter writer = null;
-                        try {
-                            writer = new PrintWriter(stringWriter);
-                            QifExportUtils.logQif(transaction, mnyContext, writer);
-                            writer.flush();
-                            final String qifStr = stringWriter.getBuffer().toString();
-
-                            log.info("Transaction QIF:");
-                            log.info("\n" + qifStr);
-
-                            if (transactionQifTextArea != null) {
-                                Runnable doRun = new Runnable() {
-
-                                    @Override
-                                    public void run() {
-                                        transactionQifTextArea.setText(qifStr);
-                                    }
-                                };
-                                SwingUtilities.invokeLater(doRun);
-                            }
-                        } finally {
-                            if (writer != null) {
-                                writer.close();
-                                writer = null;
-                            }
-                        }
+                        logQif(transaction);
+                        logJson(transaction);
                         break;
                     }
+                }
+            }
+
+            private void logQif(Transaction transaction) {
+            
+                StringWriter stringWriter = new StringWriter();
+                PrintWriter writer = null;
+                try {
+                    writer = new PrintWriter(stringWriter);
+                    QifExportUtils.logQif(transaction, mnyContext, writer);
+                    writer.flush();
+                    final String qifStr = stringWriter.getBuffer().toString();
+            
+                    if (log.isDebugEnabled()) {
+                        log.debug("Transaction QIF:");
+                        log.debug("\n" + qifStr);
+                    }
+            
+                    if (transactionQifTextArea != null) {
+                        Runnable doRun = new Runnable() {
+            
+                            @Override
+                            public void run() {
+                                transactionQifTextArea.setText(qifStr);
+                            }
+                        };
+                        SwingUtilities.invokeLater(doRun);
+                    }
+                } finally {
+                    if (writer != null) {
+                        writer.close();
+                        writer = null;
+                    }
+                }
+            }
+
+            private void logJson(Transaction transaction) {
+                try {
+                    final String jsonStr = JSONUtils.valueToString(transaction);
+
+                    if (log.isDebugEnabled()) {
+                        log.debug("Transaction JSON:");
+                        log.debug("\n" + jsonStr);
+                    }
+
+                    if (transactionJsonTextArea != null) {
+                        Runnable doRun = new Runnable() {
+
+                            @Override
+                            public void run() {
+                                transactionJsonTextArea.setText(jsonStr);
+                            }
+                        };
+                        SwingUtilities.invokeLater(doRun);
+                    }
+                } catch (IOException e) {
+                    log.warn(e);
+                } finally {
                 }
             }
 

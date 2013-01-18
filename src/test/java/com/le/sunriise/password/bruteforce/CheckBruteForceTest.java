@@ -27,9 +27,6 @@ import org.apache.log4j.Logger;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import com.le.sunriise.password.bruteforce.CheckBruteForceUtils;
-import com.le.sunriise.password.bruteforce.GenBruteForce;
-
 public class CheckBruteForceTest {
     private static final Logger log = Logger.getLogger(CheckBruteForceTest.class);
 

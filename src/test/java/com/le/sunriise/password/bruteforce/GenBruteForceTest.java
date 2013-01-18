@@ -31,7 +31,6 @@ import org.junit.Test;
 import com.le.sunriise.password.HeaderPage;
 import com.le.sunriise.password.HeaderPagePasswordChecker;
 import com.le.sunriise.password.PasswordUtils;
-import com.le.sunriise.password.bruteforce.GenBruteForce;
 
 public class GenBruteForceTest {
     private static final Logger log = Logger.getLogger(GenBruteForceTest.class);

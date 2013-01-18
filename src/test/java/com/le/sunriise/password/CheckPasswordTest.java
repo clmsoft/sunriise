@@ -26,9 +26,6 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
-import com.le.sunriise.password.HeaderPage;
-import com.le.sunriise.password.AbstractHeaderPagePasswordChecker;
-
 public class CheckPasswordTest {
 
     @Test
