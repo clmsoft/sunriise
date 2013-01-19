@@ -23,7 +23,6 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.EventQueue;
-import java.awt.ScrollPane;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -71,8 +70,11 @@ import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 
 import org.apache.log4j.Logger;
+import org.fife.ui.rsyntaxtextarea.DefaultToken;
+import org.fife.ui.rsyntaxtextarea.RSyntaxDocument;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
+import org.fife.ui.rsyntaxtextarea.TokenMaker;
 import org.fife.ui.rtextarea.RTextScrollPane;
 import org.jdesktop.beansbinding.AutoBinding;
 import org.jdesktop.beansbinding.AutoBinding.UpdateStrategy;
@@ -124,7 +126,7 @@ public class AccountViewer {
 
     private Account selectedAccount;
 
-    private JTextPane accountInfoTextPane;
+    private JTextArea accountInfoTextArea;
 
     private JTextArea transactionQifTextArea;
 
@@ -165,18 +167,17 @@ public class AccountViewer {
             }
 
             try {
-                List<Account> accounts = AccountUtil.initMnyContext(openedDb, mnyContext);
+                final List<Account> accounts = AccountUtil.initMnyContext(openedDb, mnyContext);
 
                 AccountViewer.this.dataModel.setAccounts(accounts);
 
                 Runnable doRun = new Runnable() {
-
                     @Override
                     public void run() {
                         Account account = null;
                         // clear out currently select account, if any
                         try {
-                            accountSelected(account);
+                            accountSelected(null);
                         } catch (IOException e) {
                             log.warn(e);
                         }
@@ -291,6 +292,7 @@ public class AccountViewer {
         accountList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         accountList.setVisibleRowCount(-1);
         scrollPane.setViewportView(accountList);
+
         return leftComponent;
     }
 
@@ -323,11 +325,12 @@ public class AccountViewer {
         JPanel view = new JPanel();
         view.setLayout(new BorderLayout());
 
-        accountInfoTextPane = new JTextPane();
-        accountInfoTextPane.setEditable(false);
-        JScrollPane scrollPane = new JScrollPane(accountInfoTextPane);
-
-        view.add(scrollPane, BorderLayout.CENTER);
+        RSyntaxTextArea textArea = new RSyntaxTextArea();
+        textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_PROPERTIES_FILE);
+        RTextScrollPane sp = new RTextScrollPane(textArea);
+        accountInfoTextArea = textArea;
+        accountInfoTextArea.setEditable(false);
+        view.add(sp, BorderLayout.CENTER);
 
         return view;
     }
@@ -365,7 +368,6 @@ public class AccountViewer {
                     column.setCellRenderer(renderer);
                 }
             }
-
         };
         table.setDefaultRenderer(BigDecimal.class, new DefaultTableCellRenderer() {
 
@@ -434,11 +436,11 @@ public class AccountViewer {
     private Component createBottomComponent() {
         JTabbedPane tabPane = new JTabbedPane();
 
-        tabPane.addTab("Transaction info", createTransactionInfoView());
-
         tabPane.addTab("QIF", createTransactionQif());
 
         tabPane.addTab("JSON", createTransactionJson());
+
+        // tabPane.addTab("Transaction info", createTransactionInfoView());
 
         return tabPane;
     }
@@ -446,13 +448,6 @@ public class AccountViewer {
     private Component createTransactionJson() {
         JPanel view = new JPanel();
         view.setLayout(new BorderLayout());
-
-        // ScrollPane scrollPane = new ScrollPane();
-        //
-        // transactionJsonTextArea = new JTextArea();
-        // transactionJsonTextArea.setEditable(false);
-        //
-        // scrollPane.add(transactionJsonTextArea);
 
         RSyntaxTextArea textArea = new RSyntaxTextArea();
         textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JAVASCRIPT);
@@ -468,13 +463,15 @@ public class AccountViewer {
         JPanel view = new JPanel();
         view.setLayout(new BorderLayout());
 
-        ScrollPane scrollPane = new ScrollPane();
-
-        transactionQifTextArea = new JTextArea();
+        RSyntaxTextArea textArea = new RSyntaxTextArea();
+        textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_NONE);
+        RSyntaxDocument doc = (RSyntaxDocument) textArea.getDocument();
+        TokenMaker tokenMaker = new QifTokenMaker();
+        doc.setSyntaxStyle(tokenMaker);
+        RTextScrollPane sp = new RTextScrollPane(textArea);
+        transactionQifTextArea = textArea;
         transactionQifTextArea.setEditable(false);
-
-        scrollPane.add(transactionQifTextArea);
-        view.add(scrollPane, BorderLayout.CENTER);
+        view.add(sp, BorderLayout.CENTER);
 
         return view;
     }
@@ -627,6 +624,9 @@ public class AccountViewer {
                     account.setCurrentBalance(new BigDecimal(marketValue));
                     updateEndingBalanceLabel(new BigDecimal(marketValue), account);
                     break;
+                default:
+                    log.warn("Skip handling unknown accountType=" + accountType);
+                    break;
                 }
             }
 
@@ -649,89 +649,67 @@ public class AccountViewer {
     }
 
     private void updateAccountInfoPane(Account account) {
-        accountInfoTextPane.setText("");
+        accountInfoTextArea.setText("");
 
         if (account == null) {
             return;
         }
 
-        StyledDocument doc = accountInfoTextPane.getStyledDocument();
+        accountInfoTextArea.append("Name: " + account.getName() + "\n");
+        accountInfoTextArea.append("Account type: " + account.getAccountType().toString() + "\n");
+        accountInfoTextArea.append("Number of transactions: " + account.getTransactions().size() + "\n");
+        if (account.getAccountType() == AccountType.INVESTMENT) {
+            accountInfoTextArea.append("Retirement: " + account.getRetirement().toString() + "\n");
+        }
+        accountInfoTextArea.append("Currency: " + Currency.getName(account.getCurrencyId(), mnyContext.getCurrencies()) + "\n");
+        accountInfoTextArea.append("Starting balance: " + account.formatAmmount(account.getStartingBalance()) + "\n");
+        accountInfoTextArea.append("Ending balance: " + account.formatAmmount(account.getCurrentBalance()) + "\n");
 
-        // Define a keyword attribute
-        SimpleAttributeSet keyWord = new SimpleAttributeSet();
-        // StyleConstants.setForeground(keyWord, Color.RED);
-        StyleConstants.setBackground(keyWord, Color.YELLOW);
-        StyleConstants.setBold(keyWord, true);
+        if (account.getAccountType() == AccountType.INVESTMENT) {
+            accountInfoTextArea.append("# SecurityHolding" + "\n");
+            List<SecurityHolding> securityHolding = account.getSecurityHoldings();
+            int count = 0;
+            for (SecurityHolding sec : securityHolding) {
+                StringBuilder sb = new StringBuilder();
+                sb.append("SecurityHolding." + count++ + ": ");
+                sb.append(sec.getName());
+                sb.append(", ");
+                sb.append(account.formatSecurityQuantity(sec.getQuanity()));
+                sb.append(", ");
+                sb.append(account.formatAmmount(sec.getPrice()));
+                sb.append(", ");
+                sb.append(account.formatAmmount(sec.getMarketValue()));
+                sb.append("\n");
 
-        try {
-            insertKeyValueToStyleDocument("Number of transactions", "" + account.getTransactions().size(), doc, keyWord);
-            insertKeyValueToStyleDocument("Name", account.getName(), doc, keyWord);
-            insertKeyValueToStyleDocument("Account type", account.getAccountType().toString(), doc, keyWord);
+                accountInfoTextArea.append(sb.toString());
+            }
+        }
+
+        Account relatedToAccount = account.getRelatedToAccount();
+        if (relatedToAccount != null) {
+            accountInfoTextArea.append("# RelatedToAccount" + "\n");
             if (account.getAccountType() == AccountType.INVESTMENT) {
-                insertKeyValueToStyleDocument("    Retirement", account.getRetirement().toString(), doc, keyWord);
+                accountInfoTextArea.append("Cash account: " + relatedToAccount.getName() + "\n");
+                accountInfoTextArea.append("Cash account balance: "
+                        + relatedToAccount.formatAmmount(relatedToAccount.getCurrentBalance()) + "\n");
+            } else {
+                accountInfoTextArea.append("Related account: " + relatedToAccount.getName() + "\n");
+                accountInfoTextArea.append("Related account balance: "
+                        + relatedToAccount.formatAmmount(relatedToAccount.getCurrentBalance()) + "\n");
             }
-            insertKeyValueToStyleDocument("Currency", Currency.getName(account.getCurrencyId(), mnyContext.getCurrencies()), doc,
-                    keyWord);
-            insertKeyValueToStyleDocument("Starting balance", account.formatAmmount(account.getStartingBalance()), doc, keyWord);
-            insertKeyValueToStyleDocument("Ending balance", account.formatAmmount(account.getCurrentBalance()), doc, keyWord);
-            if (account.getAccountType() == AccountType.INVESTMENT) {
-                List<SecurityHolding> securityHolding = account.getSecurityHoldings();
-                for (SecurityHolding sec : securityHolding) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("  ");
-                    sb.append(sec.getName());
-                    sb.append(", ");
-                    sb.append(account.formatSecurityQuantity(sec.getQuanity()));
-                    sb.append(", ");
-                    sb.append(account.formatAmmount(sec.getPrice()));
-                    sb.append(", ");
-                    sb.append(account.formatAmmount(sec.getMarketValue()));
-
-                    insertKeyValueToStyleDocument(null, sb.toString(), doc, keyWord);
-                }
-            }
-
-            Account relatedToAccount = account.getRelatedToAccount();
-            if (relatedToAccount != null) {
-                if (account.getAccountType() == AccountType.INVESTMENT) {
-                    insertKeyValueToStyleDocument("Cash account", relatedToAccount.getName(), doc, keyWord);
-                    insertKeyValueToStyleDocument("Cash account aalance",
-                            relatedToAccount.formatAmmount(relatedToAccount.getCurrentBalance()), doc, keyWord);
-                } else {
-                    insertKeyValueToStyleDocument("Related account", relatedToAccount.getName(), doc, keyWord);
-                    insertKeyValueToStyleDocument("Related account balance",
-                            relatedToAccount.formatAmmount(relatedToAccount.getCurrentBalance()), doc, keyWord);
-                }
-            }
-
-            if (account.getAccountType() == AccountType.CREDIT_CARD) {
-                BigDecimal amountLimit = account.getAmountLimit();
-                if (amountLimit == null) {
-                    amountLimit = new BigDecimal(0.0);
-                }
-                insertKeyValueToStyleDocument("Limit amount",
-                        account.formatAmmount(new BigDecimal(Math.abs(amountLimit.doubleValue()))), doc, keyWord);
-            }
-        } catch (BadLocationException e) {
-            log.warn(e);
         }
-    }
 
-    private void insertKeyValueToStyleDocument(String key, String value, StyledDocument doc, SimpleAttributeSet keyWord)
-            throws BadLocationException {
-        boolean newLine = true;
-        insertKeyValueToStyleDocument(key, value, doc, keyWord, newLine);
-    }
+        if (account.getAccountType() == AccountType.CREDIT_CARD) {
+            accountInfoTextArea.append("# Credit Card Info" + "\n");
+            BigDecimal amountLimit = account.getAmountLimit();
+            if (amountLimit == null) {
+                amountLimit = new BigDecimal(0.0);
+            }
+            accountInfoTextArea.append("Credit card limit amount: "
+                    + account.formatAmmount(new BigDecimal(Math.abs(amountLimit.doubleValue()))) + "\n");
+        }
 
-    private void insertKeyValueToStyleDocument(String key, String value, StyledDocument doc, SimpleAttributeSet keyWord,
-            boolean newLine) throws BadLocationException {
-        if (newLine) {
-            doc.insertString(doc.getLength(), "\n", null);
-        }
-        if (key != null) {
-            doc.insertString(doc.getLength(), key + ":", keyWord);
-        }
-        doc.insertString(doc.getLength(), " " + value, null);
+        accountInfoTextArea.setCaretPosition(0);
     }
 
     /**
@@ -804,7 +782,7 @@ public class AccountViewer {
             }
 
             private void logQif(Transaction transaction) {
-            
+
                 StringWriter stringWriter = new StringWriter();
                 PrintWriter writer = null;
                 try {
@@ -812,18 +790,19 @@ public class AccountViewer {
                     QifExportUtils.logQif(transaction, mnyContext, writer);
                     writer.flush();
                     final String qifStr = stringWriter.getBuffer().toString();
-            
+
                     if (log.isDebugEnabled()) {
                         log.debug("Transaction QIF:");
                         log.debug("\n" + qifStr);
                     }
-            
+
                     if (transactionQifTextArea != null) {
                         Runnable doRun = new Runnable() {
-            
+
                             @Override
                             public void run() {
                                 transactionQifTextArea.setText(qifStr);
+                                transactionQifTextArea.setCaretPosition(0);
                             }
                         };
                         SwingUtilities.invokeLater(doRun);
@@ -851,6 +830,7 @@ public class AccountViewer {
                             @Override
                             public void run() {
                                 transactionJsonTextArea.setText(jsonStr);
+                                transactionJsonTextArea.setCaretPosition(0);
                             }
                         };
                         SwingUtilities.invokeLater(doRun);
