@@ -33,6 +33,7 @@ import javax.swing.SwingUtilities;
 import org.apache.log4j.Logger;
 
 import com.healthmarketscience.jackcess.Database;
+import com.le.sunriise.export.ExportToContext;
 import com.le.sunriise.export.ExportToJSON;
 import com.le.sunriise.mnyobject.Account;
 import com.le.sunriise.mnyobject.Transaction;
@@ -43,47 +44,50 @@ public class ExportToJSONAction implements ActionListener {
     /**
      * 
      */
-    private final MynViewer mnyViewer;
-
+    // private final MynViewer mnyViewer;
+//    private Component parentComponent = null;
+//    private OpenedDb srcDb = null;
+    private ExportToContext exportToContext = null;
+    
     private JFileChooser fc = null;
 
     private final class ExportToJSONTask implements Runnable {
         private final ProgressMonitor progressMonitor;
         private final File destDir;
         private final Component source;
-    
+
         private ExportToJSONTask(ProgressMonitor progressMonitor, File destDir, Component source) {
             this.progressMonitor = progressMonitor;
             this.destDir = destDir;
             this.source = source;
         }
-    
+
         @Override
         public void run() {
-            OpenedDb srcDb = null;
+            // OpenedDb srcDb = null;
             Database destDb = null;
             Exception exception = null;
-    
+
             try {
-                srcDb = ExportToJSONAction.this.mnyViewer.getOpenedDb();
+                // srcDb = ExportToJSONAction.this.mnyViewer.getOpenedDb();
                 ExportToJSON exporter = new ExportToJSON() {
                     private String accountName = "";
                     private int count = 0;
                     private int maxAccounts = 0;
-    
+
                     @Override
                     public void visitAccounts(List<Account> accounts) throws IOException {
                         maxAccounts = accounts.size();
                         super.visitAccounts(accounts);
                     }
-    
+
                     @Override
                     protected void startExport(File outDir) {
                         accountName = "";
                         count = 0;
                         maxAccounts = 0;
                         SwingUtilities.invokeLater(new Runnable() {
-    
+
                             @Override
                             public void run() {
                                 progressMonitor.setProgress(progressMonitor.getMinimum());
@@ -91,14 +95,14 @@ public class ExportToJSONAction implements ActionListener {
                         });
                         super.startExport(outDir);
                     }
-    
+
                     @Override
                     protected void endExport(File outDir) {
                         if (progressMonitor.isCanceled()) {
                             return;
                         }
                         SwingUtilities.invokeLater(new Runnable() {
-    
+
                             @Override
                             public void run() {
                                 progressMonitor.setProgress(progressMonitor.getMaximum());
@@ -106,9 +110,9 @@ public class ExportToJSONAction implements ActionListener {
                         });
                         super.endExport(outDir);
                     }
-    
+
                     @Override
-                    public void visitAccount(Account account) {
+                    public void visitAccount(Account account) throws IOException {
                         if (progressMonitor.isCanceled()) {
                             return;
                         }
@@ -123,7 +127,7 @@ public class ExportToJSONAction implements ActionListener {
                         });
                         super.visitAccount(account);
                     }
-    
+
                     @Override
                     public void visitTransaction(Transaction transaction) throws IOException {
                         if (progressMonitor.isCanceled()) {
@@ -132,7 +136,7 @@ public class ExportToJSONAction implements ActionListener {
                         super.visitTransaction(transaction);
                     }
                 };
-                destDb = exporter.export(srcDb, destDir);
+                destDb = exporter.export(exportToContext.getSrcDb(), destDir);
                 // XXX - don't close it
                 destDb = null;
             } catch (IOException e) {
@@ -151,7 +155,7 @@ public class ExportToJSONAction implements ActionListener {
                 log.info("< DONE, exported to file=" + destDir);
                 final Exception exception2 = exception;
                 Runnable doRun = new Runnable() {
-    
+
                     @Override
                     public void run() {
                         if (exception2 != null) {
@@ -170,11 +174,8 @@ public class ExportToJSONAction implements ActionListener {
         }
     }
 
-    /**
-     * @param mnyViewer
-     */
-    public ExportToJSONAction(MynViewer mnyViewer) {
-        this.mnyViewer = mnyViewer;
+    public ExportToJSONAction(ExportToContext exportToContext) {
+        this.exportToContext = exportToContext;
     }
 
     @Override
@@ -191,12 +192,12 @@ public class ExportToJSONAction implements ActionListener {
         log.info("> Export as *.json to file=" + destFile);
 
         source.setEnabled(false);
-        Component parentComponent = this.mnyViewer.getFrame();
+        // Component parentComponent = this.mnyViewer.getFrame();
         Object message = "Exporting to *.json ...";
         String note = "";
         int min = 0;
         int max = 100;
-        final ProgressMonitor progressMonitor = new ProgressMonitor(parentComponent, message, note, min, max);
+        final ProgressMonitor progressMonitor = new ProgressMonitor(exportToContext.getParentComponent(), message, note, min, max);
         progressMonitor.setProgress(0);
 
         Runnable command = new ExportToJSONTask(progressMonitor, destFile, source);

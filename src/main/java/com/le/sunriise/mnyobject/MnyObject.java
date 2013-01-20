@@ -21,7 +21,7 @@ package com.le.sunriise.mnyobject;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.codehaus.jackson.annotate.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public abstract class MnyObject {
     @JsonIgnore

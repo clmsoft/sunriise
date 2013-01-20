@@ -107,6 +107,8 @@ import org.jdesktop.beansbinding.ELProperty;
 import org.jdesktop.swingbinding.JListBinding;
 import org.jdesktop.swingbinding.SwingBindings;
 
+import app.MnyViewer;
+
 import com.healthmarketscience.jackcess.Column;
 import com.healthmarketscience.jackcess.DataType;
 import com.healthmarketscience.jackcess.Database;
@@ -118,6 +120,7 @@ import com.jgoodies.forms.layout.RowSpec;
 import com.le.sunriise.BuildNumber;
 import com.le.sunriise.JavaInfo;
 import com.le.sunriise.StopWatch;
+import com.le.sunriise.export.ExportToContext;
 import com.le.sunriise.index.IndexLookup;
 import com.le.sunriise.model.bean.MnyViewerDataModel;
 import com.le.sunriise.model.bean.TableListItem;
@@ -377,7 +380,19 @@ public class MynViewer {
         mnNewMenu_1.add(mntmNewMenuItem_4);
         
         JMenuItem mntmTojson = new JMenuItem("To *.json");
-        mntmTojson.addActionListener(new ExportToJSONAction(this));
+        mntmTojson.addActionListener(new ExportToJSONAction(new ExportToContext() {
+
+            @Override
+            public Component getParentComponent() {
+                return getFrame();
+            }
+
+            @Override
+            public OpenedDb getSrcDb() {
+                return getOpenedDb();
+            }
+            
+        }));
         mnNewMenu_1.add(mntmTojson);
 
         JSeparator separator_1 = new JSeparator();

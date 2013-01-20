@@ -1,10 +1,10 @@
 package com.le.sunriise.json;
 
 import org.apache.log4j.Logger;
-import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.schema.JsonSchema;
 
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.jsonschema.JsonSchema;
 import com.le.sunriise.mnyobject.Category;
 
 public class JsonSchemaCmd {

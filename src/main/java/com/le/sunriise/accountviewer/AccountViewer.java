@@ -31,6 +31,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.io.Writer;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -43,6 +44,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.prefs.Preferences;
 
+import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -55,7 +57,6 @@ import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
-import javax.swing.JTextPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
@@ -64,13 +65,8 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.SimpleAttributeSet;
-import javax.swing.text.StyleConstants;
-import javax.swing.text.StyledDocument;
 
 import org.apache.log4j.Logger;
-import org.fife.ui.rsyntaxtextarea.DefaultToken;
 import org.fife.ui.rsyntaxtextarea.RSyntaxDocument;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
@@ -89,6 +85,7 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Table;
 import com.le.sunriise.JavaInfo;
 import com.le.sunriise.StopWatch;
+import com.le.sunriise.export.ExportToContext;
 import com.le.sunriise.json.JSONUtils;
 import com.le.sunriise.mnyobject.Account;
 import com.le.sunriise.mnyobject.AccountType;
@@ -97,11 +94,14 @@ import com.le.sunriise.mnyobject.SecurityHolding;
 import com.le.sunriise.mnyobject.Transaction;
 import com.le.sunriise.model.bean.AccountViewerDataModel;
 import com.le.sunriise.qif.QifExportUtils;
+import com.le.sunriise.viewer.ExportToJSONAction;
 import com.le.sunriise.viewer.MyTableCellRenderer;
 import com.le.sunriise.viewer.OpenDbAction;
 import com.le.sunriise.viewer.OpenDbDialog;
 import com.le.sunriise.viewer.OpenedDb;
 import com.le.sunriise.viewer.TableUtils;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
 
 public class AccountViewer {
     private static final Logger log = Logger.getLogger(AccountViewer.class);
@@ -127,9 +127,9 @@ public class AccountViewer {
     private Account selectedAccount;
 
     private JTextArea accountInfoTextArea;
+    private JTextArea accountJsonTextArea;
 
     private JTextArea transactionQifTextArea;
-
     private JTextArea transactionJsonTextArea;
 
     private Connection jdbcConn;
@@ -258,6 +258,25 @@ public class AccountViewer {
         fileOpenMenuItem.addActionListener(new MyOpenDbAction(AccountViewer.this.frame, prefs, openedDb));
 
         fileMenu.add(fileOpenMenuItem);
+
+        JMenu mnNewMenu = new JMenu("Export");
+        fileMenu.add(mnNewMenu);
+
+        JMenuItem mntmNewMenuItem = new JMenuItem("To *.json");
+        ExportToContext exportToContext = new ExportToContext() {
+
+            @Override
+            public OpenedDb getSrcDb() {
+                return getOpenedDb();
+            }
+
+            @Override
+            public Component getParentComponent() {
+                return getFrame();
+            }
+        };
+        mntmNewMenuItem.addActionListener(new ExportToJSONAction(exportToContext));
+        mnNewMenu.add(mntmNewMenuItem);
         fileMenu.addSeparator();
         fileMenu.add(exitMenuItem);
     }
@@ -266,6 +285,8 @@ public class AccountViewer {
         JPanel leftComponent = new JPanel();
         // leftComponent.setPreferredSize(new Dimension(80, -1));
         leftComponent.setLayout(new BorderLayout());
+
+        leftComponent.setBorder(BorderFactory.createTitledBorder("Accounts"));
 
         JScrollPane scrollPane = new JScrollPane();
         leftComponent.add(scrollPane, BorderLayout.CENTER);
@@ -314,11 +335,29 @@ public class AccountViewer {
 
     private Component createTopComponent() {
         JTabbedPane tabbedPane = new JTabbedPane();
+        tabbedPane.setBorder(BorderFactory.createTitledBorder("Account details"));
 
         tabbedPane.addTab("Transactions", createTransactionsView());
+
         tabbedPane.addTab("Account info", createAccountInfoView());
 
+        tabbedPane.addTab("JSON", createAccountJsonView());
+
         return tabbedPane;
+    }
+
+    private Component createAccountJsonView() {
+        JPanel view = new JPanel();
+        view.setLayout(new BorderLayout());
+
+        RSyntaxTextArea textArea = new RSyntaxTextArea();
+        textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JAVASCRIPT);
+        RTextScrollPane sp = new RTextScrollPane(textArea);
+        accountJsonTextArea = textArea;
+        accountJsonTextArea.setEditable(false);
+        view.add(sp, BorderLayout.CENTER);
+
+        return view;
     }
 
     private Component createAccountInfoView() {
@@ -434,15 +473,16 @@ public class AccountViewer {
     }
 
     private Component createBottomComponent() {
-        JTabbedPane tabPane = new JTabbedPane();
+        JTabbedPane tabbedPane = new JTabbedPane();
+        tabbedPane.setBorder(BorderFactory.createTitledBorder("Transaction details"));
 
-        tabPane.addTab("QIF", createTransactionQif());
+        tabbedPane.addTab("QIF", createTransactionQif());
 
-        tabPane.addTab("JSON", createTransactionJson());
+        tabbedPane.addTab("JSON", createTransactionJson());
 
-        // tabPane.addTab("Transaction info", createTransactionInfoView());
+        // tabbedPane.addTab("Transaction info", createTransactionInfoView());
 
-        return tabPane;
+        return tabbedPane;
     }
 
     private Component createTransactionJson() {
@@ -639,12 +679,40 @@ public class AccountViewer {
             dataModel.setTableModel(tableModel);
 
             updateAccountInfoPane(account);
+            updateAccountJsonPane(account);
 
             transactionQifTextArea.setText("");
             transactionJsonTextArea.setText("");
         } finally {
             long delta = stopWatch.click();
             log.info("< accountSelected, delta=" + delta);
+        }
+    }
+
+    private void updateAccountJsonPane(Account account) {
+        accountJsonTextArea.setText("");
+
+        if (account == null) {
+            return;
+        }
+
+        Writer writer = null;
+        try {
+            writer = new JTextAreaWriter(accountJsonTextArea);
+            JSONUtils.writeValue(account, writer);
+        } catch (IOException e) {
+            log.warn(e);
+        } finally {
+            if (writer != null) {
+                try {
+                    writer.close();
+                } catch (IOException e) {
+                    log.warn(e);
+                } finally {
+                    writer = null;
+                }
+            }
+            accountJsonTextArea.setCaretPosition(0);
         }
     }
 
@@ -883,5 +951,19 @@ public class AccountViewer {
             }
             jdbcConn = null;
         }
+    }
+
+    private class SwingAction extends AbstractAction {
+        public SwingAction() {
+            putValue(NAME, "SwingAction");
+            putValue(SHORT_DESCRIPTION, "Some short description");
+        }
+
+        public void actionPerformed(ActionEvent e) {
+        }
+    }
+
+    public OpenedDb getOpenedDb() {
+        return openedDb;
     }
 }

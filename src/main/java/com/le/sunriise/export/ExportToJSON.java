@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 Hung Le
+ * Copyright (c) 2013 Hung Le
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -21,19 +21,49 @@ package com.le.sunriise.export;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
-import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jackson.map.JsonMappingException;
 
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.healthmarketscience.jackcess.Database;
 import com.le.sunriise.json.JSONUtils;
 import com.le.sunriise.mnyobject.Account;
+import com.le.sunriise.mnyobject.Category;
 import com.le.sunriise.report.DefaultAccountVisitor;
 import com.le.sunriise.viewer.OpenedDb;
 
 public class ExportToJSON extends DefaultAccountVisitor {
     private static final Logger log = Logger.getLogger(ExportToJSON.class);
+
+    private class SafeCharMap {
+        private char c1;
+        private char c2;
+
+        public SafeCharMap(char c1, char c2) {
+            super();
+            this.c1 = c1;
+            this.c2 = c2;
+        }
+
+        public char getC1() {
+            return c1;
+        }
+
+        public void setC1(char c1) {
+            this.c1 = c1;
+        }
+
+        public char getC2() {
+            return c2;
+        }
+
+        public void setC2(char c2) {
+            this.c2 = c2;
+        }
+    }
 
     private File outDir;
 
@@ -44,22 +74,49 @@ public class ExportToJSON extends DefaultAccountVisitor {
     }
 
     @Override
-    public void visitAccount(Account account) {
+    public void visitAccounts(List<Account> accounts) throws IOException {
+        super.visitAccounts(accounts);
+
+        File f = null;
+
+        f = new File(outDir, "categories.json");
+        writeValue(this.mnyContext.getCategories().values(), f);
+
+        f = new File(outDir, "payees.json");
+        writeValue(this.mnyContext.getPayees().values(), f);
+
+        f = new File(outDir, "currencies.json");
+        writeValue(this.mnyContext.getCurrencies().values(), f);
+
+        f = new File(outDir, "securities.json");
+        writeValue(this.mnyContext.getSecurities().values(), f);
+    }
+
+    @Override
+    public void visitAccount(Account account) throws IOException {
+        super.visitAccount(account);
+
         String accountName = account.getName();
         log.info("> " + accountName);
 
         accountName = toSafeFileName(accountName);
-        File out = new File(outDir, accountName + ".json");
+        File d = new File(outDir, accountName + ".d");
+        d.mkdirs();
 
+        File f = null;
+
+        f = new File(d, "account.json");
+        writeValue(account, f);
+
+        f = new File(d, "transactions.json");
+        writeValue(account.getTransactions(), f);
+    }
+
+    private void writeValue(Object value, File out) {
         FileWriter writer = null;
         try {
             writer = new FileWriter(out);
-            JSONUtils.writeValue(account, writer);
-//            try {
-//                Thread.sleep(1 * 1000L);
-//            } catch (InterruptedException e) {
-//                log.warn(e);
-//            }
+            JSONUtils.writeValue(value, writer);
         } catch (JsonGenerationException e) {
             log.error(e, e);
         } catch (JsonMappingException e) {
@@ -77,7 +134,6 @@ public class ExportToJSON extends DefaultAccountVisitor {
                 }
             }
         }
-
     }
 
     private String toSafeFileName(String accountName) {
@@ -93,7 +149,7 @@ public class ExportToJSON extends DefaultAccountVisitor {
 
     private char toSafeFileNameChar(char c) {
         char safeC = c;
-    
+
         if (c == ' ') {
             return '_';
         }
@@ -133,11 +189,24 @@ public class ExportToJSON extends DefaultAccountVisitor {
         if (c == '*') {
             return '_';
         }
-    
+        if (c == '*') {
+            return '_';
+        }
+        if (c == '{') {
+            return '_';
+        }
+        if (c == '}') {
+            return '_';
+        }
+
         return safeC;
     }
 
     public void export(File dbFile, String password, File outDir) throws IOException {
+        if (dbFile == null) {
+            return;
+        }
+
         this.outDir = outDir;
         startExport(outDir);
         try {
@@ -148,15 +217,21 @@ public class ExportToJSON extends DefaultAccountVisitor {
     }
 
     public Database export(OpenedDb srcDb, File outDir) throws IOException {
+        if (srcDb == null) {
+            return null;
+        }
+        if (srcDb.getDb() == null) {
+            return null;
+        }
         this.outDir = outDir;
         startExport(outDir);
-    
+
         try {
             _visit(srcDb);
         } finally {
             endExport(outDir);
         }
-    
+
         return srcDb.getDb();
     }
 
@@ -167,7 +242,7 @@ public class ExportToJSON extends DefaultAccountVisitor {
         File dbFile = null;
         String password = null;
         File outDir = null;
-    
+
         if (args.length == 2) {
             dbFile = new File(args[0]);
             outDir = new File(args[1]);
@@ -180,10 +255,10 @@ public class ExportToJSON extends DefaultAccountVisitor {
             System.out.println("Usage: java " + clz.getName() + " in.mny [password] outDir");
             System.exit(1);
         }
-    
+
         log.info("dbFile=" + dbFile);
         log.info("outDir=" + outDir);
-    
+
         outDir.mkdirs();
         try {
             ExportToJSON cmd = new ExportToJSON();
@@ -193,6 +268,6 @@ public class ExportToJSON extends DefaultAccountVisitor {
         } finally {
             log.info("< DONE");
         }
-    
+
     }
 }

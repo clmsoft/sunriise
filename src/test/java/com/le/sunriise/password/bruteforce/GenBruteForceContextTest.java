@@ -22,9 +22,10 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.log4j.Logger;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Test;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class GenBruteForceContextTest {
     private static final Logger log = Logger.getLogger(GenBruteForceContextTest.class);

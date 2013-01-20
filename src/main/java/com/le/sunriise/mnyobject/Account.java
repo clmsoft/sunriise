@@ -24,9 +24,10 @@ import java.text.NumberFormat;
 import java.util.List;
 import java.util.Locale;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class Account extends MnyObject implements Comparable<Account> {
-    /* 
+    /*
      * Internal MsMoney id
      */
     private Integer id;
@@ -42,9 +43,6 @@ public class Account extends MnyObject implements Comparable<Account> {
 
     private BigDecimal startingBalance;
     private BigDecimal currentBalance;
-
-    private List<Transaction> transactions;
-    private List<Transaction> filteredTransactions;
 
     private AccountType accountType;
 
@@ -66,6 +64,12 @@ public class Account extends MnyObject implements Comparable<Account> {
     private List<SecurityHolding> securityHoldings;
 
     private final NumberFormat securityQuantityFormatter;
+
+    @JsonIgnore
+    private List<Transaction> transactions;
+
+    @JsonIgnore
+    private List<Transaction> filteredTransactions;
 
     public Account() {
         super();

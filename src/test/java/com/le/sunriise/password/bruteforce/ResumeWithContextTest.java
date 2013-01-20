@@ -24,10 +24,10 @@ import java.io.IOException;
 import junit.framework.Assert;
 
 import org.apache.log4j.Logger;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.le.sunriise.password.HeaderPage;
 import com.le.sunriise.password.PasswordUtils;
 
