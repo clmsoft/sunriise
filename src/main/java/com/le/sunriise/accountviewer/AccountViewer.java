@@ -101,7 +101,6 @@ import com.le.sunriise.viewer.OpenDbDialog;
 import com.le.sunriise.viewer.OpenedDb;
 import com.le.sunriise.viewer.TableUtils;
 import javax.swing.AbstractAction;
-import javax.swing.Action;
 
 public class AccountViewer {
     private static final Logger log = Logger.getLogger(AccountViewer.class);
@@ -959,6 +958,7 @@ public class AccountViewer {
             putValue(SHORT_DESCRIPTION, "Some short description");
         }
 
+        @Override
         public void actionPerformed(ActionEvent e) {
         }
     }

@@ -22,8 +22,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
-
 import org.apache.log4j.Logger;
 
 import com.fasterxml.jackson.core.JsonGenerationException;
@@ -31,7 +29,6 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.healthmarketscience.jackcess.Database;
 import com.le.sunriise.json.JSONUtils;
 import com.le.sunriise.mnyobject.Account;
-import com.le.sunriise.mnyobject.Category;
 import com.le.sunriise.report.DefaultAccountVisitor;
 import com.le.sunriise.viewer.OpenedDb;
 

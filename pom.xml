@@ -80,7 +80,7 @@
           <appendAssemblyId>false</appendAssemblyId>
           <archive>
             <manifest>
-              <mainClass>app.AccountViewer</mainClass>
+              <mainClass>app.Launcher</mainClass>
               <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
             </manifest>
             <manifestEntries>
@@ -206,9 +206,7 @@
     <dependency>
       <groupId>org.python</groupId>
       <artifactId>jython</artifactId>
-      <version>2.5.0</version>
-      <type>jar</type>
-      <scope>compile</scope>
+      <version>2.5.3</version>
     </dependency>
     <dependency>
       <groupId>org.apache.poi</groupId>
