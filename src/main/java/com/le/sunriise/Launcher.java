@@ -38,7 +38,10 @@ import com.jgoodies.forms.factories.FormFactory;
 import javax.swing.SwingConstants;
 import javax.swing.AbstractAction;
 import java.awt.event.ActionEvent;
+import java.net.URL;
+
 import javax.swing.Action;
+import javax.swing.ImageIcon;
 
 public class Launcher {
     private static final Logger log = Logger.getLogger(Launcher.class);
@@ -92,42 +95,51 @@ public class Launcher {
         // frame.setBounds(100, 100, 450, 300);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.getContentPane().setLayout(
-                new FormLayout(new ColumnSpec[] { ColumnSpec.decode("247px"), FormFactory.RELATED_GAP_COLSPEC,
-                        FormFactory.DEFAULT_COLSPEC, }, new RowSpec[] { FormFactory.DEFAULT_ROWSPEC,
-                        FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC,
-                        FormFactory.DEFAULT_ROWSPEC, }));
+                new FormLayout(new ColumnSpec[] { ColumnSpec.decode("right:90px"), FormFactory.RELATED_GAP_COLSPEC,
+                        FormFactory.DEFAULT_COLSPEC, FormFactory.RELATED_GAP_COLSPEC, FormFactory.DEFAULT_COLSPEC, },
+                        new RowSpec[] { FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+                                FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC,
+                                FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC, }));
+
+        JButton btnNewButton_3 = new JButton();
+        btnNewButton_3.setAction(action);
+        frame.getContentPane().add(btnNewButton_3, "1, 3");
 
         JLabel lblNewJgoodiesLabel_3 = DefaultComponentFactory.getInstance().createLabel(
                 "MS Money file viewer (view tables, rows ...)");
-        lblNewJgoodiesLabel_3.setHorizontalAlignment(SwingConstants.RIGHT);
-        frame.getContentPane().add(lblNewJgoodiesLabel_3, "1, 1");
+        lblNewJgoodiesLabel_3.setHorizontalAlignment(SwingConstants.LEFT);
+        frame.getContentPane().add(lblNewJgoodiesLabel_3, "3, 3");
 
-        JButton btnNewButton_3 = new JButton("Launch");
-        btnNewButton_3.setAction(action);
-        frame.getContentPane().add(btnNewButton_3, "3, 1");
+        JButton btnNewButton_4 = new JButton();
+        btnNewButton_4.setAction(action_1);
+        frame.getContentPane().add(btnNewButton_4, "1, 5");
 
         JLabel lblNewJgoodiesLabel_4 = DefaultComponentFactory.getInstance().createLabel(
                 "Accounts viewer (accounts, transactions ...)");
-        lblNewJgoodiesLabel_4.setHorizontalAlignment(SwingConstants.RIGHT);
-        frame.getContentPane().add(lblNewJgoodiesLabel_4, "1, 3");
+        lblNewJgoodiesLabel_4.setHorizontalAlignment(SwingConstants.LEFT);
+        frame.getContentPane().add(lblNewJgoodiesLabel_4, "3, 5");
 
-        JButton btnNewButton_4 = new JButton("Launch");
-        btnNewButton_4.setAction(action_1);
-        frame.getContentPane().add(btnNewButton_4, "3, 3");
+        JButton btnNewButton_5 = new JButton();
+        btnNewButton_5.setAction(action_2);
+        frame.getContentPane().add(btnNewButton_5, "1, 7");
 
         JLabel lblNewJgoodiesLabel_5 = DefaultComponentFactory.getInstance().createLabel("Password tools");
-        lblNewJgoodiesLabel_5.setHorizontalAlignment(SwingConstants.RIGHT);
-        frame.getContentPane().add(lblNewJgoodiesLabel_5, "1, 5");
-
-        JButton btnNewButton_5 = new JButton("Launch");
-        btnNewButton_5.setAction(action_2);
-        frame.getContentPane().add(btnNewButton_5, "3, 5");
+        lblNewJgoodiesLabel_5.setHorizontalAlignment(SwingConstants.LEFT);
+        frame.getContentPane().add(lblNewJgoodiesLabel_5, "3, 7");
     }
 
     private class SwingAction extends AbstractAction {
         public SwingAction() {
             putValue(NAME, "Launch");
             putValue(SHORT_DESCRIPTION, "Launch *.mny viewer");
+            String iconResource1Name = "/images/icon_db.png";
+            URL iconResource1 = Launcher.class.getResource(iconResource1Name);
+            if (iconResource1 != null) {
+                putValue(LARGE_ICON_KEY, new ImageIcon(iconResource1));
+            } else {
+                log.warn("Cannot find icon resource=" + iconResource1Name);
+            }
+
         }
 
         @Override
@@ -142,6 +154,13 @@ public class Launcher {
         public SwingAction_1() {
             putValue(NAME, "Launch");
             putValue(SHORT_DESCRIPTION, "Launch accounts viewer");
+            String iconResource1Name = "/images/icon_money.png";
+            URL iconResource1 = Launcher.class.getResource(iconResource1Name);
+            if (iconResource1 != null) {
+                putValue(LARGE_ICON_KEY, new ImageIcon(iconResource1));
+            } else {
+                log.warn("Cannot find icon resource=" + iconResource1Name);
+            }
         }
 
         @Override
@@ -156,6 +175,13 @@ public class Launcher {
         public SwingAction_2() {
             putValue(NAME, "Launch");
             putValue(SHORT_DESCRIPTION, "Launch password tools");
+            String iconResource1Name = "/images/icon_password.png";
+            URL iconResource1 = Launcher.class.getResource(iconResource1Name);
+            if (iconResource1 != null) {
+                putValue(LARGE_ICON_KEY, new ImageIcon(iconResource1));
+            } else {
+                log.warn("Cannot find icon resource=" + iconResource1Name);
+            }
         }
 
         @Override
