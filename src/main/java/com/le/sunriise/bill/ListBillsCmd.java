@@ -32,8 +32,8 @@ import com.healthmarketscience.jackcess.Index;
 import com.healthmarketscience.jackcess.Joiner;
 import com.healthmarketscience.jackcess.Table;
 import com.le.sunriise.mnyobject.Account;
-import com.le.sunriise.mnyobject.Frequency;
 import com.le.sunriise.mnyobject.Transaction;
+import com.le.sunriise.mnyobject.impl.TransactionImpl;
 import com.le.sunriise.report.DefaultAccountVisitor;
 import com.le.sunriise.viewer.OpenedDb;
 
@@ -99,18 +99,18 @@ public class ListBillsCmd {
 
             Index trnIndex = trnTable.getIndex("AcctDtIdTrn");
 
-            Cursor trnCursor = Cursor.createIndexCursor(trnTable, trnIndex);
+//            Cursor trnCursor = Cursor.createIndexCursor(trnTable, trnIndex);
             
             Cursor cursor = Cursor.createCursor(table);
             Map<String, Object> row = null;
             while((row = cursor.getNextRow()) != null) {
                 Integer st= (Integer) row.get("st");
                 
-                Integer frq = (Integer) row.get("frq");
-                Double cFrqInst = (Double) row.get("cFrqInst");
-                Frequency frequency = new Frequency();
-                frequency.setFrq(frq);
-                frequency.setcFrqInst(cFrqInst);
+//                Integer frq = (Integer) row.get("frq");
+//                Double cFrqInst = (Double) row.get("cFrqInst");
+//                Frequency frequency = new FrequencyImpl();
+//                frequency.setFrq(frq);
+//                frequency.setcFrqInst(cFrqInst);
                 
                 Integer lHtrn = (Integer) row.get("lHtrn");
                 log.info("lHtrn=" + lHtrn);
@@ -250,7 +250,7 @@ public class ListBillsCmd {
             Map<String, Object> rowPattern = new HashMap<String, Object>();
             rowPattern.put("htrn", lHtrn);
             if (trnCursor.findFirstRow(rowPattern)) {
-                transation = new Transaction();
+                transation = new TransactionImpl();
                 Map<String, Object> row = trnCursor.getCurrentRow();
                 
             }

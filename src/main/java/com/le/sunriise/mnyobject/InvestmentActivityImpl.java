@@ -18,7 +18,7 @@
  *******************************************************************************/
 package com.le.sunriise.mnyobject;
 
-public class InvestmentActivity {
+public class InvestmentActivityImpl {
     // TRN.act
     public static final int TRANSFER_SHARES_OUT = 33;
 
@@ -71,7 +71,7 @@ public class InvestmentActivity {
 
     private boolean added = true;
 
-    public InvestmentActivity(Integer flag) {
+    public InvestmentActivityImpl(Integer flag) {
         super();
         this.flag = flag;
         initialize();

@@ -1,73 +1,27 @@
-/*******************************************************************************
- * Copyright (c) 2010 Hung Le
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
- * USA
- *******************************************************************************/
 package com.le.sunriise.mnyobject;
 
 import java.math.BigDecimal;
 
-public class SecurityHolding {
-    private Integer id;
+public interface SecurityHolding {
 
-    private String name;
+    public abstract Integer getId();
 
-    private Double quanity;
+    public abstract void setId(Integer id);
 
-    private BigDecimal price;
+    public abstract String getName();
 
-    private BigDecimal marketValue;
+    public abstract void setName(String name);
 
-    public Integer getId() {
-        return id;
-    }
+    public abstract Double getQuanity();
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
+    public abstract void setQuanity(Double quanity);
 
-    public String getName() {
-        return name;
-    }
+    public abstract BigDecimal getPrice();
 
-    public void setName(String name) {
-        this.name = name;
-    }
+    public abstract void setPrice(BigDecimal price);
 
-    public Double getQuanity() {
-        return quanity;
-    }
+    public abstract BigDecimal getMarketValue();
 
-    public void setQuanity(Double quanity) {
-        this.quanity = quanity;
-    }
+    public abstract void setMarketValue(BigDecimal marketValue);
 
-    public BigDecimal getPrice() {
-        return price;
-    }
-
-    public void setPrice(BigDecimal price) {
-        this.price = price;
-    }
-
-    public BigDecimal getMarketValue() {
-        return marketValue;
-    }
-
-    public void setMarketValue(BigDecimal marketValue) {
-        this.marketValue = marketValue;
-    }
 }

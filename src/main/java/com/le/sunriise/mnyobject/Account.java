@@ -1,301 +1,115 @@
-/*******************************************************************************
- * Copyright (c) 2010 Hung Le
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
- * USA
- *******************************************************************************/
 package com.le.sunriise.mnyobject;
 
 import java.math.BigDecimal;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.List;
-import java.util.Locale;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
-public class Account extends MnyObject implements Comparable<Account> {
-    /*
-     * Internal MsMoney id
-     */
-    private Integer id;
-
-    private Integer relatedToAccountId;
-    private Account relatedToAccount;
-
-    private String name;
-
-    private Integer type;
-
-    private Boolean closed;
-
-    private BigDecimal startingBalance;
-    private BigDecimal currentBalance;
-
-    private AccountType accountType;
-
-    private Integer currencyId;
-
-    private NumberFormat amountFormatter = NumberFormat.getCurrencyInstance();
-
-    private String currencyCode;
-
-    // fRetirement
-    private Boolean retirement;
-
-    // uat
-    private Integer investmentSubType;
-
-    // amtLimit
-    private BigDecimal amountLimit;
-
-    private List<SecurityHolding> securityHoldings;
-
-    private final NumberFormat securityQuantityFormatter;
-
-    @JsonIgnore
-    private List<Transaction> transactions;
-
-    @JsonIgnore
-    private List<Transaction> filteredTransactions;
-
-    public Account() {
-        super();
-
-        securityQuantityFormatter = NumberFormat.getIntegerInstance();
-        securityQuantityFormatter.setGroupingUsed(true);
-        if (securityQuantityFormatter instanceof DecimalFormat) {
-            DecimalFormat df = (DecimalFormat) securityQuantityFormatter;
-            df.setMinimumFractionDigits(4);
-            df.setMaximumFractionDigits(4);
-        }
-    }
-
-    public String formatAmmount(BigDecimal amount) {
-        return amountFormatter.format(amount);
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public Integer getType() {
-        return type;
-    }
-
-    public void setType(Integer type) {
-        this.type = type;
-
-        this.accountType = AccountType.toAccountType(type);
-    }
-
+public interface Account {
     /**
      * Get the internal MsMoney id for this account.
      * 
-     * @return an Integer which is the internal MsMoney id for this account.
+     * @return an non-negative Integer which is the internal MsMoney id for this
+     *         account.
      */
-    public Integer getId() {
-        return id;
-    }
+    public abstract Integer getId();
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
+    /**
+     * Set the internal MsMoney id for this account.
+     * 
+     * @param id
+     *            an non-negative Integer which is the internal MsMoney id for
+     *            this account.
+     */
+    public abstract void setId(Integer id);
 
-    public void setClosed(Boolean closed) {
-        this.closed = closed;
-    }
+    /**
+     * Get the account name.
+     * 
+     * @return
+     */
+    public abstract String getName();
 
-    public BigDecimal getStartingBalance() {
-        if (startingBalance == null) {
-            return new BigDecimal(0.0);
-        }
-        return startingBalance;
-    }
+    /**
+     * Set the account name.
+     * 
+     * @param name
+     */
+    public abstract void setName(String name);
 
-    public void setStartingBalance(BigDecimal startingBalance) {
-        this.startingBalance = startingBalance;
-    }
+    /**
+     * Get the account type.
+     * 
+     * @return
+     */
+    public abstract Integer getType();
 
-    public Integer getRelatedToAccountId() {
-        return relatedToAccountId;
-    }
+    /**
+     * Set the account type.
+     * 
+     * @param type
+     */
+    public abstract void setType(Integer type);
 
-    public void setRelatedToAccountId(Integer relatedToAccountId) {
-        this.relatedToAccountId = relatedToAccountId;
-    }
+    public abstract AccountType getAccountType();
 
-    public List<Transaction> getTransactions() {
-        return transactions;
-    }
+    public abstract void setAccountType(AccountType accountType);
 
-    public void setTransactions(List<Transaction> transactions) {
-        this.transactions = transactions;
-    }
+    public abstract Integer getCurrencyId();
 
-    @Override
-    public String toString() {
-        return getName();
-    }
+    public abstract void setCurrencyId(Integer currencyId);
 
-    @Override
-    public int compareTo(Account o) {
-        return id.compareTo(o.getId());
-    }
+    public abstract String getCurrencyCode();
 
-    public AccountType getAccountType() {
-        return accountType;
-    }
+    public abstract void setCurrencyCode(String currencyCode);
 
-    public void setAccountType(AccountType accountType) {
-        this.accountType = accountType;
-    }
+    public abstract BigDecimal getStartingBalance();
 
-    public Integer getCurrencyId() {
-        return currencyId;
-    }
+    public abstract void setStartingBalance(BigDecimal startingBalance);
 
-    public void setCurrencyId(Integer currencyId) {
-        this.currencyId = currencyId;
-    }
+    public abstract BigDecimal getCurrentBalance();
 
-    public String getCurrencyCode() {
-        return currencyCode;
-    }
+    public abstract void setCurrentBalance(BigDecimal currentBalance);
 
-    public void setCurrencyCode(String currencyCode) {
-        // currencyCode = "CNY";
+    public abstract Integer getRelatedToAccountId();
 
-        this.currencyCode = currencyCode;
-        java.util.Currency javaCurrency = java.util.Currency.getInstance(currencyCode);
-        if (javaCurrency != null) {
-            Locale currencyLocale = null;
-            if (currencyCode.equals("USD")) {
-                currencyLocale = Locale.US;
-            } else if (currencyCode.equals("GBP")) {
-                currencyLocale = Locale.UK;
-            } else if (currencyCode.equals("CAD")) {
-                currencyLocale = Locale.CANADA;
-            } else if (currencyCode.equals("JPY")) {
-                currencyLocale = Locale.JAPAN;
-            } else if (currencyCode.equals("CNY")) {
-                currencyLocale = Locale.CHINA;
-            } else {
-                currencyLocale = null;
-            }
+    public abstract void setRelatedToAccountId(Integer relatedToAccountId);
 
-            // currencyLocale = Locale.CHINA;
+    public abstract Account getRelatedToAccount();
 
-            if (currencyLocale != null) {
-                amountFormatter = NumberFormat.getCurrencyInstance(currencyLocale);
-            } else {
-                amountFormatter = NumberFormat.getCurrencyInstance();
-            }
-            amountFormatter.setCurrency(javaCurrency);
-        }
-    }
+    public abstract void setRelatedToAccount(Account relatedToAccount);
 
-    public Boolean getRetirement() {
-        return retirement;
-    }
+    public abstract List<Transaction> getTransactions();
 
-    public void setRetirement(Boolean retirement) {
-        this.retirement = retirement;
-    }
+    public abstract void setTransactions(List<Transaction> transactions);
 
-    public Integer getInvestmentSubType() {
-        return investmentSubType;
-    }
+    public abstract String formatAmmount(BigDecimal amount);
 
-    public void setInvestmentSubType(Integer investmentSubType) {
-        this.investmentSubType = investmentSubType;
-    }
+    public abstract void setClosed(Boolean closed);
 
-    public BigDecimal getAmountLimit() {
-        return amountLimit;
-    }
+    public abstract Boolean getRetirement();
 
-    public void setAmountLimit(BigDecimal amountLimit) {
-        this.amountLimit = amountLimit;
-    }
+    public abstract void setRetirement(Boolean retirement);
 
-    public boolean isCreditCard() {
-        return getAccountType() == AccountType.CREDIT_CARD;
-    }
+    public abstract Integer getInvestmentSubType();
 
-    public boolean is401k403b() {
-        if (!retirement) {
-            return false;
-        }
+    public abstract void setInvestmentSubType(Integer investmentSubType);
 
-        if (investmentSubType == null) {
-            return false;
-        }
+    public abstract BigDecimal getAmountLimit();
 
-        // 403(b)
-        if (investmentSubType == 0) {
-            return true;
-        }
-        if (investmentSubType == 1) {
-            return true;
-        }
+    public abstract void setAmountLimit(BigDecimal amountLimit);
 
-        return false;
-    }
+    public abstract List<SecurityHolding> getSecurityHoldings();
 
-    public BigDecimal getCurrentBalance() {
-        return currentBalance;
-    }
+    public abstract void setSecurityHoldings(List<SecurityHolding> securityHoldings);
 
-    public void setCurrentBalance(BigDecimal currentBalance) {
-        this.currentBalance = currentBalance;
-    }
+    public abstract List<Transaction> getFilteredTransactions();
 
-    public Boolean getClosed() {
-        return closed;
-    }
+    public abstract void setFilteredTransactions(List<Transaction> filteredTransactions);
 
-    public String formatSecurityQuantity(Double quantity) {
-        return securityQuantityFormatter.format(quantity);
-    }
+    public abstract boolean isCreditCard();
 
-    public List<SecurityHolding> getSecurityHoldings() {
-        return securityHoldings;
-    }
+    public abstract boolean is401k403b();
 
-    public void setSecurityHoldings(List<SecurityHolding> securityHoldings) {
-        this.securityHoldings = securityHoldings;
-    }
+    public abstract Boolean getClosed();
 
-    public Account getRelatedToAccount() {
-        return relatedToAccount;
-    }
-
-    public void setRelatedToAccount(Account relatedToAccount) {
-        this.relatedToAccount = relatedToAccount;
-    }
-
-    public List<Transaction> getFilteredTransactions() {
-        return filteredTransactions;
-    }
-
-    public void setFilteredTransactions(List<Transaction> filteredTransactions) {
-        this.filteredTransactions = filteredTransactions;
-    }
+    public abstract String formatSecurityQuantity(Double quantity);
 }

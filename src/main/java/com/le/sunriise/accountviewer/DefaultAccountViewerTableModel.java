@@ -24,11 +24,10 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 
 import com.le.sunriise.mnyobject.Account;
-import com.le.sunriise.mnyobject.Category;
-import com.le.sunriise.mnyobject.InvestmentActivity;
+import com.le.sunriise.mnyobject.InvestmentActivityImpl;
 import com.le.sunriise.mnyobject.Payee;
 import com.le.sunriise.mnyobject.Transaction;
-import com.le.sunriise.mnyobject.TransactionSplit;
+import com.le.sunriise.mnyobject.impl.MnyObjectUtil;
 
 public class DefaultAccountViewerTableModel extends AbstractAccountViewerTableModel {
     private static final Logger log = Logger.getLogger(DefaultAccountViewerTableModel.class);
@@ -76,7 +75,7 @@ public class DefaultAccountViewerTableModel extends AbstractAccountViewerTableMo
             value = toPayeeString(transaction);
             break;
         case COLUMN_CATEGORY:
-            value = toCategoryString(transaction);
+            value = MnyObjectUtil.toCategoryString(getMnyContext(), transaction);
             break;
         // case COLUMN_CLASSIFICATION:
         // value = "classification";
@@ -119,48 +118,12 @@ public class DefaultAccountViewerTableModel extends AbstractAccountViewerTableMo
 
         if (transaction.isInvestment()) {
             value = "UNKNOWN";
-            InvestmentActivity investmentActivity = transaction.getInvestmentActivity();
+            InvestmentActivityImpl investmentActivity = transaction.getInvestmentActivity();
             if (investmentActivity != null) {
                 value = investmentActivity.toString();
             }
         }
 
-        return value;
-    }
-
-    private Object toCategoryString(Transaction transaction) {
-        Object value = null;
-        Integer transferredAccountId = transaction.getTransferredAccountId();
-        if (transferredAccountId != null) {
-            List<Account> accounts = getMnyContext().getAccounts();
-            if (accounts != null) {
-                for (Account a : accounts) {
-                    Integer id = a.getId();
-                    if (id.equals(transferredAccountId)) {
-                        value = "Transfer to " + a.getName();
-                        break;
-                    }
-                }
-            }
-        } else {
-            Integer categoryId = transaction.getCategoryId();
-            Map<Integer, Category> categories = getMnyContext().getCategories();
-            String categoryName = Category.getCategoryName(categoryId, categories);
-            value = categoryName;
-        }
-
-        if (value == null) {
-            if (transaction.hasSplits()) {
-                List<TransactionSplit> splits = transaction.getSplits();
-                value = "(" + splits.size() + ") Split Transaction";
-            }
-        }
-
-        if (transaction.isInvestment()) {
-            Integer securityId = transaction.getSecurityId();
-            String securityName = AccountUtil.getSecurityName(securityId, getMnyContext());
-            value = securityName;
-        }
         return value;
     }
 

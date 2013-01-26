@@ -39,15 +39,11 @@ import com.le.sunriise.mnyobject.Account;
 import com.le.sunriise.mnyobject.AccountType;
 import com.le.sunriise.mnyobject.Category;
 import com.le.sunriise.mnyobject.Currency;
-import com.le.sunriise.mnyobject.Frequency;
-import com.le.sunriise.mnyobject.InvestmentActivity;
-import com.le.sunriise.mnyobject.InvestmentTransaction;
 import com.le.sunriise.mnyobject.Payee;
 import com.le.sunriise.mnyobject.Security;
-import com.le.sunriise.mnyobject.SecurityHolding;
 import com.le.sunriise.mnyobject.Transaction;
-import com.le.sunriise.mnyobject.TransactionInfo;
 import com.le.sunriise.mnyobject.TransactionSplit;
+import com.le.sunriise.mnyobject.impl.MnyObjectUtil;
 import com.le.sunriise.viewer.OpenedDb;
 
 public class AccountUtil {
@@ -69,7 +65,7 @@ public class AccountUtil {
         Cursor cursor = Cursor.createCursor(table);
         while (cursor.moveToNextRow()) {
             Map<String, Object> row = cursor.getCurrentRow();
-            Account account = getAcccount(row);
+            Account account = MnyObjectUtil.getAcccount(row);
             if (account != null) {
                 accounts.add(account);
             }
@@ -97,55 +93,6 @@ public class AccountUtil {
     public static List<Account> getAccounts(Database db) throws IOException {
         boolean sort = true;
         return getAccounts(db, sort);
-    }
-
-    private static Account getAcccount(Map<String, Object> row) {
-        Account account = null;
-        String name = (String) row.get("szFull");
-        if (name == null) {
-            return account;
-        }
-        if (name.length() == 0) {
-            return account;
-        }
-
-        account = new Account();
-
-        account.setName(name);
-
-        Integer hacct = (Integer) row.get("hacct");
-        account.setId(hacct);
-
-        Integer hacctRel = (Integer) row.get("hacctRel");
-        account.setRelatedToAccountId(hacctRel);
-
-        Integer type = (Integer) row.get("at");
-        account.setType(type);
-
-        Boolean closed = (Boolean) row.get("fClosed");
-        account.setClosed(closed);
-
-        BigDecimal amtOpen = (BigDecimal) row.get("amtOpen");
-        account.setStartingBalance(amtOpen);
-
-        Integer currencyId = (Integer) row.get("hcrnc");
-        account.setCurrencyId(currencyId);
-
-        Boolean retirement = (Boolean) row.get("fRetirement");
-        account.setRetirement(retirement);
-
-        // 0: 403(b)
-        // 1: 401k
-        // 2: IRA
-        // 3: Keogh
-        Integer investmentSubType = (Integer) row.get("uat");
-        account.setInvestmentSubType(investmentSubType);
-
-        // amtLimit
-        BigDecimal amountLimit = (BigDecimal) row.get("amtLimit");
-        account.setAmountLimit(amountLimit);
-
-        return account;
     }
 
     public static List<Transaction> retrieveTransactions(Database db, Account account) throws IOException {
@@ -177,13 +124,13 @@ public class AccountUtil {
                 if (account != null) {
                     if (cursor.currentRowMatches(rowPattern)) {
                         row = cursor.getCurrentRow();
-                        AccountUtil.addTransactionFromRow(db, transactionFilters, row, transactions, filteredTransactions);
+                        MnyObjectUtil.addTransactionFromRow(db, transactionFilters, row, transactions, filteredTransactions);
                     }
                 } else {
                     row = cursor.getCurrentRow();
                     Integer hacct = (Integer) row.get("hacct");
                     if (hacct == null) {
-                        AccountUtil.addTransactionFromRow(db, transactionFilters, row, transactions, filteredTransactions);
+                        MnyObjectUtil.addTransactionFromRow(db, transactionFilters, row, transactions, filteredTransactions);
                     }
                 }
             }
@@ -256,124 +203,6 @@ public class AccountUtil {
         return transactionFilters;
     }
 
-    private static boolean addTransactionFromRow(Database db, List<TransactionFilter> filters, Map<String, Object> row,
-            List<Transaction> transactions, List<Transaction> filteredTransactions) throws IOException {
-        Transaction transaction = new Transaction();
-
-        // transaction id
-        Integer htrn = (Integer) row.get("htrn");
-        transaction.setId(htrn);
-
-        // amount
-        BigDecimal amt = (BigDecimal) row.get("amt");
-        transaction.setAmount(amt);
-
-        // TableID index ColumnName comments
-        // TRN 7 cs "cleared state?
-        // 0 == not cleared
-        // 1 == cleared
-        // 2 == reconciled
-
-        Integer cs = (Integer) row.get("cs");
-        transaction.setClearedState(cs);
-
-        // flags? we are currentl using this to figure out which transaction to
-        // skip/void
-        Integer grftt = (Integer) row.get("grftt");
-        transaction.setStatusFlag(grftt);
-        if (grftt != null) {
-            TransactionInfo transactionInfo = new TransactionInfo();
-            transactionInfo.setFlag(grftt);
-            transaction.setTransactionInfo(transactionInfo);
-        }
-
-        // date
-        Date date = (Date) row.get("dt");
-        transaction.setDate(date);
-
-        // frequency for recurring transaction?
-        Integer frq = (Integer) row.get("frq");
-        Double cFrqInst = (Double) row.get("cFrqInst");
-        Frequency frequency = new Frequency();
-        frequency.setFrq(frq);
-        frequency.setcFrqInst(cFrqInst);
-        frequency.setGrftt(grftt);
-        transaction.setFrequency(frequency);
-
-        // category
-        Integer hcat = (Integer) row.get("hcat");
-        transaction.setCategoryId(hcat);
-
-        // payee
-        Integer lhpay = (Integer) row.get("lHpay");
-        transaction.setPayeeId(lhpay);
-
-        // transfer to account
-        Integer hacctLink = (Integer) row.get("hacctLink");
-        transaction.setTransferredAccountId(hacctLink);
-
-        // hsec: security
-        Integer hsec = (Integer) row.get("hsec");
-        transaction.setSecurityId(hsec);
-
-        // act: Investment activity: Buy, Sell ..
-        Integer act = (Integer) row.get("act");
-        InvestmentActivity investmentActivity = new InvestmentActivity(act);
-        transaction.setInvestmentActivity(investmentActivity);
-
-        InvestmentTransaction investmentTransaction = null;
-        if (transaction.isInvestment()) {
-            investmentTransaction = getInvestmentTransaction(db, transaction.getId());
-        }
-        transaction.setInvestmentTransaction(investmentTransaction);
-
-        // mMemo
-        String memo = (String) row.get("mMemo");
-        transaction.setMemo(memo);
-
-        // szId
-        String szId = (String) row.get("szId");
-        transaction.setNumber(szId);
-
-        boolean accept = true;
-        if (filters != null) {
-            for (TransactionFilter filter : filters) {
-                if (!filter.accept(transaction, row)) {
-                    accept = false;
-                    break;
-                }
-            }
-        }
-
-        if (accept) {
-            transactions.add(transaction);
-        } else {
-            filteredTransactions.add(transaction);
-        }
-
-        return accept;
-    }
-
-    private static InvestmentTransaction getInvestmentTransaction(Database db, Integer id) throws IOException {
-        InvestmentTransaction investmentTransaction = new InvestmentTransaction();
-
-        String splitTableName = "TRN_INV";
-        Table splitTable = db.getTable(splitTableName);
-        Cursor cursor = Cursor.createCursor(splitTable);
-        Map<String, Object> rowPattern = new HashMap<String, Object>();
-        rowPattern.put("htrn", id);
-        if (cursor.findFirstRow(rowPattern)) {
-            Map<String, Object> row = cursor.getCurrentRow();
-            Double price = (Double) row.get("dPrice");
-            investmentTransaction.setPrice(price);
-
-            Double quantity = (Double) row.get("qty");
-            investmentTransaction.setQuantity(quantity);
-        }
-
-        return investmentTransaction;
-    }
-
     private static void handleSplit(Database db, List<Transaction> transactions) throws IOException {
         String splitTableName = "TRN_SPLIT";
         Table splitTable = db.getTable(splitTableName);
@@ -385,7 +214,7 @@ public class AccountUtil {
         while (listIterator.hasNext()) {
             Transaction transaction = listIterator.next();
             TransactionSplit transactionSplit = null;
-            transactionSplit = AccountUtil.getTransactionSplit(cursor, transaction);
+            transactionSplit = MnyObjectUtil.getTransactionSplit(cursor, transaction);
 
             if (transactionSplit != null) {
                 List<TransactionSplit> list = splits.get(transactionSplit.getParentId());
@@ -410,24 +239,6 @@ public class AccountUtil {
 
             transaction.setSplits(list);
         }
-    }
-
-    private static TransactionSplit getTransactionSplit(Cursor splitCursor, Transaction transaction) throws IOException {
-        splitCursor.reset();
-        TransactionSplit transactionSplit = null;
-        Map<String, Object> rowPattern = new HashMap<String, Object>();
-        rowPattern.put("htrn", transaction.getId());
-        if (splitCursor.findFirstRow(rowPattern)) {
-            Map<String, Object> row = splitCursor.getCurrentRow();
-            Integer htrnParent = (Integer) row.get("htrnParent");
-            Integer iSplit = (Integer) row.get("iSplit");
-
-            transactionSplit = new TransactionSplit();
-            transactionSplit.setTransaction(transaction);
-            transactionSplit.setParentId(htrnParent);
-            transactionSplit.setRowId(iSplit);
-        }
-        return transactionSplit;
     }
 
     public static BigDecimal getRunningBalance(int rowIndex, Account account) {
@@ -463,155 +274,6 @@ public class AccountUtil {
         transaction.setRunningBalance(runningBalance);
 
         return runningBalance;
-    }
-
-    public static Map<Integer, Payee> getPayees(Database db) throws IOException {
-        Map<Integer, Payee> payees = new HashMap<Integer, Payee>();
-
-        String tableName = "PAY";
-        Table table = db.getTable(tableName);
-        Cursor cursor = null;
-        try {
-            cursor = Cursor.createCursor(table);
-
-            while (cursor.moveToNextRow()) {
-                Map<String, Object> row = cursor.getCurrentRow();
-
-                String name = (String) row.get("szFull");
-                if (name == null) {
-                    continue;
-                }
-                if (name.length() == 0) {
-                    continue;
-                }
-
-                Integer hpay = (Integer) row.get("hpay");
-                Integer hpayParent = (Integer) row.get("hpayParent");
-
-                Payee payee = new Payee();
-                payee.setId(hpay);
-                payee.setParent(hpayParent);
-                payee.setName(name);
-
-                payees.put(hpay, payee);
-            }
-        } finally {
-
-        }
-        return payees;
-    }
-
-    public static Map<Integer, Security> getSecurities(Database db) throws IOException {
-        Map<Integer, Security> securities = new HashMap<Integer, Security>();
-
-        String tableName = "SEC";
-        Table table = db.getTable(tableName);
-        Cursor cursor = null;
-        try {
-            cursor = Cursor.createCursor(table);
-
-            while (cursor.moveToNextRow()) {
-                Map<String, Object> row = cursor.getCurrentRow();
-
-                Integer hsec = (Integer) row.get("hsec");
-
-                String szFull = (String) row.get("szFull");
-                String szSymbol = (String) row.get("szSymbol");
-
-                Security security = new Security();
-                security.setId(hsec);
-                security.setName(szFull);
-                security.setSymbol(szSymbol);
-
-                securities.put(hsec, security);
-            }
-        } finally {
-
-        }
-
-        return securities;
-    }
-
-    public static Map<Integer, Currency> getCurrencies(Database db) throws IOException {
-        Map<Integer, Currency> currencies = new HashMap<Integer, Currency>();
-
-        String tableName = "CRNC";
-        Table table = db.getTable(tableName);
-        Cursor cursor = null;
-        try {
-            cursor = Cursor.createCursor(table);
-
-            while (cursor.moveToNextRow()) {
-                Map<String, Object> row = cursor.getCurrentRow();
-
-                String name = (String) row.get("szName");
-                if (name == null) {
-                    continue;
-                }
-                if (name.length() == 0) {
-                    continue;
-                }
-
-                Integer hcrnc = (Integer) row.get("hcrnc");
-                String isoCode = (String) row.get("szIsoCode");
-
-                Currency currency = new Currency();
-                currency.setId(hcrnc);
-                currency.setName(name);
-                currency.setIsoCode(isoCode);
-
-                currencies.put(hcrnc, currency);
-            }
-        } finally {
-
-        }
-
-        return currencies;
-    }
-
-    public static Map<Integer, Category> getCategories(Database db) throws IOException {
-        Map<Integer, Category> categories = new HashMap<Integer, Category>();
-
-        String tableName = "CAT";
-        Table table = db.getTable(tableName);
-        Cursor cursor = null;
-        try {
-            cursor = Cursor.createCursor(table);
-
-            while (cursor.moveToNextRow()) {
-                Map<String, Object> row = cursor.getCurrentRow();
-
-                String name = (String) row.get("szFull");
-                if (name == null) {
-                    continue;
-                }
-                if (name.length() == 0) {
-                    continue;
-                }
-
-                Category category = new Category();
-
-                Integer hcat = (Integer) row.get("hcat");
-                category.setId(hcat);
-
-                Integer hcatParent = (Integer) row.get("hcatParent");
-                category.setParentId(hcatParent);
-
-                category.setName(name);
-
-                Integer hct = (Integer) row.get("hct");
-                category.setClassificationId(hct);
-
-                Integer nLevel = (Integer) row.get("nLevel");
-                category.setLevel(nLevel);
-
-                categories.put(hcat, category);
-            }
-        } finally {
-
-        }
-
-        return categories;
     }
 
     public static void setCurrencies(List<Account> accounts, Map<Integer, Currency> currencies) {
@@ -669,114 +331,10 @@ public class AccountUtil {
 
     public static Double calculateInvestmentBalance(Account account, MnyContext mnyContext) {
         Date date = null;
-        return calculateInvestmentBalance(account, date, mnyContext);
+        return MnyObjectUtil.calculateInvestmentBalance(account, date, mnyContext);
     }
 
-    public static Double calculateInvestmentBalance(Account account, Date date, MnyContext mnyContext) {
-        Map<Integer, Double> quantities = new HashMap<Integer, Double>();
-        Double accountMarketValue = new Double(0.0);
-
-        for (Transaction transaction : account.getTransactions()) {
-            if (transaction.isVoid()) {
-                continue;
-            }
-            if (transaction.isRecurring()) {
-                continue;
-            }
-            if (!transaction.isInvestment()) {
-                continue;
-            }
-            if (date != null) {
-                Date transactionDate = transaction.getDate();
-                if (transactionDate.compareTo(date) > 0) {
-                    continue;
-                }
-            }
-            InvestmentTransaction investmentTransaction = transaction.getInvestmentTransaction();
-            if (investmentTransaction == null) {
-                log.warn("Transaction is an investment transaction but investmentTransaction is null");
-                continue;
-            }
-            Integer securityId = transaction.getSecurityId();
-            InvestmentActivity investmentActivity = transaction.getInvestmentActivity();
-            Double quantity = quantities.get(securityId);
-            if (quantity == null) {
-                quantity = new Double(0.0);
-                quantities.put(securityId, quantity);
-            }
-            Double q = investmentTransaction.getQuantity();
-            if (q == null) {
-                q = new Double(0.0);
-            }
-            if (investmentActivity.isAdded()) {
-                quantity += q;
-            } else {
-                quantity -= q;
-            }
-            quantities.put(securityId, quantity);
-        }
-
-        List<SecurityHolding> securityHoldings = new ArrayList<SecurityHolding>();
-        for (Integer securityId : quantities.keySet()) {
-            Double quantity = quantities.get(securityId);
-            // TODO: skip really small holding value
-            if (quantity < 0.00000001) {
-                continue;
-            }
-            SecurityHolding securityHolding = new SecurityHolding();
-            securityHolding.setId(securityId);
-            securityHolding.setQuanity(quantity);
-
-            Map<Integer, Security> securities = mnyContext.getSecurities();
-            Security security = securities.get(securityId);
-            String securityName = null;
-            if (security != null) {
-                securityName = security.getName();
-            } else {
-                securityName = securityId.toString();
-            }
-            securityHolding.setName(securityName);
-
-            try {
-                Double price = getSecurityLatestPrice(securityId, date, mnyContext);
-                if (price == null) {
-                    price = new Double(0.0);
-                }
-                securityHolding.setPrice(new BigDecimal(price));
-            } catch (IOException e) {
-                log.warn("Cannot find latest price for securityId=" + securityId, e);
-            }
-            securityHoldings.add(securityHolding);
-            BigDecimal price = securityHolding.getPrice();
-            securityHolding.setMarketValue(new BigDecimal(price.doubleValue() * securityHolding.getQuanity()));
-        }
-        Collections.sort(securityHoldings, new Comparator<SecurityHolding>() {
-            @Override
-            public int compare(SecurityHolding o1, SecurityHolding o2) {
-                return o1.getName().compareTo(o2.getName());
-            }
-        });
-        account.setSecurityHoldings(securityHoldings);
-        for (SecurityHolding sec : securityHoldings) {
-            log.info("securityName=" + sec.getName() + ", quantity=" + account.formatSecurityQuantity(sec.getQuanity())
-                    + ", price=" + account.formatAmmount(sec.getPrice()) + ", value=" + account.formatAmmount(sec.getMarketValue()));
-            accountMarketValue += sec.getMarketValue().doubleValue();
-        }
-
-        try {
-            Double cashAccountValue = getCashAccountValue(account, mnyContext);
-            log.info("cashAccountValue=" + cashAccountValue);
-            if (cashAccountValue != null) {
-                accountMarketValue += cashAccountValue.doubleValue();
-            }
-        } catch (IOException e) {
-            log.warn(e);
-        }
-
-        return accountMarketValue;
-    }
-
-    private static Double getCashAccountValue(Account account, MnyContext mnyContext) throws IOException {
+    public static Double getCashAccountValue(Account account, MnyContext mnyContext) throws IOException {
         Double cashAccountValue = null;
         Integer relatedToAccountId = account.getRelatedToAccountId();
         if (relatedToAccountId != null) {
@@ -806,12 +364,12 @@ public class AccountUtil {
         rowPattern.put("hacct", relatedToAccountId);
         if (cursor.findFirstRow(rowPattern)) {
             Map<String, Object> row = cursor.getCurrentRow();
-            relatedToAccount = getAcccount(row);
+            relatedToAccount = MnyObjectUtil.getAcccount(row);
         }
         return relatedToAccount;
     }
 
-    private static Double getSecurityLatestPrice(Integer securityId, Date date, MnyContext mnyContext) throws IOException {
+    public static Double getSecurityLatestPrice(Integer securityId, Date date, MnyContext mnyContext) throws IOException {
         Double price = null;
 
         StopWatch stopWatch = new StopWatch();
@@ -857,16 +415,16 @@ public class AccountUtil {
         Database db = openedDb.getDb();
         mnyContext.setDb(db);
 
-        Map<Integer, Payee> payees = getPayees(db);
+        Map<Integer, Payee> payees = MnyObjectUtil.getPayees(db);
         mnyContext.setPayees(payees);
 
-        Map<Integer, Category> categories = getCategories(db);
+        Map<Integer, Category> categories = MnyObjectUtil.getCategories(db);
         mnyContext.setCategories(categories);
 
-        Map<Integer, Currency> currencies = getCurrencies(db);
+        Map<Integer, Currency> currencies = MnyObjectUtil.getCurrencies(db);
         mnyContext.setCurrencies(currencies);
 
-        Map<Integer, Security> securities = getSecurities(db);
+        Map<Integer, Security> securities = MnyObjectUtil.getSecurities(db);
         mnyContext.setSecurities(securities);
 
         List<Account> accounts = getAccounts(db);
@@ -894,11 +452,20 @@ public class AccountUtil {
     public static BigDecimal calculateBalance(Account account, Date date, MnyContext mnyContext) {
         BigDecimal currentBalance = null;
         if (account.getAccountType() == AccountType.INVESTMENT) {
-            Double investmentBalance = calculateInvestmentBalance(account, date, mnyContext);
+            Double investmentBalance = MnyObjectUtil.calculateInvestmentBalance(account, date, mnyContext);
             currentBalance = new BigDecimal(investmentBalance);
         } else {
             currentBalance = calculateNonInvestmentBalance(account, date);
         }
         return currentBalance;
+    }
+
+    public static String getCurrencyName(Integer currencyId, Map<Integer, Currency> currencies) {
+        Currency currency = currencies.get(currencyId);
+        if (currency != null) {
+            return currency.getIsoCode();
+        } else {
+            return null;
+        }
     }
 }

@@ -19,29 +19,28 @@
 package com.le.sunriise;
 
 import java.awt.EventQueue;
+import java.awt.event.ActionEvent;
+import java.net.URL;
 
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.SwingConstants;
 
 import org.apache.log4j.Logger;
-import javax.swing.JButton;
 
 import app.AccountViewer;
 import app.MnyViewer;
 import app.PasswordCheckerApp;
 
-import com.jgoodies.forms.layout.FormLayout;
-import com.jgoodies.forms.layout.ColumnSpec;
-import com.jgoodies.forms.layout.RowSpec;
-import javax.swing.JLabel;
 import com.jgoodies.forms.factories.DefaultComponentFactory;
 import com.jgoodies.forms.factories.FormFactory;
-import javax.swing.SwingConstants;
-import javax.swing.AbstractAction;
-import java.awt.event.ActionEvent;
-import java.net.URL;
-
-import javax.swing.Action;
-import javax.swing.ImageIcon;
+import com.jgoodies.forms.layout.ColumnSpec;
+import com.jgoodies.forms.layout.FormLayout;
+import com.jgoodies.forms.layout.RowSpec;
 
 public class Launcher {
     private static final Logger log = Logger.getLogger(Launcher.class);

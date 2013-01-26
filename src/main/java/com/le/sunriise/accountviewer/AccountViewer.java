@@ -44,6 +44,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.prefs.Preferences;
 
+import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -89,7 +90,6 @@ import com.le.sunriise.export.ExportToContext;
 import com.le.sunriise.json.JSONUtils;
 import com.le.sunriise.mnyobject.Account;
 import com.le.sunriise.mnyobject.AccountType;
-import com.le.sunriise.mnyobject.Currency;
 import com.le.sunriise.mnyobject.SecurityHolding;
 import com.le.sunriise.mnyobject.Transaction;
 import com.le.sunriise.model.bean.AccountViewerDataModel;
@@ -100,7 +100,6 @@ import com.le.sunriise.viewer.OpenDbAction;
 import com.le.sunriise.viewer.OpenDbDialog;
 import com.le.sunriise.viewer.OpenedDb;
 import com.le.sunriise.viewer.TableUtils;
-import javax.swing.AbstractAction;
 
 public class AccountViewer {
     private static final Logger log = Logger.getLogger(AccountViewer.class);
@@ -637,7 +636,7 @@ public class AccountViewer {
                 BigDecimal currentBalance = AccountUtil.calculateCurrentBalance(account);
 
                 log.info(account.getName() + ", " + account.getAccountType() + ", "
-                        + Currency.getName(account.getCurrencyId(), mnyContext.getCurrencies()) + ", "
+                        + AccountUtil.getCurrencyName(account.getCurrencyId(), mnyContext.getCurrencies()) + ", "
                         + account.getStartingBalance() + ", " + currentBalance + ", " + account.getAmountLimit());
 
                 // UI
@@ -728,7 +727,7 @@ public class AccountViewer {
         if (account.getAccountType() == AccountType.INVESTMENT) {
             accountInfoTextArea.append("Retirement: " + account.getRetirement().toString() + "\n");
         }
-        accountInfoTextArea.append("Currency: " + Currency.getName(account.getCurrencyId(), mnyContext.getCurrencies()) + "\n");
+        accountInfoTextArea.append("Currency: " + AccountUtil.getCurrencyName(account.getCurrencyId(), mnyContext.getCurrencies()) + "\n");
         accountInfoTextArea.append("Starting balance: " + account.formatAmmount(account.getStartingBalance()) + "\n");
         accountInfoTextArea.append("Ending balance: " + account.formatAmmount(account.getCurrentBalance()) + "\n");
 

@@ -11,10 +11,11 @@ final class QifTokenMaker extends PlainTextTokenMaker {
 
     @Override
     public Token getTokenList(Segment text, int startTokenType, final int startOffset) {
-        log.info("getTokenList, text=" + text.toString());
-        log.info("  startTokenType=" + startTokenType);
-        log.info("  startOffset=" + startOffset);
-
+        if (log.isDebugEnabled()) {
+            log.debug("getTokenList, text=" + text.toString());
+            log.debug("  startTokenType=" + startTokenType);
+            log.debug("  startOffset=" + startOffset);
+        }
         return super.getTokenList(text, startTokenType, startOffset);
     }
 

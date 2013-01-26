@@ -31,11 +31,10 @@ import org.apache.log4j.Logger;
 import com.le.sunriise.accountviewer.AccountUtil;
 import com.le.sunriise.accountviewer.MnyContext;
 import com.le.sunriise.mnyobject.Account;
-import com.le.sunriise.mnyobject.Category;
-import com.le.sunriise.mnyobject.InvestmentActivity;
-import com.le.sunriise.mnyobject.Payee;
+import com.le.sunriise.mnyobject.InvestmentActivityImpl;
 import com.le.sunriise.mnyobject.Transaction;
 import com.le.sunriise.mnyobject.TransactionSplit;
+import com.le.sunriise.mnyobject.impl.MnyObjectUtil;
 
 public class QifExportUtils {
     private static final Logger log = Logger.getLogger(QifExportUtils.class);
@@ -170,7 +169,7 @@ public class QifExportUtils {
         if (log.isDebugEnabled()) {
             log.debug("payeeId=" + payeeId);
         }
-        String payeeName = Payee.getPayeeName(payeeId, mnyContext.getPayees());
+        String payeeName = MnyObjectUtil.getPayeeName(payeeId, mnyContext.getPayees());
         if (transaction.isVoid()) {
             // money way
             // writer.println("PVOID " + Payee.getPayeeName(payeeId,
@@ -275,7 +274,7 @@ public class QifExportUtils {
         // ReinvSh
         // Sell (X)
 
-        InvestmentActivity investmentActivity = transaction.getInvestmentActivity();
+        InvestmentActivityImpl investmentActivity = transaction.getInvestmentActivity();
         if (investmentActivity == null) {
             return null;
         }
@@ -284,51 +283,51 @@ public class QifExportUtils {
         String str = "ACTIVITY_UNKNOWN";
         boolean added = true;
         switch (flag) {
-        case InvestmentActivity.BUY:
+        case InvestmentActivityImpl.BUY:
             str = "Buy";
             break;
-        case InvestmentActivity.SELL:
+        case InvestmentActivityImpl.SELL:
             str = "Sell";
             added = false;
             break;
-        case InvestmentActivity.DIVIDEND:
+        case InvestmentActivityImpl.DIVIDEND:
             str = "Dividend";
             break;
-        case InvestmentActivity.INTEREST:
+        case InvestmentActivityImpl.INTEREST:
             str = "Interest";
             break;
-        case InvestmentActivity.RETURN_OF_CAPITAL:
+        case InvestmentActivityImpl.RETURN_OF_CAPITAL:
             str = "Return of Capital";
             break;
-        case InvestmentActivity.REINVEST_DIVIDEND:
+        case InvestmentActivityImpl.REINVEST_DIVIDEND:
             str = "Reinvest Dividend";
             break;
-        case InvestmentActivity.REINVEST_INTEREST:
+        case InvestmentActivityImpl.REINVEST_INTEREST:
             str = "Reinvest Interest";
             break;
-        case InvestmentActivity.REMOVE_SHARES:
+        case InvestmentActivityImpl.REMOVE_SHARES:
             str = "Remove Shares";
             added = false;
             break;
-        case InvestmentActivity.ADD_SHARES:
+        case InvestmentActivityImpl.ADD_SHARES:
             str = "Add Shares";
             break;
-        case InvestmentActivity.S_TERM_CAP_GAINS_DIST:
+        case InvestmentActivityImpl.S_TERM_CAP_GAINS_DIST:
             str = "S-Term Cap Gains Dist";
             break;
-        case InvestmentActivity.L_TERM_CAP_GAINS_DIST:
+        case InvestmentActivityImpl.L_TERM_CAP_GAINS_DIST:
             str = "L-Term Cap Gains Dist";
             break;
-        case InvestmentActivity.REINVEST_S_TERM_CG_DIST:
+        case InvestmentActivityImpl.REINVEST_S_TERM_CG_DIST:
             str = "Reinvest S-Term CG Dist";
             break;
-        case InvestmentActivity.REINVEST_L_TERM_CG_DIST:
+        case InvestmentActivityImpl.REINVEST_L_TERM_CG_DIST:
             str = "Reinvest L-Term CG Dist";
             break;
-        case InvestmentActivity.TRANSFER_SHARES_IN:
+        case InvestmentActivityImpl.TRANSFER_SHARES_IN:
             str = "Transfer Shares (in)";
             break;
-        case InvestmentActivity.TRANSFER_SHARES_OUT:
+        case InvestmentActivityImpl.TRANSFER_SHARES_OUT:
             str = "Transfer Shares (out)";
             added = false;
             break;
@@ -350,10 +349,10 @@ public class QifExportUtils {
             }
             List<Account> accounts = mnyContext.getAccounts();
             if (accounts != null) {
-                for (Account a : accounts) {
-                    Integer id = a.getId();
+                for (Account account : accounts) {
+                    Integer id = account.getId();
                     if (id.equals(transferredAccountId)) {
-                        writer.println(prefix + "[" + a.getName() + "]");
+                        writer.println(prefix + "[" + account.getName() + "]");
                         break;
                     }
                 }
@@ -361,7 +360,7 @@ public class QifExportUtils {
         } else {
             Integer categoryId = transaction.getCategoryId();
             log.info("categoryId=" + categoryId);
-            String categoryName = Category.getCategoryName(categoryId, mnyContext.getCategories());
+            String categoryName = MnyObjectUtil.getCategoryName(categoryId, mnyContext.getCategories());
             if (categoryName != null) {
                 writer.println(prefix + categoryName);
             }

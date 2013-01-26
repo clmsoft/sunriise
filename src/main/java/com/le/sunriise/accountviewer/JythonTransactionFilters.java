@@ -26,6 +26,7 @@ import org.apache.log4j.Logger;
 import org.python.util.PythonInterpreter;
 
 import com.le.sunriise.mnyobject.Transaction;
+import com.le.sunriise.mnyobject.impl.TransactionImpl;
 
 public class JythonTransactionFilters {
     private static final Logger log = Logger.getLogger(JythonTransactionFilters.class);
@@ -52,7 +53,7 @@ public class JythonTransactionFilters {
         for (TransactionFilter f : filters) {
             log.info(f);
             Map<String, Object> row = null;
-            Transaction transaction = new Transaction();
+            Transaction transaction = new TransactionImpl();
             transaction.isRecurring();
             log.info("    accept=" + f.accept(transaction, row));
         }
