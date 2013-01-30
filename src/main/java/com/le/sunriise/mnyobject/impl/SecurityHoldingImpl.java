@@ -20,68 +20,42 @@ package com.le.sunriise.mnyobject.impl;
 
 import java.math.BigDecimal;
 
+import com.le.sunriise.mnyobject.Security;
 import com.le.sunriise.mnyobject.SecurityHolding;
 
 public class SecurityHoldingImpl implements SecurityHolding {
-    private Integer id;
+    private Security security;
 
-    private String name;
-
-    private Double quanity;
+    private Double quantity;
 
     private BigDecimal price;
 
     private BigDecimal marketValue;
 
-    /* (non-Javadoc)
-     * @see com.le.sunriise.mnyobject.SecurityHolding#getId()
-     */
-    @Override
-    public Integer getId() {
-        return id;
-    }
-
-    /* (non-Javadoc)
-     * @see com.le.sunriise.mnyobject.SecurityHolding#setId(java.lang.Integer)
-     */
-    @Override
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    /* (non-Javadoc)
-     * @see com.le.sunriise.mnyobject.SecurityHolding#getName()
-     */
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    /* (non-Javadoc)
-     * @see com.le.sunriise.mnyobject.SecurityHolding#setName(java.lang.String)
-     */
-    @Override
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.SecurityHolding#getQuanity()
      */
     @Override
-    public Double getQuanity() {
-        return quanity;
+    public Double getQuantity() {
+        return quantity;
     }
 
-    /* (non-Javadoc)
-     * @see com.le.sunriise.mnyobject.SecurityHolding#setQuanity(java.lang.Double)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.le.sunriise.mnyobject.SecurityHolding#setQuanity(java.lang.Double)
      */
     @Override
-    public void setQuanity(Double quanity) {
-        this.quanity = quanity;
+    public void setQuantity(Double quanity) {
+        this.quantity = quanity;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.SecurityHolding#getPrice()
      */
     @Override
@@ -89,15 +63,20 @@ public class SecurityHoldingImpl implements SecurityHolding {
         return price;
     }
 
-    /* (non-Javadoc)
-     * @see com.le.sunriise.mnyobject.SecurityHolding#setPrice(java.math.BigDecimal)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.le.sunriise.mnyobject.SecurityHolding#setPrice(java.math.BigDecimal)
      */
     @Override
     public void setPrice(BigDecimal price) {
         this.price = price;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.SecurityHolding#getMarketValue()
      */
     @Override
@@ -105,11 +84,25 @@ public class SecurityHoldingImpl implements SecurityHolding {
         return marketValue;
     }
 
-    /* (non-Javadoc)
-     * @see com.le.sunriise.mnyobject.SecurityHolding#setMarketValue(java.math.BigDecimal)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.le.sunriise.mnyobject.SecurityHolding#setMarketValue(java.math.BigDecimal
+     * )
      */
     @Override
     public void setMarketValue(BigDecimal marketValue) {
         this.marketValue = marketValue;
+    }
+
+    @Override
+    public Security getSecurity() {
+        return security;
+    }
+
+    @Override
+    public void setSecurity(Security security) {
+        this.security = security;
     }
 }

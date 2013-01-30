@@ -90,6 +90,7 @@ import com.le.sunriise.export.ExportToContext;
 import com.le.sunriise.json.JSONUtils;
 import com.le.sunriise.mnyobject.Account;
 import com.le.sunriise.mnyobject.AccountType;
+import com.le.sunriise.mnyobject.Security;
 import com.le.sunriise.mnyobject.SecurityHolding;
 import com.le.sunriise.mnyobject.Transaction;
 import com.le.sunriise.model.bean.AccountViewerDataModel;
@@ -609,7 +610,8 @@ public class AccountViewer {
         try {
             if (account != null) {
                 log.info("select account=" + account);
-                AccountUtil.retrieveTransactions(openedDb.getDb(), account);
+                Database db = openedDb.getDb();
+                AccountUtil.retrieveTransactions(db, account);
 
                 // JDBC
                 if (jdbcConn != null) {
@@ -733,18 +735,19 @@ public class AccountViewer {
 
         if (account.getAccountType() == AccountType.INVESTMENT) {
             accountInfoTextArea.append("# SecurityHolding" + "\n");
-            List<SecurityHolding> securityHolding = account.getSecurityHoldings();
+            List<SecurityHolding> securityHoldings = account.getSecurityHoldings();
             int count = 0;
-            for (SecurityHolding sec : securityHolding) {
+            for (SecurityHolding securityHolding : securityHoldings) {
+                Security security = securityHolding.getSecurity();
                 StringBuilder sb = new StringBuilder();
                 sb.append("SecurityHolding." + count++ + ": ");
-                sb.append(sec.getName());
+                sb.append(security.getName());
                 sb.append(", ");
-                sb.append(account.formatSecurityQuantity(sec.getQuanity()));
+                sb.append(account.formatSecurityQuantity(securityHolding.getQuantity()));
                 sb.append(", ");
-                sb.append(account.formatAmmount(sec.getPrice()));
+                sb.append(account.formatAmmount(securityHolding.getPrice()));
                 sb.append(", ");
-                sb.append(account.formatAmmount(sec.getMarketValue()));
+                sb.append(account.formatAmmount(securityHolding.getMarketValue()));
                 sb.append("\n");
 
                 accountInfoTextArea.append(sb.toString());

@@ -33,7 +33,7 @@ import com.le.sunriise.Utils;
 import com.le.sunriise.accountviewer.AccountUtil;
 import com.le.sunriise.mnyobject.Account;
 import com.le.sunriise.mnyobject.Currency;
-import com.le.sunriise.mnyobject.impl.MnyObjectUtil;
+import com.le.sunriise.mnyobject.impl.CurrencyImplUtil;
 import com.le.sunriise.viewer.OpenedDb;
 
 public class QifAccountUtilCmd {
@@ -75,7 +75,7 @@ public class QifAccountUtilCmd {
 
     private static void printAccounts(OpenedDb openedDb, File qifFile) throws IOException {
         Database db = openedDb.getDb();
-        Map<Integer, Currency> currencies = MnyObjectUtil.getCurrencies(db);
+        Map<Integer, Currency> currencies = CurrencyImplUtil.getCurrencies(db);
 
         List<Account> accounts = AccountUtil.getAccounts(db);
         AccountUtil.setCurrencies(accounts, currencies);
