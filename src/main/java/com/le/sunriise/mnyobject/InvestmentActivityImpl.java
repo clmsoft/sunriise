@@ -19,7 +19,6 @@
 package com.le.sunriise.mnyobject;
 
 public class InvestmentActivityImpl {
-    // TRN.act
     public static final int TRANSFER_SHARES_OUT = 33;
 
     public static final int TRANSFER_SHARES_IN = 32;
@@ -51,6 +50,7 @@ public class InvestmentActivityImpl {
     public static final int BUY = 1;
     
     private final Integer flag;
+    
     private String string;
 
     // Buy: act=1, grftt=18, grftf=0

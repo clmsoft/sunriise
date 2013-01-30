@@ -131,13 +131,13 @@ public class AccountUtil {
                 if (account != null) {
                     if (cursor.currentRowMatches(rowPattern)) {
                         row = cursor.getCurrentRow();
-                        TransactionImplUtil.addTransactionFromRow(db, transactionFilters, row, transactions, filteredTransactions);
+                        TransactionImplUtil.addTransactionFromRow(db, account.getId(), transactionFilters, row, transactions, filteredTransactions);
                     }
                 } else {
                     row = cursor.getCurrentRow();
                     Integer hacct = (Integer) row.get("hacct");
                     if (hacct == null) {
-                        TransactionImplUtil.addTransactionFromRow(db, transactionFilters, row, transactions, filteredTransactions);
+                        TransactionImplUtil.addTransactionFromRow(db, hacct, transactionFilters, row, transactions, filteredTransactions);
                     }
                 }
             }

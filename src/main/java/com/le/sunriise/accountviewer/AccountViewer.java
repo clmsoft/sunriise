@@ -716,7 +716,7 @@ public class AccountViewer {
         }
     }
 
-    private void updateAccountInfoPane(Account account) {
+    private void updateAccountInfoPane(final Account account) {
         accountInfoTextArea.setText("");
 
         if (account == null) {
@@ -724,6 +724,7 @@ public class AccountViewer {
         }
 
         accountInfoTextArea.append("Name: " + account.getName() + "\n");
+        accountInfoTextArea.append("ID: " + account.getId() + "\n");
         accountInfoTextArea.append("Account type: " + account.getAccountType().toString() + "\n");
         accountInfoTextArea.append("Number of transactions: " + account.getTransactions().size() + "\n");
         if (account.getAccountType() == AccountType.INVESTMENT) {

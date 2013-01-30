@@ -39,6 +39,8 @@ public class TransactionImpl extends MnyObject implements Comparable<Transaction
 
     private Integer id;
 
+    private Integer accountId;
+    
     private BigDecimal amount;
 
     private BigDecimal runningBalance;
@@ -478,5 +480,21 @@ public class TransactionImpl extends MnyObject implements Comparable<Transaction
     @Override
     public void setState(TransactionState state) {
         this.state = state;
+    }
+
+    /**
+     * 
+     */
+    @Override
+    public Integer getAccountId() {
+        return accountId;
+    }
+
+    /**
+     * 
+     */
+    @Override
+    public void setAccountId(Integer accountId) {
+        this.accountId = accountId;
     }
 }

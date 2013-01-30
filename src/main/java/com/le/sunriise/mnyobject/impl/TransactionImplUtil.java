@@ -16,16 +16,23 @@ import com.le.sunriise.mnyobject.TransactionInfo;
 
 public class TransactionImplUtil {
 
-    public static boolean addTransactionFromRow(Database db, List<TransactionFilter> filters, Map<String, Object> row,
+    private static final String COL_DATE = "dt";
+    private static final String COL_GRFTT = "grftt";
+    private static final String COL_CLEARED_STATE = "cs";
+    private static final String COL_AMOUNT = "amt";
+    private static final String COL_ID = "htrn";
+
+    public static boolean addTransactionFromRow(Database db, Integer accountId, List<TransactionFilter> filters, Map<String, Object> row,
             List<Transaction> transactions, List<Transaction> filteredTransactions) throws IOException {
-        TransactionImpl transaction = new TransactionImpl();
-    
+        Transaction transaction = new TransactionImpl();
+        transaction.setAccountId(accountId);
+        
         // transaction id
-        Integer htrn = (Integer) row.get("htrn");
+        Integer htrn = (Integer) row.get(COL_ID);
         transaction.setId(htrn);
     
         // amount
-        BigDecimal amt = (BigDecimal) row.get("amt");
+        BigDecimal amt = (BigDecimal) row.get(COL_AMOUNT);
         transaction.setAmount(amt);
     
         // TableID index ColumnName comments
@@ -34,12 +41,12 @@ public class TransactionImplUtil {
         // 1 == cleared
         // 2 == reconciled
     
-        Integer cs = (Integer) row.get("cs");
+        Integer cs = (Integer) row.get(COL_CLEARED_STATE);
         transaction.setClearedState(cs);
     
         // flags? we are currently using this to figure out which transaction to
         // skip/void
-        Integer grftt = (Integer) row.get("grftt");
+        Integer grftt = (Integer) row.get(COL_GRFTT);
         transaction.setStatusFlag(grftt);
         if (grftt != null) {
             TransactionInfo transactionInfo = new TransactionInfoImpl();
@@ -48,13 +55,13 @@ public class TransactionImplUtil {
         }
     
         // date
-        Date date = (Date) row.get("dt");
+        Date date = (Date) row.get(COL_DATE);
         transaction.setDate(date);
     
         // frequency for recurring transaction?
-        Integer frq = (Integer) row.get("frq");
         Double cFrqInst = (Double) row.get("cFrqInst");
         Frequency frequency = new FrequencyImpl();
+        Integer frq = (Integer) row.get("frq");
         frequency.setFrq(frq);
         frequency.setcFrqInst(cFrqInst);
         frequency.setGrftt(grftt);
