@@ -19,8 +19,12 @@
 package com.le.sunriise.json;
 
 import java.io.CharArrayWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+
+import org.apache.log4j.Logger;
 
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonParser;
@@ -31,6 +35,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 
 public class JSONUtils {
+    private static final Logger log = Logger.getLogger(JSONUtils.class);
+    
     public static void writeValue(Object value, Writer w, boolean prettyPrint) throws JsonGenerationException,
             JsonMappingException, IOException {
         ObjectMapper mapper = new ObjectMapper();
@@ -47,6 +53,28 @@ public class JSONUtils {
     public static void writeValue(Object value, Writer w) throws JsonGenerationException, JsonMappingException, IOException {
         boolean prettyPrint = true;
         writeValue(value, w, prettyPrint);
+    }
+
+    public static void writeValue(Object value, File file) throws IOException {
+        FileWriter writer = null;
+        try {
+            writer = new FileWriter(file);
+            writeValue(value, writer);
+        } catch (JsonGenerationException e) {
+            throw new IOException(e);
+        } catch (JsonMappingException e) {
+            throw new IOException(e);
+        } finally {
+            if (writer != null) {
+                try {
+                    writer.close();
+                } catch (IOException e) {
+                    log.warn(e);
+                } finally {
+                    writer = null;
+                }
+            }
+        }
     }
 
     public static String valueToString(Object value) throws IOException {
