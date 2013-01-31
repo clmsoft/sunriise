@@ -1,0 +1,19 @@
+{
+  "id" : 10,
+  "relatedToAccountId" : null,
+  "relatedToAccount" : null,
+  "name" : "Credit Card",
+  "type" : 1,
+  "closed" : false,
+  "startingBalance" : 0.0000,
+  "currentBalance" : null,
+  "accountType" : "CREDIT_CARD",
+  "currencyId" : 45,
+  "currencyCode" : "USD",
+  "retirement" : false,
+  "investmentSubType" : -1,
+  "amountLimit" : -11111.0000,
+  "securityHoldings" : null,
+  "creditCard" : true,
+  "401k403b" : false
+}

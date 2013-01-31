@@ -1,0 +1,19 @@
+{
+  "id" : 6,
+  "relatedToAccountId" : 7,
+  "relatedToAccount" : null,
+  "name" : "Retirement 403(b)",
+  "type" : 5,
+  "closed" : false,
+  "startingBalance" : 0.0000,
+  "currentBalance" : null,
+  "accountType" : "INVESTMENT",
+  "currencyId" : 45,
+  "currencyCode" : "USD",
+  "retirement" : true,
+  "investmentSubType" : 0,
+  "amountLimit" : null,
+  "securityHoldings" : null,
+  "creditCard" : false,
+  "401k403b" : true
+}

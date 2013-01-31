@@ -1,0 +1,19 @@
+{
+  "id" : 6,
+  "relatedToAccountId" : 5,
+  "relatedToAccount" : null,
+  "name" : "Stocks and Shares (Cash)",
+  "type" : 0,
+  "closed" : false,
+  "startingBalance" : 0.0000,
+  "currentBalance" : null,
+  "accountType" : "BANKING",
+  "currencyId" : 2,
+  "currencyCode" : "AUD",
+  "retirement" : false,
+  "investmentSubType" : -1,
+  "amountLimit" : null,
+  "securityHoldings" : null,
+  "creditCard" : false,
+  "401k403b" : false
+}

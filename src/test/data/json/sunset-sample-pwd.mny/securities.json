@@ -1,0 +1,289 @@
+[ {
+  "id" : 18,
+  "name" : "Dow Jones Industrial Average",
+  "symbol" : "$INDU"
+}, {
+  "id" : 30,
+  "name" : "NASDAQ Composite Index",
+  "symbol" : "$COMPX"
+}, {
+  "id" : 38,
+  "name" : "Standard & Poor's 500",
+  "symbol" : "$INX"
+}, {
+  "id" : 41,
+  "name" : "Standard & Poor's Healthcare",
+  "symbol" : ".HCX.X"
+}, {
+  "id" : 59,
+  "name" : "Lucerne Publishing",
+  "symbol" : "LUPB"
+}, {
+  "id" : 58,
+  "name" : "Contoso, Ltd.",
+  "symbol" : "CONT"
+}, {
+  "id" : 57,
+  "name" : "Wide World Importers",
+  "symbol" : null
+}, {
+  "id" : 56,
+  "name" : "Litware, Inc.",
+  "symbol" : "LITW"
+}, {
+  "id" : 63,
+  "name" : "Fidelity Mid-Cap Stock Fund",
+  "symbol" : null
+}, {
+  "id" : 62,
+  "name" : "Fidelity New Millenium",
+  "symbol" : null
+}, {
+  "id" : 61,
+  "name" : "Fidelity US Bond Index",
+  "symbol" : null
+}, {
+  "id" : 60,
+  "name" : "Trey Research",
+  "symbol" : "TREY"
+}, {
+  "id" : 68,
+  "name" : "Coho Winery",
+  "symbol" : "COHO"
+}, {
+  "id" : 69,
+  "name" : "Fabrikam, Inc.",
+  "symbol" : "FABRI"
+}, {
+  "id" : 70,
+  "name" : "Vanguard Intermediate-Term Corporate Bond Fund",
+  "symbol" : null
+}, {
+  "id" : 71,
+  "name" : "Vanguard Primecap Fund",
+  "symbol" : null
+}, {
+  "id" : 64,
+  "name" : "Fidelity Magellan",
+  "symbol" : null
+}, {
+  "id" : 65,
+  "name" : "Fidelity Emerging Markets Fund",
+  "symbol" : null
+}, {
+  "id" : 66,
+  "name" : "Consolidated Messenger",
+  "symbol" : null
+}, {
+  "id" : 67,
+  "name" : "Blue Yonder Airlines",
+  "symbol" : null
+}, {
+  "id" : 76,
+  "name" : "Fox Entertainment Group",
+  "symbol" : null
+}, {
+  "id" : 77,
+  "name" : "Consolidated Messengers",
+  "symbol" : "CONSO"
+}, {
+  "id" : 78,
+  "name" : "Contoso Pharmaceuticals",
+  "symbol" : "LEH"
+}, {
+  "id" : 79,
+  "name" : "Borland Software Corporation",
+  "symbol" : null
+}, {
+  "id" : 72,
+  "name" : "Vanguard Capital Opportunity Fund",
+  "symbol" : null
+}, {
+  "id" : 73,
+  "name" : "Vanguard Money Market Fund",
+  "symbol" : null
+}, {
+  "id" : 74,
+  "name" : "Coho Wineries",
+  "symbol" : null
+}, {
+  "id" : 75,
+  "name" : "Bank of America Corp",
+  "symbol" : null
+}, {
+  "id" : 85,
+  "name" : "Johnson & Johnson",
+  "symbol" : null
+}, {
+  "id" : 84,
+  "name" : "Smith Barney Money Market",
+  "symbol" : null
+}, {
+  "id" : 87,
+  "name" : "The Phone Company",
+  "symbol" : null
+}, {
+  "id" : 86,
+  "name" : "PacifiCare Health Systems, Inc.",
+  "symbol" : null
+}, {
+  "id" : 81,
+  "name" : "ShopKo Stores",
+  "symbol" : null
+}, {
+  "id" : 80,
+  "name" : "Merrill Lynch Money Market",
+  "symbol" : null
+}, {
+  "id" : 83,
+  "name" : "General Electric Co",
+  "symbol" : null
+}, {
+  "id" : 82,
+  "name" : "Carnival Corp",
+  "symbol" : null
+}, {
+  "id" : 93,
+  "name" : "Blue Skies Airlines 5.375% 7/07",
+  "symbol" : null
+}, {
+  "id" : 92,
+  "name" : "Loan Banks",
+  "symbol" : null
+}, {
+  "id" : 95,
+  "name" : "Fidelity Balanced",
+  "symbol" : null
+}, {
+  "id" : 94,
+  "name" : "Woodgrove Money Market",
+  "symbol" : null
+}, {
+  "id" : 89,
+  "name" : "Proseware, Inc.",
+  "symbol" : null
+}, {
+  "id" : 88,
+  "name" : "Blue Yonder Airlines 6.7% 11/06",
+  "symbol" : null
+}, {
+  "id" : 91,
+  "name" : "World Importers 6.9% 9/04",
+  "symbol" : null
+}, {
+  "id" : 90,
+  "name" : "Wingtip Toys",
+  "symbol" : null
+}, {
+  "id" : 102,
+  "name" : "Walt Disney Company",
+  "symbol" : null
+}, {
+  "id" : 103,
+  "name" : "McDonalds",
+  "symbol" : null
+}, {
+  "id" : 100,
+  "name" : "Avery Dennison",
+  "symbol" : null
+}, {
+  "id" : 101,
+  "name" : "EBay",
+  "symbol" : null
+}, {
+  "id" : 98,
+  "name" : "Adatum Corp",
+  "symbol" : "ADM"
+}, {
+  "id" : 99,
+  "name" : "America Online",
+  "symbol" : null
+}, {
+  "id" : 96,
+  "name" : "Fidelity Contrafund",
+  "symbol" : null
+}, {
+  "id" : 97,
+  "name" : "Fidelity Growth & Income",
+  "symbol" : null
+}, {
+  "id" : 110,
+  "name" : "Microsoft Corporation",
+  "symbol" : null
+}, {
+  "id" : 111,
+  "name" : "emc",
+  "symbol" : null
+}, {
+  "id" : 108,
+  "name" : "Margie's Travel",
+  "symbol" : null
+}, {
+  "id" : 109,
+  "name" : "German Stock",
+  "symbol" : null
+}, {
+  "id" : 106,
+  "name" : "Procter & Gamble",
+  "symbol" : null
+}, {
+  "id" : 107,
+  "name" : "Janus Ent Fund",
+  "symbol" : null
+}, {
+  "id" : 104,
+  "name" : "Toys R Us",
+  "symbol" : null
+}, {
+  "id" : 105,
+  "name" : "Woodgrove Money Market Fund",
+  "symbol" : "WGMXX"
+}, {
+  "id" : 119,
+  "name" : "WoodGrove Bank Stock",
+  "symbol" : "WDGRVE"
+}, {
+  "id" : 118,
+  "name" : "FrogKick Scuba Gear",
+  "symbol" : "FKSG"
+}, {
+  "id" : 117,
+  "name" : "*Cash*",
+  "symbol" : null
+}, {
+  "id" : 116,
+  "name" : "White Oak Growth Stock",
+  "symbol" : null
+}, {
+  "id" : 115,
+  "name" : "Oakmark Fund",
+  "symbol" : null
+}, {
+  "id" : 114,
+  "name" : "Microsoft",
+  "symbol" : "MSFT"
+}, {
+  "id" : 113,
+  "name" : "Microsoft Corporation 1999 Grant",
+  "symbol" : null
+}, {
+  "id" : 112,
+  "name" : "New Bond",
+  "symbol" : null
+}, {
+  "id" : 123,
+  "name" : "Contoso Exchange Traded Fund",
+  "symbol" : "QQQ"
+}, {
+  "id" : 122,
+  "name" : "Gold",
+  "symbol" : "-GC"
+}, {
+  "id" : 121,
+  "name" : "Heating Oil",
+  "symbol" : "-HO"
+}, {
+  "id" : 120,
+  "name" : "WoodGrove Bank Stock 2006 Grant",
+  "symbol" : null
+} ]

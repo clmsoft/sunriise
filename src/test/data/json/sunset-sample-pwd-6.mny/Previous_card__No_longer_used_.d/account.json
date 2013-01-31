@@ -1,0 +1,19 @@
+{
+  "id" : 74,
+  "relatedToAccountId" : null,
+  "relatedToAccount" : null,
+  "name" : "Previous card (No longer used)",
+  "type" : 1,
+  "closed" : false,
+  "startingBalance" : -984.2500,
+  "currentBalance" : null,
+  "accountType" : "CREDIT_CARD",
+  "currencyId" : 45,
+  "currencyCode" : "USD",
+  "retirement" : false,
+  "investmentSubType" : -1,
+  "amountLimit" : -2500.0000,
+  "securityHoldings" : null,
+  "creditCard" : true,
+  "401k403b" : false
+}

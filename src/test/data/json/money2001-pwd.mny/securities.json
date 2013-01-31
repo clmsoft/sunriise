@@ -1,0 +1,221 @@
+[ {
+  "id" : 1,
+  "name" : "Amex Airline Index",
+  "symbol" : "$XAL.X"
+}, {
+  "id" : 2,
+  "name" : "Amex Biotechnology Index",
+  "symbol" : "$BTK.X"
+}, {
+  "id" : 3,
+  "name" : "Amex Broker/Dealer Index",
+  "symbol" : "$XBD.X"
+}, {
+  "id" : 4,
+  "name" : "Amex Composite",
+  "symbol" : "$XAX.X"
+}, {
+  "id" : 5,
+  "name" : "Amex Computer Technology Index",
+  "symbol" : "$XCI.X"
+}, {
+  "id" : 6,
+  "name" : "Amex Disk Drive Index",
+  "symbol" : "$DDX.X"
+}, {
+  "id" : 7,
+  "name" : "Amex Eurotop 100 Index",
+  "symbol" : "$TOP.X"
+}, {
+  "id" : 8,
+  "name" : "Amex Gold Bugs Index",
+  "symbol" : "$HUI.X"
+}, {
+  "id" : 9,
+  "name" : "Amex Japan Index",
+  "symbol" : "$JPN.X"
+}, {
+  "id" : 10,
+  "name" : "Amex Networking Index",
+  "symbol" : "$NWX.X"
+}, {
+  "id" : 11,
+  "name" : "Amex North American Telcomm.",
+  "symbol" : "$XTC.X"
+}, {
+  "id" : 12,
+  "name" : "Amex Pharmaceutical Index",
+  "symbol" : "$DRG.X"
+}, {
+  "id" : 13,
+  "name" : "Amex Tobacco Index",
+  "symbol" : "$TOB.X"
+}, {
+  "id" : 14,
+  "name" : "CBOE Automotive Index",
+  "symbol" : ".AUX.X"
+}, {
+  "id" : 15,
+  "name" : "CBOE Computer Software",
+  "symbol" : ".CWX.X"
+}, {
+  "id" : 17,
+  "name" : "De Yaeger Year2000 Index",
+  "symbol" : "$YTK.X"
+}, {
+  "id" : 16,
+  "name" : "CBOE Gaming Index",
+  "symbol" : ".GAX.X"
+}, {
+  "id" : 19,
+  "name" : "Dow Jones Transportation",
+  "symbol" : "$TRAN"
+}, {
+  "id" : 18,
+  "name" : "Dow Jones Industrial Average",
+  "symbol" : "$INDU"
+}, {
+  "id" : 21,
+  "name" : "Inter@ctive Week Internet Index",
+  "symbol" : "$IIX.X"
+}, {
+  "id" : 20,
+  "name" : "Dow Jones Utilities",
+  "symbol" : "$UTIL"
+}, {
+  "id" : 23,
+  "name" : "Morgan Stanley Consumer Index",
+  "symbol" : "$CMR.X"
+}, {
+  "id" : 22,
+  "name" : "Morgan Stanley Commodity-Related",
+  "symbol" : "$CRX.X"
+}, {
+  "id" : 25,
+  "name" : "Morgan Stanley Healthcare Payors",
+  "symbol" : "$HMO.X"
+}, {
+  "id" : 24,
+  "name" : "Morgan Stanley Cyclical Index",
+  "symbol" : "$CYC.X"
+}, {
+  "id" : 27,
+  "name" : "Morgan Stanley High-Tech 35",
+  "symbol" : "$MSH.X"
+}, {
+  "id" : 26,
+  "name" : "Morgan Stanley Healthcare Prod.",
+  "symbol" : "$RXP.X"
+}, {
+  "id" : 29,
+  "name" : "NASDAQ 100 Index",
+  "symbol" : "$NDX.X"
+}, {
+  "id" : 28,
+  "name" : "Morgan Stanley Multinational 50",
+  "symbol" : ".NFT.X"
+}, {
+  "id" : 31,
+  "name" : "NYSE Composites",
+  "symbol" : "$NYA.X"
+}, {
+  "id" : 30,
+  "name" : "NASDAQ Composite Index",
+  "symbol" : "$COMPX"
+}, {
+  "id" : 34,
+  "name" : "PSE Technology Index",
+  "symbol" : "$PSE.X"
+}, {
+  "id" : 35,
+  "name" : "Russell 2000",
+  "symbol" : "$IUX"
+}, {
+  "id" : 32,
+  "name" : "Philadelphia Gold and Silver",
+  "symbol" : "$XAU.X"
+}, {
+  "id" : 33,
+  "name" : "Philadelphia Semiconductor",
+  "symbol" : "$SOX.X"
+}, {
+  "id" : 38,
+  "name" : "Standard & Poor's 500",
+  "symbol" : "$INX"
+}, {
+  "id" : 39,
+  "name" : "Standard & Poor's Bank Index",
+  "symbol" : ".BIX.X"
+}, {
+  "id" : 36,
+  "name" : "Standard & Poor's 100",
+  "symbol" : "$OEX"
+}, {
+  "id" : 37,
+  "name" : "Standard & Poor's 400 Midcap",
+  "symbol" : "$MID.X"
+}, {
+  "id" : 42,
+  "name" : "Standard & Poor's Insurance",
+  "symbol" : ".IUX.X"
+}, {
+  "id" : 43,
+  "name" : "Standard & Poor's Retail Index",
+  "symbol" : ".RLX.X"
+}, {
+  "id" : 40,
+  "name" : "Standard & Poor's Chemicals",
+  "symbol" : ".CEX.X"
+}, {
+  "id" : 41,
+  "name" : "Standard & Poor's Healthcare",
+  "symbol" : ".HCX.X"
+}, {
+  "id" : 46,
+  "name" : "Standard & Poor/Barra Value",
+  "symbol" : ".SVX.X"
+}, {
+  "id" : 47,
+  "name" : "Wilshire Small-cap",
+  "symbol" : "$WSX.X"
+}, {
+  "id" : 44,
+  "name" : "Standard & Poor's Transportation",
+  "symbol" : ".TRX.X"
+}, {
+  "id" : 45,
+  "name" : "Standard & Poor/Barra Growth",
+  "symbol" : ".SGX.X"
+}, {
+  "id" : 51,
+  "name" : "FTSE (London)",
+  "symbol" : "$FTSE"
+}, {
+  "id" : 50,
+  "name" : "DAX (Frankfurt)",
+  "symbol" : "$DAX"
+}, {
+  "id" : 49,
+  "name" : "CAC-40 (Paris)",
+  "symbol" : "$PARI"
+}, {
+  "id" : 48,
+  "name" : "All Ordinaries (Sydney)",
+  "symbol" : "$SYDI"
+}, {
+  "id" : 55,
+  "name" : "TSE 300 (Toronto)",
+  "symbol" : "TI300"
+}, {
+  "id" : 54,
+  "name" : "Straits Times Indst. (Singapore)",
+  "symbol" : "$STRI"
+}, {
+  "id" : 53,
+  "name" : "Nikkei 225 (Tokyo)",
+  "symbol" : "$TOKN"
+}, {
+  "id" : 52,
+  "name" : "Hang Seng (Hong Kong)",
+  "symbol" : "$HKHI"
+} ]

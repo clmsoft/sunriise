@@ -1,0 +1,19 @@
+{
+  "id" : 5,
+  "relatedToAccountId" : 4,
+  "relatedToAccount" : null,
+  "name" : "Retirement IRA (Contributions)",
+  "type" : 0,
+  "closed" : false,
+  "startingBalance" : 0.0000,
+  "currentBalance" : null,
+  "accountType" : "BANKING",
+  "currencyId" : 45,
+  "currencyCode" : "USD",
+  "retirement" : false,
+  "investmentSubType" : -1,
+  "amountLimit" : null,
+  "securityHoldings" : null,
+  "creditCard" : false,
+  "401k403b" : false
+}

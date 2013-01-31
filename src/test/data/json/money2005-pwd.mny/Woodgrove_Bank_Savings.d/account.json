@@ -1,0 +1,19 @@
+{
+  "id" : 3,
+  "relatedToAccountId" : null,
+  "relatedToAccount" : null,
+  "name" : "Woodgrove Bank Savings",
+  "type" : 0,
+  "closed" : false,
+  "startingBalance" : 800.0000,
+  "currentBalance" : null,
+  "accountType" : "BANKING",
+  "currencyId" : 2,
+  "currencyCode" : "AUD",
+  "retirement" : false,
+  "investmentSubType" : -1,
+  "amountLimit" : null,
+  "securityHoldings" : null,
+  "creditCard" : false,
+  "401k403b" : false
+}

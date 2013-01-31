@@ -1,0 +1,19 @@
+{
+  "id" : 69,
+  "relatedToAccountId" : null,
+  "relatedToAccount" : null,
+  "name" : "Escrow Account",
+  "type" : 3,
+  "closed" : false,
+  "startingBalance" : 1000.0000,
+  "currentBalance" : null,
+  "accountType" : "ASSET",
+  "currencyId" : 45,
+  "currencyCode" : "USD",
+  "retirement" : false,
+  "investmentSubType" : -1,
+  "amountLimit" : null,
+  "securityHoldings" : null,
+  "creditCard" : false,
+  "401k403b" : false
+}

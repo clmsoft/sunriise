@@ -1,0 +1,277 @@
+[ {
+  "id" : 1,
+  "name" : "Argentine peso",
+  "isoCode" : "ARS"
+}, {
+  "id" : 2,
+  "name" : "Australian dollar",
+  "isoCode" : "AUD"
+}, {
+  "id" : 3,
+  "name" : "Austrian schilling",
+  "isoCode" : "ATS"
+}, {
+  "id" : 4,
+  "name" : "Belgian franc",
+  "isoCode" : "BEF"
+}, {
+  "id" : 5,
+  "name" : "Bolivian boliviano",
+  "isoCode" : "BOB"
+}, {
+  "id" : 6,
+  "name" : "Brazilian real",
+  "isoCode" : "BRL"
+}, {
+  "id" : 7,
+  "name" : "Canadian dollar",
+  "isoCode" : "CAD"
+}, {
+  "id" : 8,
+  "name" : "Swiss franc",
+  "isoCode" : "CHF"
+}, {
+  "id" : 9,
+  "name" : "Chilean peso",
+  "isoCode" : "CLP"
+}, {
+  "id" : 10,
+  "name" : "Renminbi yuan",
+  "isoCode" : "CNY"
+}, {
+  "id" : 11,
+  "name" : "Colombian peso",
+  "isoCode" : "COP"
+}, {
+  "id" : 12,
+  "name" : "Czech koruna",
+  "isoCode" : "CZK"
+}, {
+  "id" : 13,
+  "name" : "German mark",
+  "isoCode" : "DEM"
+}, {
+  "id" : 14,
+  "name" : "Danish krone",
+  "isoCode" : "DKK"
+}, {
+  "id" : 15,
+  "name" : "Ecuadorian sucre",
+  "isoCode" : "ECS"
+}, {
+  "id" : 17,
+  "name" : "French franc",
+  "isoCode" : "FRF"
+}, {
+  "id" : 16,
+  "name" : "Finnish markka",
+  "isoCode" : "FIM"
+}, {
+  "id" : 19,
+  "name" : "Greek drachma",
+  "isoCode" : "GRD"
+}, {
+  "id" : 18,
+  "name" : "British pound",
+  "isoCode" : "GBP"
+}, {
+  "id" : 21,
+  "name" : "Hungarian forint",
+  "isoCode" : "HUF"
+}, {
+  "id" : 20,
+  "name" : "Hong Kong dollar",
+  "isoCode" : "HKD"
+}, {
+  "id" : 23,
+  "name" : "Irish punt",
+  "isoCode" : "IEP"
+}, {
+  "id" : 22,
+  "name" : "Indonesian rupiah",
+  "isoCode" : "IDR"
+}, {
+  "id" : 25,
+  "name" : "Japanese yen",
+  "isoCode" : "JPY"
+}, {
+  "id" : 24,
+  "name" : "Italian lira",
+  "isoCode" : "ITL"
+}, {
+  "id" : 27,
+  "name" : "Luxembourg franc",
+  "isoCode" : "LUF"
+}, {
+  "id" : 26,
+  "name" : "Korean won",
+  "isoCode" : "KRW"
+}, {
+  "id" : 29,
+  "name" : "Dutch guilder",
+  "isoCode" : "NLG"
+}, {
+  "id" : 28,
+  "name" : "Mexican peso",
+  "isoCode" : "MXP"
+}, {
+  "id" : 31,
+  "name" : "Norwegian krone",
+  "isoCode" : "NOK"
+}, {
+  "id" : 30,
+  "name" : "New Zealand dollar",
+  "isoCode" : "NZD"
+}, {
+  "id" : 34,
+  "name" : "Polish zloty",
+  "isoCode" : "PLZ"
+}, {
+  "id" : 35,
+  "name" : "Portuguese escudo",
+  "isoCode" : "PTE"
+}, {
+  "id" : 32,
+  "name" : "Peruvian nuevo sol",
+  "isoCode" : "PEN"
+}, {
+  "id" : 33,
+  "name" : "Philippine peso",
+  "isoCode" : "PHP"
+}, {
+  "id" : 38,
+  "name" : "Swedish krona",
+  "isoCode" : "SEK"
+}, {
+  "id" : 39,
+  "name" : "Singapore dollar",
+  "isoCode" : "SGD"
+}, {
+  "id" : 36,
+  "name" : "Russian Federation rouble",
+  "isoCode" : "RUR"
+}, {
+  "id" : 37,
+  "name" : "Spanish peseta",
+  "isoCode" : "ESP"
+}, {
+  "id" : 42,
+  "name" : "Venezuelan bolivar",
+  "isoCode" : "VEB"
+}, {
+  "id" : 43,
+  "name" : "South African rand",
+  "isoCode" : "ZAR"
+}, {
+  "id" : 40,
+  "name" : "Thai baht",
+  "isoCode" : "THB"
+}, {
+  "id" : 41,
+  "name" : "Taiwan dollar",
+  "isoCode" : "TWD"
+}, {
+  "id" : 46,
+  "name" : "Guatemalan quetzale",
+  "isoCode" : "GTQ"
+}, {
+  "id" : 47,
+  "name" : "Moroccan dirham",
+  "isoCode" : "MAD"
+}, {
+  "id" : 44,
+  "name" : "Euro",
+  "isoCode" : "EUR"
+}, {
+  "id" : 45,
+  "name" : "US dollar",
+  "isoCode" : "USD"
+}, {
+  "id" : 51,
+  "name" : "Israeli new shekel",
+  "isoCode" : "ILS"
+}, {
+  "id" : 50,
+  "name" : "Turkish lira",
+  "isoCode" : "TRL"
+}, {
+  "id" : 49,
+  "name" : "Algerian dinar",
+  "isoCode" : "DZD"
+}, {
+  "id" : 48,
+  "name" : "Tunisian dinar",
+  "isoCode" : "TND"
+}, {
+  "id" : 55,
+  "name" : "Kenyan shilling",
+  "isoCode" : "KES"
+}, {
+  "id" : 54,
+  "name" : "Ghanaian cedi",
+  "isoCode" : "GHC"
+}, {
+  "id" : 53,
+  "name" : "Botswana pula",
+  "isoCode" : "BWP"
+}, {
+  "id" : 52,
+  "name" : "Malaysia ringgit",
+  "isoCode" : "MYR"
+}, {
+  "id" : 59,
+  "name" : "Jordanian dinar",
+  "isoCode" : "JOD"
+}, {
+  "id" : 58,
+  "name" : "Bahraini dinar",
+  "isoCode" : "BHD"
+}, {
+  "id" : 57,
+  "name" : "Zimbabwean dollar",
+  "isoCode" : "ZWD"
+}, {
+  "id" : 56,
+  "name" : "Namibian dollar",
+  "isoCode" : "NAD"
+}, {
+  "id" : 63,
+  "name" : "Qatari riyal",
+  "isoCode" : "QAR"
+}, {
+  "id" : 62,
+  "name" : "Pakistani rupee",
+  "isoCode" : "PKR"
+}, {
+  "id" : 61,
+  "name" : "Omani riyal",
+  "isoCode" : "OMR"
+}, {
+  "id" : 60,
+  "name" : "Kuwaiti dinar",
+  "isoCode" : "KWD"
+}, {
+  "id" : 68,
+  "name" : "Cypriot pound",
+  "isoCode" : "CYP"
+}, {
+  "id" : 69,
+  "name" : "Tanzanian shilling",
+  "isoCode" : "TZS"
+}, {
+  "id" : 64,
+  "name" : "Saudi riyal",
+  "isoCode" : "SAR"
+}, {
+  "id" : 65,
+  "name" : "Emirati dirham",
+  "isoCode" : "AED"
+}, {
+  "id" : 66,
+  "name" : "Vietnamese dong",
+  "isoCode" : "VND"
+}, {
+  "id" : 67,
+  "name" : "Indian rupee",
+  "isoCode" : "INR"
+} ]

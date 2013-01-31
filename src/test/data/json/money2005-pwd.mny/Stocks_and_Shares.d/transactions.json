@@ -1,0 +1,99 @@
+[ {
+  "id" : 72,
+  "accountId" : 5,
+  "amount" : 652.5000,
+  "runningBalance" : null,
+  "splits" : null,
+  "statusFlag" : 16,
+  "date" : 1058252400000,
+  "frequency" : {
+    "frq" : -1,
+    "cFrqInst" : null,
+    "grftt" : 16,
+    "recurring" : false,
+    "frequencyString" : "Non-recurring"
+  },
+  "categoryId" : 131,
+  "payeeId" : -1,
+  "transferredAccountId" : null,
+  "transactionInfo" : {
+    "flag" : 16,
+    "void" : false,
+    "investment" : true,
+    "transfer" : false,
+    "transferTo" : false,
+    "splitParent" : false,
+    "splitChild" : false
+  },
+  "securityId" : 56,
+  "investmentActivity" : {
+    "flag" : 1,
+    "added" : true
+  },
+  "investmentTransaction" : {
+    "id" : null,
+    "price" : 2.51,
+    "quantity" : 250.0
+  },
+  "clearedState" : 0,
+  "memo" : null,
+  "number" : null,
+  "state" : "UNRECONCILED",
+  "void" : false,
+  "recurring" : false,
+  "investment" : true,
+  "quantity" : 250.0,
+  "price" : 2.51,
+  "transfer" : false,
+  "cleared" : false,
+  "reconciled" : false
+}, {
+  "id" : 73,
+  "accountId" : 5,
+  "amount" : 178.0000,
+  "runningBalance" : null,
+  "splits" : null,
+  "statusFlag" : 18,
+  "date" : 1059807600000,
+  "frequency" : {
+    "frq" : -1,
+    "cFrqInst" : null,
+    "grftt" : 18,
+    "recurring" : false,
+    "frequencyString" : "Non-recurring"
+  },
+  "categoryId" : 131,
+  "payeeId" : -1,
+  "transferredAccountId" : 6,
+  "transactionInfo" : {
+    "flag" : 18,
+    "void" : false,
+    "investment" : true,
+    "transfer" : true,
+    "transferTo" : false,
+    "splitParent" : false,
+    "splitChild" : false
+  },
+  "securityId" : 57,
+  "investmentActivity" : {
+    "flag" : 1,
+    "added" : true
+  },
+  "investmentTransaction" : {
+    "id" : null,
+    "price" : 1.78,
+    "quantity" : 100.0
+  },
+  "clearedState" : 0,
+  "memo" : null,
+  "number" : null,
+  "state" : "UNRECONCILED",
+  "void" : false,
+  "recurring" : false,
+  "investment" : true,
+  "quantity" : 100.0,
+  "price" : 1.78,
+  "transfer" : true,
+  "cleared" : false,
+  "reconciled" : false
+} ]

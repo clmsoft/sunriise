@@ -1,0 +1,25 @@
+[ {
+  "id" : 18,
+  "name" : "Dow Jones Industrial Average",
+  "symbol" : "$US:INDU"
+}, {
+  "id" : 38,
+  "name" : "Standard & Poor's 500",
+  "symbol" : "$US:INX"
+}, {
+  "id" : 58,
+  "name" : "*Cash*",
+  "symbol" : null
+}, {
+  "id" : 57,
+  "name" : "Wide World Importers",
+  "symbol" : null
+}, {
+  "id" : 56,
+  "name" : "Alpine Ski Haus",
+  "symbol" : null
+}, {
+  "id" : 30,
+  "name" : "NASDAQ Composite Index",
+  "symbol" : "$US:COMPX"
+} ]

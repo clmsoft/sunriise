@@ -1,0 +1,246 @@
+[ {
+  "id" : 616,
+  "accountId" : 16,
+  "amount" : 3416.4000,
+  "runningBalance" : null,
+  "splits" : null,
+  "statusFlag" : 16,
+  "date" : 1151737200000,
+  "frequency" : {
+    "frq" : -1,
+    "cFrqInst" : null,
+    "grftt" : 16,
+    "recurring" : false,
+    "frequencyString" : "Non-recurring"
+  },
+  "categoryId" : 130,
+  "payeeId" : -1,
+  "transferredAccountId" : null,
+  "transactionInfo" : {
+    "flag" : 16,
+    "void" : false,
+    "investment" : true,
+    "transfer" : false,
+    "transferTo" : false,
+    "splitParent" : false,
+    "splitChild" : false
+  },
+  "securityId" : 56,
+  "investmentActivity" : {
+    "flag" : 12,
+    "added" : true
+  },
+  "investmentTransaction" : {
+    "id" : null,
+    "price" : 21.9,
+    "quantity" : 156.0
+  },
+  "clearedState" : 0,
+  "memo" : "401(k) or 403(b) statement update: 12/29/2000",
+  "number" : null,
+  "state" : "UNRECONCILED",
+  "void" : false,
+  "recurring" : false,
+  "investment" : true,
+  "quantity" : 156.0,
+  "price" : 21.9,
+  "transfer" : false,
+  "cleared" : false,
+  "reconciled" : false
+}, {
+  "id" : 620,
+  "accountId" : 16,
+  "amount" : 11928.0000,
+  "runningBalance" : null,
+  "splits" : null,
+  "statusFlag" : 16,
+  "date" : 1152946800000,
+  "frequency" : {
+    "frq" : -1,
+    "cFrqInst" : null,
+    "grftt" : 16,
+    "recurring" : false,
+    "frequencyString" : "Non-recurring"
+  },
+  "categoryId" : 130,
+  "payeeId" : -1,
+  "transferredAccountId" : null,
+  "transactionInfo" : {
+    "flag" : 16,
+    "void" : false,
+    "investment" : true,
+    "transfer" : false,
+    "transferTo" : false,
+    "splitParent" : false,
+    "splitChild" : false
+  },
+  "securityId" : 60,
+  "investmentActivity" : {
+    "flag" : 12,
+    "added" : true
+  },
+  "investmentTransaction" : {
+    "id" : null,
+    "price" : 994.0,
+    "quantity" : 12.0
+  },
+  "clearedState" : 0,
+  "memo" : "401(k) or 403(b) statement update: 12/29/2000",
+  "number" : null,
+  "state" : "UNRECONCILED",
+  "void" : false,
+  "recurring" : false,
+  "investment" : true,
+  "quantity" : 12.0,
+  "price" : 994.0,
+  "transfer" : false,
+  "cleared" : false,
+  "reconciled" : false
+}, {
+  "id" : 619,
+  "accountId" : 16,
+  "amount" : 5870.7800,
+  "runningBalance" : null,
+  "splits" : null,
+  "statusFlag" : 16,
+  "date" : 1158303600000,
+  "frequency" : {
+    "frq" : -1,
+    "cFrqInst" : null,
+    "grftt" : 16,
+    "recurring" : false,
+    "frequencyString" : "Non-recurring"
+  },
+  "categoryId" : 130,
+  "payeeId" : -1,
+  "transferredAccountId" : null,
+  "transactionInfo" : {
+    "flag" : 16,
+    "void" : false,
+    "investment" : true,
+    "transfer" : false,
+    "transferTo" : false,
+    "splitParent" : false,
+    "splitChild" : false
+  },
+  "securityId" : 59,
+  "investmentActivity" : {
+    "flag" : 12,
+    "added" : true
+  },
+  "investmentTransaction" : {
+    "id" : null,
+    "price" : 11.14,
+    "quantity" : 527.0
+  },
+  "clearedState" : 0,
+  "memo" : "401(k) or 403(b) statement update: 12/29/2000",
+  "number" : null,
+  "state" : "UNRECONCILED",
+  "void" : false,
+  "recurring" : false,
+  "investment" : true,
+  "quantity" : 527.0,
+  "price" : 11.14,
+  "transfer" : false,
+  "cleared" : false,
+  "reconciled" : false
+}, {
+  "id" : 2772,
+  "accountId" : 16,
+  "amount" : 1034.0000,
+  "runningBalance" : null,
+  "splits" : null,
+  "statusFlag" : 16,
+  "date" : 1175238000000,
+  "frequency" : {
+    "frq" : -1,
+    "cFrqInst" : null,
+    "grftt" : 16,
+    "recurring" : false,
+    "frequencyString" : "Non-recurring"
+  },
+  "categoryId" : 131,
+  "payeeId" : -1,
+  "transferredAccountId" : null,
+  "transactionInfo" : {
+    "flag" : 16,
+    "void" : false,
+    "investment" : true,
+    "transfer" : false,
+    "transferTo" : false,
+    "splitParent" : false,
+    "splitChild" : false
+  },
+  "securityId" : 114,
+  "investmentActivity" : {
+    "flag" : 1,
+    "added" : true
+  },
+  "investmentTransaction" : {
+    "id" : null,
+    "price" : 23.5,
+    "quantity" : 44.0
+  },
+  "clearedState" : 0,
+  "memo" : null,
+  "number" : null,
+  "state" : "UNRECONCILED",
+  "void" : false,
+  "recurring" : false,
+  "investment" : true,
+  "quantity" : 44.0,
+  "price" : 23.5,
+  "transfer" : false,
+  "cleared" : false,
+  "reconciled" : false
+}, {
+  "id" : 617,
+  "accountId" : 16,
+  "amount" : 2500.0000,
+  "runningBalance" : null,
+  "splits" : null,
+  "statusFlag" : 16,
+  "date" : 1184482800000,
+  "frequency" : {
+    "frq" : -1,
+    "cFrqInst" : null,
+    "grftt" : 16,
+    "recurring" : false,
+    "frequencyString" : "Non-recurring"
+  },
+  "categoryId" : 130,
+  "payeeId" : -1,
+  "transferredAccountId" : null,
+  "transactionInfo" : {
+    "flag" : 16,
+    "void" : false,
+    "investment" : true,
+    "transfer" : false,
+    "transferTo" : false,
+    "splitParent" : false,
+    "splitChild" : false
+  },
+  "securityId" : 57,
+  "investmentActivity" : {
+    "flag" : 12,
+    "added" : true
+  },
+  "investmentTransaction" : {
+    "id" : null,
+    "price" : 1.0,
+    "quantity" : 2500.0
+  },
+  "clearedState" : 0,
+  "memo" : "401(k) or 403(b) statement update: 12/29/2000",
+  "number" : null,
+  "state" : "UNRECONCILED",
+  "void" : false,
+  "recurring" : false,
+  "investment" : true,
+  "quantity" : 2500.0,
+  "price" : 1.0,
+  "transfer" : false,
+  "cleared" : false,
+  "reconciled" : false
+} ]

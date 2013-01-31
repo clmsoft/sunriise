@@ -1,0 +1,19 @@
+{
+  "id" : 68,
+  "relatedToAccountId" : null,
+  "relatedToAccount" : null,
+  "name" : "Woodgrove Bank Savings",
+  "type" : 0,
+  "closed" : false,
+  "startingBalance" : 4000.0000,
+  "currentBalance" : null,
+  "accountType" : "BANKING",
+  "currencyId" : 45,
+  "currencyCode" : "USD",
+  "retirement" : false,
+  "investmentSubType" : -1,
+  "amountLimit" : null,
+  "securityHoldings" : null,
+  "creditCard" : false,
+  "401k403b" : false
+}

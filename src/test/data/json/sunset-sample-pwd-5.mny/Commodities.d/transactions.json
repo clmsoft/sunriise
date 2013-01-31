@@ -1,0 +1,99 @@
+[ {
+  "id" : 4894,
+  "accountId" : 77,
+  "amount" : 1910.0000,
+  "runningBalance" : null,
+  "splits" : null,
+  "statusFlag" : 18,
+  "date" : 1177916400000,
+  "frequency" : {
+    "frq" : -1,
+    "cFrqInst" : null,
+    "grftt" : 18,
+    "recurring" : false,
+    "frequencyString" : "Non-recurring"
+  },
+  "categoryId" : 131,
+  "payeeId" : -1,
+  "transferredAccountId" : 78,
+  "transactionInfo" : {
+    "flag" : 18,
+    "void" : false,
+    "investment" : true,
+    "transfer" : true,
+    "transferTo" : false,
+    "splitParent" : false,
+    "splitChild" : false
+  },
+  "securityId" : 121,
+  "investmentActivity" : {
+    "flag" : 1,
+    "added" : true
+  },
+  "investmentTransaction" : {
+    "id" : null,
+    "price" : 1.91,
+    "quantity" : 1000.0
+  },
+  "clearedState" : 0,
+  "memo" : null,
+  "number" : null,
+  "state" : "UNRECONCILED",
+  "void" : false,
+  "recurring" : false,
+  "investment" : true,
+  "quantity" : 1000.0,
+  "price" : 1.91,
+  "transfer" : true,
+  "cleared" : false,
+  "reconciled" : false
+}, {
+  "id" : 4896,
+  "accountId" : 77,
+  "amount" : 6835.0000,
+  "runningBalance" : null,
+  "splits" : null,
+  "statusFlag" : 18,
+  "date" : 1177916400000,
+  "frequency" : {
+    "frq" : -1,
+    "cFrqInst" : null,
+    "grftt" : 18,
+    "recurring" : false,
+    "frequencyString" : "Non-recurring"
+  },
+  "categoryId" : 131,
+  "payeeId" : -1,
+  "transferredAccountId" : 78,
+  "transactionInfo" : {
+    "flag" : 18,
+    "void" : false,
+    "investment" : true,
+    "transfer" : true,
+    "transferTo" : false,
+    "splitParent" : false,
+    "splitChild" : false
+  },
+  "securityId" : 122,
+  "investmentActivity" : {
+    "flag" : 1,
+    "added" : true
+  },
+  "investmentTransaction" : {
+    "id" : null,
+    "price" : 683.5,
+    "quantity" : 10.0
+  },
+  "clearedState" : 0,
+  "memo" : null,
+  "number" : null,
+  "state" : "UNRECONCILED",
+  "void" : false,
+  "recurring" : false,
+  "investment" : true,
+  "quantity" : 10.0,
+  "price" : 683.5,
+  "transfer" : true,
+  "cleared" : false,
+  "reconciled" : false
+} ]

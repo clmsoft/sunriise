@@ -1,0 +1,148 @@
+[ {
+  "id" : 1,
+  "accountId" : 1,
+  "amount" : 0.0000,
+  "runningBalance" : null,
+  "splits" : null,
+  "statusFlag" : 16,
+  "date" : 1262332800000,
+  "frequency" : {
+    "frq" : -1,
+    "cFrqInst" : null,
+    "grftt" : 16,
+    "recurring" : false,
+    "frequencyString" : "Non-recurring"
+  },
+  "categoryId" : 130,
+  "payeeId" : -1,
+  "transferredAccountId" : null,
+  "transactionInfo" : {
+    "flag" : 16,
+    "void" : false,
+    "investment" : true,
+    "transfer" : false,
+    "transferTo" : false,
+    "splitParent" : false,
+    "splitChild" : false
+  },
+  "securityId" : 1,
+  "investmentActivity" : {
+    "flag" : 1,
+    "added" : true
+  },
+  "investmentTransaction" : {
+    "id" : null,
+    "price" : 0.0,
+    "quantity" : 0.0
+  },
+  "clearedState" : 0,
+  "memo" : null,
+  "number" : null,
+  "state" : "UNRECONCILED",
+  "void" : false,
+  "recurring" : false,
+  "investment" : true,
+  "quantity" : 0.0,
+  "price" : 0.0,
+  "transfer" : false,
+  "cleared" : false,
+  "reconciled" : false
+}, {
+  "id" : 2,
+  "accountId" : 1,
+  "amount" : 0.0000,
+  "runningBalance" : null,
+  "splits" : null,
+  "statusFlag" : 16,
+  "date" : 1262332800000,
+  "frequency" : {
+    "frq" : -1,
+    "cFrqInst" : null,
+    "grftt" : 16,
+    "recurring" : false,
+    "frequencyString" : "Non-recurring"
+  },
+  "categoryId" : 130,
+  "payeeId" : -1,
+  "transferredAccountId" : null,
+  "transactionInfo" : {
+    "flag" : 16,
+    "void" : false,
+    "investment" : true,
+    "transfer" : false,
+    "transferTo" : false,
+    "splitParent" : false,
+    "splitChild" : false
+  },
+  "securityId" : 2,
+  "investmentActivity" : {
+    "flag" : 1,
+    "added" : true
+  },
+  "investmentTransaction" : {
+    "id" : null,
+    "price" : 0.0,
+    "quantity" : 0.0
+  },
+  "clearedState" : 0,
+  "memo" : null,
+  "number" : null,
+  "state" : "UNRECONCILED",
+  "void" : false,
+  "recurring" : false,
+  "investment" : true,
+  "quantity" : 0.0,
+  "price" : 0.0,
+  "transfer" : false,
+  "cleared" : false,
+  "reconciled" : false
+}, {
+  "id" : 3,
+  "accountId" : 1,
+  "amount" : 0.0000,
+  "runningBalance" : null,
+  "splits" : null,
+  "statusFlag" : 16,
+  "date" : 1262332800000,
+  "frequency" : {
+    "frq" : -1,
+    "cFrqInst" : null,
+    "grftt" : 16,
+    "recurring" : false,
+    "frequencyString" : "Non-recurring"
+  },
+  "categoryId" : 130,
+  "payeeId" : -1,
+  "transferredAccountId" : null,
+  "transactionInfo" : {
+    "flag" : 16,
+    "void" : false,
+    "investment" : true,
+    "transfer" : false,
+    "transferTo" : false,
+    "splitParent" : false,
+    "splitChild" : false
+  },
+  "securityId" : 3,
+  "investmentActivity" : {
+    "flag" : 1,
+    "added" : true
+  },
+  "investmentTransaction" : {
+    "id" : null,
+    "price" : 0.0,
+    "quantity" : 0.0
+  },
+  "clearedState" : 0,
+  "memo" : null,
+  "number" : null,
+  "state" : "UNRECONCILED",
+  "void" : false,
+  "recurring" : false,
+  "investment" : true,
+  "quantity" : 0.0,
+  "price" : 0.0,
+  "transfer" : false,
+  "cleared" : false,
+  "reconciled" : false
+} ]

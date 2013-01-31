@@ -1,0 +1,345 @@
+[ {
+  "id" : 1,
+  "name" : "Amex Airline Index",
+  "symbol" : "$XAL.X"
+}, {
+  "id" : 2,
+  "name" : "Amex Biotechnology Index",
+  "symbol" : "$BTK.X"
+}, {
+  "id" : 3,
+  "name" : "Amex Broker/Dealer Index",
+  "symbol" : "$XBD.X"
+}, {
+  "id" : 4,
+  "name" : "Amex Composite",
+  "symbol" : "$XAX.X"
+}, {
+  "id" : 5,
+  "name" : "Amex Computer Technology Index",
+  "symbol" : "$XCI.X"
+}, {
+  "id" : 6,
+  "name" : "Amex Disk Drive Index",
+  "symbol" : "$DDX.X"
+}, {
+  "id" : 7,
+  "name" : "Amex Gold Bugs Index",
+  "symbol" : "$HUI.X"
+}, {
+  "id" : 8,
+  "name" : "Amex Japan Index",
+  "symbol" : "$JPN.X"
+}, {
+  "id" : 9,
+  "name" : "Amex Networking Index",
+  "symbol" : "$NWX.X"
+}, {
+  "id" : 10,
+  "name" : "Amex North American Telcomm.",
+  "symbol" : "$XTC.X"
+}, {
+  "id" : 11,
+  "name" : "Amex Pharmaceutical Index",
+  "symbol" : "$DRG.X"
+}, {
+  "id" : 12,
+  "name" : "Amex Tobacco Index",
+  "symbol" : "$TOB.X"
+}, {
+  "id" : 13,
+  "name" : "CBOE Automotive Index",
+  "symbol" : " $US:AUX.X"
+}, {
+  "id" : 14,
+  "name" : "CBOE Computer Software",
+  "symbol" : "$US:CWX.X"
+}, {
+  "id" : 15,
+  "name" : "CBOE Gaming Index",
+  "symbol" : "$US:GAX.X"
+}, {
+  "id" : 17,
+  "name" : "Dow Jones Industrial Average",
+  "symbol" : "$US:INDU"
+}, {
+  "id" : 16,
+  "name" : "FTSE-250",
+  "symbol" : "GB:MCX"
+}, {
+  "id" : 19,
+  "name" : "Dow Jones Utilities",
+  "symbol" : "$UTIL"
+}, {
+  "id" : 18,
+  "name" : "Dow Jones Transportation",
+  "symbol" : "$TRAN"
+}, {
+  "id" : 21,
+  "name" : "Morgan Stanley Commodity-Related",
+  "symbol" : "$CRX.X"
+}, {
+  "id" : 20,
+  "name" : "Inter@ctive Week Internet Index",
+  "symbol" : "$IIX.X"
+}, {
+  "id" : 23,
+  "name" : "Morgan Stanley Cyclical Index",
+  "symbol" : "$CYC.X"
+}, {
+  "id" : 22,
+  "name" : "Morgan Stanley Consumer Index",
+  "symbol" : "$CMR.X"
+}, {
+  "id" : 25,
+  "name" : "Morgan Stanley Healthcare Prod.",
+  "symbol" : "$RXP.X"
+}, {
+  "id" : 24,
+  "name" : "Morgan Stanley Healthcare Payors",
+  "symbol" : "$HMO.X"
+}, {
+  "id" : 27,
+  "name" : "Morgan Stanley Multinational 50",
+  "symbol" : "$US:NFT.X"
+}, {
+  "id" : 26,
+  "name" : "Morgan Stanley High-Tech 35",
+  "symbol" : "$MSH.X"
+}, {
+  "id" : 29,
+  "name" : "NASDAQ Composite Index",
+  "symbol" : "$US:COMPX"
+}, {
+  "id" : 28,
+  "name" : "NASDAQ 100 Index",
+  "symbol" : "$NDX.X"
+}, {
+  "id" : 31,
+  "name" : "Philadelphia Gold and Silver",
+  "symbol" : "$XAU.X"
+}, {
+  "id" : 30,
+  "name" : "NYSE Composites",
+  "symbol" : "$NYA.X"
+}, {
+  "id" : 34,
+  "name" : "Russell 2000",
+  "symbol" : "$IUX"
+}, {
+  "id" : 35,
+  "name" : "Standard & Poor's 100",
+  "symbol" : "$OEX"
+}, {
+  "id" : 32,
+  "name" : "Philadelphia Semiconductor",
+  "symbol" : "$SOX.X"
+}, {
+  "id" : 33,
+  "name" : "PSE Technology Index",
+  "symbol" : "$PSE.X"
+}, {
+  "id" : 38,
+  "name" : "Standard & Poor's Bank Index",
+  "symbol" : ".BIX.X"
+}, {
+  "id" : 39,
+  "name" : "Standard & Poor's Chemicals",
+  "symbol" : "$US:CEX.X"
+}, {
+  "id" : 36,
+  "name" : "Standard & Poor's 400 Midcap",
+  "symbol" : "$MID.X"
+}, {
+  "id" : 37,
+  "name" : "Standard & Poor's 500",
+  "symbol" : "$US:INX"
+}, {
+  "id" : 42,
+  "name" : "Standard & Poor's Retail Index",
+  "symbol" : "$US:RLX.X"
+}, {
+  "id" : 43,
+  "name" : "Standard & Poor's Transportation",
+  "symbol" : "$US:TRX.X"
+}, {
+  "id" : 40,
+  "name" : "Standard & Poor's Healthcare",
+  "symbol" : "$US:HCX.X"
+}, {
+  "id" : 41,
+  "name" : "Standard & Poor's Insurance",
+  "symbol" : "$US:IUX.X"
+}, {
+  "id" : 46,
+  "name" : "Wilshire Small Cap",
+  "symbol" : "$WSX.X"
+}, {
+  "id" : 47,
+  "name" : "All Ordinaries (Sydney)",
+  "symbol" : "$SYDI"
+}, {
+  "id" : 44,
+  "name" : "Standard & Poor/Barra Growth",
+  "symbol" : "$US:SGX.X"
+}, {
+  "id" : 45,
+  "name" : "Standard & Poor/Barra Value",
+  "symbol" : "$US:SVX.X"
+}, {
+  "id" : 51,
+  "name" : "Hang Seng (Hong Kong)",
+  "symbol" : "$HKHI"
+}, {
+  "id" : 50,
+  "name" : "FTSE (London)",
+  "symbol" : "$US:FTSE"
+}, {
+  "id" : 49,
+  "name" : "DAX (Frankfurt)",
+  "symbol" : "$DAX"
+}, {
+  "id" : 48,
+  "name" : "CAC-40 (Paris)",
+  "symbol" : "$PARI"
+}, {
+  "id" : 55,
+  "name" : "FTSE Allshare",
+  "symbol" : "GB:ASX"
+}, {
+  "id" : 54,
+  "name" : "TSE 300 (Toronto)",
+  "symbol" : "TI300"
+}, {
+  "id" : 53,
+  "name" : "Straits Times Indst. (Singapore)",
+  "symbol" : "$STRI"
+}, {
+  "id" : 52,
+  "name" : "Nikkei 225 (Tokyo)",
+  "symbol" : "$TOKN"
+}, {
+  "id" : 59,
+  "name" : "Neptune Income Class A Retail Accumulation",
+  "symbol" : "3231551"
+}, {
+  "id" : 58,
+  "name" : "M&G American Class X Accumulation",
+  "symbol" : "3195000"
+}, {
+  "id" : 57,
+  "name" : "Cazenove European Class B Accumulation Units",
+  "symbol" : "3109335"
+}, {
+  "id" : 56,
+  "name" : "FTSE AIM",
+  "symbol" : "GB:AXX"
+}, {
+  "id" : 63,
+  "name" : "Invesco Perpetual High Income Accumulation Units",
+  "symbol" : "3303148"
+}, {
+  "id" : 62,
+  "name" : "Royal London Sterling Extra Yield Bond Class B Income *2",
+  "symbol" : "3257159"
+}, {
+  "id" : 61,
+  "name" : "Artemis Income Retail Accumulation Units",
+  "symbol" : "3256792"
+}, {
+  "id" : 60,
+  "name" : "Neptune Income Class A Retail Income",
+  "symbol" : "3232509"
+}, {
+  "id" : 68,
+  "name" : "First State Asia Pacific Leaders Class A Accumulation Units",
+  "symbol" : "3387421"
+}, {
+  "id" : 69,
+  "name" : "Artemis Income Retail Inc",
+  "symbol" : "657246"
+}, {
+  "id" : 70,
+  "name" : "Jupiter European Income Units",
+  "symbol" : "666468"
+}, {
+  "id" : 71,
+  "name" : "GLG Japan CoreAlpha Fund Retail Accumulation",
+  "symbol" : "B011993"
+}, {
+  "id" : 64,
+  "name" : "Invesco Perpetual High Income Income Units",
+  "symbol" : "3305401"
+}, {
+  "id" : 65,
+  "name" : "Aberdeen Emerging Markets Accumulation Shares",
+  "symbol" : "3322819"
+}, {
+  "id" : 66,
+  "name" : "CF Walker Crips Equity Income Fund Income Units",
+  "symbol" : "3372687"
+}, {
+  "id" : 67,
+  "name" : "CF Walker Crips Equity Income Fund Accumulation Units",
+  "symbol" : "3372698"
+}, {
+  "id" : 76,
+  "name" : "Aegon Investment Grade Bond Fund Income",
+  "symbol" : "B1419R5"
+}, {
+  "id" : 77,
+  "name" : "M&G Optimal Income Class X Income",
+  "symbol" : "B1H0537"
+}, {
+  "id" : 78,
+  "name" : "M&G Optimal Income Class X Accumulation",
+  "symbol" : "B1H0548"
+}, {
+  "id" : 79,
+  "name" : "First State Global Listed Infrastructure Accumulation",
+  "symbol" : "B24HJC5"
+}, {
+  "id" : 72,
+  "name" : "Newton Global Higher Income Income",
+  "symbol" : "B0MY6T0"
+}, {
+  "id" : 73,
+  "name" : "Liontrust Special Situations Income Units",
+  "symbol" : "B0N6YF7"
+}, {
+  "id" : 74,
+  "name" : "Threadneedle UK Equity Alpha Income Retail Income",
+  "symbol" : "B12WJY7"
+}, {
+  "id" : 75,
+  "name" : "Aegon Investment Grade Bond Fund Accumulation",
+  "symbol" : "B140FR4"
+}, {
+  "id" : 85,
+  "name" : "Threadneedle UK Equity Income Retail Accumulation",
+  "symbol" : "B60SM09"
+}, {
+  "id" : 84,
+  "name" : "INSYNERGY Odey Fund Accumulation units",
+  "symbol" : "B4KYYS5"
+}, {
+  "id" : 86,
+  "name" : "Marlborough Special Situations Accumulation Units",
+  "symbol" : "B659XQ0"
+}, {
+  "id" : 81,
+  "name" : "Elite Bloxham Global Equity Income Accumulation",
+  "symbol" : "B2PRP60"
+}, {
+  "id" : 80,
+  "name" : "First State Global Listed Infrastructure Income",
+  "symbol" : "B24HJR0"
+}, {
+  "id" : 83,
+  "name" : "Artemis Strategic Assets Retail Accumulation",
+  "symbol" : "B3VDDQ5"
+}, {
+  "id" : 82,
+  "name" : "Elite Bloxham Global Equity Income Income",
+  "symbol" : "B2PRP71"
+} ]

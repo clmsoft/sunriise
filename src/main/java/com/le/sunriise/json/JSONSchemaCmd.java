@@ -7,8 +7,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.jsonschema.JsonSchema;
 import com.le.sunriise.mnyobject.Category;
 
-public class JsonSchemaCmd {
-    private static final Logger log = Logger.getLogger(JsonSchemaCmd.class);
+public class JSONSchemaCmd {
+    private static final Logger log = Logger.getLogger(JSONSchemaCmd.class);
 
     /**
      * @param args

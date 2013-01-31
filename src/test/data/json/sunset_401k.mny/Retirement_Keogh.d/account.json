@@ -1,0 +1,19 @@
+{
+  "id" : 8,
+  "relatedToAccountId" : 9,
+  "relatedToAccount" : null,
+  "name" : "Retirement Keogh",
+  "type" : 5,
+  "closed" : false,
+  "startingBalance" : 0.0000,
+  "currentBalance" : null,
+  "accountType" : "INVESTMENT",
+  "currencyId" : 45,
+  "currencyCode" : "USD",
+  "retirement" : true,
+  "investmentSubType" : 3,
+  "amountLimit" : null,
+  "securityHoldings" : null,
+  "creditCard" : false,
+  "401k403b" : false
+}

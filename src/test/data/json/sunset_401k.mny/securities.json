@@ -1,0 +1,17 @@
+[ {
+  "id" : 1,
+  "name" : "Dow Jones Industrial Average",
+  "symbol" : "$US:INDU"
+}, {
+  "id" : 2,
+  "name" : "NASDAQ Composite Index",
+  "symbol" : "$US:COMPX"
+}, {
+  "id" : 3,
+  "name" : "Standard & Poor's 500",
+  "symbol" : "$US:INX"
+}, {
+  "id" : 4,
+  "name" : "*Cash*",
+  "symbol" : null
+} ]

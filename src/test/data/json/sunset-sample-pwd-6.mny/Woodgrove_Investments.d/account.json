@@ -1,0 +1,19 @@
+{
+  "id" : 2,
+  "relatedToAccountId" : 3,
+  "relatedToAccount" : null,
+  "name" : "Woodgrove Investments",
+  "type" : 5,
+  "closed" : false,
+  "startingBalance" : 0.0000,
+  "currentBalance" : null,
+  "accountType" : "INVESTMENT",
+  "currencyId" : 45,
+  "currencyCode" : "USD",
+  "retirement" : false,
+  "investmentSubType" : -1,
+  "amountLimit" : null,
+  "securityHoldings" : null,
+  "creditCard" : false,
+  "401k403b" : false
+}

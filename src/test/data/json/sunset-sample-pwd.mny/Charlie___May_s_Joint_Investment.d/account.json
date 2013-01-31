@@ -1,0 +1,19 @@
+{
+  "id" : 72,
+  "relatedToAccountId" : 73,
+  "relatedToAccount" : null,
+  "name" : "Charlie & May’s Joint Investment",
+  "type" : 5,
+  "closed" : false,
+  "startingBalance" : 0.0000,
+  "currentBalance" : null,
+  "accountType" : "INVESTMENT",
+  "currencyId" : 45,
+  "currencyCode" : "USD",
+  "retirement" : false,
+  "investmentSubType" : -1,
+  "amountLimit" : null,
+  "securityHoldings" : null,
+  "creditCard" : false,
+  "401k403b" : false
+}
