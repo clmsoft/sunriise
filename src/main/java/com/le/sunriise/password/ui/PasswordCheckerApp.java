@@ -129,10 +129,10 @@ public class PasswordCheckerApp {
             @Override
             public void run() {
                 try {
+                    JavaInfo.logInfo();
+
                     PasswordCheckerApp window = new PasswordCheckerApp();
                     showMainFrame(window);
-                    
-                    JavaInfo.logInfo();
                 } catch (Exception e) {
                     log.error(e, e);
                 }
@@ -144,6 +144,7 @@ public class PasswordCheckerApp {
                 // window.frame.pack();
                 window.getFrame().setLocationRelativeTo(null);
                 window.getFrame().setVisible(true);
+                log.info("> setVisible to true");
             }
         });
     }

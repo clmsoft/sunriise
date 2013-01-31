@@ -114,6 +114,7 @@ public class AccountViewer {
     // private boolean dbReadOnly;
 
     private AccountViewerDataModel dataModel = new AccountViewerDataModel();
+    
     private JList accountList;
     private JTable table;
 
@@ -798,16 +799,21 @@ public class AccountViewer {
             @Override
             public void run() {
                 try {
-                    AccountViewer window = new AccountViewer();
-                    window.getFrame().pack();
-                    window.getFrame().setLocationRelativeTo(null);
-                    window.getFrame().setVisible(true);
-
                     JavaInfo.logInfo();
+
+                    AccountViewer window = new AccountViewer();
+                    showMainFrame(window);
 
                 } catch (Exception e) {
                     log.error(e, e);
                 }
+            }
+
+            protected void showMainFrame(AccountViewer window) {
+                window.getFrame().pack();
+                window.getFrame().setLocationRelativeTo(null);
+                window.getFrame().setVisible(true);
+                log.info("> setVisible to true");
             }
         });
     }

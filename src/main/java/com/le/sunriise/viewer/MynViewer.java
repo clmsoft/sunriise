@@ -252,17 +252,19 @@ public class MynViewer {
         // EventQueue waitQueue = new WaitCursorEventQueue(500);
         // Toolkit.getDefaultToolkit().getSystemEventQueue().push(waitQueue);
 
-        String builNumber = BuildNumber.findBuilderNumber();
+//        String builNumber = BuildNumber.findBuilderNumber();
 
         EventQueue.invokeLater(new Runnable() {
             @Override
             public void run() {
                 try {
+                    JavaInfo.logInfo();
+
                     MynViewer window = new MynViewer();
                     window.getFrame().setLocationRelativeTo(null);
                     window.getFrame().setVisible(true);
+                    log.info("> setVisible to true");
                     
-                    JavaInfo.logInfo();
                 } catch (Exception e) {
                     log.error(e, e);
                 }

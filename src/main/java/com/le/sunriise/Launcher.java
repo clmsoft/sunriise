@@ -46,9 +46,9 @@ public class Launcher {
     private static final Logger log = Logger.getLogger(Launcher.class);
 
     private JFrame frame;
-    private final Action action = new SwingAction();
-    private final Action action_1 = new SwingAction_1();
-    private final Action action_2 = new SwingAction_2();
+    private final Action viewerAction = new SwingAction();
+    private final Action accountViewerAction = new AccountViewerSwingAction();
+    private final Action passwordToolAction = new PasswordToolSwingAction();
 
     /**
      * Launch the application.
@@ -101,7 +101,7 @@ public class Launcher {
                                 FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC, }));
 
         JButton btnNewButton_3 = new JButton();
-        btnNewButton_3.setAction(action);
+        btnNewButton_3.setAction(viewerAction);
         frame.getContentPane().add(btnNewButton_3, "1, 3");
 
         JLabel lblNewJgoodiesLabel_3 = DefaultComponentFactory.getInstance().createLabel(
@@ -110,7 +110,7 @@ public class Launcher {
         frame.getContentPane().add(lblNewJgoodiesLabel_3, "3, 3");
 
         JButton btnNewButton_4 = new JButton();
-        btnNewButton_4.setAction(action_1);
+        btnNewButton_4.setAction(accountViewerAction);
         frame.getContentPane().add(btnNewButton_4, "1, 5");
 
         JLabel lblNewJgoodiesLabel_4 = DefaultComponentFactory.getInstance().createLabel(
@@ -119,7 +119,7 @@ public class Launcher {
         frame.getContentPane().add(lblNewJgoodiesLabel_4, "3, 5");
 
         JButton btnNewButton_5 = new JButton();
-        btnNewButton_5.setAction(action_2);
+        btnNewButton_5.setAction(passwordToolAction);
         frame.getContentPane().add(btnNewButton_5, "1, 7");
 
         JLabel lblNewJgoodiesLabel_5 = DefaultComponentFactory.getInstance().createLabel("Password tools");
@@ -149,8 +149,8 @@ public class Launcher {
         }
     }
 
-    private class SwingAction_1 extends AbstractAction {
-        public SwingAction_1() {
+    private class AccountViewerSwingAction extends AbstractAction {
+        public AccountViewerSwingAction() {
             putValue(NAME, "Launch");
             putValue(SHORT_DESCRIPTION, "Launch accounts viewer");
             String iconResource1Name = "/images/icon_money.png";
@@ -170,8 +170,8 @@ public class Launcher {
         }
     }
 
-    private class SwingAction_2 extends AbstractAction {
-        public SwingAction_2() {
+    private class PasswordToolSwingAction extends AbstractAction {
+        public PasswordToolSwingAction() {
             putValue(NAME, "Launch");
             putValue(SHORT_DESCRIPTION, "Launch password tools");
             String iconResource1Name = "/images/icon_password.png";
