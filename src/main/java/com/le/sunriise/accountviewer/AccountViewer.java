@@ -325,10 +325,10 @@ public class AccountViewer {
         Component bottomComponent = createBottomComponent();
 
         JSplitPane vSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, topComponent, bottomComponent);
-
-        vSplitPane.setResizeWeight(0.66);
         view.add(vSplitPane, BorderLayout.CENTER);
-        vSplitPane.setDividerLocation(0.66);
+
+//        vSplitPane.setResizeWeight(0.50);
+//        vSplitPane.setDividerLocation(0.50);
 
         return view;
     }
@@ -476,7 +476,7 @@ public class AccountViewer {
         JTabbedPane tabbedPane = new JTabbedPane();
         tabbedPane.setBorder(BorderFactory.createTitledBorder("Transaction details"));
 
-        tabbedPane.addTab("QIF", createTransactionQif());
+//        tabbedPane.addTab("QIF", createTransactionQif());
 
         tabbedPane.addTab("JSON", createTransactionJson());
 
@@ -667,7 +667,9 @@ public class AccountViewer {
             updateAccountInfoPane(account);
             updateAccountJsonPane(account);
 
-            transactionQifTextArea.setText("");
+            if (transactionQifTextArea != null) {
+                transactionQifTextArea.setText("");
+            }
             transactionJsonTextArea.setText("");
         } finally {
             long delta = stopWatch.click();
