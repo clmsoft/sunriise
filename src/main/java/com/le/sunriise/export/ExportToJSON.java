@@ -32,7 +32,19 @@ import com.le.sunriise.viewer.OpenedDb;
 
 public class ExportToJSON extends DefaultAccountVisitor {
     private static final Logger log = Logger.getLogger(ExportToJSON.class);
-
+    
+    private static final String FILENAME_ACCOUNT = "account.json";
+    
+    private static final String FILENAME_TRANSACTIONS = "transactions.json";
+    
+    private static final String FILENAME_SECURITIES = "securities.json";
+    
+    private static final String FILENAME_CURRENCIES = "currencies.json";
+    
+    private static final String FILENAME_PAYEES = "payees.json";
+    
+    private static final String FILENAME_CATEGORIES = "categories.json";
+    
     private class SafeCharMap {
         private char c1;
         private char c2;
@@ -75,16 +87,16 @@ public class ExportToJSON extends DefaultAccountVisitor {
             log.warn("outDir=null. Will SKIP exportMnyContext");
         }
         
-        outFile = new File(outDir, "categories.json");
+        outFile = new File(outDir, FILENAME_CATEGORIES);
         JSONUtils.writeValue(this.mnyContext.getCategories().values(), outFile);
     
-        outFile = new File(outDir, "payees.json");
+        outFile = new File(outDir, FILENAME_PAYEES);
         JSONUtils.writeValue(this.mnyContext.getPayees().values(), outFile);
     
-        outFile = new File(outDir, "currencies.json");
+        outFile = new File(outDir, FILENAME_CURRENCIES);
         JSONUtils.writeValue(this.mnyContext.getCurrencies().values(), outFile);
     
-        outFile = new File(outDir, "securities.json");
+        outFile = new File(outDir, FILENAME_SECURITIES);
         JSONUtils.writeValue(this.mnyContext.getSecurities().values(), outFile);
     }
 
@@ -95,17 +107,17 @@ public class ExportToJSON extends DefaultAccountVisitor {
             log.warn("outDir=null. Will SKIP exportAccount");
         }
         
-        outFile = new File(outDir, "account.json");
+        outFile = new File(outDir, FILENAME_ACCOUNT);
         JSONUtils.writeValue(account, outFile);
     
-        outFile = new File(outDir, "transactions.json");
+        outFile = new File(outDir, FILENAME_TRANSACTIONS);
         JSONUtils.writeValue(account.getTransactions(), outFile);
     }
 
     @Override
     public void visitAccounts(List<Account> accounts) throws IOException {
         super.visitAccounts(accounts);
-
+        
         exportMnyContext(outDir);
     }
 
@@ -117,10 +129,10 @@ public class ExportToJSON extends DefaultAccountVisitor {
         log.info("> " + accountName);
 
         accountName = toSafeFileName(accountName);
-        File d = new File(outDir, accountName + ".d");
-        d.mkdirs();
+        File accountDir = new File(outDir, accountName + ".d");
+        accountDir.mkdirs();
 
-        exportAccount(account, d);
+        exportAccount(account, accountDir);
     }
 
     private String toSafeFileName(String accountName) {

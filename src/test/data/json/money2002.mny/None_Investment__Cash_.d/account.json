@@ -1,19 +1,19 @@
 {
   "id" : 3,
+  "name" : "None Investment (Cash)",
   "relatedToAccountId" : 2,
   "relatedToAccount" : null,
-  "name" : "None Investment (Cash)",
   "type" : 0,
+  "accountType" : "BANKING",
   "closed" : false,
   "startingBalance" : 0.0000,
-  "currentBalance" : null,
-  "accountType" : "BANKING",
+  "currentBalance" : 0.0000,
   "currencyId" : 18,
   "currencyCode" : "GBP",
   "retirement" : false,
   "investmentSubType" : -1,
-  "amountLimit" : null,
   "securityHoldings" : null,
+  "amountLimit" : null,
   "creditCard" : false,
   "401k403b" : false
 }

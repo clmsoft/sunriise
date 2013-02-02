@@ -1,19 +1,91 @@
 {
   "id" : 72,
-  "relatedToAccountId" : 73,
-  "relatedToAccount" : null,
   "name" : "Charlie & May’s Joint Investment",
+  "relatedToAccountId" : 73,
+  "relatedToAccount" : {
+    "id" : 73,
+    "name" : "Charlie & May’s Joint Inv (Cash)",
+    "relatedToAccountId" : 72,
+    "relatedToAccount" : null,
+    "type" : 0,
+    "accountType" : "BANKING",
+    "closed" : false,
+    "startingBalance" : 0.0000,
+    "currentBalance" : -10004.1500,
+    "currencyId" : 45,
+    "currencyCode" : null,
+    "retirement" : false,
+    "investmentSubType" : -1,
+    "securityHoldings" : null,
+    "amountLimit" : null,
+    "creditCard" : false,
+    "401k403b" : false
+  },
   "type" : 5,
+  "accountType" : "INVESTMENT",
   "closed" : false,
   "startingBalance" : 0.0000,
-  "currentBalance" : null,
-  "accountType" : "INVESTMENT",
+  "currentBalance" : 19974,
   "currencyId" : 45,
   "currencyCode" : "USD",
   "retirement" : false,
   "investmentSubType" : -1,
+  "securityHoldings" : [ {
+    "security" : {
+      "id" : 103,
+      "name" : "McDonalds",
+      "symbol" : null
+    },
+    "quantity" : 120.0,
+    "price" : 36.89999999999999857891452847979962825775146484375,
+    "marketValue" : 4428
+  }, {
+    "security" : {
+      "id" : 114,
+      "name" : "Microsoft",
+      "symbol" : "MSFT"
+    },
+    "quantity" : 200.0,
+    "price" : 29.910000000000000142108547152020037174224853515625,
+    "marketValue" : 5982
+  }, {
+    "security" : {
+      "id" : 115,
+      "name" : "Oakmark Fund",
+      "symbol" : null
+    },
+    "quantity" : 145.0,
+    "price" : 44.89999999999999857891452847979962825775146484375,
+    "marketValue" : 6510.5
+  }, {
+    "security" : {
+      "id" : 104,
+      "name" : "Toys R Us",
+      "symbol" : null
+    },
+    "quantity" : 125.0,
+    "price" : 27.1099999999999994315658113919198513031005859375,
+    "marketValue" : 3388.75
+  }, {
+    "security" : {
+      "id" : 102,
+      "name" : "Walt Disney Company",
+      "symbol" : null
+    },
+    "quantity" : 115.0,
+    "price" : 38.89999999999999857891452847979962825775146484375,
+    "marketValue" : 4473.5
+  }, {
+    "security" : {
+      "id" : 116,
+      "name" : "White Oak Growth Stock",
+      "symbol" : null
+    },
+    "quantity" : 140.0,
+    "price" : 37.1099999999999994315658113919198513031005859375,
+    "marketValue" : 5195.399999999999636202119290828704833984375
+  } ],
   "amountLimit" : null,
-  "securityHoldings" : null,
   "creditCard" : false,
   "401k403b" : false
 }

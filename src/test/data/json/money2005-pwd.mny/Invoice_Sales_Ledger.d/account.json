@@ -1,19 +1,19 @@
 {
   "id" : 8,
+  "name" : "Invoice Sales Ledger",
   "relatedToAccountId" : null,
   "relatedToAccount" : null,
-  "name" : "Invoice Sales Ledger",
   "type" : 3,
+  "accountType" : "ASSET",
   "closed" : false,
   "startingBalance" : 1780.7100,
-  "currentBalance" : null,
-  "accountType" : "ASSET",
+  "currentBalance" : 1780.7100,
   "currencyId" : 2,
   "currencyCode" : "AUD",
   "retirement" : false,
   "investmentSubType" : -1,
-  "amountLimit" : null,
   "securityHoldings" : null,
+  "amountLimit" : null,
   "creditCard" : false,
   "401k403b" : false
 }

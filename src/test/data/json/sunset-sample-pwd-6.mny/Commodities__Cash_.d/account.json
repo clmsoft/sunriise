@@ -1,19 +1,19 @@
 {
   "id" : 78,
+  "name" : "Commodities (Cash)",
   "relatedToAccountId" : 77,
   "relatedToAccount" : null,
-  "name" : "Commodities (Cash)",
   "type" : 0,
+  "accountType" : "BANKING",
   "closed" : false,
   "startingBalance" : 0.0000,
-  "currentBalance" : null,
-  "accountType" : "BANKING",
+  "currentBalance" : 255.0000,
   "currencyId" : 45,
   "currencyCode" : "USD",
   "retirement" : false,
   "investmentSubType" : -1,
-  "amountLimit" : null,
   "securityHoldings" : null,
+  "amountLimit" : null,
   "creditCard" : false,
   "401k403b" : false
 }

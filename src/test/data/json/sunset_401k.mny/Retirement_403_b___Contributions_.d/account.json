@@ -1,19 +1,19 @@
 {
   "id" : 7,
+  "name" : "Retirement 403(b) (Contributions)",
   "relatedToAccountId" : 6,
   "relatedToAccount" : null,
-  "name" : "Retirement 403(b) (Contributions)",
   "type" : 0,
+  "accountType" : "BANKING",
   "closed" : false,
   "startingBalance" : 0.0000,
-  "currentBalance" : null,
-  "accountType" : "BANKING",
+  "currentBalance" : 0.0000,
   "currencyId" : 45,
   "currencyCode" : "USD",
   "retirement" : false,
   "investmentSubType" : -1,
-  "amountLimit" : null,
   "securityHoldings" : null,
+  "amountLimit" : null,
   "creditCard" : false,
   "401k403b" : false
 }

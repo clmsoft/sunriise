@@ -114,7 +114,7 @@ public class AccountViewer {
     // private boolean dbReadOnly;
 
     private AccountViewerDataModel dataModel = new AccountViewerDataModel();
-    
+
     private JList accountList;
     private JTable table;
 
@@ -612,35 +612,18 @@ public class AccountViewer {
             if (account != null) {
                 log.info("select account=" + account);
                 Database db = openedDb.getDb();
+
                 AccountUtil.retrieveTransactions(db, account);
 
-                // JDBC
-                if (jdbcConn != null) {
-                    Statement statement = null;
-                    try {
-                        statement = jdbcConn.createStatement();
-                        ResultSet rs = statement.executeQuery("select * from ACCT");
-                        dump(rs, "select * from ACCT");
-                    } catch (SQLException e) {
-                        log.warn(e);
-                    } finally {
-                        if (statement != null) {
-                            try {
-                                statement.close();
-                            } catch (SQLException e) {
-                                log.warn(e);
-                            } finally {
-                                statement = null;
-                            }
-                        }
-                    }
-                }
+                jdbcDump();
 
                 BigDecimal currentBalance = AccountUtil.calculateCurrentBalance(account);
 
-                log.info(account.getName() + ", " + account.getAccountType() + ", "
-                        + AccountUtil.getCurrencyName(account.getCurrencyId(), mnyContext.getCurrencies()) + ", "
-                        + account.getStartingBalance() + ", " + currentBalance + ", " + account.getAmountLimit());
+                if (log.isDebugEnabled()) {
+                    log.debug(account.getName() + ", " + account.getAccountType() + ", "
+                            + AccountUtil.getCurrencyName(account.getCurrencyId(), mnyContext.getCurrencies()) + ", "
+                            + account.getStartingBalance() + ", " + currentBalance + ", " + account.getAmountLimit());
+                }
 
                 // UI
                 updateStartingBalanceLabel(account.getStartingBalance(), account);
@@ -666,7 +649,9 @@ public class AccountViewer {
                     updateEndingBalanceLabel(new BigDecimal(marketValue), account);
                     break;
                 default:
-                    log.warn("Skip handling unknown accountType=" + accountType);
+                    if (log.isDebugEnabled()) {
+                        log.warn("Skip handling unknown accountType=" + accountType);
+                    }
                     break;
                 }
             }
@@ -687,6 +672,30 @@ public class AccountViewer {
         } finally {
             long delta = stopWatch.click();
             log.info("< accountSelected, delta=" + delta);
+        }
+    }
+
+    protected void jdbcDump() {
+        // JDBC
+        if (jdbcConn != null) {
+            Statement statement = null;
+            try {
+                statement = jdbcConn.createStatement();
+                ResultSet rs = statement.executeQuery("select * from ACCT");
+                dump(rs, "select * from ACCT");
+            } catch (SQLException e) {
+                log.warn(e);
+            } finally {
+                if (statement != null) {
+                    try {
+                        statement.close();
+                    } catch (SQLException e) {
+                        log.warn(e);
+                    } finally {
+                        statement = null;
+                    }
+                }
+            }
         }
     }
 
@@ -731,7 +740,8 @@ public class AccountViewer {
         if (account.getAccountType() == AccountType.INVESTMENT) {
             accountInfoTextArea.append("Retirement: " + account.getRetirement().toString() + "\n");
         }
-        accountInfoTextArea.append("Currency: " + AccountUtil.getCurrencyName(account.getCurrencyId(), mnyContext.getCurrencies()) + "\n");
+        accountInfoTextArea.append("Currency: " + AccountUtil.getCurrencyName(account.getCurrencyId(), mnyContext.getCurrencies())
+                + "\n");
         accountInfoTextArea.append("Starting balance: " + account.formatAmmount(account.getStartingBalance()) + "\n");
         accountInfoTextArea.append("Ending balance: " + account.formatAmmount(account.getCurrentBalance()) + "\n");
 

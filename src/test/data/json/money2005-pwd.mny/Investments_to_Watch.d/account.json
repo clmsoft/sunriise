@@ -1,19 +1,19 @@
 {
   "id" : 1,
+  "name" : "Investments to Watch",
   "relatedToAccountId" : null,
   "relatedToAccount" : null,
-  "name" : "Investments to Watch",
   "type" : 5,
+  "accountType" : "INVESTMENT",
   "closed" : false,
   "startingBalance" : 0.0000,
-  "currentBalance" : null,
-  "accountType" : "INVESTMENT",
+  "currentBalance" : 0,
   "currencyId" : 18,
   "currencyCode" : "GBP",
   "retirement" : false,
   "investmentSubType" : -1,
+  "securityHoldings" : [ ],
   "amountLimit" : null,
-  "securityHoldings" : null,
   "creditCard" : false,
   "401k403b" : false
 }

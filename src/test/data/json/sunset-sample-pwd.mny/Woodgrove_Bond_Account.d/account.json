@@ -1,19 +1,91 @@
 {
   "id" : 66,
-  "relatedToAccountId" : 67,
-  "relatedToAccount" : null,
   "name" : "Woodgrove Bond Account",
+  "relatedToAccountId" : 67,
+  "relatedToAccount" : {
+    "id" : 67,
+    "name" : "Woodgrove Bond Account (Cash)",
+    "relatedToAccountId" : 66,
+    "relatedToAccount" : null,
+    "type" : 0,
+    "accountType" : "BANKING",
+    "closed" : false,
+    "startingBalance" : 0.0000,
+    "currentBalance" : -57916.2000,
+    "currencyId" : 45,
+    "currencyCode" : null,
+    "retirement" : false,
+    "investmentSubType" : -1,
+    "securityHoldings" : null,
+    "amountLimit" : null,
+    "creditCard" : false,
+    "401k403b" : false
+  },
   "type" : 5,
+  "accountType" : "INVESTMENT",
   "closed" : false,
   "startingBalance" : 0.0000,
-  "currentBalance" : null,
-  "accountType" : "INVESTMENT",
+  "currentBalance" : 4244.650000000008731149137020111083984375,
   "currencyId" : 45,
   "currencyCode" : "USD",
   "retirement" : false,
   "investmentSubType" : -1,
+  "securityHoldings" : [ {
+    "security" : {
+      "id" : 112,
+      "name" : "New Bond",
+      "symbol" : null
+    },
+    "quantity" : 10000.0,
+    "price" : 0.997500000000000053290705182007513940334320068359375,
+    "marketValue" : 9975
+  }, {
+    "security" : {
+      "id" : 89,
+      "name" : "Proseware, Inc.",
+      "symbol" : null
+    },
+    "quantity" : 1000.0,
+    "price" : 0.98609000000000002206235194535111077129840850830078125,
+    "marketValue" : 986.0900000000000318323145620524883270263671875
+  }, {
+    "security" : {
+      "id" : 87,
+      "name" : "The Phone Company",
+      "symbol" : null
+    },
+    "quantity" : 20000.0,
+    "price" : 1.0268800000000000149924517245381139218807220458984375,
+    "marketValue" : 20537.5999999999985448084771633148193359375
+  }, {
+    "security" : {
+      "id" : 57,
+      "name" : "Wide World Importers",
+      "symbol" : null
+    },
+    "quantity" : 10000.0,
+    "price" : 1,
+    "marketValue" : 10000
+  }, {
+    "security" : {
+      "id" : 90,
+      "name" : "Wingtip Toys",
+      "symbol" : null
+    },
+    "quantity" : 15000.0,
+    "price" : 1.042499999999999982236431605997495353221893310546875,
+    "marketValue" : 15637.5
+  }, {
+    "security" : {
+      "id" : 94,
+      "name" : "Woodgrove Money Market",
+      "symbol" : null
+    },
+    "quantity" : 5024.66,
+    "price" : 1,
+    "marketValue" : 5024.65999999999985448084771633148193359375
+  } ],
   "amountLimit" : null,
-  "securityHoldings" : null,
   "creditCard" : false,
   "401k403b" : false
 }

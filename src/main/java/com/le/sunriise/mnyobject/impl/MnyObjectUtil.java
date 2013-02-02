@@ -26,7 +26,7 @@ import com.le.sunriise.mnyobject.TransactionSplit;
 
 public class MnyObjectUtil {
     private static final Logger log = Logger.getLogger(MnyObjectUtil.class);
-    
+
     public static String getCategoryName(Integer categoryId, Map<Integer, Category> categories) {
         String sep = ":";
         int depth = 0;
@@ -54,14 +54,14 @@ public class MnyObjectUtil {
             String categoryName = getCategoryName(categoryId, categories);
             value = categoryName;
         }
-    
+
         if (value == null) {
             if (transaction.hasSplits()) {
                 List<TransactionSplit> splits = transaction.getSplits();
                 value = "(" + splits.size() + ") Split Transaction";
             }
         }
-    
+
         if (transaction.isInvestment()) {
             Integer securityId = transaction.getSecurityId();
             String securityName = AccountUtil.getSecurityName(securityId, context);
@@ -87,7 +87,7 @@ public class MnyObjectUtil {
     public static Double calculateInvestmentBalance(Account account, Date date, MnyContext mnyContext) {
         Map<Integer, Double> quantities = new HashMap<Integer, Double>();
         Double accountMarketValue = new Double(0.0);
-    
+
         for (Transaction transaction : account.getTransactions()) {
             if (transaction.isVoid()) {
                 continue;
@@ -127,7 +127,7 @@ public class MnyObjectUtil {
             }
             quantities.put(securityId, quantity);
         }
-    
+
         List<SecurityHolding> securityHoldings = new ArrayList<SecurityHolding>();
         for (Integer securityId : quantities.keySet()) {
             Double quantity = quantities.get(securityId);
@@ -137,20 +137,12 @@ public class MnyObjectUtil {
                 continue;
             }
             SecurityHolding securityHolding = new SecurityHoldingImpl();
-//            securityHolding.setId(securityId);
             securityHolding.setQuantity(quantity);
-    
+
             Map<Integer, Security> securities = mnyContext.getSecurities();
             Security security = securities.get(securityId);
-//            String securityName = null;
-//            if (security != null) {
-//                securityName = security.getName();
-//            } else {
-//                securityName = securityId.toString();
-//            }
-//            securityHolding.setName(securityName);
             securityHolding.setSecurity(security);
-            
+
             try {
                 Double price = AccountUtil.getSecurityLatestPrice(securityId, date, mnyContext);
                 if (price == null) {
@@ -172,11 +164,14 @@ public class MnyObjectUtil {
         });
         account.setSecurityHoldings(securityHoldings);
         for (SecurityHolding sec : securityHoldings) {
-            log.info("securityName=" + sec.getSecurity().getName() + ", quantity=" + account.formatSecurityQuantity(sec.getQuantity())
-                    + ", price=" + account.formatAmmount(sec.getPrice()) + ", value=" + account.formatAmmount(sec.getMarketValue()));
+            if (log.isDebugEnabled()) {
+                log.debug("securityName=" + sec.getSecurity().getName() + ", quantity="
+                        + account.formatSecurityQuantity(sec.getQuantity()) + ", price=" + account.formatAmmount(sec.getPrice())
+                        + ", value=" + account.formatAmmount(sec.getMarketValue()));
+            }
             accountMarketValue += sec.getMarketValue().doubleValue();
         }
-    
+
         try {
             Double cashAccountValue = AccountUtil.getCashAccountValue(account, mnyContext);
             log.info("cashAccountValue=" + cashAccountValue);
@@ -186,7 +181,7 @@ public class MnyObjectUtil {
         } catch (IOException e) {
             log.warn(e);
         }
-    
+
         return accountMarketValue;
     }
 

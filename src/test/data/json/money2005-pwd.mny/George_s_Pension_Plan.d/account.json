@@ -1,19 +1,19 @@
 {
   "id" : 7,
+  "name" : "George's Pension Plan",
   "relatedToAccountId" : null,
   "relatedToAccount" : null,
-  "name" : "George's Pension Plan",
   "type" : 0,
+  "accountType" : "BANKING",
   "closed" : false,
   "startingBalance" : 250.0000,
-  "currentBalance" : null,
-  "accountType" : "BANKING",
+  "currentBalance" : 250.0000,
   "currencyId" : 2,
   "currencyCode" : "AUD",
   "retirement" : false,
   "investmentSubType" : -1,
-  "amountLimit" : null,
   "securityHoldings" : null,
+  "amountLimit" : null,
   "creditCard" : false,
   "401k403b" : false
 }

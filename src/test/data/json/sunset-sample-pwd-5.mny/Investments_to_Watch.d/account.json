@@ -1,19 +1,28 @@
 {
   "id" : 26,
+  "name" : "Investments to Watch",
   "relatedToAccountId" : null,
   "relatedToAccount" : null,
-  "name" : "Investments to Watch",
   "type" : 5,
+  "accountType" : "INVESTMENT",
   "closed" : false,
   "startingBalance" : 0,
-  "currentBalance" : null,
-  "accountType" : "INVESTMENT",
+  "currentBalance" : 3996.5625,
   "currencyId" : 45,
   "currencyCode" : "USD",
   "retirement" : false,
   "investmentSubType" : -1,
+  "securityHoldings" : [ {
+    "security" : {
+      "id" : 98,
+      "name" : "Adatum Corp",
+      "symbol" : "ADM"
+    },
+    "quantity" : 110.25,
+    "price" : 36.25,
+    "marketValue" : 3996.5625
+  } ],
   "amountLimit" : null,
-  "securityHoldings" : null,
   "creditCard" : false,
   "401k403b" : false
 }

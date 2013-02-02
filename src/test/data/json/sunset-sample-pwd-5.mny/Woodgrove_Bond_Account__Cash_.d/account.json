@@ -1,19 +1,19 @@
 {
   "id" : 67,
+  "name" : "Woodgrove Bond Account (Cash)",
   "relatedToAccountId" : 66,
   "relatedToAccount" : null,
-  "name" : "Woodgrove Bond Account (Cash)",
   "type" : 0,
+  "accountType" : "BANKING",
   "closed" : false,
   "startingBalance" : 0.0000,
-  "currentBalance" : null,
-  "accountType" : "BANKING",
+  "currentBalance" : -57916.2000,
   "currencyId" : 45,
   "currencyCode" : "USD",
   "retirement" : false,
   "investmentSubType" : -1,
-  "amountLimit" : null,
   "securityHoldings" : null,
+  "amountLimit" : null,
   "creditCard" : false,
   "401k403b" : false
 }

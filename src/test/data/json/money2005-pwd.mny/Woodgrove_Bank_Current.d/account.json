@@ -1,19 +1,19 @@
 {
   "id" : 2,
+  "name" : "Woodgrove Bank Current",
   "relatedToAccountId" : null,
   "relatedToAccount" : null,
-  "name" : "Woodgrove Bank Current",
   "type" : 0,
+  "accountType" : "BANKING",
   "closed" : false,
   "startingBalance" : 15575.4800,
-  "currentBalance" : null,
-  "accountType" : "BANKING",
+  "currentBalance" : 20280.1400,
   "currencyId" : 2,
   "currencyCode" : "AUD",
   "retirement" : false,
   "investmentSubType" : -1,
-  "amountLimit" : null,
   "securityHoldings" : null,
+  "amountLimit" : null,
   "creditCard" : false,
   "401k403b" : false
 }

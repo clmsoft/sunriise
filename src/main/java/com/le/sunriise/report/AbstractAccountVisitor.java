@@ -20,6 +20,7 @@ package com.le.sunriise.report;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -29,6 +30,7 @@ import com.le.sunriise.Utils;
 import com.le.sunriise.accountviewer.AccountUtil;
 import com.le.sunriise.accountviewer.MnyContext;
 import com.le.sunriise.mnyobject.Account;
+import com.le.sunriise.mnyobject.AccountType;
 import com.le.sunriise.mnyobject.Transaction;
 import com.le.sunriise.viewer.OpenedDb;
 
@@ -85,6 +87,21 @@ public abstract class AbstractAccountVisitor {
 
         Database db = mnyContext.getDb();
         AccountUtil.retrieveTransactions(db, account);
+        AccountUtil.calculateCurrentBalance(account);
+        if (account != null) {
+            AccountType accountType = account.getAccountType();
+            switch (accountType) {
+            case INVESTMENT:
+                Double marketValue = AccountUtil.calculateInvestmentBalance(account, mnyContext);
+                account.setCurrentBalance(new BigDecimal(marketValue));
+                break;
+            default:
+                if (log.isDebugEnabled()) {
+                    log.warn("Not handle accountType=" + accountType);
+                }
+                break;
+            }
+        }
 
         visitAccount(account);
 

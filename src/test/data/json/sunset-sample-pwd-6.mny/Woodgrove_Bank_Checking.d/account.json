@@ -1,19 +1,19 @@
 {
   "id" : 42,
+  "name" : "Woodgrove Bank Checking",
   "relatedToAccountId" : null,
   "relatedToAccount" : null,
-  "name" : "Woodgrove Bank Checking",
   "type" : 0,
+  "accountType" : "BANKING",
   "closed" : false,
   "startingBalance" : -76000.0000,
-  "currentBalance" : null,
-  "accountType" : "BANKING",
+  "currentBalance" : 21921.4200,
   "currencyId" : 45,
   "currencyCode" : "USD",
   "retirement" : false,
   "investmentSubType" : -1,
-  "amountLimit" : null,
   "securityHoldings" : null,
+  "amountLimit" : null,
   "creditCard" : false,
   "401k403b" : false
 }

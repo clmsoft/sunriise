@@ -80,20 +80,6 @@ public class SanityCheck extends DefaultAccountVisitor {
 
         super.visitAccount(account);
 
-        AccountUtil.calculateCurrentBalance(account);
-        if (account != null) {
-            AccountType accountType = account.getAccountType();
-            switch (accountType) {
-            case INVESTMENT:
-                Double marketValue = AccountUtil.calculateInvestmentBalance(account, mnyContext);
-                account.setCurrentBalance(new BigDecimal(marketValue));
-                break;
-            default:
-                log.warn("Not handle accountType=" + accountType);
-                break;
-            }
-        }
-
         log.info("  currentBalance=" + account.getCurrentBalance());
     }
 

@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import org.apache.log4j.Logger;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.google.common.hash.HashCode;
@@ -71,6 +72,7 @@ public class JsonTest {
         }
     }
 
+    @Ignore
     @Test
     public void test() throws IOException {
         for (MnyTestFile file : MnyTestFile.sampleFiles) {

@@ -1,19 +1,19 @@
 {
   "id" : 80,
+  "name" : "ETF Brokerage Account (Cash)",
   "relatedToAccountId" : 79,
   "relatedToAccount" : null,
-  "name" : "ETF Brokerage Account (Cash)",
   "type" : 0,
+  "accountType" : "BANKING",
   "closed" : false,
   "startingBalance" : 0.0000,
-  "currentBalance" : null,
-  "accountType" : "BANKING",
+  "currentBalance" : 2310.0000,
   "currencyId" : 45,
   "currencyCode" : "USD",
   "retirement" : false,
   "investmentSubType" : -1,
-  "amountLimit" : null,
   "securityHoldings" : null,
+  "amountLimit" : null,
   "creditCard" : false,
   "401k403b" : false
 }

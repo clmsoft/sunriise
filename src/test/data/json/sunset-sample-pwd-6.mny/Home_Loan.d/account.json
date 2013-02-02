@@ -1,19 +1,19 @@
 {
   "id" : 18,
+  "name" : "Home Loan",
   "relatedToAccountId" : 19,
   "relatedToAccount" : null,
-  "name" : "Home Loan",
   "type" : 6,
+  "accountType" : "LOAN",
   "closed" : false,
   "startingBalance" : -240000.0000,
-  "currentBalance" : null,
-  "accountType" : "LOAN",
+  "currentBalance" : -148553.7900,
   "currencyId" : 45,
   "currencyCode" : "USD",
   "retirement" : false,
   "investmentSubType" : -1,
-  "amountLimit" : null,
   "securityHoldings" : null,
+  "amountLimit" : null,
   "creditCard" : false,
   "401k403b" : false
 }

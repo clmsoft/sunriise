@@ -109,8 +109,8 @@ public class AccountUtil {
         return retrieveTransactions(db, account, transactionFilters);
     }
 
-    public static List<Transaction> retrieveTransactions(final Database db, final Account account, final List<TransactionFilter> transactionFilters)
-            throws IOException {
+    public static List<Transaction> retrieveTransactions(final Database db, final Account account,
+            final List<TransactionFilter> transactionFilters) throws IOException {
         log.info("> getTransactions, account=" + account.getName());
 
         StopWatch stopWatch = new StopWatch();
@@ -131,13 +131,15 @@ public class AccountUtil {
                 if (account != null) {
                     if (cursor.currentRowMatches(rowPattern)) {
                         row = cursor.getCurrentRow();
-                        TransactionImplUtil.addTransactionFromRow(db, account.getId(), transactionFilters, row, transactions, filteredTransactions);
+                        TransactionImplUtil.addTransactionFromRow(db, account.getId(), transactionFilters, row, transactions,
+                                filteredTransactions);
                     }
                 } else {
                     row = cursor.getCurrentRow();
                     Integer hacct = (Integer) row.get("hacct");
                     if (hacct == null) {
-                        TransactionImplUtil.addTransactionFromRow(db, hacct, transactionFilters, row, transactions, filteredTransactions);
+                        TransactionImplUtil.addTransactionFromRow(db, hacct, transactionFilters, row, transactions,
+                                filteredTransactions);
                     }
                 }
             }
@@ -333,6 +335,7 @@ public class AccountUtil {
             }
         }
         account.setCurrentBalance(currentBalance);
+
         return currentBalance;
     }
 
@@ -345,9 +348,12 @@ public class AccountUtil {
         Double cashAccountValue = null;
         Integer relatedToAccountId = account.getRelatedToAccountId();
         if (relatedToAccountId != null) {
-            Account relatedToAccount = getAccount(relatedToAccountId, mnyContext);
-            account.setRelatedToAccount(relatedToAccount);
-            retrieveTransactions(mnyContext.getDb(), relatedToAccount);
+            Account relatedToAccount = account.getRelatedToAccount();
+            if (relatedToAccount == null) {
+                relatedToAccount = getAccount(relatedToAccountId, mnyContext);
+                account.setRelatedToAccount(relatedToAccount);
+                retrieveTransactions(mnyContext.getDb(), relatedToAccount);
+            }
             if (relatedToAccount != null) {
                 BigDecimal currentBalance = calculateCurrentBalance(relatedToAccount);
                 if (currentBalance != null) {

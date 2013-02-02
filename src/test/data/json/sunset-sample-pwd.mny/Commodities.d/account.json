@@ -1,19 +1,55 @@
 {
   "id" : 77,
-  "relatedToAccountId" : 78,
-  "relatedToAccount" : null,
   "name" : "Commodities",
+  "relatedToAccountId" : 78,
+  "relatedToAccount" : {
+    "id" : 78,
+    "name" : "Commodities (Cash)",
+    "relatedToAccountId" : 77,
+    "relatedToAccount" : null,
+    "type" : 0,
+    "accountType" : "BANKING",
+    "closed" : false,
+    "startingBalance" : 0.0000,
+    "currentBalance" : 255.0000,
+    "currencyId" : 45,
+    "currencyCode" : null,
+    "retirement" : false,
+    "investmentSubType" : -1,
+    "securityHoldings" : null,
+    "amountLimit" : null,
+    "creditCard" : false,
+    "401k403b" : false
+  },
   "type" : 5,
+  "accountType" : "INVESTMENT",
   "closed" : false,
   "startingBalance" : 0.0000,
-  "currentBalance" : null,
-  "accountType" : "INVESTMENT",
+  "currentBalance" : 9000,
   "currencyId" : 45,
   "currencyCode" : "USD",
   "retirement" : false,
   "investmentSubType" : -1,
+  "securityHoldings" : [ {
+    "security" : {
+      "id" : 122,
+      "name" : "Gold",
+      "symbol" : "-GC"
+    },
+    "quantity" : 10.0,
+    "price" : 683.5,
+    "marketValue" : 6835
+  }, {
+    "security" : {
+      "id" : 121,
+      "name" : "Heating Oil",
+      "symbol" : "-HO"
+    },
+    "quantity" : 1000.0,
+    "price" : 1.9099999999999999200639422269887290894985198974609375,
+    "marketValue" : 1910
+  } ],
   "amountLimit" : null,
-  "securityHoldings" : null,
   "creditCard" : false,
   "401k403b" : false
 }

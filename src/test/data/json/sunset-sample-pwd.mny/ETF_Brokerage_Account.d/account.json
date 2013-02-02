@@ -1,19 +1,46 @@
 {
   "id" : 79,
-  "relatedToAccountId" : 80,
-  "relatedToAccount" : null,
   "name" : "ETF Brokerage Account",
+  "relatedToAccountId" : 80,
+  "relatedToAccount" : {
+    "id" : 80,
+    "name" : "ETF Brokerage Account (Cash)",
+    "relatedToAccountId" : 79,
+    "relatedToAccount" : null,
+    "type" : 0,
+    "accountType" : "BANKING",
+    "closed" : false,
+    "startingBalance" : 0.0000,
+    "currentBalance" : 2310.0000,
+    "currencyId" : 45,
+    "currencyCode" : null,
+    "retirement" : false,
+    "investmentSubType" : -1,
+    "securityHoldings" : null,
+    "amountLimit" : null,
+    "creditCard" : false,
+    "401k403b" : false
+  },
   "type" : 5,
+  "accountType" : "INVESTMENT",
   "closed" : false,
   "startingBalance" : 0.0000,
-  "currentBalance" : null,
-  "accountType" : "INVESTMENT",
+  "currentBalance" : 3350,
   "currencyId" : 45,
   "currencyCode" : "USD",
   "retirement" : false,
   "investmentSubType" : -1,
+  "securityHoldings" : [ {
+    "security" : {
+      "id" : 123,
+      "name" : "Contoso Exchange Traded Fund",
+      "symbol" : "QQQ"
+    },
+    "quantity" : 40.0,
+    "price" : 26,
+    "marketValue" : 1040
+  } ],
   "amountLimit" : null,
-  "securityHoldings" : null,
   "creditCard" : false,
   "401k403b" : false
 }

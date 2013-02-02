@@ -1,19 +1,19 @@
 {
   "id" : 39,
+  "name" : "Woodgrove Bank Credit Card",
   "relatedToAccountId" : null,
   "relatedToAccount" : null,
-  "name" : "Woodgrove Bank Credit Card",
   "type" : 1,
+  "accountType" : "CREDIT_CARD",
   "closed" : false,
   "startingBalance" : -10000.0000,
-  "currentBalance" : null,
-  "accountType" : "CREDIT_CARD",
+  "currentBalance" : 19305.7400,
   "currencyId" : 45,
   "currencyCode" : "USD",
   "retirement" : false,
   "investmentSubType" : -1,
-  "amountLimit" : 0.0000,
   "securityHoldings" : null,
+  "amountLimit" : 0.0000,
   "creditCard" : true,
   "401k403b" : false
 }

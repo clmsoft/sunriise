@@ -37,25 +37,20 @@ public class AccountImpl extends MnyObject implements Comparable<AccountImpl>, A
      */
     private Integer id;
 
+    private String name;
+    
     private Integer relatedToAccountId;
     private Account relatedToAccount;
-
-    private String name;
-
+    
     private Integer type;
-
+    private AccountType accountType;
+    
     private Boolean closed;
 
     private BigDecimal startingBalance;
     private BigDecimal currentBalance;
 
-    private AccountType accountType;
-
     private Integer currencyId;
-
-    @JsonIgnore
-    private NumberFormat amountFormatter = NumberFormat.getCurrencyInstance();
-
     private String currencyCode;
 
     // fRetirement
@@ -64,13 +59,16 @@ public class AccountImpl extends MnyObject implements Comparable<AccountImpl>, A
     // uat
     private Integer investmentSubType;
 
+    private List<SecurityHolding> securityHoldings;
+
     // amtLimit
     private BigDecimal amountLimit;
 
-    private List<SecurityHolding> securityHoldings;
-
     @JsonIgnore
     private final NumberFormat securityQuantityFormatter;
+
+    @JsonIgnore
+    private NumberFormat amountFormatter = NumberFormat.getCurrencyInstance();
 
     @JsonIgnore
     private List<Transaction> transactions;

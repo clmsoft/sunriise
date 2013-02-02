@@ -1,19 +1,82 @@
 {
   "id" : 2,
-  "relatedToAccountId" : 3,
-  "relatedToAccount" : null,
   "name" : "Woodgrove Investments",
+  "relatedToAccountId" : 3,
+  "relatedToAccount" : {
+    "id" : 3,
+    "name" : "Woodgrove Investments (Cash)",
+    "relatedToAccountId" : 2,
+    "relatedToAccount" : null,
+    "type" : 0,
+    "accountType" : "BANKING",
+    "closed" : false,
+    "startingBalance" : 0.0000,
+    "currentBalance" : -1594.6200,
+    "currencyId" : 45,
+    "currencyCode" : null,
+    "retirement" : false,
+    "investmentSubType" : -1,
+    "securityHoldings" : null,
+    "amountLimit" : null,
+    "creditCard" : false,
+    "401k403b" : false
+  },
   "type" : 5,
+  "accountType" : "INVESTMENT",
   "closed" : false,
   "startingBalance" : 0.0000,
-  "currentBalance" : null,
-  "accountType" : "INVESTMENT",
+  "currentBalance" : 5755.414999999999054125510156154632568359375,
   "currencyId" : 45,
   "currencyCode" : "USD",
   "retirement" : false,
   "investmentSubType" : -1,
+  "securityHoldings" : [ {
+    "security" : {
+      "id" : 68,
+      "name" : "Coho Winery",
+      "symbol" : "COHO"
+    },
+    "quantity" : 250.0,
+    "price" : 0.000100000000000000004792173602385929598312941379845142364501953125,
+    "marketValue" : 0.025000000000000001387778780781445675529539585113525390625
+  }, {
+    "security" : {
+      "id" : 78,
+      "name" : "Contoso Pharmaceuticals",
+      "symbol" : "LEH"
+    },
+    "quantity" : 50.0,
+    "price" : 72.9800000000000039790393202565610408782958984375,
+    "marketValue" : 3649
+  }, {
+    "security" : {
+      "id" : 69,
+      "name" : "Fabrikam, Inc.",
+      "symbol" : "FABRI"
+    },
+    "quantity" : 150.0,
+    "price" : 23.5,
+    "marketValue" : 3525
+  }, {
+    "security" : {
+      "id" : 114,
+      "name" : "Microsoft",
+      "symbol" : "MSFT"
+    },
+    "quantity" : 3.0,
+    "price" : 29.910000000000000142108547152020037174224853515625,
+    "marketValue" : 89.7300000000000039790393202565610408782958984375
+  }, {
+    "security" : {
+      "id" : 105,
+      "name" : "Woodgrove Money Market Fund",
+      "symbol" : "WGMXX"
+    },
+    "quantity" : 86.28,
+    "price" : 1,
+    "marketValue" : 86.280000000000001136868377216160297393798828125
+  } ],
   "amountLimit" : null,
-  "securityHoldings" : null,
   "creditCard" : false,
   "401k403b" : false
 }

@@ -1,19 +1,19 @@
 {
   "id" : 73,
+  "name" : "Charlie & May’s Joint Inv (Cash)",
   "relatedToAccountId" : 72,
   "relatedToAccount" : null,
-  "name" : "Charlie & May’s Joint Inv (Cash)",
   "type" : 0,
+  "accountType" : "BANKING",
   "closed" : false,
   "startingBalance" : 0.0000,
-  "currentBalance" : null,
-  "accountType" : "BANKING",
+  "currentBalance" : -10004.1500,
   "currencyId" : 45,
   "currencyCode" : "USD",
   "retirement" : false,
   "investmentSubType" : -1,
-  "amountLimit" : null,
   "securityHoldings" : null,
+  "amountLimit" : null,
   "creditCard" : false,
   "401k403b" : false
 }

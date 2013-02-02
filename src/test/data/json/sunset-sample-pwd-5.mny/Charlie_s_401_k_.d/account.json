@@ -1,19 +1,82 @@
 {
   "id" : 16,
-  "relatedToAccountId" : 17,
-  "relatedToAccount" : null,
   "name" : "Charlie's 401(k)",
+  "relatedToAccountId" : 17,
+  "relatedToAccount" : {
+    "id" : 17,
+    "name" : "Charlie's 401(k) (Contributions)",
+    "relatedToAccountId" : 16,
+    "relatedToAccount" : null,
+    "type" : 0,
+    "accountType" : "BANKING",
+    "closed" : false,
+    "startingBalance" : 250000.0000,
+    "currentBalance" : 13192.6800,
+    "currencyId" : 45,
+    "currencyCode" : null,
+    "retirement" : false,
+    "investmentSubType" : -1,
+    "securityHoldings" : null,
+    "amountLimit" : null,
+    "creditCard" : false,
+    "401k403b" : false
+  },
   "type" : 5,
+  "accountType" : "INVESTMENT",
   "closed" : false,
   "startingBalance" : 0.0000,
-  "currentBalance" : null,
-  "accountType" : "INVESTMENT",
+  "currentBalance" : 38223.9000000000014551915228366851806640625,
   "currencyId" : 45,
   "currencyCode" : "USD",
   "retirement" : true,
   "investmentSubType" : 1,
+  "securityHoldings" : [ {
+    "security" : {
+      "id" : 56,
+      "name" : "Litware, Inc.",
+      "symbol" : "LITW"
+    },
+    "quantity" : 156.0,
+    "price" : 21.89999999999999857891452847979962825775146484375,
+    "marketValue" : 3416.399999999999636202119290828704833984375
+  }, {
+    "security" : {
+      "id" : 59,
+      "name" : "Lucerne Publishing",
+      "symbol" : "LUPB"
+    },
+    "quantity" : 527.0,
+    "price" : 11.1400000000000005684341886080801486968994140625,
+    "marketValue" : 5870.780000000000654836185276508331298828125
+  }, {
+    "security" : {
+      "id" : 114,
+      "name" : "Microsoft",
+      "symbol" : "MSFT"
+    },
+    "quantity" : 44.0,
+    "price" : 29.910000000000000142108547152020037174224853515625,
+    "marketValue" : 1316.0399999999999636202119290828704833984375
+  }, {
+    "security" : {
+      "id" : 60,
+      "name" : "Trey Research",
+      "symbol" : "TREY"
+    },
+    "quantity" : 12.0,
+    "price" : 994,
+    "marketValue" : 11928
+  }, {
+    "security" : {
+      "id" : 57,
+      "name" : "Wide World Importers",
+      "symbol" : null
+    },
+    "quantity" : 2500.0,
+    "price" : 1,
+    "marketValue" : 2500
+  } ],
   "amountLimit" : null,
-  "securityHoldings" : null,
   "creditCard" : false,
   "401k403b" : true
 }

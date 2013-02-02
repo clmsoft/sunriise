@@ -1,19 +1,55 @@
 {
   "id" : 5,
-  "relatedToAccountId" : 6,
-  "relatedToAccount" : null,
   "name" : "Stocks and Shares",
+  "relatedToAccountId" : 6,
+  "relatedToAccount" : {
+    "id" : 6,
+    "name" : "Stocks and Shares (Cash)",
+    "relatedToAccountId" : 5,
+    "relatedToAccount" : null,
+    "type" : 0,
+    "accountType" : "BANKING",
+    "closed" : false,
+    "startingBalance" : 0.0000,
+    "currentBalance" : -178.0000,
+    "currencyId" : 2,
+    "currencyCode" : null,
+    "retirement" : false,
+    "investmentSubType" : -1,
+    "securityHoldings" : null,
+    "amountLimit" : null,
+    "creditCard" : false,
+    "401k403b" : false
+  },
   "type" : 5,
+  "accountType" : "INVESTMENT",
   "closed" : false,
   "startingBalance" : 0.0000,
-  "currentBalance" : null,
-  "accountType" : "INVESTMENT",
+  "currentBalance" : 627.5,
   "currencyId" : 2,
   "currencyCode" : "AUD",
   "retirement" : false,
   "investmentSubType" : -1,
+  "securityHoldings" : [ {
+    "security" : {
+      "id" : 56,
+      "name" : "Alpine Ski Haus",
+      "symbol" : null
+    },
+    "quantity" : 250.0,
+    "price" : 2.5099999999999997868371792719699442386627197265625,
+    "marketValue" : 627.5
+  }, {
+    "security" : {
+      "id" : 57,
+      "name" : "Wide World Importers",
+      "symbol" : null
+    },
+    "quantity" : 100.0,
+    "price" : 1.7800000000000000266453525910037569701671600341796875,
+    "marketValue" : 178
+  } ],
   "amountLimit" : null,
-  "securityHoldings" : null,
   "creditCard" : false,
   "401k403b" : false
 }

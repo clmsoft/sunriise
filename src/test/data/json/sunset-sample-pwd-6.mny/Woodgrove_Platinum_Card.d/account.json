@@ -1,19 +1,19 @@
 {
   "id" : 63,
+  "name" : "Woodgrove Platinum Card",
   "relatedToAccountId" : null,
   "relatedToAccount" : null,
-  "name" : "Woodgrove Platinum Card",
   "type" : 1,
+  "accountType" : "CREDIT_CARD",
   "closed" : false,
   "startingBalance" : -836.0000,
-  "currentBalance" : null,
-  "accountType" : "CREDIT_CARD",
+  "currentBalance" : -836.0000,
   "currencyId" : 45,
   "currencyCode" : "USD",
   "retirement" : false,
   "investmentSubType" : -1,
-  "amountLimit" : -10000.0000,
   "securityHoldings" : null,
+  "amountLimit" : -10000.0000,
   "creditCard" : true,
   "401k403b" : false
 }

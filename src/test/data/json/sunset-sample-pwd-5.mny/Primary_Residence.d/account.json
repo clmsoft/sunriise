@@ -1,19 +1,19 @@
 {
   "id" : 19,
+  "name" : "Primary Residence",
   "relatedToAccountId" : null,
   "relatedToAccount" : null,
-  "name" : "Primary Residence",
   "type" : 3,
+  "accountType" : "ASSET",
   "closed" : false,
   "startingBalance" : 355000.0000,
-  "currentBalance" : null,
-  "accountType" : "ASSET",
+  "currentBalance" : 355000.0000,
   "currencyId" : 45,
   "currencyCode" : "USD",
   "retirement" : false,
   "investmentSubType" : -1,
-  "amountLimit" : null,
   "securityHoldings" : null,
+  "amountLimit" : null,
   "creditCard" : false,
   "401k403b" : false
 }

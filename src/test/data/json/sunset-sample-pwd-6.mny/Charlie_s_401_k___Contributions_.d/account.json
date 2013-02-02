@@ -1,19 +1,19 @@
 {
   "id" : 17,
+  "name" : "Charlie's 401(k) (Contributions)",
   "relatedToAccountId" : 16,
   "relatedToAccount" : null,
-  "name" : "Charlie's 401(k) (Contributions)",
   "type" : 0,
+  "accountType" : "BANKING",
   "closed" : false,
   "startingBalance" : 250000.0000,
-  "currentBalance" : null,
-  "accountType" : "BANKING",
+  "currentBalance" : 13257.3500,
   "currencyId" : 45,
   "currencyCode" : "USD",
   "retirement" : false,
   "investmentSubType" : -1,
-  "amountLimit" : null,
   "securityHoldings" : null,
+  "amountLimit" : null,
   "creditCard" : false,
   "401k403b" : false
 }
