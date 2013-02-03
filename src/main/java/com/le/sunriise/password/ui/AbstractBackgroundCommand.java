@@ -24,6 +24,7 @@ import java.awt.event.ActionListener;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
@@ -41,21 +42,27 @@ public abstract class AbstractBackgroundCommand implements ActionListener {
 
     private StopWatch stopWatch = null;
 
+    private Component parentComponent = null;
+
     public AbstractBackgroundCommand(JButton button) {
         super();
         this.button = button;
-    }
-
-    public AbstractBackgroundCommand() {
-        super();
+        this.parentComponent = button.getParent();
     }
 
     @Override
     public void actionPerformed(ActionEvent event) {
         if (!isRunning()) {
+            log.info("CLICK to START");
             startBackground();
         } else {
-            notifyBackgroundToStop();
+            log.info("CLICK to STOP");
+            if (JOptionPane.showConfirmDialog(parentComponent, "Stop current search?", "Request confirmation",
+                    JOptionPane.YES_NO_OPTION
+                    ) == JOptionPane.YES_OPTION) {
+                notifyBackgroundToStop();
+            }
+
         }
     }
 
@@ -118,26 +125,30 @@ public abstract class AbstractBackgroundCommand implements ActionListener {
 
     protected void notifyResult(final Component parentComponent, final String result) {
         log.info("matchedPassword=" + result);
-        Runnable doRun = new Runnable() {
-            @Override
-            public void run() {
-                if (result == null) {
-                    JOptionPane.showMessageDialog(parentComponent, "Result of last search: NO password found.", "Search Result",
-                            JOptionPane.WARNING_MESSAGE);
-                } else {
-                    JTextArea textArea = new JTextArea();
-                    textArea.setEditable(false);
-                    textArea.setColumns(30);
-                    textArea.setLineWrap(true);
-                    textArea.setWrapStyleWord(true);
-                    textArea.append("Result of last search:\n");
-                    textArea.append("found password=" + result);
-                    textArea.setSize(textArea.getPreferredSize().width, 1);
-                    JOptionPane.showMessageDialog(parentComponent, textArea, "Search Result", JOptionPane.INFORMATION_MESSAGE);
+
+        boolean showDialog = false;
+        if (showDialog) {
+            Runnable doRun = new Runnable() {
+                @Override
+                public void run() {
+                    if (result == null) {
+                        JOptionPane.showMessageDialog(parentComponent, "Result of last search: NO password found.",
+                                "Search Result", JOptionPane.WARNING_MESSAGE);
+                    } else {
+                        JTextArea textArea = new JTextArea();
+                        textArea.setEditable(false);
+                        textArea.setColumns(30);
+                        textArea.setLineWrap(true);
+                        textArea.setWrapStyleWord(true);
+                        textArea.append("Result of last search:\n");
+                        textArea.append("found password=" + result);
+                        textArea.setSize(textArea.getPreferredSize().width, 1);
+                        JOptionPane.showMessageDialog(parentComponent, textArea, "Search Result", JOptionPane.INFORMATION_MESSAGE);
+                    }
                 }
-            }
-        };
-        SwingUtilities.invokeLater(doRun);
+            };
+            SwingUtilities.invokeLater(doRun);
+        }
     }
 
     public long getElapsed() {

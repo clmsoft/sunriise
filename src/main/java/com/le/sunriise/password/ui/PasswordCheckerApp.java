@@ -31,7 +31,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.prefs.Preferences;
 
+import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -56,6 +58,7 @@ import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 import com.le.sunriise.JavaInfo;
+import com.le.sunriise.accountviewer.AccountViewer;
 import com.le.sunriise.model.bean.BruteForceCheckerModel;
 import com.le.sunriise.model.bean.PasswordCheckerModel;
 import com.le.sunriise.password.bruteforce.BruteForceStat;
@@ -65,6 +68,8 @@ import com.le.sunriise.password.timing.Duration;
 
 public class PasswordCheckerApp {
     private static final Logger log = Logger.getLogger(PasswordCheckerApp.class);
+
+    private static final Preferences prefs = Preferences.userNodeForPackage(PasswordCheckerApp.class);
 
     private JFrame frame;
 
@@ -91,7 +96,7 @@ public class PasswordCheckerApp {
 
     private JLabel[][] scoreboards;
 
-    private AtomicLong counter = new AtomicLong(0L);
+//    private AtomicLong counter = new AtomicLong(0L);
 
     private final class OpenWordListAction implements ActionListener {
         private JFileChooser fc = null;
@@ -189,6 +194,8 @@ public class PasswordCheckerApp {
             @Override
             protected void setMnyFileName(String fileName) {
                 dataModel.setMnyFileName(fileName);
+                prefs.put("lastOpenedMnyFileName", fileName);
+
             }
 
         });
@@ -255,6 +262,7 @@ public class PasswordCheckerApp {
             @Override
             protected void setMnyFileName(String fileName) {
                 bruteForceDataModel.setMnyFileName(fileName);
+                prefs.put("lastOpenedMnyFileName", fileName);
             }
         });
         bruteForceView.add(btnNewButton_3, "6, 2");
@@ -308,18 +316,33 @@ public class PasswordCheckerApp {
         for (int i = 0; i < rows; i++) {
             scoreboards[i] = new JLabel[columns];
             for (int j = 0; j < 12; j++) {
-                scoreboards[i][j] = new JLabel("");
+                scoreboards[i][j] = new JLabel(" ");
             }
         }
-        JPanel progressView = new JPanel();
-        bruteForceViewParent.add(progressView);
-        progressView.setLayout(new GridLayout(3, 12));
+        JPanel scoreBoardView = new JPanel();
+        bruteForceViewParent.add(scoreBoardView);
+        scoreBoardView.setBorder(BorderFactory.createTitledBorder("Scoreboard"));
+        scoreBoardView.setLayout(new GridLayout(3, 12));
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < columns; j++) {
-                progressView.add(scoreboards[i][j]);
+                scoreBoardView.add(scoreboards[i][j]);
             }
         }
 
+        if (dataModel != null) {
+            String str = prefs.get("lastOpenedMnyFileName", null);
+            if (str != null) {
+                dataModel.setMnyFileName(str);
+            }
+        }
+        
+        if (bruteForceDataModel != null) {
+            String str = prefs.get("lastOpenedMnyFileName", null);
+            if (str != null) {
+                bruteForceDataModel.setMnyFileName(str);
+            }
+        }
+        
         initDataBindings();
     }
 
@@ -337,21 +360,12 @@ public class PasswordCheckerApp {
                 }
 
                 CheckBruteForce checker = action.getChecker();
-                final BruteForceStat stat = checker.getStat();
-                final char[] alphabets = checker.getAlphabets();
-                if ((stat != null) && (alphabets != null)) {
-                    Runnable doRun = new Runnable() {
-                        @Override
-                        public void run() {
-                            updateScoreboardsUI(stat, alphabets);
-                        }
-                    };
-                    SwingUtilities.invokeLater(doRun);
-                }
+                updateScoreboardsUI(checker, true);
 
                 long delta = action.getElapsed();
                 final Duration duration = new Duration(delta);
 
+                final BruteForceStat stat = checker.getStat();
                 String rateString = null;
                 if (stat != null) {
                     if (stat.getSeconds().longValue() > 0) {
@@ -368,46 +382,6 @@ public class PasswordCheckerApp {
                 }
             }
 
-            private void updateScoreboardsUI(final BruteForceStat stat, char[] alphabets) {
-                JLabel[][] scoreboards = getScoreboards();
-                int[] cursorIndex = stat.getCurrentCursorIndex();
-                if ((cursorIndex == null) || (cursorIndex.length <= 0)) {
-                    return;
-                }
-
-                int i = 2;
-                int columns = scoreboards[i].length;
-                for (int j = 0; j < columns; j++) {
-                    if (j < cursorIndex.length) {
-                        scoreboards[i][j].setText("" + alphabets.length);
-                    } else {
-                        scoreboards[i][j].setText("");
-                    }
-                }
-
-                i = 1;
-                for (int j = 0; j < columns; j++) {
-                    if (j < cursorIndex.length) {
-                        scoreboards[i][j].setText("" + cursorIndex[j]);
-                    } else {
-                        scoreboards[i][j].setText("");
-                    }
-                }
-
-                i = 0;
-                for (int j = 0; j < columns; j++) {
-                    if (j < cursorIndex.length) {
-                        int index = cursorIndex[j];
-                        if ((alphabets != null) && (index >= 0) && (index < alphabets.length)) {
-                            scoreboards[i][j].setText("" + alphabets[index]);
-                        } else {
-                            scoreboards[i][j].setText("");
-                        }
-                    } else {
-                        scoreboards[i][j].setText("");
-                    }
-                }
-            }
         };
         long period = 1L;
         long initialDelay = 1L;
@@ -509,4 +483,66 @@ public class PasswordCheckerApp {
     public JLabel[][] getScoreboards() {
         return scoreboards;
     }
+
+    protected void updateScoreboardsUI(CheckBruteForce checker, boolean invokeLater) {
+        final BruteForceStat stat = checker.getStat();
+
+        final char[] alphabets = checker.getAlphabets();
+
+        if ((stat != null) && (alphabets != null)) {
+            Runnable doRun = new Runnable() {
+                @Override
+                public void run() {
+                    updateScoreboardsUI(stat, alphabets);
+                }
+            };
+            if (invokeLater) {
+                SwingUtilities.invokeLater(doRun);
+            } else {
+                doRun.run();
+            }
+        }
+    }
+
+    private void updateScoreboardsUI(final BruteForceStat stat, char[] alphabets) {
+        JLabel[][] scoreboards = getScoreboards();
+        int[] cursorIndex = stat.getCurrentCursorIndex();
+        if ((cursorIndex == null) || (cursorIndex.length <= 0)) {
+            return;
+        }
+
+        int i = 2;
+        int columns = scoreboards[i].length;
+        for (int j = 0; j < columns; j++) {
+            if (j < cursorIndex.length) {
+                scoreboards[i][j].setText("" + alphabets.length);
+            } else {
+                scoreboards[i][j].setText("");
+            }
+        }
+
+        i = 1;
+        for (int j = 0; j < columns; j++) {
+            if (j < cursorIndex.length) {
+                scoreboards[i][j].setText("" + cursorIndex[j]);
+            } else {
+                scoreboards[i][j].setText("");
+            }
+        }
+
+        i = 0;
+        for (int j = 0; j < columns; j++) {
+            if (j < cursorIndex.length) {
+                int index = cursorIndex[j];
+                if ((alphabets != null) && (index >= 0) && (index < alphabets.length)) {
+                    scoreboards[i][j].setText("" + alphabets[index]);
+                } else {
+                    scoreboards[i][j].setText("");
+                }
+            } else {
+                scoreboards[i][j].setText("");
+            }
+        }
+    }
+
 }

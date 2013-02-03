@@ -22,17 +22,17 @@ import java.util.concurrent.TimeUnit;
 
 public class Duration implements Comparable<Duration> {
     public static final long DAYS_IN_YEAR = 365L;
-    
+
     private static final long MILLISECONDS = 1000L;
     private static final long SECONDS = 60L;
     private static final long MINUTES = 60L;
     private static final long HOURS = 24L;
-    
+
     public static final long MILLISECONDS_PER_SECOND = MILLISECONDS;
     public static final long MILLISECONDS_PER_MINUTE = MILLISECONDS_PER_SECOND * SECONDS;
     public static final long MILLISECONDS_PER_HOUR = MILLISECONDS_PER_MINUTE * MINUTES;
     public static final long MILLISECONDS_PER_DAY = MILLISECONDS_PER_HOUR * HOURS;
-    
+
     private long years;
     private long days;
     private final long hours;
@@ -40,6 +40,9 @@ public class Duration implements Comparable<Duration> {
     private final long seconds;
     private final long millis;
     private final long duration;
+
+    private static final String[] FULL_UNIT_NAME = { "years", "days", "hours", "mins", "secs", "millis", };
+    private static final String[] SHORT_UNIT_NAME = { "y", "d", "h", "m", "s", "ms", };
 
     public Duration(long duration) {
         this.duration = duration;
@@ -69,30 +72,46 @@ public class Duration implements Comparable<Duration> {
     }
 
     public String toString(boolean compact) {
+        boolean shortName = true;
+        String[] unitNames = null;
+        if (shortName) {
+            unitNames = SHORT_UNIT_NAME;
+        } else {
+            unitNames = FULL_UNIT_NAME;
+        }
         if (compact) {
             StringBuilder sb = new StringBuilder();
             int n = 0;
 
-            n = appendIfPositive(sb, years, "years", n);
-            n = appendIfPositive(sb, days, "days", n);
-            n = appendIfPositive(sb, hours, "hours", n);
-            n = appendIfPositive(sb, minutes, "minutes", n);
-            n = appendIfPositive(sb, seconds, "seconds", n);
-            n = appendIfPositive(sb, millis, "millis", n);
+            n = appendIfPositive(sb, years, unitNames[0], n);
+            n = appendIfPositive(sb, days, unitNames[1], n);
+            n = appendIfPositive(sb, hours, unitNames[2], n);
+            n = appendIfPositive(sb, minutes, unitNames[3], n);
+            n = appendIfPositive(sb, seconds, unitNames[4], n);
+            n = appendIfPositive(sb, millis, unitNames[5], n);
 
             return sb.toString();
         } else {
-            return String.format("%d years %d days, %d hours, %d mins, %d secs, %d millis", years, days, hours, minutes, seconds,
-                    millis);
+            return String.format("%d " + unitNames[0] + "," + " %d " + unitNames[1] + "," + " %d " + unitNames[2] + "," + " %d "
+                    + unitNames[3] + "," + " %d " + unitNames[4] + "," + " %d " + unitNames[5], years, days, hours, minutes,
+                    seconds, millis);
         }
     }
 
     private int appendIfPositive(StringBuilder sb, long value, String label, int n) {
+        return appendIfPositive(sb, value, label, n, null);
+    }
+
+    private int appendIfPositive(StringBuilder sb, long value, String label, int n, String sep) {
         if (value > 0) {
             if (n > 0) {
                 sb.append(" ");
             }
-            sb.append(String.format("%d " + label, value));
+            if (sep != null) {
+                sb.append(String.format("%d" + sep + label, value));
+            } else {
+                sb.append(String.format("%d" + label, value));
+            }
             n++;
         }
         return n;
