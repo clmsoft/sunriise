@@ -129,6 +129,13 @@ final class DictionarySearchAction extends DictionarySearch implements ActionLis
 
         final Component parentComponent = app.getFrame();
 
+        boolean showResultAsPopup = false;
+        if (showResultAsPopup) {
+            showResultAsPopup(parentComponent, matchedPassword);
+        }
+    }
+
+    protected void showResultAsPopup(final Component parentComponent, final String matchedPassword) {
         Runnable command = new Runnable() {
             @Override
             public void run() {

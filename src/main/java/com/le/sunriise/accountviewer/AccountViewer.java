@@ -86,6 +86,7 @@ import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Table;
 import com.le.sunriise.JavaInfo;
 import com.le.sunriise.StopWatch;
+import com.le.sunriise.SunriiseBuildNumber;
 import com.le.sunriise.export.ExportToContext;
 import com.le.sunriise.json.JSONUtils;
 import com.le.sunriise.mnyobject.Account;
@@ -817,6 +818,9 @@ public class AccountViewer {
                     AccountViewer window = new AccountViewer();
                     showMainFrame(window);
 
+                    String buildNumber = SunriiseBuildNumber.getBuildnumber();
+                    log.info("BuildNumber: " + buildNumber);
+                    
                 } catch (Exception e) {
                     log.error(e, e);
                 }

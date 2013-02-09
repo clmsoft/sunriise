@@ -45,6 +45,8 @@ import com.jgoodies.forms.layout.RowSpec;
 public class Launcher {
     private static final Logger log = Logger.getLogger(Launcher.class);
 
+    private static String VERSION;
+
     private JFrame frame;
     private final Action viewerAction = new SwingAction();
     private final Action accountViewerAction = new AccountViewerSwingAction();
@@ -66,9 +68,21 @@ public class Launcher {
             }
 
             protected void showMainFrame(Launcher window) {
-                window.frame.pack();
-                window.frame.setLocationRelativeTo(null);
-                window.frame.setVisible(true);
+                JFrame mainFrame = window.getFrame();
+
+                Launcher.VERSION = SunriiseBuildNumber.getBuildnumber();
+                if (Launcher.VERSION != null) {
+                    mainFrame.setTitle("Sunriise - " + Launcher.VERSION);
+                } else {
+                    mainFrame.setTitle("Sunriise");
+                }
+                log.info("BuildNumber: " + Launcher.VERSION);
+
+                mainFrame.pack();
+
+                mainFrame.setLocationRelativeTo(null);
+
+                mainFrame.setVisible(true);
             }
         });
     }
@@ -84,16 +98,11 @@ public class Launcher {
      * Initialize the contents of the frame.
      */
     private void initialize() {
-        frame = new JFrame();
-        String buildNumber = BuildNumber.findBuilderNumber();
-        if (buildNumber != null) {
-            frame.setTitle("Sunriise Launcher - " + buildNumber);
-        } else {
-            frame.setTitle("Sunriise Launcher");
-        }
+        setFrame(new JFrame());
+
         // frame.setBounds(100, 100, 450, 300);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.getContentPane().setLayout(
+        getFrame().setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        getFrame().getContentPane().setLayout(
                 new FormLayout(new ColumnSpec[] { ColumnSpec.decode("right:90px"), FormFactory.RELATED_GAP_COLSPEC,
                         FormFactory.DEFAULT_COLSPEC, FormFactory.RELATED_GAP_COLSPEC, FormFactory.DEFAULT_COLSPEC, },
                         new RowSpec[] { FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
@@ -102,29 +111,29 @@ public class Launcher {
 
         JButton btnNewButton_3 = new JButton();
         btnNewButton_3.setAction(viewerAction);
-        frame.getContentPane().add(btnNewButton_3, "1, 3");
+        getFrame().getContentPane().add(btnNewButton_3, "1, 3");
 
         JLabel lblNewJgoodiesLabel_3 = DefaultComponentFactory.getInstance().createLabel(
                 "MS Money file viewer (view tables, rows ...)");
         lblNewJgoodiesLabel_3.setHorizontalAlignment(SwingConstants.LEFT);
-        frame.getContentPane().add(lblNewJgoodiesLabel_3, "3, 3");
+        getFrame().getContentPane().add(lblNewJgoodiesLabel_3, "3, 3");
 
         JButton btnNewButton_4 = new JButton();
         btnNewButton_4.setAction(accountViewerAction);
-        frame.getContentPane().add(btnNewButton_4, "1, 5");
+        getFrame().getContentPane().add(btnNewButton_4, "1, 5");
 
         JLabel lblNewJgoodiesLabel_4 = DefaultComponentFactory.getInstance().createLabel(
                 "Accounts viewer (accounts, transactions ...)");
         lblNewJgoodiesLabel_4.setHorizontalAlignment(SwingConstants.LEFT);
-        frame.getContentPane().add(lblNewJgoodiesLabel_4, "3, 5");
+        getFrame().getContentPane().add(lblNewJgoodiesLabel_4, "3, 5");
 
         JButton btnNewButton_5 = new JButton();
         btnNewButton_5.setAction(passwordToolAction);
-        frame.getContentPane().add(btnNewButton_5, "1, 7");
+        getFrame().getContentPane().add(btnNewButton_5, "1, 7");
 
         JLabel lblNewJgoodiesLabel_5 = DefaultComponentFactory.getInstance().createLabel("Password tools");
         lblNewJgoodiesLabel_5.setHorizontalAlignment(SwingConstants.LEFT);
-        frame.getContentPane().add(lblNewJgoodiesLabel_5, "3, 7");
+        getFrame().getContentPane().add(lblNewJgoodiesLabel_5, "3, 7");
     }
 
     private class SwingAction extends AbstractAction {
@@ -145,7 +154,7 @@ public class Launcher {
         public void actionPerformed(ActionEvent e) {
             String[] args = new String[0];
             MnyViewer.main(args);
-            frame.setVisible(false);
+            getFrame().setVisible(false);
         }
     }
 
@@ -166,7 +175,7 @@ public class Launcher {
         public void actionPerformed(ActionEvent e) {
             String[] args = new String[0];
             AccountViewer.main(args);
-            frame.setVisible(false);
+            getFrame().setVisible(false);
         }
     }
 
@@ -187,7 +196,15 @@ public class Launcher {
         public void actionPerformed(ActionEvent e) {
             String[] args = new String[0];
             PasswordCheckerApp.main(args);
-            frame.setVisible(false);
+            getFrame().setVisible(false);
         }
+    }
+
+    public JFrame getFrame() {
+        return frame;
+    }
+
+    private void setFrame(JFrame frame) {
+        this.frame = frame;
     }
 }

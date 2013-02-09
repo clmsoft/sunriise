@@ -1,21 +1,3 @@
-/*******************************************************************************
- * Copyright (c) 2010 Hung Le
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
- * USA
- *******************************************************************************/
 package com.le.sunriise;
 
 import java.io.IOException;
@@ -30,7 +12,7 @@ import org.apache.log4j.Logger;
 public class BuildNumber {
     private static final Logger log = Logger.getLogger(BuildNumber.class);
 
-    public static String findBuilderNumber(String resourceName, ClassLoader classLoader) {
+    public static String findBuilderNumber(String implementationVendorId, String resourceName, ClassLoader classLoader) {
         String buildNumber = null;
         if (log.isDebugEnabled()) {
             log.debug("> findBuilderNumber: resourceName=" + resourceName + ", classLoader=" + classLoader);
@@ -78,10 +60,11 @@ public class BuildNumber {
                     if ((id == null) || (id.length() <= 0)) {
                         continue;
                     }
-                    if (id.compareTo("com.le.tools.moneyutils") != 0) {
+//                    String implementationVendorId = "com.le.tools.moneyutils";
+                    if (id.compareTo(implementationVendorId) != 0) {
                         continue;
                     }
-                    log.info("FOUND Manifest with id='" + "com.le.tools.moneyutils" + "'");
+                    log.info("FOUND Manifest with id='" + implementationVendorId + "'");
                     String build = attributes.getValue("Implementation-Build");
                     if (build != null) {
                         // GUI.VERSION = build;
@@ -122,26 +105,39 @@ public class BuildNumber {
         return buildNumber;
     }
 
-    public static String findBuilderNumber() {
+    public static String findBuilderNumber(String implementationVendorId, String defaultBuildNumber) {
+        log.info("> findBuilderNumber: implementationVendorId=" + implementationVendorId);
         String buildNumber = null;
         String resourceName = "META-INF/MANIFEST.MF";
         ClassLoader classLoader = null;
         if (buildNumber == null) {
             classLoader = Thread.currentThread().getContextClassLoader();
             log.debug("> findBuilderNumber (contextClassLoader): resourceName=" + resourceName + ", classLoader=" + classLoader);
-            buildNumber = findBuilderNumber(resourceName, classLoader);
+            buildNumber = findBuilderNumber(implementationVendorId, resourceName, classLoader);
         }
         if (buildNumber == null) {
             classLoader = log.getClass().getClassLoader();
             log.debug("> findBuilderNumber (logger classLoader): resourceName=" + resourceName + ", classLoader=" + classLoader);
-            buildNumber = findBuilderNumber(resourceName, classLoader);
+            buildNumber = findBuilderNumber(implementationVendorId, resourceName, classLoader);
         }
         if (buildNumber == null) {
             classLoader = ClassLoader.getSystemClassLoader();
             log.debug("> findBuilderNumber (systemClassLoader): resourceName=" + resourceName + ", classLoader=" + classLoader);
-            buildNumber = findBuilderNumber(resourceName, classLoader);
+            buildNumber = findBuilderNumber(implementationVendorId, resourceName, classLoader);
         }
+        
+        if (buildNumber == null) {
+            log.warn("Cannot find buildNumber from Manifest.");
+            log.warn("Using built-in buildNumber which is likely to be wrong!");
+            buildNumber = defaultBuildNumber;
+        }
+        
         return buildNumber;
+    }
+
+    public static String findBuilderNumber(String implementationVendorId) {
+        String defaultBuildNumber = "0.0.0";
+        return findBuilderNumber(implementationVendorId, defaultBuildNumber);
     }
 
 }

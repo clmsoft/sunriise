@@ -107,8 +107,6 @@ import org.jdesktop.beansbinding.ELProperty;
 import org.jdesktop.swingbinding.JListBinding;
 import org.jdesktop.swingbinding.SwingBindings;
 
-import app.MnyViewer;
-
 import com.healthmarketscience.jackcess.Column;
 import com.healthmarketscience.jackcess.DataType;
 import com.healthmarketscience.jackcess.Database;
@@ -118,7 +116,9 @@ import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 import com.le.sunriise.JavaInfo;
+import com.le.sunriise.Launcher;
 import com.le.sunriise.StopWatch;
+import com.le.sunriise.SunriiseBuildNumber;
 import com.le.sunriise.export.ExportToContext;
 import com.le.sunriise.index.IndexLookup;
 import com.le.sunriise.model.bean.MnyViewerDataModel;
@@ -332,6 +332,8 @@ public class MynViewer {
                     MynViewer window = new MynViewer();
                     showMainFrame(window);
 
+                    String buildNumber = SunriiseBuildNumber.getBuildnumber();
+                    log.info("BuildNumber: " + buildNumber);
                 } catch (Exception e) {
                     log.error(e, e);
                 }

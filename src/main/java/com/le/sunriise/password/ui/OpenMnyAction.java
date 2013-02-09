@@ -36,9 +36,33 @@ abstract class OpenMnyAction implements ActionListener {
     private JTextField textField;
     private Component parent;
 
+    private MnyFileFilter choosableFileFilter;
+
     protected abstract void setMnyFileName(String fileName);
 
-    public OpenMnyAction(Component parent, JTextField textField) {
+    private final class MnyFileFilter extends FileFilter {
+        @Override
+        public boolean accept(File f) {
+            if (f.isDirectory()) {
+                return true;
+            }
+    
+            String name = f.getName();
+            if (name.endsWith(".mny")) {
+                return true;
+            }
+    
+            return false;
+        }
+    
+        @Override
+        public String getDescription() {
+            String description = "*.mny - Money file";
+            return description;
+        }
+    }
+
+    public OpenMnyAction(Component parent, JTextField textField, JFileChooser fc) {
         super();
         this.parent = parent;
         this.textField = textField;
@@ -46,41 +70,21 @@ abstract class OpenMnyAction implements ActionListener {
         if (log.isDebugEnabled()) {
             log.debug("> new JFileChooser");
         }
-        this.fc = new JFileChooser(new File("."));
-//        fc = new JFileChooser();
+//        this.fc = new JFileChooser(new File("."));
+        // fc = new JFileChooser();
+        this.fc = fc;
         if (log.isDebugEnabled()) {
             log.debug("< new JFileChooser");
         }
-//        this.fc = fc;
-        
-        FileFilter filter = new FileFilter() {
 
-            @Override
-            public boolean accept(File f) {
-                if (f.isDirectory()) {
-                    return true;
-                }
-
-                String name = f.getName();
-                if (name.endsWith(".mny")) {
-                    return true;
-                }
-
-                return false;
-            }
-
-            @Override
-            public String getDescription() {
-                String description = "*.mny - Money file";
-                return description;
-            }
-
-        };
-        fc.addChoosableFileFilter(filter);
+        this.choosableFileFilter = new MnyFileFilter();
+//        fc.addChoosableFileFilter(choosableFileFilter);
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
+        resetFileChooser(fc);
+        
         if (fc.showOpenDialog(parent) != JFileChooser.APPROVE_OPTION) {
             return;
         }
@@ -92,5 +96,17 @@ abstract class OpenMnyAction implements ActionListener {
         if (textField != null) {
             textField.setCaretPosition(str.length());
         }
+    }
+
+    private void resetFileChooser(JFileChooser fc) {
+        if (fc == null) {
+            return;
+        }
+        
+        if (choosableFileFilter != null) {
+            fc.resetChoosableFileFilters();
+            fc.addChoosableFileFilter(choosableFileFilter);
+        }
+        fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
     }
 }

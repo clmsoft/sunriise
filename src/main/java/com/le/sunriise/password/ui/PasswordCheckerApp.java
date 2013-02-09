@@ -33,7 +33,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.prefs.Preferences;
 
 import javax.swing.BorderFactory;
@@ -49,6 +48,7 @@ import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.filechooser.FileFilter;
 
 import org.apache.log4j.Logger;
 import org.jdesktop.beansbinding.AutoBinding;
@@ -61,7 +61,7 @@ import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 import com.le.sunriise.JavaInfo;
-import com.le.sunriise.accountviewer.AccountViewer;
+import com.le.sunriise.SunriiseBuildNumber;
 import com.le.sunriise.model.bean.BruteForceCheckerModel;
 import com.le.sunriise.model.bean.PasswordCheckerModel;
 import com.le.sunriise.password.bruteforce.BruteForceStat;
@@ -99,6 +99,8 @@ public class PasswordCheckerApp {
 
     private JLabel[][] scoreboards;
 
+    private JFileChooser sharedFileChooser;
+
     // private AtomicLong counter = new AtomicLong(0L);
 
     // private JFileChooser fc;
@@ -106,24 +108,29 @@ public class PasswordCheckerApp {
     private final class OpenWordListAction implements ActionListener {
         private JFileChooser fc = null;
         private JTextField textField;
+        private FileFilter choosableFileFilter = null;
 
-        public OpenWordListAction(JTextField textField) {
+        public OpenWordListAction(JTextField textField, JFileChooser fc) {
             super();
             this.textField = textField;
             // XXX - create JFileChooser is slow
             if (log.isDebugEnabled()) {
                 log.debug("> new JFileChooser");
             }
-            fc = new JFileChooser(new File("."));
+            // fc = new JFileChooser(new File("."));
+            this.fc = fc;
             if (log.isDebugEnabled()) {
                 log.debug("< new JFileChooser");
             }
-            fc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+            // fc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
         }
 
         @Override
         public void actionPerformed(ActionEvent e) {
             Component parent = getFrame();
+
+            resetFileChooser(fc);
+
             fc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
             if (fc.showOpenDialog(parent) != JFileChooser.APPROVE_OPTION) {
                 return;
@@ -136,6 +143,19 @@ public class PasswordCheckerApp {
             if (textField != null) {
                 textField.setCaretPosition(str.length());
             }
+        }
+
+        private void resetFileChooser(JFileChooser fc) {
+            if (fc == null) {
+                return;
+            }
+
+            fc.resetChoosableFileFilters();
+
+            if (choosableFileFilter != null) {
+                fc.addChoosableFileFilter(choosableFileFilter);
+            }
+            fc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
         }
     }
 
@@ -152,6 +172,9 @@ public class PasswordCheckerApp {
                     log.info("> Starting PasswordCheckerApp");
                     PasswordCheckerApp window = new PasswordCheckerApp();
                     showMainFrame(window);
+
+                    String buildNumber = SunriiseBuildNumber.getBuildnumber();
+                    log.info("BuildNumber: " + buildNumber);
                 } catch (Exception e) {
                     log.error(e, e);
                 }
@@ -159,17 +182,17 @@ public class PasswordCheckerApp {
 
             private void showMainFrame(PasswordCheckerApp window) {
                 JFrame mainFrame = window.getFrame();
-                
+
                 String title = "Mny Password Checker";
                 mainFrame.setTitle(title);
-                
+
                 Dimension preferredSize = new Dimension(600, 400);
                 mainFrame.setPreferredSize(preferredSize);
-                
+
                 mainFrame.pack();
-                
+
                 mainFrame.setLocationRelativeTo(null);
-                
+
                 mainFrame.setVisible(true);
                 log.info(" setVisible to true");
             }
@@ -233,9 +256,13 @@ public class PasswordCheckerApp {
         wordListView.add(textField, "4, 2, fill, default");
         textField.setColumns(10);
 
+        log.info("> Creating sharedFileChooser");
+        sharedFileChooser = new JFileChooser(".");
+        log.info("< Creating sharedFileChooser");
+            
         log.info("> Adding OpenMnyAction");
         JButton btnNewButton = new JButton("Open ...");
-        btnNewButton.addActionListener(new OpenMnyAction(this.getFrame(), textField) {
+        btnNewButton.addActionListener(new OpenMnyAction(this.getFrame(), textField, sharedFileChooser) {
             @Override
             protected void setMnyFileName(String fileName) {
                 dataModel.setMnyFileName(fileName);
@@ -256,7 +283,7 @@ public class PasswordCheckerApp {
 
         log.info("> Adding OpenWordListAction");
         JButton btnNewButton_1 = new JButton("Open ...");
-        btnNewButton_1.addActionListener(new OpenWordListAction(textField_1));
+        btnNewButton_1.addActionListener(new OpenWordListAction(textField_1, sharedFileChooser));
         wordListView.add(btnNewButton_1, "6, 4");
 
         // log.info("> 111");
@@ -311,7 +338,7 @@ public class PasswordCheckerApp {
         textField_3.setColumns(10);
 
         JButton btnNewButton_3 = new JButton("Open ...");
-        btnNewButton_3.addActionListener(new OpenMnyAction(this.getFrame(), textField_3) {
+        btnNewButton_3.addActionListener(new OpenMnyAction(this.getFrame(), textField_3, sharedFileChooser) {
             @Override
             protected void setMnyFileName(String fileName) {
                 bruteForceDataModel.setMnyFileName(fileName);
