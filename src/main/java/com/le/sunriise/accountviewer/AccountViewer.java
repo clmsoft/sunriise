@@ -832,7 +832,7 @@ public class AccountViewer {
                 String title = com.le.sunriise.viewer.MynViewer.TITLE_NO_OPENED_DB;
                 mainFrame.setTitle(title);
 
-                Dimension preferredSize = new Dimension(1000, 800);
+                Dimension preferredSize = new Dimension(900, 700);
                 mainFrame.setPreferredSize(preferredSize);
 
                 mainFrame.pack();
