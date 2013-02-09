@@ -24,6 +24,7 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.le.sunriise.mnyobject.Frequency;
 import com.le.sunriise.mnyobject.InvestmentActivityImpl;
 import com.le.sunriise.mnyobject.InvestmentTransaction;
@@ -74,6 +75,7 @@ public class TransactionImpl extends MnyObject implements Comparable<Transaction
 
     private String number;
 
+    @JsonIgnore
     private TransactionState state = TransactionState.UNRECONCILED;
 
     /* (non-Javadoc)

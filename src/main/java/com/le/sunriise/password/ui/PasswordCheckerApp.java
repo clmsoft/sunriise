@@ -20,10 +20,13 @@ package com.le.sunriise.password.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -96,7 +99,9 @@ public class PasswordCheckerApp {
 
     private JLabel[][] scoreboards;
 
-//    private AtomicLong counter = new AtomicLong(0L);
+    // private AtomicLong counter = new AtomicLong(0L);
+
+    // private JFileChooser fc;
 
     private final class OpenWordListAction implements ActionListener {
         private JFileChooser fc = null;
@@ -105,13 +110,21 @@ public class PasswordCheckerApp {
         public OpenWordListAction(JTextField textField) {
             super();
             this.textField = textField;
+            // XXX - create JFileChooser is slow
+            if (log.isDebugEnabled()) {
+                log.debug("> new JFileChooser");
+            }
             fc = new JFileChooser(new File("."));
+            if (log.isDebugEnabled()) {
+                log.debug("< new JFileChooser");
+            }
             fc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
         }
 
         @Override
         public void actionPerformed(ActionEvent e) {
             Component parent = getFrame();
+            fc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
             if (fc.showOpenDialog(parent) != JFileChooser.APPROVE_OPTION) {
                 return;
             }
@@ -136,6 +149,7 @@ public class PasswordCheckerApp {
                 try {
                     JavaInfo.logInfo();
 
+                    log.info("> Starting PasswordCheckerApp");
                     PasswordCheckerApp window = new PasswordCheckerApp();
                     showMainFrame(window);
                 } catch (Exception e) {
@@ -144,12 +158,20 @@ public class PasswordCheckerApp {
             }
 
             private void showMainFrame(PasswordCheckerApp window) {
+                JFrame mainFrame = window.getFrame();
+                
                 String title = "Mny Password Checker";
-                window.getFrame().setTitle(title);
-                // window.frame.pack();
-                window.getFrame().setLocationRelativeTo(null);
-                window.getFrame().setVisible(true);
-                log.info("> setVisible to true");
+                mainFrame.setTitle(title);
+                
+                Dimension preferredSize = new Dimension(600, 400);
+                mainFrame.setPreferredSize(preferredSize);
+                
+                mainFrame.pack();
+                
+                mainFrame.setLocationRelativeTo(null);
+                
+                mainFrame.setVisible(true);
+                log.info(" setVisible to true");
             }
         });
     }
@@ -165,13 +187,35 @@ public class PasswordCheckerApp {
      * Initialize the contents of the frame.
      */
     private void initialize() {
+        log.info("> initialize");
+
         setFrame(new JFrame());
-        getFrame().setBounds(100, 100, 600, 300);
+        // getFrame().setBounds(100, 100, 600, 300);
         getFrame().setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        getFrame().addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                super.windowClosing(e);
+                log.info("> windowClosing");
+            }
+
+            @Override
+            public void windowClosed(WindowEvent e) {
+                super.windowClosed(e);
+                log.info("> windowClosed");
+            }
+
+        });
+
+        // fc = new JFileChooser(new File("."));
 
         JTabbedPane tabbedPane = new JTabbedPane(SwingConstants.TOP);
         getFrame().getContentPane().add(tabbedPane, BorderLayout.CENTER);
+
         JPanel wordListView = new JPanel();
+
+        log.info("> Adding tab 'Word list'");
         tabbedPane.addTab("Word list", null, wordListView, null);
 
         wordListView.setLayout(new FormLayout(new ColumnSpec[] { FormFactory.UNRELATED_GAP_COLSPEC, FormFactory.DEFAULT_COLSPEC,
@@ -189,6 +233,7 @@ public class PasswordCheckerApp {
         wordListView.add(textField, "4, 2, fill, default");
         textField.setColumns(10);
 
+        log.info("> Adding OpenMnyAction");
         JButton btnNewButton = new JButton("Open ...");
         btnNewButton.addActionListener(new OpenMnyAction(this.getFrame(), textField) {
             @Override
@@ -209,27 +254,33 @@ public class PasswordCheckerApp {
         wordListView.add(textField_1, "4, 4, fill, default");
         textField_1.setColumns(10);
 
+        log.info("> Adding OpenWordListAction");
         JButton btnNewButton_1 = new JButton("Open ...");
         btnNewButton_1.addActionListener(new OpenWordListAction(textField_1));
         wordListView.add(btnNewButton_1, "6, 4");
 
+        // log.info("> 111");
         JLabel lblNewLabel_2 = new JLabel("Threads");
         lblNewLabel_2.setHorizontalAlignment(SwingConstants.TRAILING);
         wordListView.add(lblNewLabel_2, "2, 6");
 
+        // log.info("> 222");
         spinner = new JSpinner();
         spinner.setModel(new SpinnerNumberModel(new Integer(1), new Integer(1), null, new Integer(1)));
         wordListView.add(spinner, "4, 6");
 
+        // log.info("> 333");
         JLabel lblNewLabel_3 = new JLabel("Status");
         lblNewLabel_3.setHorizontalAlignment(SwingConstants.TRAILING);
         wordListView.add(lblNewLabel_3, "2, 8, right, default");
 
+        // log.info("> 444");
         textField_2 = new JTextField();
         textField_2.setEditable(false);
         wordListView.add(textField_2, "4, 8, fill, default");
         textField_2.setColumns(10);
 
+        log.info("> Adding DictionarySearchAction");
         JButton btnNewButton_2 = new JButton("Start");
         final DictionarySearchAction action = new DictionarySearchAction(this, dataModel, btnNewButton_2);
         scheduleDictionaryStatusCommand(action);
@@ -238,6 +289,8 @@ public class PasswordCheckerApp {
 
         JPanel bruteForceViewParent = new JPanel();
         bruteForceViewParent.setLayout(new BoxLayout(bruteForceViewParent, BoxLayout.PAGE_AXIS));
+
+        log.info("> Adding tab 'Brute force'");
         tabbedPane.addTab("Brute force", null, bruteForceViewParent, null);
 
         JPanel bruteForceView = new JPanel();
@@ -316,7 +369,7 @@ public class PasswordCheckerApp {
         for (int i = 0; i < rows; i++) {
             scoreboards[i] = new JLabel[columns];
             for (int j = 0; j < 12; j++) {
-                scoreboards[i][j] = new JLabel(" ");
+                scoreboards[i][j] = new JLabel("00");
             }
         }
         JPanel scoreBoardView = new JPanel();
@@ -335,15 +388,18 @@ public class PasswordCheckerApp {
                 dataModel.setMnyFileName(str);
             }
         }
-        
+
         if (bruteForceDataModel != null) {
             String str = prefs.get("lastOpenedMnyFileName", null);
             if (str != null) {
                 bruteForceDataModel.setMnyFileName(str);
             }
         }
-        
+
+        log.info("> initDataBindings");
         initDataBindings();
+
+        log.info("< initialize");
     }
 
     private void scheduleBruteForceStatusCommand(final StartBruteForceSearchAction action) {

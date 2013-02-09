@@ -107,6 +107,8 @@ import org.jdesktop.beansbinding.ELProperty;
 import org.jdesktop.swingbinding.JListBinding;
 import org.jdesktop.swingbinding.SwingBindings;
 
+import app.MnyViewer;
+
 import com.healthmarketscience.jackcess.Column;
 import com.healthmarketscience.jackcess.DataType;
 import com.healthmarketscience.jackcess.Database;
@@ -129,7 +131,9 @@ public class MynViewer {
 
     private static final Executor threadPool = Executors.newCachedThreadPool();
 
-    JFrame frame;
+    public static final String TITLE_NO_OPENED_DB = "No opened db";
+
+    private JFrame frame;
     // private File dbFile;
     // private Database db;
     private OpenedDb openedDb = new OpenedDb();
@@ -177,6 +181,71 @@ public class MynViewer {
     private AtomicBoolean settingNewSorter = new AtomicBoolean(false);
 
     private JPopupMenu filterCcpPopupMenu;
+
+    private final class MnyViewerOpenDbAction extends OpenDbAction {
+
+        private MnyViewerOpenDbAction(Component locationRelativeTo, Preferences prefs, OpenedDb openedDb) {
+            super(locationRelativeTo, prefs, openedDb);
+        }
+
+        @Override
+        public void dbFileOpened(OpenedDb newOpenedDb, OpenDbDialog dialog) {
+            if (newOpenedDb != null) {
+                MynViewer.this.openedDb = newOpenedDb;
+            }
+
+            File dbFile = openedDb.getDbFile();
+            if (dbFile != null) {
+                getFrame().setTitle(dbFile.getAbsolutePath());
+            } else {
+                getFrame().setTitle(TITLE_NO_OPENED_DB);
+            }
+
+            List<TableListItem> tables = new ArrayList<TableListItem>();
+            try {
+                Database db = getDb();
+                
+                DatabaseUtils.logDbInfo(db);
+                
+                Set<String> tableNames = db.getTableNames();
+                for (String tableName : tableNames) {
+                    try {
+                        Table table = db.getTable(tableName);
+                        TableListItem tableListItem = new TableListItem();
+                        tableListItem.setTable(table);
+                        tables.add(tableListItem);
+                    } catch (IOException e) {
+                        log.warn(e);
+                    }
+                }
+                
+                boolean showSystemCatalog = true;
+                if (showSystemCatalog) {
+                    Table table = db.getSystemCatalog();
+                    if (table != null) {
+                        TableListItem tableListItem = new TableListItem();
+                        tableListItem.setTable(table);
+                        tables.add(tableListItem);
+                    }
+                }
+            } catch (IOException e) {
+                log.warn(e);
+            }
+
+            log.info("Found " + tables.size() + " tables.");
+
+            dbReadOnly = dialog.getReadOnlyCheckBox().isSelected();
+
+            if (duplicateMenuItem != null) {
+                duplicateMenuItem.setEnabled(!dbReadOnly);
+            }
+            if (deleteMenuItem != null) {
+                deleteMenuItem.setEnabled(!dbReadOnly);
+            }
+            MynViewer.this.dataModel.setTables(tables);
+            clearDataModel(MynViewer.this.dataModel);
+        }
+    }
 
     private final class GotoToColumnAction extends AbstractAction {
         private String columnName;
@@ -251,7 +320,7 @@ public class MynViewer {
         // EventQueue waitQueue = new WaitCursorEventQueue(500);
         // Toolkit.getDefaultToolkit().getSystemEventQueue().push(waitQueue);
 
-//        String builNumber = BuildNumber.findBuilderNumber();
+        // String builNumber = BuildNumber.findBuilderNumber();
 
         EventQueue.invokeLater(new Runnable() {
             @Override
@@ -259,14 +328,30 @@ public class MynViewer {
                 try {
                     JavaInfo.logInfo();
 
+                    log.info("> Starting MynViewer");
                     MynViewer window = new MynViewer();
-                    window.getFrame().setLocationRelativeTo(null);
-                    window.getFrame().setVisible(true);
-                    log.info("> setVisible to true");
-                    
+                    showMainFrame(window);
+
                 } catch (Exception e) {
                     log.error(e, e);
                 }
+            }
+
+            protected void showMainFrame(MynViewer window) {
+                JFrame mainFrame = window.getFrame();
+
+                String title = com.le.sunriise.viewer.MynViewer.TITLE_NO_OPENED_DB;
+                mainFrame.setTitle(title);
+                
+                Dimension preferredSize = new Dimension(1000, 800);
+                mainFrame.setPreferredSize(preferredSize);
+
+                mainFrame.pack();
+                
+                mainFrame.setLocationRelativeTo(null);
+                
+                mainFrame.setVisible(true);
+                log.info("setVisible to true");
             }
         });
     }
@@ -299,12 +384,12 @@ public class MynViewer {
             public void windowClosed(WindowEvent e) {
                 super.windowClosed(e);
                 log.info("> windowClosed");
-            }            
+            }
         });
-        
+
         JMenuBar menuBar = new JMenuBar();
         getFrame().setJMenuBar(menuBar);
-        getFrame().setTitle("No opened db");
+        getFrame().setTitle(com.le.sunriise.viewer.MynViewer.TITLE_NO_OPENED_DB);
         JMenu mnNewMenu = new JMenu("File");
         menuBar.add(mnNewMenu);
 
@@ -320,51 +405,7 @@ public class MynViewer {
         });
 
         JMenuItem mntmNewMenuItem_1 = new JMenuItem("Open");
-        mntmNewMenuItem_1.addActionListener(new OpenDbAction(MynViewer.this.getFrame(), prefs, openedDb) {
-
-            @Override
-            public void dbFileOpened(OpenedDb newOpenedDb, OpenDbDialog dialog) {
-                if (newOpenedDb != null) {
-                    MynViewer.this.openedDb = newOpenedDb;
-                }
-
-                File dbFile = openedDb.getDbFile();
-                if (dbFile != null) {
-                    getFrame().setTitle(dbFile.getAbsolutePath());
-                } else {
-                    getFrame().setTitle("No opened db");
-                }
-
-                List<TableListItem> tables = new ArrayList<TableListItem>();
-                try {
-                    Set<String> names = getDb().getTableNames();
-                    for (String name : names) {
-                        try {
-                            Table t = getDb().getTable(name);
-                            TableListItem tableListItem = new TableListItem();
-                            tableListItem.setTable(t);
-                            tables.add(tableListItem);
-                        } catch (IOException e) {
-                            log.warn(e);
-                        }
-                    }
-                } catch (IOException e) {
-                    log.warn(e);
-                }
-
-                dbReadOnly = dialog.getReadOnlyCheckBox().isSelected();
-
-                if (duplicateMenuItem != null) {
-                    duplicateMenuItem.setEnabled(!dbReadOnly);
-                }
-                if (deleteMenuItem != null) {
-                    deleteMenuItem.setEnabled(!dbReadOnly);
-                }
-                MynViewer.this.dataModel.setTables(tables);
-                clearDataModel(MynViewer.this.dataModel);
-            }
-
-        });
+        mntmNewMenuItem_1.addActionListener(new MnyViewerOpenDbAction(MynViewer.this.getFrame(), prefs, openedDb));
         mnNewMenu.add(mntmNewMenuItem_1);
 
         JMenu mnNewMenu_1 = new JMenu("Export DB");
@@ -377,7 +418,7 @@ public class MynViewer {
         JMenuItem mntmNewMenuItem_4 = new JMenuItem("To *.mdb");
         mntmNewMenuItem_4.addActionListener(new ExportToMdbAction(this));
         mnNewMenu_1.add(mntmNewMenuItem_4);
-        
+
         JMenuItem mntmTojson = new JMenuItem("To *.json");
         mntmTojson.addActionListener(new ExportToJSONAction(new ExportToContext() {
 
@@ -390,7 +431,7 @@ public class MynViewer {
             public OpenedDb getSrcDb() {
                 return getOpenedDb();
             }
-            
+
         }));
         mnNewMenu_1.add(mntmTojson);
 
@@ -741,7 +782,7 @@ public class MynViewer {
                     int preViewRowCount = sorter.getViewRowCount();
                     try {
                         log.info("> setRowFilter");
-                        
+
                         boolean background = true;
                         if (background) {
                             int parties = 2;
@@ -767,7 +808,7 @@ public class MynViewer {
                                     }
                                 }
                             };
-                            
+
                             Component parent = SwingUtilities.getRoot(MynViewer.this.frame);
                             Cursor waitCursor = setWaitCursor(parent);
                             try {
@@ -1161,16 +1202,16 @@ public class MynViewer {
                     if (diff.getValue1() instanceof byte[]) {
                         sb.append("columm=" + diff.getKey() + ", value1=" + "byte[]-instance" + ", value2=" + "byte[]-instance");
                         sb.append("\n");
-//                        sb.append("\n");
+                        // sb.append("\n");
                     } else {
                         sb.append("columm=" + diff.getKey() + ", value1=" + diff.getValue1() + ", value2=" + diff.getValue2());
                         sb.append("\n");
-//                        sb.append("\n");
+                        // sb.append("\n");
                     }
                 }
                 textArea.setText(sb.toString());
                 textArea.setCaretPosition(0);
-                
+
                 // stuff it in a scrollpane with a controlled size.
                 JScrollPane scrollPane = new JScrollPane(textArea);
                 scrollPane.setPreferredSize(new Dimension(350, 150));

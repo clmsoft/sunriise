@@ -62,7 +62,7 @@ final class MnyTableRowSorter extends TableRowSorter<TableModel> {
                 }
             };
 
-            Component parent = SwingUtilities.getRoot(this.mynViewer.frame);
+            Component parent = SwingUtilities.getRoot(this.mynViewer.getFrame());
             Cursor waitCursor = this.mynViewer.setWaitCursor(parent);
             try {
                 MynViewer.getThreadPool().execute(command);
@@ -76,7 +76,7 @@ final class MnyTableRowSorter extends TableRowSorter<TableModel> {
                 this.mynViewer.clearWaitCursor(parent, waitCursor);
             }
         } else {
-            Component parent = SwingUtilities.getRoot(this.mynViewer.frame);
+            Component parent = SwingUtilities.getRoot(this.mynViewer.getFrame());
             Cursor waitCursor = this.mynViewer.setWaitCursor(parent);
             try {
                 parentSetSortKeys(sortKeys);

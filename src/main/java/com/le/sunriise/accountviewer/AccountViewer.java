@@ -163,7 +163,7 @@ public class AccountViewer {
                 // log.warn(e);
                 // }
             } else {
-                getFrame().setTitle("No opened db");
+                getFrame().setTitle(com.le.sunriise.viewer.MynViewer.TITLE_NO_OPENED_DB);
             }
 
             try {
@@ -202,7 +202,7 @@ public class AccountViewer {
      */
     private void initialize() {
         setFrame(new JFrame());
-        getFrame().setPreferredSize(new Dimension(1000, 800));
+
         // frame.setBounds(100, 100, 450, 300);
         getFrame().setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -327,8 +327,8 @@ public class AccountViewer {
         JSplitPane vSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, topComponent, bottomComponent);
         view.add(vSplitPane, BorderLayout.CENTER);
 
-//        vSplitPane.setResizeWeight(0.50);
-//        vSplitPane.setDividerLocation(0.50);
+        // vSplitPane.setResizeWeight(0.50);
+        // vSplitPane.setDividerLocation(0.50);
 
         return view;
     }
@@ -476,7 +476,7 @@ public class AccountViewer {
         JTabbedPane tabbedPane = new JTabbedPane();
         tabbedPane.setBorder(BorderFactory.createTitledBorder("Transaction details"));
 
-//        tabbedPane.addTab("QIF", createTransactionQif());
+        // tabbedPane.addTab("QIF", createTransactionQif());
 
         tabbedPane.addTab("JSON", createTransactionJson());
 
@@ -813,6 +813,7 @@ public class AccountViewer {
                 try {
                     JavaInfo.logInfo();
 
+                    log.info("> Starting AccountViewer");
                     AccountViewer window = new AccountViewer();
                     showMainFrame(window);
 
@@ -822,10 +823,20 @@ public class AccountViewer {
             }
 
             protected void showMainFrame(AccountViewer window) {
-                window.getFrame().pack();
-                window.getFrame().setLocationRelativeTo(null);
-                window.getFrame().setVisible(true);
-                log.info("> setVisible to true");
+                JFrame mainFrame = window.getFrame();
+
+                String title = com.le.sunriise.viewer.MynViewer.TITLE_NO_OPENED_DB;
+                mainFrame.setTitle(title);
+
+                Dimension preferredSize = new Dimension(1000, 800);
+                mainFrame.setPreferredSize(preferredSize);
+
+                mainFrame.pack();
+
+                mainFrame.setLocationRelativeTo(null);
+
+                mainFrame.setVisible(true);
+                log.info(" setVisible to true");
             }
         });
     }

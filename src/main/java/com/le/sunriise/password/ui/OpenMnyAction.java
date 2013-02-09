@@ -42,7 +42,17 @@ abstract class OpenMnyAction implements ActionListener {
         super();
         this.parent = parent;
         this.textField = textField;
-        fc = new JFileChooser(new File("."));
+        // XXX - create a new JFileChooser could be slow
+        if (log.isDebugEnabled()) {
+            log.debug("> new JFileChooser");
+        }
+        this.fc = new JFileChooser(new File("."));
+//        fc = new JFileChooser();
+        if (log.isDebugEnabled()) {
+            log.debug("< new JFileChooser");
+        }
+//        this.fc = fc;
+        
         FileFilter filter = new FileFilter() {
 
             @Override
