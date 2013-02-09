@@ -116,7 +116,6 @@ import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 import com.le.sunriise.JavaInfo;
-import com.le.sunriise.Launcher;
 import com.le.sunriise.StopWatch;
 import com.le.sunriise.SunriiseBuildNumber;
 import com.le.sunriise.export.ExportToContext;
