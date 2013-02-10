@@ -116,6 +116,7 @@ import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 import com.le.sunriise.JavaInfo;
+import com.le.sunriise.Launcher;
 import com.le.sunriise.StopWatch;
 import com.le.sunriise.SunriiseBuildNumber;
 import com.le.sunriise.export.ExportToContext;
@@ -369,7 +370,7 @@ public class MynViewer {
      */
     private void initialize() {
         setFrame(new JFrame());
-        getFrame().setBounds(100, 100, 800, 600);
+//        getFrame().setBounds(100, 100, 800, 600);
         getFrame().setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         getFrame().addWindowListener(new WindowAdapter() {
             @Override
@@ -401,7 +402,8 @@ public class MynViewer {
                 if (openedDb != null) {
                     appClosed();
                 }
-                System.exit(1);
+                log.info("User selects File -> Exit");
+                System.exit(0);
             }
         });
 
@@ -449,6 +451,8 @@ public class MynViewer {
         });
         toolsMenu.add(scriptMenuItem);
 
+        Launcher.addHelpMenu(frame, menuBar);
+        
         JPanel statusPane = new JPanel();
         frame.getContentPane().add(statusPane, BorderLayout.SOUTH);
         statusPane.setLayout(new BorderLayout(0, 0));

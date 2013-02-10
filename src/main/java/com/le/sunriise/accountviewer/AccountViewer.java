@@ -85,6 +85,7 @@ import com.healthmarketscience.jackcess.Cursor;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.Table;
 import com.le.sunriise.JavaInfo;
+import com.le.sunriise.Launcher;
 import com.le.sunriise.StopWatch;
 import com.le.sunriise.SunriiseBuildNumber;
 import com.le.sunriise.export.ExportToContext;
@@ -251,6 +252,7 @@ public class AccountViewer {
             public void actionPerformed(ActionEvent e) {
                 appClosed();
 
+                log.info("User selects File -> Exit");
                 System.exit(0);
             }
         });
@@ -280,6 +282,8 @@ public class AccountViewer {
         mnNewMenu.add(mntmNewMenuItem);
         fileMenu.addSeparator();
         fileMenu.add(exitMenuItem);
+        
+        Launcher.addHelpMenu(frame, menuBar);
     }
 
     private JPanel createLeftComponent() {

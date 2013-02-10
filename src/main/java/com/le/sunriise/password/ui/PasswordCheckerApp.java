@@ -61,6 +61,7 @@ import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 import com.le.sunriise.JavaInfo;
+import com.le.sunriise.Launcher;
 import com.le.sunriise.SunriiseBuildNumber;
 import com.le.sunriise.model.bean.BruteForceCheckerModel;
 import com.le.sunriise.model.bean.PasswordCheckerModel;
@@ -68,6 +69,9 @@ import com.le.sunriise.password.bruteforce.BruteForceStat;
 import com.le.sunriise.password.bruteforce.CheckBruteForce;
 import com.le.sunriise.password.bruteforce.GenBruteForce;
 import com.le.sunriise.password.timing.Duration;
+import javax.swing.JMenuBar;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
 
 public class PasswordCheckerApp {
     private static final Logger log = Logger.getLogger(PasswordCheckerApp.class);
@@ -231,6 +235,24 @@ public class PasswordCheckerApp {
 
         });
 
+        
+        JMenuBar menuBar = new JMenuBar();
+        getFrame().setJMenuBar(menuBar);
+        
+        JMenu mnNewMenu = new JMenu("File");
+        menuBar.add(mnNewMenu);
+        
+        JMenuItem mntmNewMenuItem = new JMenuItem("Exit");
+        mntmNewMenuItem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                log.info("User selects File -> Exit");
+                System.exit(0);
+            }
+        });
+        mnNewMenu.add(mntmNewMenuItem);
+        
+        Launcher.addHelpMenu(getFrame(), menuBar);
+
         // fc = new JFileChooser(new File("."));
 
         JTabbedPane tabbedPane = new JTabbedPane(SwingConstants.TOP);
@@ -259,7 +281,7 @@ public class PasswordCheckerApp {
         log.info("> Creating sharedFileChooser");
         sharedFileChooser = new JFileChooser(".");
         log.info("< Creating sharedFileChooser");
-            
+
         log.info("> Adding OpenMnyAction");
         JButton btnNewButton = new JButton("Open ...");
         btnNewButton.addActionListener(new OpenMnyAction(this.getFrame(), textField, sharedFileChooser) {
