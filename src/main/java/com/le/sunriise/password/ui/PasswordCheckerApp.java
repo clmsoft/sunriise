@@ -244,6 +244,7 @@ public class PasswordCheckerApp {
         
         JMenuItem mntmNewMenuItem = new JMenuItem("Exit");
         mntmNewMenuItem.addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent e) {
                 log.info("User selects File -> Exit");
                 System.exit(0);

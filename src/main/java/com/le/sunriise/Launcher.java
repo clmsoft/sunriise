@@ -110,6 +110,7 @@ public class Launcher {
 
                 JMenuItem mntmNewMenuItem = new JMenuItem("Exit");
                 mntmNewMenuItem.addActionListener(new ActionListener() {
+                    @Override
                     public void actionPerformed(ActionEvent e) {
                         log.info("User selects File -> Exit");
                         System.exit(0);
@@ -137,6 +138,7 @@ public class Launcher {
     
         JMenuItem homePageMenuItem = new JMenuItem("Home page");
         homePageMenuItem.addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent e) {
                 log.info("> Go to home page");
                 String str = "https://code.google.com/p/sunriise/";
@@ -152,6 +154,7 @@ public class Launcher {
     
         JMenuItem wikiMenuItem = new JMenuItem("Documentation (Wiki)");
         wikiMenuItem.addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent e) {
                 String str = "https://code.google.com/p/sunriise/w/list";
                 URI uri = URI.create(str);
@@ -166,6 +169,7 @@ public class Launcher {
     
         JMenuItem issueMenuItem = new JMenuItem("Log a bug");
         issueMenuItem.addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent e) {
                 String str = "https://code.google.com/p/sunriise/issues/list";
                 URI uri = URI.create(str);
@@ -181,6 +185,7 @@ public class Launcher {
     
         JMenuItem groupMenuItem = new JMenuItem("Discussion group");
         groupMenuItem.addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent e) {
                 String str = "https://groups.google.com/forum/?fromgroups#!forum/sunriise";
                 URI uri = URI.create(str);
@@ -199,6 +204,7 @@ public class Launcher {
     
         JMenuItem aboutMenuItem = new JMenuItem("About sunriise");
         aboutMenuItem.addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent e) {
                 log.info("> About sunriise");
     
