@@ -56,6 +56,7 @@ import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 import com.le.sunriise.Utils;
 import com.le.sunriise.model.bean.OpenDbDialogDataModel;
+import com.le.sunriise.password.BackupFileUtils;
 
 public class OpenDbDialog extends JDialog {
     private static final Logger log = Logger.getLogger(OpenDbDialog.class);
@@ -104,6 +105,30 @@ public class OpenDbDialog extends JDialog {
                 JOptionPane.showMessageDialog(dbFileNames, "Please enter a database filename.", "Missing database filename",
                         JOptionPane.ERROR_MESSAGE);
                 return;
+            }
+            if (dbFileName.endsWith(".mbf") && (! readOnlyCheckBox.isSelected())) {
+                JOptionPane.showMessageDialog(dbFileNames, "Cannot open Money backup file write-mode.", "Cannot open in write-mode",
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            if (dbFileName.endsWith(".mbf")) {
+                try {
+                    File tempFile = File.createTempFile("sunriise", ".mny");
+                    // tempFile.deleteOnExit();
+                    File dbFile = new File(dbFileName);
+                    long headerOffset = BackupFileUtils.findMagicHeader(dbFile);
+                    log.info("findMagicHeader, headerOffset=" + headerOffset);
+                    if (headerOffset < 0) {
+                        headerOffset = 70; // compression header?
+                        log.info(" TODO: handle compression header, headerOffset=" + headerOffset);
+                    }
+                    dbFile = BackupFileUtils.copyBackupFile(dbFile, tempFile, headerOffset, headerOffset + 4096);
+                    log.info("Temp converted backup file=" + dbFile);
+                    dbFileName = dbFile.getAbsolutePath();
+                } catch (IOException e) {
+                    log.error(e, e);
+                }
             }
             try {
                 if (OpenDbDialog.this.openedDb != null) {
@@ -265,7 +290,7 @@ public class OpenDbDialog extends JDialog {
                             if (fileName.length() <= 0) {
                                 return;
                             }
-                            if (fileName.endsWith(".mny")) {
+                            if (fileName.endsWith(".mny") || fileName.endsWith(".mbf")) {
                                 encryptedCheckBox.setSelected(true);
                             } else {
                                 encryptedCheckBox.setSelected(false);
@@ -290,11 +315,27 @@ public class OpenDbDialog extends JDialog {
         }
         {
             readOnlyCheckBox = new JCheckBox("Read only");
+            readOnlyCheckBox.addItemListener(new ItemListener() {
+                @Override
+                public void itemStateChanged(ItemEvent e) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("readOnlyCheckBox=" + readOnlyCheckBox.isSelected());
+                    }
+                }
+            });
             readOnlyCheckBox.setSelected(true);
             contentPanel.add(readOnlyCheckBox, "4, 6");
         }
         {
-            encryptedCheckBox = new JCheckBox("Encrypted");
+            encryptedCheckBox = new JCheckBox("Encrypted (keep selected for *.mny file)");
+            encryptedCheckBox.addItemListener(new ItemListener() {
+                @Override
+                public void itemStateChanged(ItemEvent e) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("encryptedCheckBox=" + encryptedCheckBox.isSelected());
+                    }
+                }
+            });
             encryptedCheckBox.setSelected(true);
             contentPanel.add(encryptedCheckBox, "4, 8");
         }

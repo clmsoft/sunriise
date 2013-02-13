@@ -170,6 +170,12 @@ public class EncryptionUtils {
                 pageChannel.readPage(buffer, 0);
 
                 StringBuilder sb = new StringBuilder();
+                sb.append("format=" + format);
+                sb.append("\n");
+
+                sb.append("charset=" + charset);
+                sb.append("\n");
+                
                 if (format.CODEC_TYPE == CodecType.MSISAM) {
                     EncryptionUtils.appendMSISAMInfo(buffer, password, charset, sb);
                 }

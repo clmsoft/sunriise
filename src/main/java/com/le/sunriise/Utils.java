@@ -166,6 +166,8 @@ public class Utils {
     }
 
     static OpenedDb openDb(File dbFile, String password, boolean readOnly, boolean encrypted) throws IOException {
+        log.info("# Opening dbFile=" + dbFile.getAbsolutePath());
+        
         OpenedDb openedDb = new OpenedDb();
         openedDb.setDbFile(dbFile);
     

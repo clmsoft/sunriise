@@ -81,9 +81,7 @@ public class HeaderPage {
             File tempFile = File.createTempFile("sunriise", ".mny");
             tempFile.deleteOnExit();
             long headerOffset = BackupFileUtils.findMagicHeader(dbFile);
-            if (log.isDebugEnabled()) {
-                log.debug("headerOffset=" + headerOffset);
-            }
+            log.info("headerOffset=" + headerOffset);
             if (headerOffset < 0) {
                 headerOffset = 70; // compression header?
             }

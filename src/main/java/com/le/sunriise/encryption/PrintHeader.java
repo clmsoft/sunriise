@@ -30,8 +30,21 @@ public class PrintHeader {
      * @param args
      */
     public static void main(String[] args) {
-        File mdbFile = new File(args[0]);
+        File mdbFile = null;
         String password = null;
+
+        if (args.length == 1) {
+            mdbFile = new File(args[0]);
+            password = null;
+        } else if (args.length == 2) {
+            mdbFile = new File(args[0]);
+            password = args[1];
+        } else {
+            Class clz = PrintHeader.class;
+            System.out.println("Usage: java " + clz.getName() + " mnyFile [password]");
+            System.exit(1);
+        }
+
         try {
             EncryptionUtils.parseHeader(mdbFile, password);
         } catch (IOException e) {
