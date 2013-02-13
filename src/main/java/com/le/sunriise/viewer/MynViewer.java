@@ -620,7 +620,7 @@ public class MynViewer {
                 ListSelectionModel model = (ListSelectionModel) e.getSource();
                 int selectedIndex = model.getMinSelectionIndex();
 
-                updateRowLabel(selectedIndex);
+                updateRowLabel(selectedIndex, null);
             }
 
             @Override
@@ -1366,12 +1366,14 @@ public class MynViewer {
 
     private void setLabelColumnIndex(int columnIndex) {
         labelColumnIndex = columnIndex;
-        log.info("setLabelColumnIndex, labelColumnIndex=" + labelColumnIndex);
+        String columnName = dataModel.getTableModel().getColumnName(columnIndex);
+        log.info("setLabelColumnIndex, labelColumnIndex=" + labelColumnIndex + ", columnName=" +
+                columnName);
 
         int rowIndex = table.getSelectedRow();
         log.info("setLabelColumnIndex, rowIndex=" + rowIndex);
         if (rowIndex >= 0) {
-            updateRowLabel(rowIndex);
+            updateRowLabel(rowIndex, columnName);
         }
     }
 
@@ -1412,7 +1414,7 @@ public class MynViewer {
         }
     }
 
-    private void updateRowLabel(int rowIndex) {
+    private void updateRowLabel(int rowIndex, String columnName) {
         if (rowIndex < 0) {
             return;
         }
@@ -1429,13 +1431,17 @@ public class MynViewer {
 
         if ((columnIndex >= 0) && (columnIndex >= 0)) {
             Object value = tableModel.getValueAt(rowIndex, columnIndex);
-            String text = null;
+            String valueStr = null;
             if (value != null) {
-                text = value.toString();
+                valueStr = value.toString();
             } else {
-                text = "";
+                valueStr = "";
             }
-            rightStatusLabel.setText(text);
+            if (columnName != null) {
+                rightStatusLabel.setText(columnName + "=" + valueStr);
+            } else {
+                rightStatusLabel.setText(valueStr);
+            }
         }
     }
 

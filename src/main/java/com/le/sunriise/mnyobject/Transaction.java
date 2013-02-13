@@ -118,5 +118,9 @@ public interface Transaction {
     public abstract void setAccountId(Integer accountId);
     
     public abstract Integer getAccountId();
+    
+    // mFiStmtId
+    public abstract String getFiTransactionId();
 
+    public abstract void setFiTransactionId(String fiTransactionId);
 }

@@ -74,6 +74,8 @@ public class TransactionImpl extends MnyObject implements Comparable<Transaction
     private String memo;
 
     private String number;
+    
+    private String fiTransactionId;
 
     @JsonIgnore
     private TransactionState state = TransactionState.UNRECONCILED;
@@ -498,5 +500,15 @@ public class TransactionImpl extends MnyObject implements Comparable<Transaction
     @Override
     public void setAccountId(Integer accountId) {
         this.accountId = accountId;
+    }
+
+    @Override
+    public String getFiTransactionId() {
+        return fiTransactionId;
+    }
+
+    @Override
+    public void setFiTransactionId(String fiTransactionId) {
+        this.fiTransactionId = fiTransactionId;
     }
 }
