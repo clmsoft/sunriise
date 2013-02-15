@@ -106,15 +106,15 @@ public class OpenDbDialog extends JDialog {
                         JOptionPane.ERROR_MESSAGE);
                 return;
             }
-            if (dbFileName.endsWith(".mbf") && (! readOnlyCheckBox.isSelected())) {
-                JOptionPane.showMessageDialog(dbFileNames, "Cannot open Money backup file write-mode.", "Cannot open in write-mode",
-                        JOptionPane.ERROR_MESSAGE);
+            if (BackupFileUtils.isMnyBackupFile(dbFileName) && (!readOnlyCheckBox.isSelected())) {
+                JOptionPane.showMessageDialog(dbFileNames, "Cannot open Money backup file write-mode.",
+                        "Cannot open in write-mode", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
-            if (dbFileName.endsWith(".mbf")) {
+            if (BackupFileUtils.isMnyBackupFile(dbFileName)) {
                 try {
-                    File tempFile = File.createTempFile("sunriise", ".mny");
+                    File tempFile = File.createTempFile("sunriise", BackupFileUtils.MNY_SUFFIX);
                     // tempFile.deleteOnExit();
                     File dbFile = new File(dbFileName);
                     long headerOffset = BackupFileUtils.findMagicHeader(dbFile);
@@ -123,7 +123,7 @@ public class OpenDbDialog extends JDialog {
                         headerOffset = 70; // compression header?
                         log.info(" TODO: handle compression header, headerOffset=" + headerOffset);
                     }
-                    dbFile = BackupFileUtils.copyBackupFile(dbFile, tempFile, headerOffset, headerOffset + 4096);
+                    dbFile = BackupFileUtils.copyBackupFile(dbFile, tempFile, headerOffset, -1L);
                     log.info("Temp converted backup file=" + dbFile);
                     dbFileName = dbFile.getAbsolutePath();
                 } catch (IOException e) {
@@ -170,6 +170,7 @@ public class OpenDbDialog extends JDialog {
                 }
             }
         }
+
     }
 
     public static OpenDbDialog showDialog(OpenedDb opendDb, List<String> recentOpenFileNames, Component locationRelativeTo,
@@ -290,7 +291,7 @@ public class OpenDbDialog extends JDialog {
                             if (fileName.length() <= 0) {
                                 return;
                             }
-                            if (fileName.endsWith(".mny") || fileName.endsWith(".mbf")) {
+                            if (BackupFileUtils.isMnyFiles(fileName)) {
                                 encryptedCheckBox.setSelected(true);
                             } else {
                                 encryptedCheckBox.setSelected(false);

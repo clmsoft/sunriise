@@ -16,12 +16,14 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA
  *******************************************************************************/
-package com.le.sunriise.password;
+package com.le.sunriise.header;
 
 import java.io.File;
 import java.io.IOException;
 
 import org.apache.log4j.Logger;
+
+import com.le.sunriise.password.BackupFileUtils;
 
 public class HeaderPageCmd2 {
     private static final Logger log = Logger.getLogger(HeaderPageCmd2.class);
@@ -44,7 +46,7 @@ public class HeaderPageCmd2 {
                 File[] files = dbFile.listFiles();
                 for (File file : files) {
                     String name = file.getName();
-                    if (name.endsWith(".mny") || name.endsWith(".mbf")) {
+                    if (BackupFileUtils.isMnyFiles(name)) {
                         print(file);
                     }
                 }

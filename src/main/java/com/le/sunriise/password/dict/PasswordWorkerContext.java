@@ -4,7 +4,7 @@ import java.io.File;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
-import com.le.sunriise.password.HeaderPage;
+import com.le.sunriise.header.HeaderPage;
 
 public class PasswordWorkerContext {
     private final File dbFile;

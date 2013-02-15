@@ -30,7 +30,7 @@ import org.apache.log4j.Logger;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import com.le.sunriise.password.HeaderPage;
+import com.le.sunriise.header.HeaderPage;
 
 public class CheckDictionaryTest {
     private static final Logger log = Logger.getLogger(CheckDictionaryTest.class);

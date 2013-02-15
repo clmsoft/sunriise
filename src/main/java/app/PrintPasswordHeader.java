@@ -24,7 +24,7 @@ public class PrintPasswordHeader {
      * @param args
      */
     public static void main(String[] args) {
-        com.le.sunriise.password.HeaderPageCmd2.main(args);
+        com.le.sunriise.header.HeaderPageCmd2.main(args);
     }
 
 }

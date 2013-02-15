@@ -33,8 +33,8 @@ import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.le.sunriise.StopWatch;
+import com.le.sunriise.header.HeaderPage;
 import com.le.sunriise.password.AbstractHeaderPagePasswordChecker;
-import com.le.sunriise.password.HeaderPage;
 import com.le.sunriise.password.timing.Duration;
 
 public class CheckBruteForce extends GenBruteForce {

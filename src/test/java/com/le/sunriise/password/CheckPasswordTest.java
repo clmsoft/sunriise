@@ -26,6 +26,8 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
+import com.le.sunriise.header.HeaderPage;
+
 public class CheckPasswordTest {
 
     @Test

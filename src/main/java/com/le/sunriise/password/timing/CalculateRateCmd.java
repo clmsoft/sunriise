@@ -29,7 +29,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.log4j.Logger;
 
-import com.le.sunriise.password.HeaderPage;
+import com.le.sunriise.header.HeaderPage;
 import com.le.sunriise.password.PasswordUtils;
 import com.le.sunriise.password.bruteforce.GenBruteForce;
 

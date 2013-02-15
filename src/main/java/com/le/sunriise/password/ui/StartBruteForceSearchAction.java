@@ -28,8 +28,8 @@ import javax.swing.SwingUtilities;
 
 import org.apache.log4j.Logger;
 
+import com.le.sunriise.header.HeaderPage;
 import com.le.sunriise.model.bean.BruteForceCheckerModel;
-import com.le.sunriise.password.HeaderPage;
 import com.le.sunriise.password.bruteforce.CheckBruteForce;
 import com.le.sunriise.password.bruteforce.GenBruteForce;
 

@@ -29,6 +29,8 @@ import javax.swing.filechooser.FileFilter;
 
 import org.apache.log4j.Logger;
 
+import com.le.sunriise.password.BackupFileUtils;
+
 abstract class OpenMnyAction implements ActionListener {
     private static final Logger log = Logger.getLogger(OpenMnyAction.class);
 
@@ -48,7 +50,7 @@ abstract class OpenMnyAction implements ActionListener {
             }
     
             String name = f.getName();
-            if (name.endsWith(".mny")) {
+            if (BackupFileUtils.isMnyFile(name)) {
                 return true;
             }
     
@@ -61,7 +63,7 @@ abstract class OpenMnyAction implements ActionListener {
             return description;
         }
     }
-
+    
     public OpenMnyAction(Component parent, JTextField textField, JFileChooser fc) {
         super();
         this.parent = parent;

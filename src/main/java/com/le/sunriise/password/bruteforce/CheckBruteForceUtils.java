@@ -25,7 +25,7 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
-import com.le.sunriise.password.HeaderPage;
+import com.le.sunriise.header.HeaderPage;
 
 public class CheckBruteForceUtils {
     private static final Logger log = Logger.getLogger(CheckBruteForceUtils.class);

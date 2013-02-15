@@ -28,7 +28,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.le.sunriise.password.HeaderPage;
+import com.le.sunriise.header.HeaderPage;
 import com.le.sunriise.password.PasswordUtils;
 
 public class ResumeWithContextTest {

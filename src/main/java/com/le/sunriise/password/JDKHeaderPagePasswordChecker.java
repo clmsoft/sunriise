@@ -22,6 +22,7 @@ import java.io.IOException;
 
 import org.apache.log4j.Logger;
 
+import com.le.sunriise.header.HeaderPage;
 import com.le.sunriise.password.crypt.JDKUtils;
 
 public class JDKHeaderPagePasswordChecker extends AbstractHeaderPagePasswordChecker {

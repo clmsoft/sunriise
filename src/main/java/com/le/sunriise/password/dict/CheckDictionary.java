@@ -38,8 +38,8 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.log4j.Logger;
 
+import com.le.sunriise.header.HeaderPage;
 import com.le.sunriise.password.AbstractHeaderPagePasswordChecker;
-import com.le.sunriise.password.HeaderPage;
 
 /**
  * Check for matching password against a set of dictionary. Support

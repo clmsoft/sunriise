@@ -30,29 +30,9 @@ import org.apache.log4j.Logger;
 public class BackupFileUtils {
     private static final Logger log = Logger.getLogger(BackupFileUtils.class);
 
-    /**
-     * @param args
-     */
-    public static void main(String[] args) {
-        String dbFileName = null;
-        File dbFile = null;
+    public static final String MNY_BACKUP_SUFFIX = ".mbf";
 
-        try {
-            dbFile = new File(dbFileName);
-            String fileName = dbFile.getName();
-            if (fileName.endsWith(".mbf")) {
-                File tempFile = File.createTempFile("sunriise", ".mny");
-                // tempFile.deleteOnExit();
-                long headerOffset = findMagicHeader(dbFile);
-                dbFile = copyBackupFile(dbFile, tempFile, headerOffset, headerOffset + 4096);
-                log.info("Temp converted backup file=" + dbFile);
-            }
-        } catch (IOException e) {
-            log.error(e, e);
-        } finally {
-            log.info("< DONE");
-        }
-    }
+    public static final String MNY_SUFFIX = ".mny";
 
     // 0x00 0x01 0x00 0x00
     // 4d 53 49 53 MSIS
@@ -75,7 +55,8 @@ public class BackupFileUtils {
             byte[] data = new byte[4096 * 2];
             for (int i = 0; i < data.length; i++) {
                 data[i] = mappedByteBuffer.get();
-//                System.out.println("" + i + ", " + Integer.toHexString(data[i]));
+                // System.out.println("" + i + ", " +
+                // Integer.toHexString(data[i]));
             }
             index = matcher.indexOf(data, 0, data.length);
         } finally {
@@ -95,10 +76,6 @@ public class BackupFileUtils {
         return index;
     }
 
-    public static File copyBackupFile(File srcFile, File destFile, long offset) throws IOException {
-        return copyBackupFile(srcFile, destFile, offset, -1L);
-    }
-
     public static File copyBackupFile(File srcFile, File destFile, long offset, long maxByteCount) throws IOException {
         File newFile = destFile;
 
@@ -112,6 +89,7 @@ public class BackupFileUtils {
 
             if (log.isDebugEnabled()) {
                 log.debug("srcFile=" + srcFile);
+                log.debug("  size=" + srcChannel.size());
                 log.debug("destFile=" + destFile);
             }
             // Copy file contents from source to destination
@@ -153,6 +131,50 @@ public class BackupFileUtils {
             }
         }
         return newFile;
+    }
+
+    public static final boolean isMnyBackupFile(String name) {
+        return name.endsWith(MNY_BACKUP_SUFFIX);
+    }
+
+    public static final boolean isMnyBackupFile(File file) {
+        String dbFileName = file.getName();
+        return isMnyBackupFile(dbFileName);
+    }
+
+    public static final boolean isMnyFile(String name) {
+        return name.endsWith(MNY_SUFFIX);
+    }
+
+    public static boolean isMnyFile(File file) {
+        String dbFileName = file.getName();
+        return isMnyFile(dbFileName);
+    }
+
+    public static boolean isMnyFiles(String name) {
+        return isMnyFile(name) || isMnyBackupFile(name);
+    }
+
+    /**
+     * @param args
+     */
+    public static void main(String[] args) {
+        String dbFileName = null;
+        try {
+            File dbFile = new File(dbFileName);
+            String fileName = dbFile.getName();
+            if (isMnyBackupFile(fileName)) {
+                File tempFile = File.createTempFile("sunriise", MNY_SUFFIX);
+                // tempFile.deleteOnExit();
+                long headerOffset = findMagicHeader(dbFile);
+                dbFile = copyBackupFile(dbFile, tempFile, headerOffset, headerOffset + 4096);
+                log.info("Temp converted backup file=" + dbFile);
+            }
+        } catch (IOException e) {
+            log.error(e, e);
+        } finally {
+            log.info("< DONE");
+        }
     }
 
 }

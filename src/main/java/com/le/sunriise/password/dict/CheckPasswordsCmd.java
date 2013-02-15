@@ -24,7 +24,7 @@ import java.io.IOException;
 import org.apache.log4j.Logger;
 
 import com.le.sunriise.StopWatch;
-import com.le.sunriise.password.HeaderPage;
+import com.le.sunriise.header.HeaderPage;
 import com.le.sunriise.password.timing.Duration;
 
 // http://essayweb.net/mathematics/permcomb.shtml

@@ -28,7 +28,7 @@ import junit.framework.Assert;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
-import com.le.sunriise.password.HeaderPage;
+import com.le.sunriise.header.HeaderPage;
 import com.le.sunriise.password.HeaderPagePasswordChecker;
 import com.le.sunriise.password.PasswordUtils;
 

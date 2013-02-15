@@ -16,7 +16,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA
  *******************************************************************************/
-package com.le.sunriise.password;
+package com.le.sunriise.header;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,6 +33,7 @@ import org.apache.poi.util.HexDump;
 import com.healthmarketscience.jackcess.ByteUtil;
 import com.healthmarketscience.jackcess.Column;
 import com.healthmarketscience.jackcess.JetFormat;
+import com.le.sunriise.password.BackupFileUtils;
 
 public class HeaderPage {
     private static final Logger log = Logger.getLogger(HeaderPage.class);
@@ -77,8 +78,9 @@ public class HeaderPage {
 
     private File parse(File dbFile) throws IOException {
         String fileName = dbFile.getName();
-        if (fileName.endsWith(".mbf")) {
-            File tempFile = File.createTempFile("sunriise", ".mny");
+
+        if (BackupFileUtils.isMnyBackupFile(fileName)) {
+            File tempFile = File.createTempFile("sunriise", BackupFileUtils.MNY_SUFFIX);
             tempFile.deleteOnExit();
             long headerOffset = BackupFileUtils.findMagicHeader(dbFile);
             log.info("headerOffset=" + headerOffset);
@@ -356,16 +358,23 @@ public class HeaderPage {
     }
 
     public static void printHeaderPage(HeaderPage headerPage, String indentation) {
+        System.out.println("");
+        
         System.out.println(indentation + "getJetFormat=" + headerPage.getJetFormat());
         System.out.println(indentation + "getJetFormat.PAGE_SIZE=" + headerPage.getJetFormat().PAGE_SIZE);
         System.out.println(indentation + "getCharset=" + headerPage.getCharset());
 
         System.out.println(indentation + "isNewEncryption=" + headerPage.isNewEncryption());
+        if (! headerPage.isNewEncryption()) {
+            System.out.println(indentation + "getEmbeddedDatabasePassword=" + headerPage.getEmbeddedDatabasePassword());
+        }
 
         System.out.println(indentation + "isUseSha1=" + headerPage.isUseSha1());
         System.out.println(indentation + "getSalt=" + toHexString(headerPage.getSalt()));
         System.out.println(indentation + "getBaseSalt=" + toHexString(headerPage.getBaseSalt()));
         System.out.println(indentation + "encrypted4BytesCheck=" + toHexString(headerPage.getEncrypted4BytesCheck()));
+        
+        System.out.println("");
     }
 
     public static void printHeaderPage(HeaderPage headerPage) {

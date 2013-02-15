@@ -17,7 +17,7 @@
  * USA
  *******************************************************************************/
 
-package com.le.sunriise.password;
+package com.le.sunriise.header;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,6 +26,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.healthmarketscience.jackcess.JetFormat;
+import com.le.sunriise.header.HeaderPage;
 
 public class HeaderPageTest {
 

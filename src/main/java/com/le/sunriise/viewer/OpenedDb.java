@@ -33,7 +33,7 @@ public class OpenedDb {
     private Database db;
     private String password;
     private ROMemoryMappedFileChannel memoryMappedFileChannel;
-
+    
     public JackcessFileChannelAdapter getMemoryMappedFileChannel() {
         return memoryMappedFileChannel;
     }
@@ -71,8 +71,9 @@ public class OpenedDb {
             log.info("Closing dbFile=" + dbFile);
             try {
                 db.close();
-                
-                // since we specify the channel ourselves. We will need to close it ourselves.
+
+                // since we specify the channel ourselves. We will need to close
+                // it ourselves.
                 if (memoryMappedFileChannel != null) {
                     try {
                         log.info("Closing memoryMappedFileChannel for dbFile=" + memoryMappedFileChannel.getDbFile());
@@ -105,7 +106,7 @@ public class OpenedDb {
     public void setPassword(String password) {
         this.password = password;
     }
-    
+
     public boolean isMemoryMapped() {
         return getMemoryMappedFileChannel() != null;
     }

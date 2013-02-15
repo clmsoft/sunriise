@@ -14,7 +14,7 @@ public class DatabaseUtils {
 
     static void logDbInfo(Database db) {
         try {
-            log.info("### db=" + db.getFile());
+            log.info("### (openned) db=" + db.getFile());
 
             log.info("  fileFormat=" + db.getFileFormat());
             // log.info("  format=" + db.getFormat());
@@ -29,17 +29,23 @@ public class DatabaseUtils {
             Table table = null;
             String label = null;
 
+            log.info("  ");
             table = db.getSystemCatalog();
             label = "systemCatalog";
             logSystemTable(label, table);
 
+            log.info("  ");
             Set<String> systemTableNames = db.getSystemTableNames();
             log.info("  systemTableNames=" + systemTableNames.size());
+            int i = 0;
+            int size = systemTableNames.size();
             for (String systemTableName : systemTableNames) {
-                log.info("  systemTableName=" + systemTableName);
+                log.info("  " + "(" + i + "/" + size + ") " + "systemTableName=" + systemTableName);
                 table = db.getSystemTable(systemTableName);
                 label = "systemTable." + systemTableName;
                 logSystemTable(label, table);
+                
+                i++;
             }
 
             // log.info("  columnOrder=" + db.getColumnOrder());

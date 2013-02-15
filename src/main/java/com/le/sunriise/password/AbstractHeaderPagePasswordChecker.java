@@ -29,6 +29,7 @@ import org.apache.poi.util.HexDump;
 
 import com.healthmarketscience.jackcess.ByteUtil;
 import com.healthmarketscience.jackcess.JetFormat;
+import com.le.sunriise.header.HeaderPage;
 
 public abstract class AbstractHeaderPagePasswordChecker {
     private static final Logger log = Logger.getLogger(AbstractHeaderPagePasswordChecker.class);
@@ -43,6 +44,8 @@ public abstract class AbstractHeaderPagePasswordChecker {
     private byte[] testKey;
 
     private byte[] testBytes;
+
+    private byte[] decrypted4BytesCheck;
 
     public static boolean checkPassword(HeaderPage headerPage, String testPassword) {
         boolean matched = false;
@@ -184,7 +187,7 @@ public abstract class AbstractHeaderPagePasswordChecker {
     }
 
     private boolean verifyPassword(byte[] encrypted4BytesCheck, byte[] testKey, byte[] testBytes) {
-        byte[] decrypted4BytesCheck = decryptUsingRC4(encrypted4BytesCheck, testKey);
+        this.decrypted4BytesCheck = decryptUsingRC4(encrypted4BytesCheck, testKey);
 
         if (!Arrays.equals(decrypted4BytesCheck, testBytes)) {
             // throw new IllegalStateException("Incorrect password provided");
@@ -284,6 +287,28 @@ public abstract class AbstractHeaderPagePasswordChecker {
 
     public byte[] getTestBytes() {
         return testBytes;
+    }
+
+    public byte[] getDecrypted4BytesCheck() {
+        return decrypted4BytesCheck;
+    }
+
+    public void setDecrypted4BytesCheck(byte[] decrypted4BytesCheck) {
+        this.decrypted4BytesCheck = decrypted4BytesCheck;
+    }
+
+    public static void printChecker(AbstractHeaderPagePasswordChecker checker) {
+        System.out.println("");
+        System.out.println("testKey=" + HeaderPage.toHexString(checker.getTestKey()));
+        System.out.println("testBytes=" + HeaderPage.toHexString(checker.getTestBytes()));
+
+        System.out.println("");
+        System.out.println("decrypted4BytesCheck=" + HeaderPage.toHexString(checker.getDecrypted4BytesCheck()));
+        
+        System.out.println("");
+        System.out.println("encodingKey=" + HeaderPage.toHexString(checker.getEncodingKey()));
+        
+        System.out.println("");
     }
 
 }

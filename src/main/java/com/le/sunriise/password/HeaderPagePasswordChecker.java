@@ -24,6 +24,7 @@ import java.io.IOException;
 import org.apache.log4j.Logger;
 import org.bouncycastle.crypto.engines.RC4Engine;
 
+import com.le.sunriise.header.HeaderPage;
 import com.le.sunriise.password.crypt.BouncyCastleUtils;
 
 public class HeaderPagePasswordChecker extends AbstractHeaderPagePasswordChecker {

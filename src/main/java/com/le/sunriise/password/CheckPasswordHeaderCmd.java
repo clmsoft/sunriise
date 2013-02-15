@@ -25,15 +25,16 @@ import java.util.Arrays;
 import org.apache.log4j.Logger;
 
 import com.healthmarketscience.jackcess.JetFormat;
+import com.le.sunriise.header.HeaderPage;
 
-public class CheckPasswordHeader {
-    private static final Logger log = Logger.getLogger(CheckPasswordHeader.class);
+public class CheckPasswordHeaderCmd {
+    private static final Logger log = Logger.getLogger(CheckPasswordHeaderCmd.class);
 
     private File srcFile;
 
     private HeaderPage srcHeaderPage;
 
-    public CheckPasswordHeader(File file) throws IOException {
+    public CheckPasswordHeaderCmd(File file) throws IOException {
         this.srcFile = file;
         this.srcHeaderPage = new HeaderPage(file);
     }
@@ -43,13 +44,13 @@ public class CheckPasswordHeader {
      */
     public static void main(String[] args) {
         if (args.length < 2) {
-            Class<CheckPasswordHeader> clz = CheckPasswordHeader.class;
+            Class<CheckPasswordHeaderCmd> clz = CheckPasswordHeaderCmd.class;
             System.out.println("Usage: java " + clz.getName() + " file1.mny file1.mny ...");
             System.exit(1);
         }
 
         try {
-            CheckPasswordHeader checkPasswordHeader = new CheckPasswordHeader(new File(args[0]));
+            CheckPasswordHeaderCmd checkPasswordHeader = new CheckPasswordHeaderCmd(new File(args[0]));
             checkPasswordHeader.checkPaths(args);
         } catch (IOException e) {
             log.error(e, e);
@@ -86,7 +87,7 @@ public class CheckPasswordHeader {
         for (File destFile : files) {
             if (destFile.isFile()) {
                 String name = destFile.getName();
-                if (name.endsWith(".mny") || name.endsWith(".mbf")) {
+                if (BackupFileUtils.isMnyFiles(name)) {
                     try {
                         // System.out.println("destFile=" + destFile);
                         HeaderPage destHeaderPage = new HeaderPage(destFile);
