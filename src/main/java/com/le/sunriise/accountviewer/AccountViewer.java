@@ -800,55 +800,6 @@ public class AccountViewer {
         accountInfoTextArea.setCaretPosition(0);
     }
 
-    /**
-     * Launch the application.
-     */
-    public static void main(String[] args) {
-        // try {
-        // Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
-        // } catch (ClassNotFoundException e1) {
-        // log.error(e1);
-        // System.exit(1);
-        // }
-
-        EventQueue.invokeLater(new Runnable() {
-
-            @Override
-            public void run() {
-                try {
-                    JavaInfo.logInfo();
-
-                    log.info("> Starting AccountViewer");
-                    AccountViewer window = new AccountViewer();
-                    showMainFrame(window);
-
-                    String buildNumber = SunriiseBuildNumber.getBuildnumber();
-                    log.info("BuildNumber: " + buildNumber);
-                    
-                } catch (Exception e) {
-                    log.error(e, e);
-                }
-            }
-
-            protected void showMainFrame(AccountViewer window) {
-                JFrame mainFrame = window.getFrame();
-
-                String title = com.le.sunriise.viewer.MynViewer.TITLE_NO_OPENED_DB;
-                mainFrame.setTitle(title);
-
-                Dimension preferredSize = new Dimension(900, 700);
-                mainFrame.setPreferredSize(preferredSize);
-
-                mainFrame.pack();
-
-                mainFrame.setLocationRelativeTo(null);
-
-                mainFrame.setVisible(true);
-                log.info(" setVisible to true");
-            }
-        });
-    }
-
     private JLabel getStartingBalanceLabel() {
         return startingBalanceLabel;
     }
@@ -990,6 +941,55 @@ public class AccountViewer {
             }
             jdbcConn = null;
         }
+    }
+
+    /**
+     * Launch the application.
+     */
+    public static void main(String[] args) {
+        // try {
+        // Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
+        // } catch (ClassNotFoundException e1) {
+        // log.error(e1);
+        // System.exit(1);
+        // }
+    
+        EventQueue.invokeLater(new Runnable() {
+    
+            @Override
+            public void run() {
+                try {
+                    JavaInfo.logInfo();
+    
+                    log.info("> Starting AccountViewer");
+                    AccountViewer window = new AccountViewer();
+                    showMainFrame(window);
+    
+                    String buildNumber = SunriiseBuildNumber.getBuildnumber();
+                    log.info("BuildNumber: " + buildNumber);
+                    
+                } catch (Exception e) {
+                    log.error(e, e);
+                }
+            }
+    
+            protected void showMainFrame(AccountViewer window) {
+                JFrame mainFrame = window.getFrame();
+    
+                String title = com.le.sunriise.viewer.MynViewer.TITLE_NO_OPENED_DB;
+                mainFrame.setTitle(title);
+    
+                Dimension preferredSize = new Dimension(900, 700);
+                mainFrame.setPreferredSize(preferredSize);
+    
+                mainFrame.pack();
+    
+                mainFrame.setLocationRelativeTo(null);
+    
+                mainFrame.setVisible(true);
+                log.info(" setVisible to true");
+            }
+        });
     }
 
     private class SwingAction extends AbstractAction {

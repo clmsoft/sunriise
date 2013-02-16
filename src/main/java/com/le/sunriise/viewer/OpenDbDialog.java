@@ -135,8 +135,9 @@ public class OpenDbDialog extends JDialog {
                     OpenDbDialog.this.openedDb.close();
                 }
 
-                OpenDbDialog.this.openedDb = Utils.openDb(dbFileName, passwordField.getPassword(), readOnlyCheckBox.isSelected(),
+                OpenDbDialog.this.openedDb = openDb(dbFileName, passwordField.getPassword(), readOnlyCheckBox.isSelected(),
                         encryptedCheckBox.isSelected());
+
                 dbOpenedCallback();
             } catch (IllegalStateException e) {
                 log.error(e, e);
@@ -173,12 +174,22 @@ public class OpenDbDialog extends JDialog {
 
     }
 
-    public static OpenDbDialog showDialog(OpenedDb opendDb, List<String> recentOpenFileNames, Component locationRelativeTo,
-            boolean disablekReadOnlyCheckBox) {
+    static OpenDbDialog showDialog(OpenedDb opendDb, List<String> recentOpenFileNames, Component locationRelativeTo,
+            boolean disableReadOnlyCheckBox, final CreateOpenedDbPlugin plugin) {
         String title = null;
-        OpenDbDialog dialog = new OpenDbDialog(opendDb, title, recentOpenFileNames);
+        OpenDbDialog dialog = new OpenDbDialog(opendDb, title, recentOpenFileNames) {
+            @Override
+            protected OpenedDb openDb(String dbFileName, char[] passwordChars, boolean readOnly, boolean encrypted)
+                    throws IOException {
+                if (plugin != null) {
+                    return plugin.openDb(dbFileName, passwordChars, readOnly, encrypted);
+                } else {
+                    return super.openDb(dbFileName, passwordChars, readOnly, encrypted);
+                }
+            }
+        };
 
-        showDialog(dialog, locationRelativeTo, disablekReadOnlyCheckBox);
+        showDialog(dialog, locationRelativeTo, disableReadOnlyCheckBox);
 
         return dialog;
     }
@@ -205,11 +216,6 @@ public class OpenDbDialog extends JDialog {
         dialog.pack();
         dialog.setLocationRelativeTo(locationRelativeTo);
         dialog.setVisible(true);
-    }
-
-    public static OpenDbDialog showDialog(OpenedDb openedDb, List<String> recentOpenFileNames, Component locationRelativeTo) {
-        boolean disableReadOnlyCheckBox = false;
-        return showDialog(openedDb, recentOpenFileNames, locationRelativeTo, disableReadOnlyCheckBox);
     }
 
     /**
@@ -437,5 +443,9 @@ public class OpenDbDialog extends JDialog {
 
     public void setHide(boolean hide) {
         this.hide = hide;
+    }
+
+    protected OpenedDb openDb(String dbFileName, char[] passwordChars, boolean readOnly, boolean encrypted) throws IOException {
+        return Utils.openDb(dbFileName, passwordChars, readOnly, encrypted);
     }
 }

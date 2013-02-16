@@ -37,6 +37,8 @@ public abstract class OpenDbAction implements ActionListener {
 
     private boolean disableReadOnlyCheckBox = false;
     
+    private CreateOpenedDbPlugin plugin;
+    
     public OpenDbAction(Component locationRelativeTo, Preferences prefs, OpenedDb openedDb) {
         super();
         this.locationRelativeTo = locationRelativeTo;
@@ -62,7 +64,7 @@ public abstract class OpenDbAction implements ActionListener {
     private void openDb(Component locationRelativeTo) {
         List<String> recentOpenFileNames = OpenDbDialog.getRecentOpenFileNames(prefs);
 
-        OpenDbDialog dialog = OpenDbDialog.showDialog(openedDb, recentOpenFileNames, locationRelativeTo, disableReadOnlyCheckBox);
+        OpenDbDialog dialog = OpenDbDialog.showDialog(openedDb, recentOpenFileNames, locationRelativeTo, disableReadOnlyCheckBox, getPlugin());
         if (!dialog.isCancel()) {
             // setDb(dialog.getDb());
             // dbFile = dialog.getDbFile();
@@ -98,5 +100,15 @@ public abstract class OpenDbAction implements ActionListener {
 
     public void setDisableReadOnlyCheckBox(boolean disableReadOnlyCheckBox) {
         this.disableReadOnlyCheckBox = disableReadOnlyCheckBox;
+    }
+
+
+    public CreateOpenedDbPlugin getPlugin() {
+        return plugin;
+    }
+
+
+    public void setPlugin(CreateOpenedDbPlugin plugin) {
+        this.plugin = plugin;
     }
 }

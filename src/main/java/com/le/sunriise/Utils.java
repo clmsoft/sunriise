@@ -170,14 +170,9 @@ public class Utils {
     private static OpenedDb openDb(File dbFile, String password, boolean readOnly, boolean encrypted) throws IOException {
         log.info("# Opening dbFile=" + dbFile.getAbsolutePath());
 
-        HeaderPage headerPage = new HeaderPage(dbFile);
-        HeaderPage.printHeaderPage(headerPage);
-
-        HeaderPagePasswordChecker checker = new HeaderPagePasswordChecker(headerPage);
-        if (! checker.check(password)) {
-            log.warn("Invalid password.");
+        if (log.isDebugEnabled()) {
+            printHeaderInfo(dbFile, password);
         }
-        AbstractHeaderPagePasswordChecker.printChecker(checker);
         
         OpenedDb openedDb = new OpenedDb();
         openedDb.setDbFile(dbFile);
@@ -245,6 +240,17 @@ public class Utils {
         }
 
         return openedDb;
+    }
+
+    private static void printHeaderInfo(File dbFile, String password) throws IOException {
+        HeaderPage headerPage = new HeaderPage(dbFile);
+        HeaderPage.printHeaderPage(headerPage);
+
+        HeaderPagePasswordChecker checker = new HeaderPagePasswordChecker(headerPage);
+        if (! checker.check(password)) {
+            log.warn("Invalid password.");
+        }
+        AbstractHeaderPagePasswordChecker.printChecker(checker);
     }
 
 }

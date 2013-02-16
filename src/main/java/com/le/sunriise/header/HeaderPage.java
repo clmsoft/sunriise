@@ -67,10 +67,6 @@ public class HeaderPage {
 
     private File dbFile;
 
-    public HeaderPage() {
-        super();
-    }
-
     public HeaderPage(File dbFile) throws IOException {
         super();
         this.dbFile = parse(dbFile);
@@ -360,19 +356,19 @@ public class HeaderPage {
     public static void printHeaderPage(HeaderPage headerPage, String indentation) {
         System.out.println("");
         
-        System.out.println(indentation + "getJetFormat=" + headerPage.getJetFormat());
-        System.out.println(indentation + "getJetFormat.PAGE_SIZE=" + headerPage.getJetFormat().PAGE_SIZE);
-        System.out.println(indentation + "getCharset=" + headerPage.getCharset());
+        System.out.println(indentation + "getJetFormat: " + headerPage.getJetFormat());
+        System.out.println(indentation + "getJetFormat.PAGE_SIZE: " + headerPage.getJetFormat().PAGE_SIZE);
+        System.out.println(indentation + "getCharset: " + headerPage.getCharset());
 
-        System.out.println(indentation + "isNewEncryption=" + headerPage.isNewEncryption());
+        System.out.println(indentation + "isNewEncryption: " + headerPage.isNewEncryption());
         if (! headerPage.isNewEncryption()) {
-            System.out.println(indentation + "getEmbeddedDatabasePassword=" + headerPage.getEmbeddedDatabasePassword());
+            System.out.println(indentation + "getEmbeddedDatabasePassword: " + headerPage.getEmbeddedDatabasePassword());
         }
 
-        System.out.println(indentation + "isUseSha1=" + headerPage.isUseSha1());
-        System.out.println(indentation + "getSalt=" + toHexString(headerPage.getSalt()));
-        System.out.println(indentation + "getBaseSalt=" + toHexString(headerPage.getBaseSalt()));
-        System.out.println(indentation + "encrypted4BytesCheck=" + toHexString(headerPage.getEncrypted4BytesCheck()));
+        System.out.println(indentation + "isUseSha1: " + headerPage.isUseSha1());
+        System.out.println(indentation + "getSalt: " + HeaderPage.toHexString(headerPage.getSalt()));
+        System.out.println(indentation + "getBaseSalt: " + HeaderPage.toHexString(headerPage.getBaseSalt()));
+        System.out.println(indentation + "encrypted4BytesCheck: " + HeaderPage.toHexString(headerPage.getEncrypted4BytesCheck()));
         
         System.out.println("");
     }

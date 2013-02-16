@@ -58,6 +58,7 @@ import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
+import com.le.sunriise.header.HeaderPageViewer;
 
 public class Launcher {
     private static final Logger log = Logger.getLogger(Launcher.class);
@@ -85,7 +86,7 @@ public class Launcher {
             }
 
             protected void showMainFrame(final Launcher window) {
-                JFrame mainFrame = window.getFrame();
+                final JFrame mainFrame = window.getFrame();
 
                 Dimension preferredSize = new Dimension(400, 300);
                 mainFrame.setPreferredSize(preferredSize);
@@ -108,6 +109,22 @@ public class Launcher {
                 JMenu mnNewMenu = new JMenu("File");
                 menuBar.add(mnNewMenu);
 
+                JMenu mnNewMenu_1 = new JMenu("Other tools");
+                mnNewMenu.add(mnNewMenu_1);
+                
+                JMenuItem mntmNewMenuItem_1 = new JMenuItem("Header page viewer");
+                mntmNewMenuItem_1.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        String[] args = new String[0];
+                        log.info("Staring HeaderPageViewer.main(args) ...");
+                        HeaderPageViewer.main(args);
+                        mainFrame.setVisible(false);
+                    }
+                });
+                mnNewMenu_1.add(mntmNewMenuItem_1);
+
+                mnNewMenu.addSeparator();
                 JMenuItem mntmNewMenuItem = new JMenuItem("Exit");
                 mntmNewMenuItem.addActionListener(new ActionListener() {
                     @Override
@@ -326,6 +343,7 @@ public class Launcher {
         @Override
         public void actionPerformed(ActionEvent e) {
             String[] args = new String[0];
+            log.info("Staring MnyViewer.main(args) ...");            
             MnyViewer.main(args);
             getFrame().setVisible(false);
         }
@@ -347,6 +365,7 @@ public class Launcher {
         @Override
         public void actionPerformed(ActionEvent e) {
             String[] args = new String[0];
+            log.info("Staring AccountViewer.main(args) ...");
             AccountViewer.main(args);
             getFrame().setVisible(false);
         }
@@ -368,6 +387,7 @@ public class Launcher {
         @Override
         public void actionPerformed(ActionEvent e) {
             String[] args = new String[0];
+            log.info("Staring PasswordCheckerApp.main(args) ...");
             PasswordCheckerApp.main(args);
             getFrame().setVisible(false);
         }
