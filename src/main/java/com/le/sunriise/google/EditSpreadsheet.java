@@ -30,10 +30,7 @@ public class EditSpreadsheet {
             SpreadsheetService service = new SpreadsheetService("SunriiseTest-v1");
             String userName = null;
             String password = null;
-            userName = "hleofxquotes";
-            password = "D363736f";
-            userName = "hle999";
-            password = "S252625d";
+
             if (userName != null) {
                 service.setUserCredentials(userName, password);
             }
