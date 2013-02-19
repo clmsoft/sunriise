@@ -41,6 +41,9 @@ import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.JTabbedPane;
@@ -69,9 +72,6 @@ import com.le.sunriise.password.bruteforce.BruteForceStat;
 import com.le.sunriise.password.bruteforce.CheckBruteForce;
 import com.le.sunriise.password.bruteforce.GenBruteForce;
 import com.le.sunriise.password.timing.Duration;
-import javax.swing.JMenuBar;
-import javax.swing.JMenu;
-import javax.swing.JMenuItem;
 
 public class PasswordCheckerApp {
     private static final Logger log = Logger.getLogger(PasswordCheckerApp.class);

@@ -27,8 +27,8 @@ import org.bouncycastle.crypto.engines.RC4Engine;
 import com.le.sunriise.StopWatch;
 import com.le.sunriise.password.PasswordUtils;
 import com.le.sunriise.password.crypt.BouncyCastleUtils;
-import com.le.sunriise.password.crypt.JDKUtils;
 import com.le.sunriise.password.crypt.CryptlUtils;
+import com.le.sunriise.password.crypt.JDKUtils;
 
 public class RC4TimingCmd {
     private static final Logger log = Logger.getLogger(PasswordUtils.class);
