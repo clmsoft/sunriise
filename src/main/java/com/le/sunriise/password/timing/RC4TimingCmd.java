@@ -28,7 +28,7 @@ import com.le.sunriise.StopWatch;
 import com.le.sunriise.password.PasswordUtils;
 import com.le.sunriise.password.crypt.BouncyCastleUtils;
 import com.le.sunriise.password.crypt.JDKUtils;
-import com.le.sunriise.password.crypt.LocalUtils;
+import com.le.sunriise.password.crypt.CryptlUtils;
 
 public class RC4TimingCmd {
     private static final Logger log = Logger.getLogger(PasswordUtils.class);
@@ -95,7 +95,7 @@ public class RC4TimingCmd {
 
         @Override
         public byte[] decryptUsingRC4(byte[] ciphertext, byte[] key) {
-            return LocalUtils.decryptUsingRC4(ciphertext, key);
+            return CryptlUtils.decryptUsingRC4(ciphertext, key);
         }
 
         @Override

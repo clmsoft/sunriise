@@ -33,7 +33,7 @@ import org.apache.poi.util.HexDump;
 import com.healthmarketscience.jackcess.ByteUtil;
 import com.healthmarketscience.jackcess.Column;
 import com.healthmarketscience.jackcess.JetFormat;
-import com.le.sunriise.password.BackupFileUtils;
+import com.le.sunriise.backup.BackupFileUtils;
 
 public class HeaderPage {
     private static final Logger log = Logger.getLogger(HeaderPage.class);
@@ -76,17 +76,7 @@ public class HeaderPage {
         String fileName = dbFile.getName();
 
         if (BackupFileUtils.isMnyBackupFile(fileName)) {
-            File tempFile = File.createTempFile("sunriise", BackupFileUtils.MNY_SUFFIX);
-            tempFile.deleteOnExit();
-            long headerOffset = BackupFileUtils.findMagicHeader(dbFile);
-            log.info("headerOffset=" + headerOffset);
-            if (headerOffset < 0) {
-                headerOffset = 70; // compression header?
-            }
-            dbFile = BackupFileUtils.copyBackupFile(dbFile, tempFile, headerOffset, headerOffset + 4096);
-            if (log.isDebugEnabled()) {
-                log.debug("Temp converted backup file=" + dbFile);
-            }
+            dbFile = BackupFileUtils.createBackupAsTempFile(dbFile, true, 4096L * 2);
         }
 
         RandomAccessFile rFile = null;

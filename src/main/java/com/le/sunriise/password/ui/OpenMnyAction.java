@@ -29,7 +29,7 @@ import javax.swing.filechooser.FileFilter;
 
 import org.apache.log4j.Logger;
 
-import com.le.sunriise.password.BackupFileUtils;
+import com.le.sunriise.backup.BackupFileUtils;
 
 abstract class OpenMnyAction implements ActionListener {
     private static final Logger log = Logger.getLogger(OpenMnyAction.class);

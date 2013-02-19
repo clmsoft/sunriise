@@ -55,8 +55,8 @@ import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 import com.le.sunriise.Utils;
+import com.le.sunriise.backup.BackupFileUtils;
 import com.le.sunriise.model.bean.OpenDbDialogDataModel;
-import com.le.sunriise.password.BackupFileUtils;
 
 public class OpenDbDialog extends JDialog {
     private static final Logger log = Logger.getLogger(OpenDbDialog.class);
@@ -114,17 +114,8 @@ public class OpenDbDialog extends JDialog {
 
             if (BackupFileUtils.isMnyBackupFile(dbFileName)) {
                 try {
-                    File tempFile = File.createTempFile("sunriise", BackupFileUtils.MNY_SUFFIX);
-                    // tempFile.deleteOnExit();
                     File dbFile = new File(dbFileName);
-                    long headerOffset = BackupFileUtils.findMagicHeader(dbFile);
-                    log.info("findMagicHeader, headerOffset=" + headerOffset);
-                    if (headerOffset < 0) {
-                        headerOffset = 70; // compression header?
-                        log.info(" TODO: handle compression header, headerOffset=" + headerOffset);
-                    }
-                    dbFile = BackupFileUtils.copyBackupFile(dbFile, tempFile, headerOffset, -1L);
-                    log.info("Temp converted backup file=" + dbFile);
+                    dbFile = BackupFileUtils.createBackupAsTempFile(dbFile, true, -1L);
                     dbFileName = dbFile.getAbsolutePath();
                 } catch (IOException e) {
                     log.error(e, e);
@@ -139,12 +130,7 @@ public class OpenDbDialog extends JDialog {
                         encryptedCheckBox.isSelected());
 
                 dbOpenedCallback();
-            } catch (IllegalStateException e) {
-                log.error(e, e);
-                JOptionPane.showMessageDialog(dbFileNames, dbFileName + " \n" + e.toString(), "Error open db file",
-                        JOptionPane.ERROR_MESSAGE);
-                return;
-            } catch (IOException e) {
+            } catch (Exception e) {
                 log.error(e, e);
                 JOptionPane.showMessageDialog(dbFileNames, dbFileName + " \n" + e.toString(), "Error open db file",
                         JOptionPane.ERROR_MESSAGE);

@@ -25,6 +25,7 @@ import java.util.Arrays;
 import org.apache.log4j.Logger;
 
 import com.healthmarketscience.jackcess.JetFormat;
+import com.le.sunriise.backup.BackupFileUtils;
 import com.le.sunriise.header.HeaderPage;
 
 public class CheckPasswordHeaderCmd {
@@ -37,24 +38,6 @@ public class CheckPasswordHeaderCmd {
     public CheckPasswordHeaderCmd(File file) throws IOException {
         this.srcFile = file;
         this.srcHeaderPage = new HeaderPage(file);
-    }
-
-    /**
-     * @param args
-     */
-    public static void main(String[] args) {
-        if (args.length < 2) {
-            Class<CheckPasswordHeaderCmd> clz = CheckPasswordHeaderCmd.class;
-            System.out.println("Usage: java " + clz.getName() + " file1.mny file1.mny ...");
-            System.exit(1);
-        }
-
-        try {
-            CheckPasswordHeaderCmd checkPasswordHeader = new CheckPasswordHeaderCmd(new File(args[0]));
-            checkPasswordHeader.checkPaths(args);
-        } catch (IOException e) {
-            log.error(e, e);
-        }
     }
 
     private boolean checkPaths(String[] paths) throws IOException {
@@ -171,10 +154,28 @@ public class CheckPasswordHeaderCmd {
 
     private boolean checkJetFormat(JetFormat jetFormat, JetFormat jetFormat2) {
         boolean rv = true;
-
+    
         rv = jetFormat.toString().compareToIgnoreCase(jetFormat2.toString()) == 0;
-
+    
         return rv;
+    }
+
+    /**
+     * @param args
+     */
+    public static void main(String[] args) {
+        if (args.length < 2) {
+            Class<CheckPasswordHeaderCmd> clz = CheckPasswordHeaderCmd.class;
+            System.out.println("Usage: java " + clz.getName() + " file1.mny file1.mny ...");
+            System.exit(1);
+        }
+    
+        try {
+            CheckPasswordHeaderCmd checkPasswordHeader = new CheckPasswordHeaderCmd(new File(args[0]));
+            checkPasswordHeader.checkPaths(args);
+        } catch (IOException e) {
+            log.error(e, e);
+        }
     }
 
 }
