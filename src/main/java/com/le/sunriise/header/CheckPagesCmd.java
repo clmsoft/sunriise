@@ -1,6 +1,7 @@
 package com.le.sunriise.header;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
@@ -43,6 +44,14 @@ public class CheckPagesCmd {
 
     private PageInfo[] encryptedPages = new PageInfo[MSISAM_MAX_ENCRYPTED_PAGE];
 
+    private HeaderPage headerPage;
+
+    private Map<Integer, TableDefPage> tableDefPageMap = new HashMap<Integer, TableDefPage>();
+
+    private RandomAccessFile rFile;
+
+    private FileChannel fileChannel;
+
     public CheckPagesCmd(String dbFileName, String password) {
         this.dbFileName = dbFileName;
         this.password = password;
@@ -83,8 +92,7 @@ public class CheckPagesCmd {
     private void check() throws IOException {
         File dbFile = new File(dbFileName);
 
-        HeaderPage headerPage = null;
-        headerPage = new HeaderPage(dbFile);
+        this.headerPage = new HeaderPage(dbFile);
         this.pageSize = headerPage.getJetFormat().PAGE_SIZE;
         long fileLength = dbFile.length();
         log.info("dbFile=" + dbFile.getAbsolutePath());
@@ -105,12 +113,9 @@ public class CheckPagesCmd {
         }
 
         try {
-            RandomAccessFile rFile = null;
-            FileChannel fileChannel = null;
+
             try {
-                rFile = new RandomAccessFile(dbFile, "r");
-                rFile.seek(0L);
-                fileChannel = rFile.getChannel();
+                openFileChannel(dbFile);
 
                 ByteBuffer buffer = ByteBuffer.allocate(pageSize);
                 buffer.order(ByteOrder.LITTLE_ENDIAN);
@@ -124,31 +129,41 @@ public class CheckPagesCmd {
             } finally {
                 logPageInfoSummary();
 
-                if (fileChannel != null) {
-                    try {
-                        fileChannel.close();
-                    } catch (IOException e) {
-                        log.warn(e);
-                    } finally {
-                        fileChannel = null;
-                    }
-                }
-
-                if (rFile != null) {
-                    try {
-                        rFile.close();
-                    } catch (IOException e) {
-                        log.warn(e);
-                    } finally {
-                        rFile = null;
-                    }
-                }
+                closeFileChannel();
             }
 
         } catch (IOException e) {
             log.error(e, e);
         }
 
+    }
+
+    private void openFileChannel(File dbFile) throws FileNotFoundException, IOException {
+        rFile = new RandomAccessFile(dbFile, "r");
+        rFile.seek(0L);
+        fileChannel = rFile.getChannel();
+    }
+
+    private void closeFileChannel() {
+        if (fileChannel != null) {
+            try {
+                fileChannel.close();
+            } catch (IOException e) {
+                log.warn(e);
+            } finally {
+                fileChannel = null;
+            }
+        }
+
+        if (rFile != null) {
+            try {
+                rFile.close();
+            } catch (IOException e) {
+                log.warn(e);
+            } finally {
+                rFile = null;
+            }
+        }
     }
 
     private void logPageInfoSummary() {
@@ -163,25 +178,51 @@ public class CheckPagesCmd {
         for (int i = 0; i < encryptedPages.length; i++) {
             log.info("ENCRYPTED_PAGE, " + encryptedPages[i].toString());
         }
+
+        for (Integer key : tableDefPageMap.keySet()) {
+            TableDefPage tDef = tableDefPageMap.get(key);
+            if (tDef.isChild()) {
+                continue;
+            }
+            List<TableDefPage> children = findChildren(tDef, tableDefPageMap);
+            log.info("TDEF [" + (children.size() + 1) + "] " + toString(tDef, children));
+        }
+    }
+
+    private String toString(TableDefPage parent, List<TableDefPage> children) {
+        TableDefPage tDef = parent;
+        StringBuilder sb = new StringBuilder();
+        sb.append(tDef.getPageNumber());
+        TableDefPage lastChild = tDef;
+        for (TableDefPage child : children) {
+            sb.append(" -> ");
+            sb.append(child.getPageNumber());
+            lastChild = child;
+        }
+        sb.append(" -> ");
+        sb.append(lastChild.getNextPageNumber());
+        return sb.toString();
+    }
+
+    private static List<TableDefPage> findChildren(TableDefPage tdef, Map<Integer, TableDefPage> tableDefPageMap) {
+        List<TableDefPage> children = new ArrayList<TableDefPage>();
+        while (tdef.getNextPageNumber() > 0) {
+            tdef = tableDefPageMap.get(tdef.getNextPageNumber());
+            if (tdef == null) {
+                break;
+            }
+            children.add(tdef);
+        }
+        return children;
     }
 
     protected void checkPage(FileChannel fileChannel, ByteBuffer buffer, int pageNumber) throws IOException {
+        readPage(fileChannel, pageNumber, buffer);
+
         // skip header page
         if (pageNumber == 0) {
             return;
         }
-
-        buffer.clear();
-
-        int position = pageNumber * pageSize;
-
-        int bytesRead = fileChannel.read(buffer, position);
-        if (bytesRead != pageSize) {
-            log.error("bytesRead=" + bytesRead + " is not the same as pageSize=" + pageSize);
-        }
-        buffer.flip();
-
-        decodePage(buffer, pageNumber, encodingKey, engine);
 
         byte pageType = buffer.get(0);
 
@@ -203,7 +244,7 @@ public class CheckPagesCmd {
             knownTypePages.get(pageType).add(new PageInfo(pageNumber, pageType));
             break;
         case PageTypes.TABLE_DEF:
-            knownTypePages.get(pageType).add(new PageInfo(pageNumber, pageType));
+            parseTableDefPage(pageNumber, pageType, buffer);
             break;
         case PageTypes.USAGE_MAP:
             knownTypePages.get(pageType).add(new PageInfo(pageNumber, pageType));
@@ -214,6 +255,45 @@ public class CheckPagesCmd {
             break;
         }
         return;
+    }
+
+    private void readPage(FileChannel fileChannel, int pageNumber, ByteBuffer buffer) throws IOException {
+        buffer.clear();
+
+        int position = pageNumber * pageSize;
+
+        int bytesRead = fileChannel.read(buffer, position);
+        if (bytesRead != pageSize) {
+            log.error("bytesRead=" + bytesRead + " is not the same as pageSize=" + pageSize);
+        }
+        buffer.flip();
+
+        decodePage(buffer, pageNumber, encodingKey, engine);
+    }
+
+    private TableDefPage parseTableDefPage(int pageNumber, byte pageType, ByteBuffer buffer) throws IOException {
+        PageInfo pageInfo = new PageInfo(pageNumber, pageType);
+        knownTypePages.get(pageType).add(pageInfo);
+
+        TableDefPage tDef = tableDefPageMap.get(pageNumber);
+        if (tDef == null) {
+            tDef = new TableDefPage(pageNumber, buffer, headerPage);
+        } else {
+            log.info("Already parse pageNumber=" + pageNumber);
+        }
+        tableDefPageMap.put(pageNumber, tDef);
+        int nextPageNumber = tDef.getNextPageNumber();
+        if (nextPageNumber > 0) {
+            readPage(fileChannel, nextPageNumber, buffer);
+            pageType = buffer.get(0);
+            if (pageType != PageTypes.TABLE_DEF) {
+                log.warn("Expected PageTypes.TABLE_DEF at pageNumber=" + nextPageNumber + ". Got pageType=" + pageType);
+            } else {
+                TableDefPage nextTDef = parseTableDefPage(nextPageNumber, pageType, buffer);
+                nextTDef.setPreviousPageNumber(pageNumber);
+            }
+        }
+        return tDef;
     }
 
     private static void decodePage(ByteBuffer buffer, int pageNumber, byte[] _encodingKey, RC4Engine engine) {
