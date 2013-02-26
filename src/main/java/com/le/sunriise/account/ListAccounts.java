@@ -16,48 +16,77 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA
  *******************************************************************************/
-package com.le.sunriise.report;
+package com.le.sunriise.account;
 
+import java.io.CharArrayWriter;
 import java.io.File;
 import java.io.IOException;
 
 import org.apache.log4j.Logger;
 
-public class FilteredAccountVisitorCmd {
-    private static final Logger log = Logger.getLogger(FilteredAccountVisitorCmd.class);
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.le.sunriise.json.JSONUtils;
+import com.le.sunriise.mnyobject.Account;
+
+public class ListAccounts extends DefaultAccountVisitor {
+    private static final Logger log = Logger.getLogger(ListAccounts.class);
 
     /**
      * @param args
      */
     public static void main(String[] args) {
         File dbFile = null;
-        File propsFile = null;
         String password = null;
 
-        if (args.length == 2) {
+        if (args.length == 1) {
             dbFile = new File(args[0]);
-            propsFile = new File(args[1]);
         } else if (args.length == 2) {
             dbFile = new File(args[0]);
-            propsFile = new File(args[1]);
-            password = args[2];
+            password = args[1];
         } else {
-            Class<FilteredAccountVisitorCmd> clz = FilteredAccountVisitorCmd.class;
-            System.out.println("Usage: java " + clz.getName() + " in.mny in.props [password]");
+            Class<ListAccounts> clz = ListAccounts.class;
+            System.out.println("Usage: java " + clz.getName() + " in.mny [password]");
             System.exit(1);
         }
 
         log.info("dbFile=" + dbFile);
-        log.info("propsFile=" + propsFile);
         try {
-            FilteredAccountVisitor cmd = new FilteredAccountVisitor();
-            cmd.setFilterFile(propsFile);
+            ListAccounts cmd = new ListAccounts();
             cmd.visit(dbFile, password);
         } catch (IOException e) {
             log.error(e, e);
         } finally {
             log.info("< DONE");
         }
+
     }
 
+    @Override
+    public void visitAccount(Account account) {
+        log.info(account.getName());
+
+        boolean toJSON = true;
+        if (toJSON) {
+            CharArrayWriter writer = new CharArrayWriter();
+            try {
+                JSONUtils.writeValue(account, writer);
+            } catch (JsonGenerationException e) {
+                log.error(e, e);
+            } catch (JsonMappingException e) {
+                log.error(e, e);
+            } catch (IOException e) {
+                log.error(e, e);
+            } finally {
+                if (writer != null) {
+                    try {
+                        writer.close();
+                        System.out.println(new String(writer.toCharArray()));
+                    } finally {
+                        writer = null;
+                    }
+                }
+            }
+        }
+    }
 }

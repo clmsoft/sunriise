@@ -16,7 +16,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA
  *******************************************************************************/
-package com.le.sunriise.report;
+package com.le.sunriise.table;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,8 +31,8 @@ import com.healthmarketscience.jackcess.Table;
 import com.le.sunriise.Utils;
 import com.le.sunriise.viewer.OpenedDb;
 
-public class SavedReport {
-    private static final Logger log = Logger.getLogger(SavedReport.class);
+public class SavedReportCmd {
+    private static final Logger log = Logger.getLogger(SavedReportCmd.class);
 
     /**
      * @param args
@@ -47,14 +47,15 @@ public class SavedReport {
             dbFile = new File(args[0]);
             password = args[1];
         } else {
-            Class<SavedReport> clz = SavedReport.class;
+            Class<SavedReportCmd> clz = SavedReportCmd.class;
             System.out.println("Usage: java " + clz.getName() + " in.mny [password]");
             System.exit(1);
         }
 
         log.info("dbFile=" + dbFile);
+        OpenedDb openedDb = null;
         try {
-            OpenedDb openedDb = Utils.openDbReadOnly(dbFile, password);
+            openedDb = Utils.openDbReadOnly(dbFile, password);
             Database db = openedDb.getDb();
             Table table = db.getTable("Report Custom Pool");
             Cursor cursor = Cursor.createCursor(table);
@@ -73,12 +74,16 @@ public class SavedReport {
                 byte[] rgbMetaFile = (byte[]) values.get("rgbMetaFile");
                 if (rgbMetaFile != null) {
                     log.info("    rgbMetaFile=" + rgbMetaFile.length);
-//                  log.info(new String(rgbMetaFile));
+                    // log.info(new String(rgbMetaFile));
                 }
             }
         } catch (IOException e) {
             log.error(e, e);
         } finally {
+            if (openedDb != null) {
+                openedDb.close();
+                openedDb = null;
+            }
             log.info("< DONE");
         }
     }

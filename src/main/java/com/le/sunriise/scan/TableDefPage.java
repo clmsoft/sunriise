@@ -1,10 +1,9 @@
-package com.le.sunriise.header;
+package com.le.sunriise.scan;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.log4j.Logger;
+
+import com.le.sunriise.header.HeaderPage;
 
 public class TableDefPage {
     private static final Logger log = Logger.getLogger(TableDefPage.class);

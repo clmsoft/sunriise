@@ -23,7 +23,7 @@ import java.io.IOException;
 
 import org.apache.log4j.Logger;
 
-import com.le.sunriise.report.SanityCheck;
+import com.le.sunriise.account.SanityCheck;
 
 public class SanityCheckCmd {
 

@@ -16,10 +16,40 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA
  *******************************************************************************/
-package com.le.sunriise.report;
+package com.le.sunriise.account;
+
+import java.math.BigDecimal;
+import java.util.Date;
 
 import com.le.sunriise.mnyobject.Account;
 
-public interface AccountFilter {
-    public boolean accept(Account account);
+class AccountBalance {
+    private Account account;
+    private Date date;
+    private BigDecimal balance;
+
+    public Account getAccount() {
+        return account;
+    }
+
+    public void setAccount(Account account) {
+        this.account = account;
+    }
+
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
+    }
+
+    public BigDecimal getBalance() {
+        return balance;
+    }
+
+    public void setBalance(BigDecimal balance) {
+        this.balance = balance;
+    }
+
 }

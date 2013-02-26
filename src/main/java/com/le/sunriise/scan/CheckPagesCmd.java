@@ -1,4 +1,4 @@
-package com.le.sunriise.header;
+package com.le.sunriise.scan;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -20,6 +20,8 @@ import org.bouncycastle.crypto.params.KeyParameter;
 import com.healthmarketscience.jackcess.BaseCryptCodecHandler;
 import com.healthmarketscience.jackcess.JetFormat;
 import com.healthmarketscience.jackcess.PageTypes;
+import com.le.sunriise.header.HeaderPage;
+import com.le.sunriise.header.PageInfo;
 import com.le.sunriise.password.HeaderPagePasswordChecker;
 
 public class CheckPagesCmd {
@@ -238,14 +240,18 @@ public class CheckPagesCmd {
             log.info("ENCRYPTED_PAGE, " + encryptedPages[i].toString());
         }
 
+        int count = 0;
         for (Integer key : tableDefPageMap.keySet()) {
             TableDefPage tDef = tableDefPageMap.get(key);
             if (tDef.isChild()) {
                 continue;
             }
             List<TableDefPage> children = findChildren(tDef, tableDefPageMap);
-            log.info("TDEF [" + (children.size() + 1) + "] " + toString(tDef, children));
+            
+            log.info(count + " TDEF [" + (children.size() + 1) + "] " + toString(tDef, children));
+            count++;
         }
+        log.info("Total tDef=" + count);
     }
 
     private String toString(TableDefPage parent, List<TableDefPage> children) {

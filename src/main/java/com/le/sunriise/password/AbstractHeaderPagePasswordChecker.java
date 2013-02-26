@@ -70,7 +70,7 @@ public abstract class AbstractHeaderPagePasswordChecker {
     public static boolean checkPassword(HeaderPage headerPage, String testPassword) {
         boolean matched = false;
         AbstractHeaderPagePasswordChecker checker = null;
-        
+
         try {
             checker = createChecker(headerPage);
 
@@ -162,13 +162,13 @@ public abstract class AbstractHeaderPagePasswordChecker {
         System.out.println("");
         System.out.println("testKey: " + HeaderPage.toHexString(checker.getTestKey()));
         System.out.println("testBytes: " + HeaderPage.toHexString(checker.getTestBytes()));
-    
+
         System.out.println("");
         System.out.println("decrypted4BytesCheck: " + HeaderPage.toHexString(checker.getDecrypted4BytesCheck()));
-        
+
         System.out.println("");
         System.out.println("encodingKey: " + HeaderPage.toHexString(checker.getEncodingKey()));
-        
+
         System.out.println("");
     }
 
@@ -192,14 +192,26 @@ public abstract class AbstractHeaderPagePasswordChecker {
         if (headerPage.isNewEncryption()) {
             result = checkNewEncryption(headerPage, password, charset);
         } else {
-            checkOldEncryption(headerPage, password, charset);
+            result = checkOldEncryption(headerPage, password, charset);
         }
         return result;
     }
 
-    private void checkOldEncryption(HeaderPage headerPage, String password, Charset charset) throws IOException {
-        throw new IOException("Old MSISAM dbs using jet-style encryption. " + "No password to check. "
-                + "The embedded password is " + headerPage.getEmbeddedDatabasePassword());
+    private boolean checkOldEncryption(HeaderPage headerPage, String password, Charset charset) throws IOException {
+        String embeddedDatabasePassword = headerPage.getEmbeddedDatabasePassword();
+        if ((password == null) && (embeddedDatabasePassword == null)) {
+            return true;
+        }
+
+        if (password == null) {
+            return false;
+        }
+
+        if (embeddedDatabasePassword == null) {
+            return false;
+        }
+
+        return password.equals(embeddedDatabasePassword);
     }
 
     private boolean checkNewEncryption(HeaderPage headerPage, String password, Charset charset) {
@@ -208,7 +220,7 @@ public abstract class AbstractHeaderPagePasswordChecker {
         if (log.isDebugEnabled()) {
             log.debug("passwordDigest=" + HexDump.toHex(passwordDigest));
         }
-        
+
         // then a salt is append to the digest. This is is now known as the
         // testKey
         testKey = concat(passwordDigest, headerPage.getSalt());
