@@ -5,6 +5,7 @@ import java.io.File;
 import org.apache.log4j.Logger;
 
 import com.le.sunriise.export.ExportToJSON;
+import com.le.sunriise.misc.MnyTestFile;
 
 public class JSONGenTestData {
     private static Logger log = Logger.getLogger(JSONGenTestData.class);
@@ -25,7 +26,7 @@ public class JSONGenTestData {
 
         log.info("outputDir=" + outputDir.getAbsolutePath());
 
-        for (MnyTestFile file : MnyTestFile.sampleFiles) {
+        for (MnyTestFile file : MnyTestFile.SAMPLE_FILES) {
             try {
                 exportFile(file, outputDir);
             } catch (Exception e) {

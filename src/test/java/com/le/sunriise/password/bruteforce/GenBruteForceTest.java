@@ -145,7 +145,7 @@ public class GenBruteForceTest {
 
     @Test
     public void testFalsePositive() throws IOException {
-        File dbFile = new File("src/test/data/sunset-sample-pwd.mny");
+        File dbFile = new File("src/test/data/mny/sunset-sample-pwd.mny");
 
         HeaderPage headerPage = new HeaderPage(dbFile);
         HeaderPagePasswordChecker checker = new HeaderPagePasswordChecker(headerPage);

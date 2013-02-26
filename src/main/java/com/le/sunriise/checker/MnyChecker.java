@@ -1,6 +1,5 @@
 package com.le.sunriise.checker;
 
-import com.le.sunriise.report.SanityCheckCmd;
 
 public class MnyChecker {
     /**

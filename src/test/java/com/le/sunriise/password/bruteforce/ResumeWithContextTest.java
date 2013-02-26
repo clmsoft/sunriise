@@ -178,7 +178,7 @@ public class ResumeWithContextTest {
             throw new IOException(message);
         }
 
-        File dbFile = new File("src/test/data/sunset-sample-pwd.mny");
+        File dbFile = new File("src/test/data/mny/sunset-sample-pwd.mny");
         // 123@ABC!
         String expectedPassword = "123@ABC!";
         char[] mask = "*******".toCharArray();

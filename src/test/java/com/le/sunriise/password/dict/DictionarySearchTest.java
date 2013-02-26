@@ -52,12 +52,12 @@ public class DictionarySearchTest {
 
         MyDictionarySearch searcher = new MyDictionarySearch();
 
-        dbFileName = "src/test/data/money2001-pwd.mny";
+        dbFileName = "src/test/data/mny/money2001-pwd.mny";
         pathName = "src/test/data/dict/";
         expected = "TEST12345";
         checkPassword(dbFileName, pathName, expected, searcher);
 
-        dbFileName = "src/test/data/money2002.mny";
+        dbFileName = "src/test/data/mny/money2002.mny";
         pathName = "src/test/data/dict/";
         expected = null;
         if (!reUseChecker) {
@@ -65,7 +65,7 @@ public class DictionarySearchTest {
         }
         checkPassword(dbFileName, pathName, expected, searcher);
 
-        dbFileName = "src/test/data/money2004-pwd.mny";
+        dbFileName = "src/test/data/mny/money2004-pwd.mny";
         pathName = "src/test/data/dict/";
         expected = "123@ABC!";
         if (!reUseChecker) {
@@ -73,7 +73,7 @@ public class DictionarySearchTest {
         }
         checkPassword(dbFileName, pathName, expected, searcher);
 
-        dbFileName = "src/test/data/money2005-pwd.mny";
+        dbFileName = "src/test/data/mny/money2005-pwd.mny";
         pathName = "src/test/data/dict/";
         expected = "123@ABC!";
         if (!reUseChecker) {
@@ -81,7 +81,7 @@ public class DictionarySearchTest {
         }
         checkPassword(dbFileName, pathName, expected, searcher);
 
-        dbFileName = "src/test/data/money2008-pwd.mny";
+        dbFileName = "src/test/data/mny/money2008-pwd.mny";
         pathName = "src/test/data/dict/";
         expected = "Test12345";
         if (!reUseChecker) {
@@ -89,7 +89,7 @@ public class DictionarySearchTest {
         }
         checkPassword(dbFileName, pathName, expected, searcher);
 
-        dbFileName = "src/test/data/sunset-sample-pwd.mny";
+        dbFileName = "src/test/data/mny/sunset-sample-pwd.mny";
         pathName = "src/test/data/dict/";
         expected = "123@ABC!";
         if (!reUseChecker) {
@@ -97,7 +97,7 @@ public class DictionarySearchTest {
         }
         checkPassword(dbFileName, pathName, expected, searcher);
 
-        dbFileName = "src/test/data/sunset-sample-pwd-5.mny";
+        dbFileName = "src/test/data/mny/sunset-sample-pwd-5.mny";
         pathName = "src/test/data/dict/";
         expected = "12@a!";
         if (!reUseChecker) {
@@ -105,7 +105,7 @@ public class DictionarySearchTest {
         }
         checkPassword(dbFileName, pathName, expected, searcher);
 
-        dbFileName = "src/test/data/sunset-sample-pwd-6.mny";
+        dbFileName = "src/test/data/mny/sunset-sample-pwd-6.mny";
         pathName = "src/test/data/dict/";
         expected = null;
         if (!reUseChecker) {

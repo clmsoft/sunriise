@@ -16,12 +16,14 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA
  *******************************************************************************/
-package com.le.sunriise.report;
+package com.le.sunriise.checker;
 
 import java.io.File;
 import java.io.IOException;
 
 import org.apache.log4j.Logger;
+
+import com.le.sunriise.report.SanityCheck;
 
 public class SanityCheckCmd {
 

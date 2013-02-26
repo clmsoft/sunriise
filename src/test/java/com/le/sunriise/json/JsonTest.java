@@ -13,6 +13,7 @@ import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
 import com.le.sunriise.Utils;
 import com.le.sunriise.export.ExportToJSON;
+import com.le.sunriise.misc.MnyTestFile;
 import com.le.sunriise.mnyobject.Account;
 import com.le.sunriise.viewer.OpenedDb;
 
@@ -23,51 +24,51 @@ public class JsonTest {
 
     private final class ExporterTester extends ExportToJSON {
         private final File expectedDir;
-    
+
         private ExporterTester(File expectedDir) {
             this.expectedDir = expectedDir;
         }
-    
+
         @Override
         protected void exportMnyContext(File outDir) throws IOException {
             Assert.assertNotNull(mnyContext);
-    
+
             super.exportMnyContext(outDir);
-    
+
             String fileName = null;
-    
+
             fileName = "categories.json";
             checkFile(expectedDir, outDir, fileName);
-    
+
             fileName = "currencies.json";
             checkFile(expectedDir, outDir, fileName);
-    
+
             fileName = "payees.json";
             checkFile(expectedDir, outDir, fileName);
-    
+
             fileName = "securities.json";
             checkFile(expectedDir, outDir, fileName);
         }
-    
+
         protected void checkFile(final File expectedDir, File outDir, String fileName) throws IOException {
             File file = null;
             File expectedFile = null;
             HashFunction hashFunction = Hashing.sha1();
-    
+
             file = new File(outDir, fileName);
             expectedFile = new File(expectedDir, fileName);
             log.info("Check file=" + file);
             log.info("      expectedFile=" + expectedFile);
             HashCode hashCode = com.google.common.io.Files.hash(file, hashFunction);
             HashCode expectedHashCode = com.google.common.io.Files.hash(expectedFile, hashFunction);
-            
+
             Assert.assertTrue(hashCode.equals(expectedHashCode));
         }
-    
+
         @Override
         protected void exportAccount(Account account, File outDir) throws IOException {
             Assert.assertNotNull(account);
-            
+
             super.exportAccount(account, outDir);
         }
     }
@@ -75,10 +76,12 @@ public class JsonTest {
     @Ignore
     @Test
     public void test() throws IOException {
-        for (MnyTestFile file : MnyTestFile.sampleFiles) {
-            String dbFilename = file.getFileName();
-            String password = file.getPassword();
-            testJsonExport(dbFilename, password);
+        for (MnyTestFile testFile : MnyTestFile.SAMPLE_FILES) {
+            String dbFilename = testFile.getFileName();
+            String password = testFile.getPassword();
+            if (!testFile.isBackup()) {
+                testJsonExport(dbFilename, password);
+            }
         }
     }
 

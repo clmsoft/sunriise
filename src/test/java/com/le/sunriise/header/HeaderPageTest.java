@@ -27,6 +27,7 @@ import org.junit.Test;
 
 import com.healthmarketscience.jackcess.JetFormat;
 import com.le.sunriise.header.HeaderPage;
+import com.le.sunriise.misc.MnyTestFile;
 
 public class HeaderPageTest {
 
@@ -34,7 +35,10 @@ public class HeaderPageTest {
     public void test() throws IOException {
         File dbFile = null;
 
-        dbFile = new File("src/test/data/sunset-sample-pwd-5.mny");
+        String fileName = "sunset-sample-pwd-5.mny";
+        MnyTestFile testFile = MnyTestFile.getSampleFile(fileName);
+        Assert.assertNotNull(testFile);
+        dbFile = new File(testFile.getFileName());
         HeaderPage headerPage = new HeaderPage(dbFile);
 
         Assert.assertEquals(JetFormat.VERSION_MSISAM, headerPage.getJetFormat());
@@ -44,12 +48,15 @@ public class HeaderPageTest {
         Assert.assertEquals("[42, A0, 5B, E7]", HeaderPage.toHexString(headerPage.getBaseSalt()));
         Assert.assertEquals("[D6, BB, F8, 4B]", HeaderPage.toHexString(headerPage.getEncrypted4BytesCheck()));
     }
-    
+
     @Test
     public void testBackupFile() throws IOException {
         File dbFile = null;
 
-        dbFile = new File("src/test/data/sunset-sample.mbf");
+        String fileName = "sunset-sample.mbf";
+        MnyTestFile testFile = MnyTestFile.getSampleFile(fileName);
+        Assert.assertNotNull(testFile);
+        dbFile = new File(testFile.getFileName());
         HeaderPage headerPage = new HeaderPage(dbFile);
 
         Assert.assertEquals(JetFormat.VERSION_MSISAM, headerPage.getJetFormat());

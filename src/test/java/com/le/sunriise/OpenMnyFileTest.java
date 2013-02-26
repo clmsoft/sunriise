@@ -17,31 +17,50 @@
  * USA
  *******************************************************************************/
 
-
-
 package com.le.sunriise;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.junit.Assert;
 import org.junit.Test;
 
 import com.le.sunriise.accountviewer.AccountUtil;
+import com.le.sunriise.misc.MnyTestFile;
 import com.le.sunriise.mnyobject.Account;
 import com.le.sunriise.mnyobject.Transaction;
 import com.le.sunriise.viewer.OpenedDb;
 
 public class OpenMnyFileTest {
+    private static final Logger log = Logger.getLogger(OpenMnyFileTest.class);
+
     @Test
     public void testSunset() throws IOException {
-        File dbFile = new File("src/test/data/sunset01.mny");
-        String password = null;
-        openDB(dbFile, password);
+        String fileName = null;
 
-        dbFile = new File("src/test/data/sunset02.mny");
-        password = "12345678";
+        fileName = "sunset01.mny";
+        testSunset(fileName);
+
+        fileName = "sunset02.mny";
+        testSunset(fileName);
+    }
+
+    protected void testSunset(String fileName) throws IOException {
+        if (fileName == null) {
+            return;
+        }
+        MnyTestFile testFile;
+        String password;
+        File dbFile;
+        testFile = MnyTestFile.getSampleFile(fileName);
+        Assert.assertNotNull(testFile);
+        fileName = testFile.getFileName();
+        log.info("fileName: " + fileName);
+        dbFile = new File(testFile.getFileName());
+        password = testFile.getPassword();
+        log.info("password: " + password);
         openDB(dbFile, password);
     }
 

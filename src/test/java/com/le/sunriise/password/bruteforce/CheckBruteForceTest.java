@@ -32,7 +32,7 @@ public class CheckBruteForceTest {
 
     @Test
     public void forDebug() throws IOException {
-        File dbFile = new File("src/test/data/sunset-sample-pwd-5.mny");
+        File dbFile = new File("src/test/data/mny/sunset-sample-pwd-5.mny");
         String expectedPassword = "12@a!";
 
         char[] mask = null;
@@ -53,7 +53,7 @@ public class CheckBruteForceTest {
      */
     @Test
     public void testBruteForce() throws IOException {
-        File dbFile = new File("src/test/data/sunset-sample-pwd-5.mny");
+        File dbFile = new File("src/test/data/mny/sunset-sample-pwd-5.mny");
         String expectedPassword = "12@a!";
 
         char[] mask = null;
@@ -107,7 +107,7 @@ public class CheckBruteForceTest {
     @Ignore
     @Test
     public void testBruteForce2() throws IOException {
-        File dbFile = new File("src/test/data/sunset-sample-pwd-5.mny");
+        File dbFile = new File("src/test/data/mny/sunset-sample-pwd-5.mny");
         String expectedPassword = "12@a!";
         char[] alphabets = null;
 
@@ -129,7 +129,7 @@ public class CheckBruteForceTest {
 
     @Test
     public void testLength8Password() throws IOException {
-        File dbFile = new File("src/test/data/sunset-sample-pwd.mny");
+        File dbFile = new File("src/test/data/mny/sunset-sample-pwd.mny");
         // 123@ABC!
         String expectedPassword = "123@ABC!";
 
@@ -191,7 +191,7 @@ public class CheckBruteForceTest {
      * @throws IOException
      */
     public void testLength8Password1() throws IOException {
-        File dbFile = new File("src/test/data/sunset-sample-pwd.mny");
+        File dbFile = new File("src/test/data/mny/sunset-sample-pwd.mny");
         // 123@ABC!
         String expectedPassword = "123@ABC!";
 
@@ -208,7 +208,7 @@ public class CheckBruteForceTest {
     @Ignore
     @Test
     public void testLength8Password2() throws IOException {
-        File dbFile = new File("src/test/data/sunset-sample-pwd.mny");
+        File dbFile = new File("src/test/data/mny/sunset-sample-pwd.mny");
         // 123@ABC!
         String expectedPassword = "123@ABC!";
 

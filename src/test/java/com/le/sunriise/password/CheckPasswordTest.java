@@ -37,25 +37,25 @@ public class CheckPasswordTest {
         String password = null;
         boolean matched = false;
         
-        dbFile = new File("src/test/data/money2001-pwd.mny");
+        dbFile = new File("src/test/data/mny/money2001-pwd.mny");
         headerPage = new HeaderPage(dbFile);
         Assert.assertEquals(false, headerPage.isNewEncryption());
         Assert.assertEquals(false, headerPage.isUseSha1());
         Assert.assertEquals("TEST12345", headerPage.getEmbeddedDatabasePassword());
 
-        dbFile = new File("src/test/data/money2004-pwd.mny");
+        dbFile = new File("src/test/data/mny/money2004-pwd.mny");
         headerPage = new HeaderPage(dbFile);
         Assert.assertEquals(true, headerPage.isNewEncryption());
         Assert.assertEquals(false, headerPage.isUseSha1());
         testSunsetSamplePassword(headerPage);
 
-        dbFile = new File("src/test/data/money2005-pwd.mny");
+        dbFile = new File("src/test/data/mny/money2005-pwd.mny");
         headerPage = new HeaderPage(dbFile);
         Assert.assertEquals(true, headerPage.isNewEncryption());
         Assert.assertEquals(false, headerPage.isUseSha1());
         testSunsetSamplePassword(headerPage);
 
-        dbFile = new File("src/test/data/money2008-pwd.mny");
+        dbFile = new File("src/test/data/mny/money2008-pwd.mny");
         headerPage = new HeaderPage(dbFile);
         Assert.assertEquals(true, headerPage.isNewEncryption());
         Assert.assertEquals(true, headerPage.isUseSha1());
@@ -66,7 +66,7 @@ public class CheckPasswordTest {
         matched = AbstractHeaderPagePasswordChecker.checkPassword(headerPage, password);
         Assert.assertEquals(true, matched);
         
-        dbFile = new File("src/test/data/sunset-sample-pwd.mny");
+        dbFile = new File("src/test/data/mny/sunset-sample-pwd.mny");
         headerPage = new HeaderPage(dbFile);
         Assert.assertEquals(true, headerPage.isNewEncryption());
         Assert.assertEquals(true, headerPage.isUseSha1());

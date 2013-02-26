@@ -58,7 +58,7 @@ public class CheckDictionaryTest {
         String pathName = null;
         String expected = null;
 
-        dbFileName = "src/test/data/money2002.mny";
+        dbFileName = "src/test/data/mny/money2002.mny";
 
         pathName = "src/test/data/dict/";
         expected = null;
@@ -71,7 +71,7 @@ public class CheckDictionaryTest {
         String pathName = null;
         String expected = null;
 
-        dbFileName = "src/test/data/sunset-sample-pwd.mny";
+        dbFileName = "src/test/data/mny/sunset-sample-pwd.mny";
 
         // first entry
         pathName = "src/test/data/dict/matched/matched01.txt";
@@ -95,7 +95,7 @@ public class CheckDictionaryTest {
         String pathName = null;
         long expected = -1L;
 
-        dbFileName = "src/test/data/sunset-sample-pwd.mny";
+        dbFileName = "src/test/data/mny/sunset-sample-pwd.mny";
 
         // 3106L
         pathName = "src/test/data/dict/john.txt";

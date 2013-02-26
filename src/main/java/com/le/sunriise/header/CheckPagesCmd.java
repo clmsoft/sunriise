@@ -18,6 +18,7 @@ import org.bouncycastle.crypto.engines.RC4Engine;
 import org.bouncycastle.crypto.params.KeyParameter;
 
 import com.healthmarketscience.jackcess.BaseCryptCodecHandler;
+import com.healthmarketscience.jackcess.JetFormat;
 import com.healthmarketscience.jackcess.PageTypes;
 import com.le.sunriise.password.HeaderPagePasswordChecker;
 
@@ -51,6 +52,8 @@ public class CheckPagesCmd {
     private RandomAccessFile rFile;
 
     private FileChannel fileChannel;
+
+    private JetFormat format;
 
     public CheckPagesCmd(String dbFileName, String password) {
         this.dbFileName = dbFileName;
@@ -89,11 +92,23 @@ public class CheckPagesCmd {
         knownTypePages.put(key, value);
     }
 
+    private ByteBuffer createPageBuffer() {
+        int capacity = pageSize;
+        return createPageBuffer(capacity);
+    }
+
+    private ByteBuffer createPageBuffer(int capacity) {
+        ByteBuffer buffer = ByteBuffer.allocate(capacity);
+        buffer.order(ByteOrder.LITTLE_ENDIAN);
+        return buffer;
+    }
+
     private void check() throws IOException {
         File dbFile = new File(dbFileName);
 
         this.headerPage = new HeaderPage(dbFile);
-        this.pageSize = headerPage.getJetFormat().PAGE_SIZE;
+        format = headerPage.getJetFormat();
+        this.pageSize = format.PAGE_SIZE;
         long fileLength = dbFile.length();
         log.info("dbFile=" + dbFile.getAbsolutePath());
         log.info("fileLength=" + fileLength);
@@ -117,14 +132,15 @@ public class CheckPagesCmd {
             try {
                 openFileChannel(dbFile);
 
-                ByteBuffer buffer = ByteBuffer.allocate(pageSize);
-                buffer.order(ByteOrder.LITTLE_ENDIAN);
+                ByteBuffer buffer = createPageBuffer();
 
                 this.encodingKey = checker.getEncodingKey();
                 this.engine = new RC4Engine();
                 for (int pageNumber = 0; pageNumber < pages; pageNumber++) {
                     checkPage(fileChannel, buffer, pageNumber);
                 }
+
+                checkTDefPages();
 
             } finally {
                 logPageInfoSummary();
@@ -136,6 +152,49 @@ public class CheckPagesCmd {
             log.error(e, e);
         }
 
+    }
+
+    private void checkTDefPages() throws IOException {
+        for (Integer key : tableDefPageMap.keySet()) {
+            TableDefPage tDef = tableDefPageMap.get(key);
+            if (tDef.isChild()) {
+                continue;
+            }
+            List<TableDefPage> children = findChildren(tDef, tableDefPageMap);
+            checkTDefPage(tDef, children);
+        }
+    }
+
+    private void checkTDefPage(TableDefPage tDef, List<TableDefPage> children) throws IOException {
+        log.info("pageNumber=" + tDef.getPageNumber());
+
+        ByteBuffer buffer = readPage(tDef.getPageNumber());
+        for (TableDefPage child : children) {
+            ByteBuffer nextBuffer = readPage(child.getPageNumber());
+            int offset = 8;
+            buffer = concatBuffer(buffer, nextBuffer, offset);
+        }
+        int rowCount = buffer.getInt(getFormat().OFFSET_NUM_ROWS);
+        log.info("  rowCount=" + rowCount);
+        short columnCount = buffer.getShort(getFormat().OFFSET_NUM_COLS);
+        log.info("  columnCount=" + columnCount);
+        int logicalIndexCount = buffer.getInt(getFormat().OFFSET_NUM_INDEX_SLOTS);
+        log.info("  logicalIndexCount=" + logicalIndexCount);
+        int indexCount = buffer.getInt(getFormat().OFFSET_NUM_INDEXES);
+        log.info("  indexCount=" + indexCount);
+    }
+
+    private ByteBuffer concatBuffer(ByteBuffer buffer, ByteBuffer nextBuffer, int offset) {
+        ByteBuffer newBuffer = null;
+
+        int capacity = buffer.capacity() + (nextBuffer.capacity() - offset);
+        newBuffer = createPageBuffer(capacity);
+        newBuffer.put(buffer);
+        newBuffer.put(nextBuffer.array(), offset, (nextBuffer.capacity() - offset));
+
+        newBuffer.flip();
+
+        return newBuffer;
     }
 
     private void openFileChannel(File dbFile) throws FileNotFoundException, IOException {
@@ -257,6 +316,12 @@ public class CheckPagesCmd {
         return;
     }
 
+    private ByteBuffer readPage(int pageNumber) throws IOException {
+        ByteBuffer buffer = createPageBuffer();
+        readPage(fileChannel, pageNumber, buffer);
+        return buffer;
+    }
+
     private void readPage(FileChannel fileChannel, int pageNumber, ByteBuffer buffer) throws IOException {
         buffer.clear();
 
@@ -320,6 +385,14 @@ public class CheckPagesCmd {
         engine.init(CIPHER_DECRYPT_MODE, params);
         byte[] array = buffer.array();
         engine.processBytes(array, 0, array.length, array, 0);
+    }
+
+    public JetFormat getFormat() {
+        return format;
+    }
+
+    public void setFormat(JetFormat format) {
+        this.format = format;
     }
 
     /**

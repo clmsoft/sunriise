@@ -50,7 +50,7 @@ public class DatabaseUtils {
 
             // log.info("  columnOrder=" + db.getColumnOrder());
 
-            logPropertyMaps(db);
+//            logPropertyMaps(db);
 
         } catch (IOException e) {
             log.warn(e);
