@@ -24,7 +24,9 @@ public class TransactionInfoImpl implements TransactionInfo {
     // TRN.grftt bits
     private Integer flag = 0;
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.TransactionInfo#getFlag()
      */
     @Override
@@ -32,7 +34,9 @@ public class TransactionInfoImpl implements TransactionInfo {
         return flag;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.TransactionInfo#setFlag(java.lang.Integer)
      */
     @Override
@@ -43,7 +47,9 @@ public class TransactionInfoImpl implements TransactionInfo {
         this.flag = flag;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.TransactionInfo#isTransfer()
      */
     @Override
@@ -53,7 +59,9 @@ public class TransactionInfoImpl implements TransactionInfo {
         return (flag & mask) == mask;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.TransactionInfo#isTransferTo()
      */
     @Override
@@ -63,7 +71,9 @@ public class TransactionInfoImpl implements TransactionInfo {
         return (flag & mask) == mask;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.TransactionInfo#isInvestment()
      */
     @Override
@@ -74,7 +84,9 @@ public class TransactionInfoImpl implements TransactionInfo {
         return (flag & mask) == mask;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.TransactionInfo#isSplitParent()
      */
     @Override
@@ -84,7 +96,9 @@ public class TransactionInfoImpl implements TransactionInfo {
         return (flag & mask) == mask;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.TransactionInfo#isSplitChild()
      */
     @Override
@@ -94,7 +108,9 @@ public class TransactionInfoImpl implements TransactionInfo {
         return (flag & mask) == mask;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.TransactionInfo#isVoid()
      */
     @Override

@@ -20,7 +20,7 @@ public class CheckMSysObjects {
     public CheckMSysObjects(String dbFileName, String password) throws IOException {
         this.dbFileName = dbFileName;
         this.password = password;
-        this.openDb = Utils.openDbReadOnly(new File(dbFileName), password); 
+        this.openDb = Utils.openDbReadOnly(new File(dbFileName), password);
     }
 
     /**
@@ -49,7 +49,7 @@ public class CheckMSysObjects {
             log.error(e, e);
         } finally {
             log.info("< DONE");
-            
+
             if (checker != null) {
                 checker.close();
                 checker = null;
@@ -59,10 +59,10 @@ public class CheckMSysObjects {
 
     private void check() throws IOException {
         Database db = openDb.getDb();
-//        Table table = db.getSystemCatalog();
-//        if (table == null) {
-//            throw new IOException("Cannot find systemCatalog");
-//        }
+        // Table table = db.getSystemCatalog();
+        // if (table == null) {
+        // throw new IOException("Cannot find systemCatalog");
+        // }
     }
 
     private void close() {

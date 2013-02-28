@@ -48,7 +48,8 @@ public final class UpdateFxDialog extends OpenDbDialog {
         String fxFileName = "fx.csv";
         File fxFile = new File(fxFileName);
         if (!fxFile.exists()) {
-            JOptionPane.showMessageDialog(UpdateFxDialog.this, "Cannot find file " + fxFileName, "Missing file", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(UpdateFxDialog.this, "Cannot find file " + fxFileName, "Missing file",
+                    JOptionPane.ERROR_MESSAGE);
             return false;
         }
         FxTable fxTable = new FxTable();
@@ -62,8 +63,8 @@ public final class UpdateFxDialog extends OpenDbDialog {
         final List<String> messages = new ArrayList<String>();
         UpdateExchangeRates updater = new UpdateExchangeRates() {
             @Override
-            protected void notifyUpdateExistingRate(Double rate, String hcrncFromStr, String hcrncFromName, String hcrncToStr, String hcrncToName,
-                    Double newRate) {
+            protected void notifyUpdateExistingRate(Double rate, String hcrncFromStr, String hcrncFromName, String hcrncToStr,
+                    String hcrncToName, Double newRate) {
                 super.notifyUpdateExistingRate(rate, hcrncFromStr, hcrncFromName, hcrncToStr, hcrncToName, newRate);
                 messages.add(hcrncFromStr + " -> " + hcrncToStr + ", " + newRate);
             }
@@ -87,7 +88,8 @@ public final class UpdateFxDialog extends OpenDbDialog {
                 break;
             }
         }
-        JOptionPane.showMessageDialog(UpdateFxDialog.this, "Update succesfully:\n" + dialogMessage, "Update succesfully", JOptionPane.PLAIN_MESSAGE);
+        JOptionPane.showMessageDialog(UpdateFxDialog.this, "Update succesfully:\n" + dialogMessage, "Update succesfully",
+                JOptionPane.PLAIN_MESSAGE);
 
         return true;
     }

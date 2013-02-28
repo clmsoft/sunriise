@@ -47,21 +47,18 @@ public class DialogCellEditor extends AbstractCellEditor implements TableCellEdi
         this.dialog.setCellEditor(this);
     }
 
-    
     @Override
     public Object getCellEditorValue() {
         log.info("> getCellEditorValue");
         return dialog.getValue();
     }
 
-    
     @Override
     public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
         dialog.setValue(value);
         return button;
     }
 
-    
     @Override
     public void actionPerformed(ActionEvent e) {
         if (EDIT.equals(e.getActionCommand())) {

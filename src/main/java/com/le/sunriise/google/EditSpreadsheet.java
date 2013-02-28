@@ -54,8 +54,9 @@ public class EditSpreadsheet {
             }
 
             // http://spreadsheets.google.com/feeds/feed/key/worksheet/public/basic?alt=json-in-script&callback=myFunc
-            URL entryUrl = new URL("http://spreadsheets.google.com/feeds/0AuxTv-k5qT8DdGxBT2xiTXJpNXBNX2tPVmlESVFTdEE/worksheet/public/basic");
-            
+            URL entryUrl = new URL(
+                    "http://spreadsheets.google.com/feeds/0AuxTv-k5qT8DdGxBT2xiTXJpNXBNX2tPVmlESVFTdEE/worksheet/public/basic");
+
             SpreadsheetEntry spreadsheet = service.getEntry(entryUrl, SpreadsheetEntry.class);
             log.info("title: " + spreadsheet.getTitle().getPlainText());
             log.info("  " + spreadsheet.getHtmlLink().getHref());

@@ -61,7 +61,7 @@ public class CheckBruteForceUtils {
 
     public static String checkUsingMask(File dbFile, int passwordLength, char[] mask, char[] alphabets) throws IOException {
         log.info("");
-        
+
         log.info("dbFile=" + dbFile);
         HeaderPage headerPage = new HeaderPage(dbFile);
 
@@ -69,13 +69,13 @@ public class CheckBruteForceUtils {
 
         if (mask != null) {
             log.info("mask=" + new String(mask) + ", mask.length=" + mask.length);
-        } else  {
+        } else {
             log.info("mask=" + mask);
         }
         if (alphabets == null) {
             alphabets = createAlphabets();
         }
-        
+
         log.info("alphabets.length=" + alphabets.length);
         if (log.isDebugEnabled()) {
             for (int i = 0; i < alphabets.length; i++) {

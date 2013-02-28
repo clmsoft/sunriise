@@ -33,7 +33,7 @@ public class OpenedDb {
     private Database db;
     private String password;
     private ROMemoryMappedFileChannel memoryMappedFileChannel;
-    
+
     public JackcessFileChannelAdapter getMemoryMappedFileChannel() {
         return memoryMappedFileChannel;
     }

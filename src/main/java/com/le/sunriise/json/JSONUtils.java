@@ -36,11 +36,12 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 
 public class JSONUtils {
     private static final Logger log = Logger.getLogger(JSONUtils.class);
-    
+
     public static void writeValue(Object value, Writer w, boolean prettyPrint) throws JsonGenerationException,
             JsonMappingException, IOException {
         ObjectMapper mapper = new ObjectMapper();
-        mapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true); // Jackson 1.2+
+        mapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true); // Jackson
+                                                                   // 1.2+
         if (prettyPrint) {
             PrettyPrinter pp = new DefaultPrettyPrinter();
             ObjectWriter objectWriter = mapper.writer(pp);

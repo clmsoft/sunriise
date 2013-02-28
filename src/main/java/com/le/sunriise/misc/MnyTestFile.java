@@ -65,7 +65,7 @@ public class MnyTestFile {
     public void setComment(String comment) {
         this.comment = comment;
     }
-    
+
     public boolean isBackup() {
         return fileName.endsWith(".mbf");
     }

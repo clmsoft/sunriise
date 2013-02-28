@@ -20,7 +20,6 @@ package com.le.sunriise.mnyobject.impl;
 
 import com.le.sunriise.mnyobject.InvestmentTransaction;
 
-
 public class InvestmentTransactionImpl implements InvestmentTransaction {
     private Integer id;
 
@@ -28,7 +27,9 @@ public class InvestmentTransactionImpl implements InvestmentTransaction {
 
     private Double quantity;
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.InvestmentTransaction#getId()
      */
     @Override
@@ -36,15 +37,20 @@ public class InvestmentTransactionImpl implements InvestmentTransaction {
         return id;
     }
 
-    /* (non-Javadoc)
-     * @see com.le.sunriise.mnyobject.InvestmentTransaction#setId(java.lang.Integer)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.le.sunriise.mnyobject.InvestmentTransaction#setId(java.lang.Integer)
      */
     @Override
     public void setId(Integer id) {
         this.id = id;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.InvestmentTransaction#getPrice()
      */
     @Override
@@ -52,15 +58,21 @@ public class InvestmentTransactionImpl implements InvestmentTransaction {
         return price;
     }
 
-    /* (non-Javadoc)
-     * @see com.le.sunriise.mnyobject.InvestmentTransaction#setPrice(java.lang.Double)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.le.sunriise.mnyobject.InvestmentTransaction#setPrice(java.lang.Double
+     * )
      */
     @Override
     public void setPrice(Double price) {
         this.price = price;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.InvestmentTransaction#getQuantity()
      */
     @Override
@@ -68,8 +80,12 @@ public class InvestmentTransactionImpl implements InvestmentTransaction {
         return quantity;
     }
 
-    /* (non-Javadoc)
-     * @see com.le.sunriise.mnyobject.InvestmentTransaction#setQuantity(java.lang.Double)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.le.sunriise.mnyobject.InvestmentTransaction#setQuantity(java.lang
+     * .Double)
      */
     @Override
     public void setQuantity(Double quantity) {

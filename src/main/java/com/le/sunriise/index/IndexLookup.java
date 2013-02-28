@@ -40,7 +40,7 @@ public class IndexLookup {
     private static final Logger log = Logger.getLogger(IndexLookup.class);
 
     private class ColumnNameComparator implements Comparator<Column> {
-        
+
         @Override
         public int compare(Column o1, Column o2) {
             String o1Name = o1.getTable().getName() + "." + o1.getName();

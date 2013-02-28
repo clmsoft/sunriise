@@ -35,7 +35,7 @@ import com.le.sunriise.export.ExportToCsv;
 
 public class ExportToCsvAction implements ActionListener {
     private static final Logger log = Logger.getLogger(ExportToCsvAction.class);
-    
+
     /**
      * 
      */
@@ -61,7 +61,6 @@ public class ExportToCsvAction implements ActionListener {
             this.progressMonitor = progressMonitor;
         }
 
-        
         @Override
         public void run() {
             Exception exception = null;
@@ -69,12 +68,11 @@ public class ExportToCsvAction implements ActionListener {
                 ExportToCsv exporter = new ExportToCsv() {
                     private int maxTables = 0;
 
-                    
                     @Override
                     protected void startExport(File outDir) {
                         super.startExport(outDir);
                         SwingUtilities.invokeLater(new Runnable() {
-                            
+
                             @Override
                             public void run() {
                                 progressMonitor.setProgress(progressMonitor.getMinimum());
@@ -82,12 +80,11 @@ public class ExportToCsvAction implements ActionListener {
                         });
                     }
 
-                    
                     @Override
                     protected void endExport(File outDir) {
                         super.endExport(outDir);
                         SwingUtilities.invokeLater(new Runnable() {
-                            
+
                             @Override
                             public void run() {
                                 progressMonitor.setProgress(progressMonitor.getMaximum());
@@ -95,14 +92,12 @@ public class ExportToCsvAction implements ActionListener {
                         });
                     }
 
-                    
                     @Override
                     protected void startExportTables(int size) {
                         super.startExportTables(size);
                         maxTables = size;
                     }
 
-                    
                     @Override
                     protected boolean exportedTable(final String tableName, final int count) {
                         super.exportedTable(tableName, count);
@@ -110,7 +105,7 @@ public class ExportToCsvAction implements ActionListener {
                             return false;
                         }
                         SwingUtilities.invokeLater(new Runnable() {
-                            
+
                             @Override
                             public void run() {
                                 progressMonitor.setNote("Table: " + tableName);
@@ -120,7 +115,6 @@ public class ExportToCsvAction implements ActionListener {
                         return true;
                     }
 
-                    
                     @Override
                     protected void endExportTables(int count) {
                         super.endExportTables(count);
@@ -135,7 +129,7 @@ public class ExportToCsvAction implements ActionListener {
             } finally {
                 final Exception exception2 = exception;
                 Runnable swingRun = new Runnable() {
-                    
+
                     @Override
                     public void run() {
                         if (exception2 != null) {
@@ -155,7 +149,6 @@ public class ExportToCsvAction implements ActionListener {
         }
     }
 
-    
     @Override
     public void actionPerformed(ActionEvent event) {
         final Component source = (Component) event.getSource();

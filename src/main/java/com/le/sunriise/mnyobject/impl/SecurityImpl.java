@@ -21,21 +21,21 @@ package com.le.sunriise.mnyobject.impl;
 import com.le.sunriise.mnyobject.MnyObject;
 import com.le.sunriise.mnyobject.Security;
 
-
 public class SecurityImpl extends MnyObject implements Comparable<SecurityImpl>, Security {
     private Integer id;
 
     private String name;
-    
+
     private String symbol;
-    
-    
+
     @Override
     public int compareTo(SecurityImpl o) {
         return getId().compareTo(o.getId());
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.Security#getId()
      */
     @Override
@@ -43,7 +43,9 @@ public class SecurityImpl extends MnyObject implements Comparable<SecurityImpl>,
         return id;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.Security#setId(java.lang.Integer)
      */
     @Override
@@ -51,7 +53,9 @@ public class SecurityImpl extends MnyObject implements Comparable<SecurityImpl>,
         this.id = id;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.Security#getName()
      */
     @Override
@@ -59,7 +63,9 @@ public class SecurityImpl extends MnyObject implements Comparable<SecurityImpl>,
         return name;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.Security#setName(java.lang.String)
      */
     @Override
@@ -67,7 +73,9 @@ public class SecurityImpl extends MnyObject implements Comparable<SecurityImpl>,
         this.name = name;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.Security#getSymbol()
      */
     @Override
@@ -75,7 +83,9 @@ public class SecurityImpl extends MnyObject implements Comparable<SecurityImpl>,
         return symbol;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.Security#setSymbol(java.lang.String)
      */
     @Override

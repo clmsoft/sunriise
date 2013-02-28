@@ -111,7 +111,7 @@ public class Launcher {
 
                 JMenu mnNewMenu_1 = new JMenu("Other tools");
                 mnNewMenu.add(mnNewMenu_1);
-                
+
                 JMenuItem mntmNewMenuItem_1 = new JMenuItem("Header page viewer");
                 mntmNewMenuItem_1.addActionListener(new ActionListener() {
                     @Override
@@ -152,7 +152,7 @@ public class Launcher {
     public static final void addHelpMenu(final JFrame frame, final JMenuBar menuBar) {
         JMenu helpMenu = new JMenu("Help");
         menuBar.add(helpMenu);
-    
+
         JMenuItem homePageMenuItem = new JMenuItem("Home page");
         homePageMenuItem.addActionListener(new ActionListener() {
             @Override
@@ -168,7 +168,7 @@ public class Launcher {
             }
         });
         helpMenu.add(homePageMenuItem);
-    
+
         JMenuItem wikiMenuItem = new JMenuItem("Documentation (Wiki)");
         wikiMenuItem.addActionListener(new ActionListener() {
             @Override
@@ -183,7 +183,7 @@ public class Launcher {
             }
         });
         helpMenu.add(wikiMenuItem);
-    
+
         JMenuItem issueMenuItem = new JMenuItem("Log a bug");
         issueMenuItem.addActionListener(new ActionListener() {
             @Override
@@ -195,11 +195,11 @@ public class Launcher {
                 } catch (IOException exception) {
                     log.error(exception, exception);
                 }
-    
+
             }
         });
         helpMenu.add(issueMenuItem);
-    
+
         JMenuItem groupMenuItem = new JMenuItem("Discussion group");
         groupMenuItem.addActionListener(new ActionListener() {
             @Override
@@ -211,28 +211,28 @@ public class Launcher {
                 } catch (IOException exception) {
                     log.error(exception, exception);
                 }
-    
+
             }
         });
         helpMenu.add(groupMenuItem);
-    
+
         JSeparator separator = new JSeparator();
         helpMenu.add(separator);
-    
+
         JMenuItem aboutMenuItem = new JMenuItem("About sunriise");
         aboutMenuItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 log.info("> About sunriise");
-    
+
                 Component parentComponent = frame;
                 Object message = createAboutContent();
                 String title = "About sunriise";
                 int messageType = JOptionPane.PLAIN_MESSAGE;
-    
+
                 JOptionPane.showMessageDialog(parentComponent, message, title, messageType);
             }
-    
+
             protected RTextScrollPane createAboutContent() {
                 int rows = 10;
                 int cols = 60;
@@ -240,28 +240,28 @@ public class Launcher {
                 textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_PROPERTIES_FILE);
                 RTextScrollPane scrollPane = new RTextScrollPane(textArea);
                 textArea.setEditable(false);
-    
+
                 textArea.append("Build number: " + SunriiseBuildNumber.getBuildnumber() + "\n");
                 textArea.append("\n");
                 textArea.append("Directory: " + getCurrentDirectory() + "\n");
-    
+
                 File file = new File("sunriise-log.txt");
                 if (file.exists()) {
                     textArea.append("Log file: " + file.getAbsoluteFile().getAbsolutePath() + "\n");
                 } else {
                     textArea.append("Log file: " + "NOT_FOUND" + "\n");
                 }
-    
+
                 textArea.append("\n");
                 String key = null;
                 key = "java.home";
                 textArea.append(key + ": " + System.getProperty(key) + "\n");
                 key = "java.version";
                 textArea.append(key + ": " + System.getProperty(key) + "\n");
-    
+
                 return scrollPane;
             }
-    
+
             protected String getCurrentDirectory() {
                 return new File(".").getAbsoluteFile().getAbsolutePath();
             }
@@ -343,7 +343,7 @@ public class Launcher {
         @Override
         public void actionPerformed(ActionEvent e) {
             String[] args = new String[0];
-            log.info("Staring MnyViewer.main(args) ...");            
+            log.info("Staring MnyViewer.main(args) ...");
             MnyViewer.main(args);
             getFrame().setVisible(false);
         }

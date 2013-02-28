@@ -89,6 +89,7 @@ public class CheckDictionary {
         quit.getAndSet(false);
         setResult(null);
     }
+
     /**
      * Default number of threads is 1.
      */
@@ -211,7 +212,7 @@ public class CheckDictionary {
         } catch (Exception e) {
             log.error(e, e);
         } finally {
-            log.info("> candidatesFile=" + candidatesFile  + ", lines=" + lines);
+            log.info("> candidatesFile=" + candidatesFile + ", lines=" + lines);
             if (candidatesReader != null) {
                 try {
                     candidatesReader.close();
@@ -228,7 +229,7 @@ public class CheckDictionary {
     private int consumeReader(HeaderPage headerPage, BufferedReader reader) throws IOException {
         String line = null;
         int lines = 0;
-        
+
         // LOOP
         while ((line = reader.readLine()) != null) {
             if (quit.get()) {
@@ -250,7 +251,7 @@ public class CheckDictionary {
                 pool.submit(callable);
             }
         }
-        
+
         return lines;
     }
 

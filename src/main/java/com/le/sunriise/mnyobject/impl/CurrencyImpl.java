@@ -18,10 +18,8 @@
  *******************************************************************************/
 package com.le.sunriise.mnyobject.impl;
 
-
 import com.le.sunriise.mnyobject.Currency;
 import com.le.sunriise.mnyobject.MnyObject;
-
 
 public class CurrencyImpl extends MnyObject implements Comparable<CurrencyImpl>, Currency {
     private Integer id;
@@ -30,13 +28,14 @@ public class CurrencyImpl extends MnyObject implements Comparable<CurrencyImpl>,
 
     private String isoCode;
 
-    
     @Override
     public int compareTo(CurrencyImpl o) {
         return id.compareTo(o.getId());
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.Currency#getId()
      */
     @Override
@@ -44,7 +43,9 @@ public class CurrencyImpl extends MnyObject implements Comparable<CurrencyImpl>,
         return id;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.Currency#setId(java.lang.Integer)
      */
     @Override
@@ -52,7 +53,9 @@ public class CurrencyImpl extends MnyObject implements Comparable<CurrencyImpl>,
         this.id = id;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.Currency#getName()
      */
     @Override
@@ -60,7 +63,9 @@ public class CurrencyImpl extends MnyObject implements Comparable<CurrencyImpl>,
         return name;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.Currency#setName(java.lang.String)
      */
     @Override
@@ -68,7 +73,9 @@ public class CurrencyImpl extends MnyObject implements Comparable<CurrencyImpl>,
         this.name = name;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.Currency#getIsoCode()
      */
     @Override
@@ -76,7 +83,9 @@ public class CurrencyImpl extends MnyObject implements Comparable<CurrencyImpl>,
         return isoCode;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.Currency#setIsoCode(java.lang.String)
      */
     @Override

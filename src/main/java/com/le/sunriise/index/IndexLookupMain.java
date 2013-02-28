@@ -38,7 +38,8 @@ public class IndexLookupMain {
      * @param args
      */
     public static void main(String[] args) {
-        String dbFileName = null;;
+        String dbFileName = null;
+        ;
 
         if (args.length == 1) {
             dbFileName = args[0];
@@ -75,7 +76,8 @@ public class IndexLookupMain {
 
                     List<Column> referenced = indexLookup.getReferencedColumns(column);
                     for (Column col : referenced) {
-                        log.info("(FK) " + table.getName() + "." + column.getName() + " -> " + col.getTable().getName() + "." + col.getName());
+                        log.info("(FK) " + table.getName() + "." + column.getName() + " -> " + col.getTable().getName() + "."
+                                + col.getName());
                     }
                 }
             }

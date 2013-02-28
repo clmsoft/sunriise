@@ -235,13 +235,12 @@ public class PasswordCheckerApp {
 
         });
 
-        
         JMenuBar menuBar = new JMenuBar();
         getFrame().setJMenuBar(menuBar);
-        
+
         JMenu mnNewMenu = new JMenu("File");
         menuBar.add(mnNewMenu);
-        
+
         JMenuItem mntmNewMenuItem = new JMenuItem("Exit");
         mntmNewMenuItem.addActionListener(new ActionListener() {
             @Override
@@ -251,7 +250,7 @@ public class PasswordCheckerApp {
             }
         });
         mnNewMenu.add(mntmNewMenuItem);
-        
+
         Launcher.addHelpMenu(getFrame(), menuBar);
 
         // fc = new JFileChooser(new File("."));

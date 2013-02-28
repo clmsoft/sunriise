@@ -22,29 +22,22 @@ import com.le.sunriise.mnyobject.Frequency;
 
 public class FrequencyImpl implements Frequency {
     /*
-frq     cFrqInst        grftt   mMemo
--1              0       
-0       1       2097152 only once
-1       1       2097152 daily
-2       1       2097152 weekly
-2       0.5     2097152 every other week
-3       2       2097152 twice a month
-2       0.25    2097152 every four weeks
-3       1       2097152 monthly
-3       0.5     2097152 every other month
-4       1       2097152 every three months
-3       0.25    2097152 every four months
-5       2       2097152 twice a year
-5       1       2097152 yearly
-5       0.5     2097152 every other year     
+     * frq cFrqInst grftt mMemo -1 0 0 1 2097152 only once 1 1 2097152 daily 2 1
+     * 2097152 weekly 2 0.5 2097152 every other week 3 2 2097152 twice a month 2
+     * 0.25 2097152 every four weeks 3 1 2097152 monthly 3 0.5 2097152 every
+     * other month 4 1 2097152 every three months 3 0.25 2097152 every four
+     * months 5 2 2097152 twice a year 5 1 2097152 yearly 5 0.5 2097152 every
+     * other year
      */
     private Integer frq;
 
     private Double cFrqInst;
 
     private Integer grftt;
-    
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.Frequency#getGrftt()
      */
     @Override
@@ -52,7 +45,9 @@ frq     cFrqInst        grftt   mMemo
         return grftt;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.Frequency#setGrftt(java.lang.Integer)
      */
     @Override
@@ -60,7 +55,9 @@ frq     cFrqInst        grftt   mMemo
         this.grftt = grftt;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.Frequency#getFrq()
      */
     @Override
@@ -68,7 +65,9 @@ frq     cFrqInst        grftt   mMemo
         return frq;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.Frequency#setFrq(java.lang.Integer)
      */
     @Override
@@ -76,7 +75,9 @@ frq     cFrqInst        grftt   mMemo
         this.frq = frq;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.Frequency#getcFrqInst()
      */
     @Override
@@ -84,7 +85,9 @@ frq     cFrqInst        grftt   mMemo
         return cFrqInst;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.Frequency#setcFrqInst(java.lang.Double)
      */
     @Override
@@ -92,7 +95,9 @@ frq     cFrqInst        grftt   mMemo
         this.cFrqInst = cFrqInst;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.Frequency#isRecurring()
      */
     @Override
@@ -103,8 +108,10 @@ frq     cFrqInst        grftt   mMemo
         }
         return false;
     }
-    
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.Frequency#getFrequencyString()
      */
     @Override

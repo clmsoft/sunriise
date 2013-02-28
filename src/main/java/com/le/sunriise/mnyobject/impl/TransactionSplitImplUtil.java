@@ -19,7 +19,7 @@ public class TransactionSplitImplUtil {
             Map<String, Object> row = splitCursor.getCurrentRow();
             Integer htrnParent = (Integer) row.get("htrnParent");
             Integer iSplit = (Integer) row.get("iSplit");
-    
+
             transactionSplit = new TransactionSplitImpl();
             transactionSplit.setTransaction(transaction);
             transactionSplit.setParentId(htrnParent);

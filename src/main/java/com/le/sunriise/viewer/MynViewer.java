@@ -204,9 +204,9 @@ public class MynViewer {
             List<TableListItem> tables = new ArrayList<TableListItem>();
             try {
                 Database db = getDb();
-                
+
                 DatabaseUtils.logDbInfo(db);
-                
+
                 Set<String> tableNames = db.getTableNames();
                 for (String tableName : tableNames) {
                     try {
@@ -218,7 +218,7 @@ public class MynViewer {
                         log.warn(e);
                     }
                 }
-                
+
                 boolean showSystemCatalog = true;
                 if (showSystemCatalog) {
                     Table table = db.getSystemCatalog();
@@ -344,14 +344,14 @@ public class MynViewer {
 
                 String title = com.le.sunriise.viewer.MynViewer.TITLE_NO_OPENED_DB;
                 mainFrame.setTitle(title);
-                
+
                 Dimension preferredSize = new Dimension(900, 700);
                 mainFrame.setPreferredSize(preferredSize);
 
                 mainFrame.pack();
-                
+
                 mainFrame.setLocationRelativeTo(null);
-                
+
                 mainFrame.setVisible(true);
                 log.info("setVisible to true");
             }
@@ -370,7 +370,7 @@ public class MynViewer {
      */
     private void initialize() {
         setFrame(new JFrame());
-//        getFrame().setBounds(100, 100, 800, 600);
+        // getFrame().setBounds(100, 100, 800, 600);
         getFrame().setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         getFrame().addWindowListener(new WindowAdapter() {
             @Override
@@ -452,7 +452,7 @@ public class MynViewer {
         toolsMenu.add(scriptMenuItem);
 
         Launcher.addHelpMenu(frame, menuBar);
-        
+
         JPanel statusPane = new JPanel();
         frame.getContentPane().add(statusPane, BorderLayout.SOUTH);
         statusPane.setLayout(new BorderLayout(0, 0));
@@ -1367,8 +1367,7 @@ public class MynViewer {
     private void setLabelColumnIndex(int columnIndex) {
         labelColumnIndex = columnIndex;
         String columnName = dataModel.getTableModel().getColumnName(columnIndex);
-        log.info("setLabelColumnIndex, labelColumnIndex=" + labelColumnIndex + ", columnName=" +
-                columnName);
+        log.info("setLabelColumnIndex, labelColumnIndex=" + labelColumnIndex + ", columnName=" + columnName);
 
         int rowIndex = table.getSelectedRow();
         log.info("setLabelColumnIndex, rowIndex=" + rowIndex);

@@ -97,36 +97,36 @@ public class ExportAccountsToQif {
 
     private void export(Database db, PrintWriter writer) throws IOException {
         String tableName = null;
-        Table table  = null;
+        Table table = null;
         Cursor cursor = null;
-        
+
         tableName = "ACCT";
         table = db.getTable(tableName);
         log.info("> traversing table=" + tableName);
         cursor = Cursor.createCursor(table);
-        while(cursor.moveToNextRow()) {
+        while (cursor.moveToNextRow()) {
             Map<String, Object> row = cursor.getCurrentRow();
             Integer hacct = (Integer) row.get("hacct");
-            
+
             String name = (String) row.get("szFull");
             log.info("hacct=" + hacct + ", name=" + name);
-            
+
             Integer type = (Integer) row.get("at");
             log.info("    type=" + type);
         }
-        
+
         tableName = "TRN";
         table = db.getTable(tableName);
         log.info("> traversing table=" + tableName);
         cursor = Cursor.createCursor(table);
-        while(cursor.moveToNextRow()) {
+        while (cursor.moveToNextRow()) {
             Map<String, Object> row = cursor.getCurrentRow();
             Integer hacct = (Integer) row.get("hacct");
             // hacctLink
             Integer hacctLink = (Integer) row.get("hacctLink");
             log.info("hacct=" + hacct + ", hacctLink=" + hacctLink);
         }
-        
+
     }
 
 }

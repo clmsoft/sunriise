@@ -116,9 +116,9 @@ public interface Transaction {
     public abstract void setState(TransactionState state);
 
     public abstract void setAccountId(Integer accountId);
-    
+
     public abstract Integer getAccountId();
-    
+
     // mFiStmtId
     public abstract String getFiTransactionId();
 

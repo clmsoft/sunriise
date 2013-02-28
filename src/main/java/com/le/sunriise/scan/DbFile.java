@@ -16,7 +16,7 @@ public class DbFile {
 
     private String dbFileName;
 
-    private File dbFile;
+    private File file;
 
     private HeaderPage headerPage;
 
@@ -56,12 +56,12 @@ public class DbFile {
     }
 
     private void parse() throws IOException {
-        this.dbFile = new File(dbFileName);
+        this.file = new File(dbFileName);
 
-        this.headerPage = new HeaderPage(dbFile);
+        this.headerPage = new HeaderPage(file);
         this.format = headerPage.getJetFormat();
         this.pageSize = format.PAGE_SIZE;
-        this.fileLength = dbFile.length();
+        this.fileLength = file.length();
 
         this.pages = fileLength / pageSize;
         this.leftOverBytes = fileLength % pageSize;
@@ -70,12 +70,12 @@ public class DbFile {
         this.passwordIsValid = checker.check(password);
     }
 
-    public File getDbFile() {
-        return dbFile;
+    public File getFile() {
+        return file;
     }
 
-    public void setDbFile(File dbFile) {
-        this.dbFile = dbFile;
+    public void setFile(File dbFile) {
+        this.file = dbFile;
     }
 
     public HeaderPage getHeaderPage() {

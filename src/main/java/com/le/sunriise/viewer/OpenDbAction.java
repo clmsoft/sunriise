@@ -28,7 +28,7 @@ import org.apache.log4j.Logger;
 
 public abstract class OpenDbAction implements ActionListener {
     private static final Logger log = Logger.getLogger(OpenDbAction.class);
-    
+
     private Component locationRelativeTo;
 
     private Preferences prefs;
@@ -36,9 +36,9 @@ public abstract class OpenDbAction implements ActionListener {
     private OpenedDb openedDb;
 
     private boolean disableReadOnlyCheckBox = false;
-    
+
     private CreateOpenedDbPlugin plugin;
-    
+
     public OpenDbAction(Component locationRelativeTo, Preferences prefs, OpenedDb openedDb) {
         super();
         this.locationRelativeTo = locationRelativeTo;
@@ -46,7 +46,6 @@ public abstract class OpenDbAction implements ActionListener {
         this.openedDb = openedDb;
     }
 
-    
     @Override
     public void actionPerformed(ActionEvent event) {
         Component locationRelativeTo = getLocationRelativeTo();
@@ -64,12 +63,13 @@ public abstract class OpenDbAction implements ActionListener {
     private void openDb(Component locationRelativeTo) {
         List<String> recentOpenFileNames = OpenDbDialog.getRecentOpenFileNames(prefs);
 
-        OpenDbDialog dialog = OpenDbDialog.showDialog(openedDb, recentOpenFileNames, locationRelativeTo, disableReadOnlyCheckBox, getPlugin());
+        OpenDbDialog dialog = OpenDbDialog.showDialog(openedDb, recentOpenFileNames, locationRelativeTo, disableReadOnlyCheckBox,
+                getPlugin());
         if (!dialog.isCancel()) {
             // setDb(dialog.getDb());
             // dbFile = dialog.getDbFile();
             openedDb = dialog.getOpenedDb();
-            
+
             dbFileOpened(openedDb, dialog);
 
             OpenDbDialog.updateRecentOpenFileNames(recentOpenFileNames, prefs);
@@ -102,11 +102,9 @@ public abstract class OpenDbAction implements ActionListener {
         this.disableReadOnlyCheckBox = disableReadOnlyCheckBox;
     }
 
-
     public CreateOpenedDbPlugin getPlugin() {
         return plugin;
     }
-
 
     public void setPlugin(CreateOpenedDbPlugin plugin) {
         this.plugin = plugin;

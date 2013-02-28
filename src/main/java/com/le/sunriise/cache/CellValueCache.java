@@ -16,23 +16,23 @@ public class CellValueCache {
 
     private class NullCellValue {
         private String cachedKey;
-    
+
         public String getCachedKey() {
             return cachedKey;
         }
-    
+
         public void setCachedKey(String cachedKey) {
             this.cachedKey = cachedKey;
         }
-    
+
         public NullCellValue(String cachedKey) {
             super();
             this.cachedKey = cachedKey;
         }
     }
-    
+
     private final int defaultCellCacheMaximumSize = 100000;
-    
+
     private final int defaultRowCacheMaximumSize = 50000;
 
     public CellValueCache() {
@@ -67,9 +67,9 @@ public class CellValueCache {
         if (value == null) {
             return null;
         }
-        
+
         if (value instanceof NullCellValue) {
-            if(log.isDebugEnabled()) {
+            if (log.isDebugEnabled()) {
                 log.debug("get NullCellValue, cachedKey=" + cachedKey);
             }
             value = null;

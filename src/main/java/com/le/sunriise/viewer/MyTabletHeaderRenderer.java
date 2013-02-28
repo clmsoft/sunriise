@@ -37,9 +37,9 @@ final class MyTabletHeaderRenderer extends DefaultTableCellRenderer {
         this.color = color;
     }
 
-    
     @Override
-    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row,
+            int column) {
         Component rendererComponent = null;
 
         if (rendererComponent == null) {
@@ -47,13 +47,15 @@ final class MyTabletHeaderRenderer extends DefaultTableCellRenderer {
             if (tableHeader != null) {
                 TableCellRenderer defaultRenderer = tableHeader.getDefaultRenderer();
                 if (defaultRenderer != null) {
-                    rendererComponent = defaultRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                    rendererComponent = defaultRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row,
+                            column);
                 }
             }
         }
         if (rendererComponent == null) {
             if (parentCellRenderer != null) {
-                rendererComponent = parentCellRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                rendererComponent = parentCellRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row,
+                        column);
             } else {
                 rendererComponent = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
             }

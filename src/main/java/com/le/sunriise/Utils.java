@@ -173,7 +173,7 @@ public class Utils {
         if (log.isDebugEnabled()) {
             printHeaderInfo(dbFile, password);
         }
-        
+
         OpenedDb openedDb = new OpenedDb();
         openedDb.setDbFile(dbFile);
 
@@ -247,7 +247,7 @@ public class Utils {
         HeaderPage.printHeaderPage(headerPage);
 
         HeaderPagePasswordChecker checker = new HeaderPagePasswordChecker(headerPage);
-        if (! checker.check(password)) {
+        if (!checker.check(password)) {
             log.warn("Invalid password.");
         }
         AbstractHeaderPagePasswordChecker.printChecker(checker);

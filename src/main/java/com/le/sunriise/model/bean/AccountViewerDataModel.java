@@ -29,7 +29,7 @@ public class AccountViewerDataModel {
     private List<Account> accounts;
 
     private TableModel tableModel = new DefaultTableModel();
-    
+
     public List<Account> getAccounts() {
         return accounts;
     }

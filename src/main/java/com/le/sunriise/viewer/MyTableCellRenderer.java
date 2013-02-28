@@ -36,7 +36,7 @@ import org.apache.log4j.Logger;
 
 public class MyTableCellRenderer extends DefaultTableCellRenderer {
     private static final Logger log = Logger.getLogger(MyTableCellRenderer.class);
-    
+
     private final Color evenRowsColor;
     private final Color oddRowsColor;
     private TableCellRenderer parentCellRenderer = null;
@@ -56,9 +56,9 @@ public class MyTableCellRenderer extends DefaultTableCellRenderer {
         this(cellRenderer, new Color(204, 255, 204), Color.WHITE);
     }
 
-    
     @Override
-    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row,
+            int column) {
         Component rendererComponent = null;
         Class<? extends Object> valueClz = null;
         if (value != null) {
@@ -67,19 +67,22 @@ public class MyTableCellRenderer extends DefaultTableCellRenderer {
 
             if (defaultRenderer != null) {
                 if (log.isDebugEnabled()) {
-                    log.debug("clz=" + valueClz.getName() + ", row=" + row + ", column=" + column + ", defaultRenderer=" + defaultRenderer.getClass());
+                    log.debug("clz=" + valueClz.getName() + ", row=" + row + ", column=" + column + ", defaultRenderer="
+                            + defaultRenderer.getClass());
                 }
                 rendererComponent = defaultRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
             } else {
                 if (log.isDebugEnabled()) {
-                    log.debug("clz=" + valueClz.getName() + ", row=" + row + ", column=" + column + ", defaultRenderer=" + defaultRenderer);
+                    log.debug("clz=" + valueClz.getName() + ", row=" + row + ", column=" + column + ", defaultRenderer="
+                            + defaultRenderer);
                 }
             }
         }
 
         if (rendererComponent == null) {
             if (parentCellRenderer != null) {
-                rendererComponent = parentCellRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                rendererComponent = parentCellRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row,
+                        column);
             } else {
                 rendererComponent = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
             }
@@ -93,7 +96,7 @@ public class MyTableCellRenderer extends DefaultTableCellRenderer {
                 rendererComponent.setBackground(oddRowsColor);
             }
         }
-        
+
         setCellHorizontalAlignment(rendererComponent, column, value);
 
         return rendererComponent;

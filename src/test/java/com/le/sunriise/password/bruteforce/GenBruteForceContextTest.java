@@ -46,13 +46,13 @@ public class GenBruteForceContextTest {
         Assert.assertNotNull(context2);
 
         Assert.assertTrue(context2.equals(context));
-        
+
         GenBruteForceContext context3 = new GenBruteForceContext(context2);
         Assert.assertTrue(context3.equals(context2));
-        
+
         context3.setBuffer(null);
-        Assert.assertTrue(! context3.equals(context2));
-        
+        Assert.assertTrue(!context3.equals(context2));
+
         context2.setBuffer(null);
         Assert.assertTrue(context3.equals(context2));
 

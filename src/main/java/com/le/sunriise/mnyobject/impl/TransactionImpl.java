@@ -34,14 +34,13 @@ import com.le.sunriise.mnyobject.TransactionInfo;
 import com.le.sunriise.mnyobject.TransactionSplit;
 import com.le.sunriise.mnyobject.TransactionState;
 
-
 public class TransactionImpl extends MnyObject implements Comparable<TransactionImpl>, Transaction {
     private static final Logger log = Logger.getLogger(TransactionImpl.class);
 
     private Integer id;
 
     private Integer accountId;
-    
+
     private BigDecimal amount;
 
     private BigDecimal runningBalance;
@@ -74,13 +73,15 @@ public class TransactionImpl extends MnyObject implements Comparable<Transaction
     private String memo;
 
     private String number;
-    
+
     private String fiTransactionId;
 
     @JsonIgnore
     private TransactionState state = TransactionState.UNRECONCILED;
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.Transaction#getId()
      */
     @Override
@@ -88,7 +89,9 @@ public class TransactionImpl extends MnyObject implements Comparable<Transaction
         return id;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.Transaction#setId(java.lang.Integer)
      */
     @Override
@@ -96,7 +99,9 @@ public class TransactionImpl extends MnyObject implements Comparable<Transaction
         this.id = id;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.Transaction#getSplits()
      */
     @Override
@@ -104,7 +109,9 @@ public class TransactionImpl extends MnyObject implements Comparable<Transaction
         return splits;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.Transaction#setSplits(java.util.List)
      */
     @Override
@@ -112,7 +119,9 @@ public class TransactionImpl extends MnyObject implements Comparable<Transaction
         this.splits = splits;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.Transaction#getAmount()
      */
     @Override
@@ -120,15 +129,20 @@ public class TransactionImpl extends MnyObject implements Comparable<Transaction
         return amount;
     }
 
-    /* (non-Javadoc)
-     * @see com.le.sunriise.mnyobject.Transaction#setAmount(java.math.BigDecimal)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.le.sunriise.mnyobject.Transaction#setAmount(java.math.BigDecimal)
      */
     @Override
     public void setAmount(BigDecimal amount) {
         this.amount = amount;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.Transaction#getStatusFlag()
      */
     @Override
@@ -136,15 +150,20 @@ public class TransactionImpl extends MnyObject implements Comparable<Transaction
         return statusFlag;
     }
 
-    /* (non-Javadoc)
-     * @see com.le.sunriise.mnyobject.Transaction#setStatusFlag(java.lang.Integer)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.le.sunriise.mnyobject.Transaction#setStatusFlag(java.lang.Integer)
      */
     @Override
     public void setStatusFlag(Integer status) {
         this.statusFlag = status;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.Transaction#isVoid()
      */
     @Override
@@ -180,7 +199,9 @@ public class TransactionImpl extends MnyObject implements Comparable<Transaction
         return false;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.Transaction#getDate()
      */
     @Override
@@ -188,7 +209,9 @@ public class TransactionImpl extends MnyObject implements Comparable<Transaction
         return date;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.Transaction#setDate(java.util.Date)
      */
     @Override
@@ -196,7 +219,9 @@ public class TransactionImpl extends MnyObject implements Comparable<Transaction
         this.date = date;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.Transaction#isRecurring()
      */
     @Override
@@ -204,7 +229,9 @@ public class TransactionImpl extends MnyObject implements Comparable<Transaction
         return frequency.isRecurring();
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.Transaction#getRunningBalance()
      */
     @Override
@@ -212,15 +239,21 @@ public class TransactionImpl extends MnyObject implements Comparable<Transaction
         return runningBalance;
     }
 
-    /* (non-Javadoc)
-     * @see com.le.sunriise.mnyobject.Transaction#setRunningBalance(java.math.BigDecimal)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.le.sunriise.mnyobject.Transaction#setRunningBalance(java.math.BigDecimal
+     * )
      */
     @Override
     public void setRunningBalance(BigDecimal runningBalance) {
         this.runningBalance = runningBalance;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.Transaction#getCategoryId()
      */
     @Override
@@ -228,15 +261,20 @@ public class TransactionImpl extends MnyObject implements Comparable<Transaction
         return categoryId;
     }
 
-    /* (non-Javadoc)
-     * @see com.le.sunriise.mnyobject.Transaction#setCategoryId(java.lang.Integer)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.le.sunriise.mnyobject.Transaction#setCategoryId(java.lang.Integer)
      */
     @Override
     public void setCategoryId(Integer category) {
         this.categoryId = category;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.Transaction#getPayeeId()
      */
     @Override
@@ -244,7 +282,9 @@ public class TransactionImpl extends MnyObject implements Comparable<Transaction
         return payeeId;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.Transaction#setPayeeId(java.lang.Integer)
      */
     @Override
@@ -252,7 +292,9 @@ public class TransactionImpl extends MnyObject implements Comparable<Transaction
         this.payeeId = payee;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.Transaction#getTransferredAccountId()
      */
     @Override
@@ -260,8 +302,12 @@ public class TransactionImpl extends MnyObject implements Comparable<Transaction
         return transferredAccountId;
     }
 
-    /* (non-Javadoc)
-     * @see com.le.sunriise.mnyobject.Transaction#setTransferredAccountId(java.lang.Integer)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.le.sunriise.mnyobject.Transaction#setTransferredAccountId(java.lang
+     * .Integer)
      */
     @Override
     public void setTransferredAccountId(Integer transferredAccount) {
@@ -273,7 +319,9 @@ public class TransactionImpl extends MnyObject implements Comparable<Transaction
         return id.compareTo(o.getId());
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.Transaction#getFrequency()
      */
     @Override
@@ -281,15 +329,21 @@ public class TransactionImpl extends MnyObject implements Comparable<Transaction
         return frequency;
     }
 
-    /* (non-Javadoc)
-     * @see com.le.sunriise.mnyobject.Transaction#setFrequency(com.le.sunriise.mnyobject.Frequency)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.le.sunriise.mnyobject.Transaction#setFrequency(com.le.sunriise.mnyobject
+     * .Frequency)
      */
     @Override
     public void setFrequency(Frequency frequency) {
         this.frequency = frequency;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.Transaction#getTransactionInfo()
      */
     @Override
@@ -297,15 +351,21 @@ public class TransactionImpl extends MnyObject implements Comparable<Transaction
         return transactionInfo;
     }
 
-    /* (non-Javadoc)
-     * @see com.le.sunriise.mnyobject.Transaction#setTransactionInfo(com.le.sunriise.mnyobject.TransactionInfo)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.le.sunriise.mnyobject.Transaction#setTransactionInfo(com.le.sunriise
+     * .mnyobject.TransactionInfo)
      */
     @Override
     public void setTransactionInfo(TransactionInfo transactionInfo) {
         this.transactionInfo = transactionInfo;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.Transaction#getSecurityId()
      */
     @Override
@@ -313,15 +373,20 @@ public class TransactionImpl extends MnyObject implements Comparable<Transaction
         return securityId;
     }
 
-    /* (non-Javadoc)
-     * @see com.le.sunriise.mnyobject.Transaction#setSecurityId(java.lang.Integer)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.le.sunriise.mnyobject.Transaction#setSecurityId(java.lang.Integer)
      */
     @Override
     public void setSecurityId(Integer securityId) {
         this.securityId = securityId;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.Transaction#isInvestment()
      */
     @Override
@@ -329,7 +394,9 @@ public class TransactionImpl extends MnyObject implements Comparable<Transaction
         return transactionInfo.isInvestment();
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.Transaction#getInvestmentActivity()
      */
     @Override
@@ -337,15 +404,21 @@ public class TransactionImpl extends MnyObject implements Comparable<Transaction
         return investmentActivity;
     }
 
-    /* (non-Javadoc)
-     * @see com.le.sunriise.mnyobject.Transaction#setInvestmentActivity(com.le.sunriise.mnyobject.InvestmentActivityImpl)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.le.sunriise.mnyobject.Transaction#setInvestmentActivity(com.le.sunriise
+     * .mnyobject.InvestmentActivityImpl)
      */
     @Override
     public void setInvestmentActivity(InvestmentActivityImpl investmentActivity) {
         this.investmentActivity = investmentActivity;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.Transaction#getInvestmentTransaction()
      */
     @Override
@@ -353,15 +426,21 @@ public class TransactionImpl extends MnyObject implements Comparable<Transaction
         return investmentTransaction;
     }
 
-    /* (non-Javadoc)
-     * @see com.le.sunriise.mnyobject.Transaction#setInvestmentTransaction(com.le.sunriise.mnyobject.InvestmentTransaction)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.le.sunriise.mnyobject.Transaction#setInvestmentTransaction(com.le
+     * .sunriise.mnyobject.InvestmentTransaction)
      */
     @Override
     public void setInvestmentTransaction(InvestmentTransaction investmentTransaction) {
         this.investmentTransaction = investmentTransaction;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.Transaction#getQuantity()
      */
     @Override
@@ -374,7 +453,9 @@ public class TransactionImpl extends MnyObject implements Comparable<Transaction
         return quantity;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.Transaction#getPrice()
      */
     @Override
@@ -387,7 +468,9 @@ public class TransactionImpl extends MnyObject implements Comparable<Transaction
         return price;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.Transaction#isTransfer()
      */
     @Override
@@ -395,7 +478,9 @@ public class TransactionImpl extends MnyObject implements Comparable<Transaction
         return transferredAccountId != null;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.Transaction#getClearedState()
      */
     @Override
@@ -403,15 +488,20 @@ public class TransactionImpl extends MnyObject implements Comparable<Transaction
         return clearedState;
     }
 
-    /* (non-Javadoc)
-     * @see com.le.sunriise.mnyobject.Transaction#setClearedState(java.lang.Integer)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.le.sunriise.mnyobject.Transaction#setClearedState(java.lang.Integer)
      */
     @Override
     public void setClearedState(Integer clearedState) {
         this.clearedState = clearedState;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.Transaction#isCleared()
      */
     @Override
@@ -419,7 +509,9 @@ public class TransactionImpl extends MnyObject implements Comparable<Transaction
         return (clearedState != null) && (clearedState == 1);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.Transaction#isReconciled()
      */
     @Override
@@ -427,7 +519,9 @@ public class TransactionImpl extends MnyObject implements Comparable<Transaction
         return (clearedState != null) && (clearedState == 2);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.Transaction#hasSplits()
      */
     @Override
@@ -438,7 +532,9 @@ public class TransactionImpl extends MnyObject implements Comparable<Transaction
         return splits.size() > 0;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.Transaction#getMemo()
      */
     @Override
@@ -446,7 +542,9 @@ public class TransactionImpl extends MnyObject implements Comparable<Transaction
         return memo;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.Transaction#setMemo(java.lang.String)
      */
     @Override
@@ -454,7 +552,9 @@ public class TransactionImpl extends MnyObject implements Comparable<Transaction
         this.memo = memo;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.Transaction#getNumber()
      */
     @Override
@@ -462,7 +562,9 @@ public class TransactionImpl extends MnyObject implements Comparable<Transaction
         return number;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.Transaction#setNumber(java.lang.String)
      */
     @Override
@@ -470,7 +572,9 @@ public class TransactionImpl extends MnyObject implements Comparable<Transaction
         this.number = number;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.Transaction#getState()
      */
     @Override
@@ -478,8 +582,12 @@ public class TransactionImpl extends MnyObject implements Comparable<Transaction
         return state;
     }
 
-    /* (non-Javadoc)
-     * @see com.le.sunriise.mnyobject.Transaction#setState(com.le.sunriise.mnyobject.TransactionState)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.le.sunriise.mnyobject.Transaction#setState(com.le.sunriise.mnyobject
+     * .TransactionState)
      */
     @Override
     public void setState(TransactionState state) {

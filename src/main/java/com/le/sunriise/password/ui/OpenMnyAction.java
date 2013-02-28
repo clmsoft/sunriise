@@ -48,22 +48,22 @@ abstract class OpenMnyAction implements ActionListener {
             if (f.isDirectory()) {
                 return true;
             }
-    
+
             String name = f.getName();
             if (BackupFileUtils.isMnyFile(name)) {
                 return true;
             }
-    
+
             return false;
         }
-    
+
         @Override
         public String getDescription() {
             String description = "*.mny - Money file";
             return description;
         }
     }
-    
+
     public OpenMnyAction(Component parent, JTextField textField, JFileChooser fc) {
         super();
         this.parent = parent;
@@ -72,7 +72,7 @@ abstract class OpenMnyAction implements ActionListener {
         if (log.isDebugEnabled()) {
             log.debug("> new JFileChooser");
         }
-//        this.fc = new JFileChooser(new File("."));
+        // this.fc = new JFileChooser(new File("."));
         // fc = new JFileChooser();
         this.fc = fc;
         if (log.isDebugEnabled()) {
@@ -80,13 +80,13 @@ abstract class OpenMnyAction implements ActionListener {
         }
 
         this.choosableFileFilter = new MnyFileFilter();
-//        fc.addChoosableFileFilter(choosableFileFilter);
+        // fc.addChoosableFileFilter(choosableFileFilter);
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
         resetFileChooser(fc);
-        
+
         if (fc.showOpenDialog(parent) != JFileChooser.APPROVE_OPTION) {
             return;
         }
@@ -104,7 +104,7 @@ abstract class OpenMnyAction implements ActionListener {
         if (fc == null) {
             return;
         }
-        
+
         if (choosableFileFilter != null) {
             fc.resetChoosableFileFilters();
             fc.addChoosableFileFilter(choosableFileFilter);

@@ -37,14 +37,11 @@ public class BackupFileUtils {
     // 4d 53 49 53 MSIS
     // 41 4d 20 44 AM D
     // 61 74 61 62 atab
-    // 61 73 65     ase  
+    // 61 73 65 ase
     // MSISAM Database
     // at location 0x4
-    private static final byte[] MSISAM_MAGIC_HEADER = { 
-        0x4d, 0x53, 0x49, 0x53, 
-        0x41, 0x4d, 0x20, 0x44,
-        0x61, 0x74, 0x61, 0x62, 
-        0x61, 0x73, 0x65};
+    private static final byte[] MSISAM_MAGIC_HEADER = { 0x4d, 0x53, 0x49, 0x53, 0x41, 0x4d, 0x20, 0x44, 0x61, 0x74, 0x61, 0x62,
+            0x61, 0x73, 0x65 };
 
     public static final int findMagicHeader(File srcFile) throws IOException {
         int index = -1;
@@ -82,7 +79,7 @@ public class BackupFileUtils {
         log.info("    destFile=" + destFile);
         log.info("    offset=" + offset);
         log.info("    maxByteCount=" + maxByteCount);
-        
+
         File newFile = destFile;
 
         long totalBytes = 0L;
@@ -104,7 +101,7 @@ public class BackupFileUtils {
                 maxByteCount = srcChannel.size();
                 log.info("    maxByteCount 222=" + maxByteCount);
             }
-            
+
             maxByteCount -= offset;
             if (log.isDebugEnabled()) {
                 log.debug("offset=" + offset);
@@ -123,7 +120,7 @@ public class BackupFileUtils {
         } finally {
             log.info("< DONE copying file to destFile=" + destFile);
             log.info("  totalBytes=" + totalBytes);
-            
+
             if (srcChannel != null) {
                 try {
                     srcChannel.close();
@@ -170,7 +167,7 @@ public class BackupFileUtils {
 
     public static final File createBackupAsTempFile(File dbFile, boolean deleteOnExit, long maxByteCount) throws IOException {
         File tempFile = File.createTempFile("sunriise", MNY_SUFFIX);
-        if (deleteOnExit){
+        if (deleteOnExit) {
             tempFile.deleteOnExit();
         }
         long headerOffset = findMagicHeader(dbFile);

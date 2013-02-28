@@ -60,7 +60,8 @@ public class BuildNumber {
                     if ((id == null) || (id.length() <= 0)) {
                         continue;
                     }
-//                    String implementationVendorId = "com.le.tools.moneyutils";
+                    // String implementationVendorId =
+                    // "com.le.tools.moneyutils";
                     if (id.compareTo(implementationVendorId) != 0) {
                         continue;
                     }
@@ -125,13 +126,13 @@ public class BuildNumber {
             log.debug("> findBuilderNumber (systemClassLoader): resourceName=" + resourceName + ", classLoader=" + classLoader);
             buildNumber = findBuilderNumber(implementationVendorId, resourceName, classLoader);
         }
-        
+
         if (buildNumber == null) {
             log.warn("Cannot find buildNumber from Manifest.");
             log.warn("Using built-in buildNumber which is likely to be wrong!");
             buildNumber = defaultBuildNumber;
         }
-        
+
         return buildNumber;
     }
 

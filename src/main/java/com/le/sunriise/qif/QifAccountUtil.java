@@ -71,7 +71,7 @@ public class QifAccountUtil {
     public static String toQifType(Account account) {
         AccountType accountType = account.getAccountType();
         Boolean retirement = account.getRetirement();
-        
+
         String qifType = null;
 
         // Export Header Type of account

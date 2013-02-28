@@ -36,7 +36,7 @@ public class CheckPasswordTest {
         HeaderPage headerPage = null;
         String password = null;
         boolean matched = false;
-        
+
         dbFile = new File("src/test/data/mny/money2001-pwd.mny");
         headerPage = new HeaderPage(dbFile);
         Assert.assertEquals(false, headerPage.isNewEncryption());
@@ -65,7 +65,7 @@ public class CheckPasswordTest {
         password = "TEST12345";
         matched = AbstractHeaderPagePasswordChecker.checkPassword(headerPage, password);
         Assert.assertEquals(true, matched);
-        
+
         dbFile = new File("src/test/data/mny/sunset-sample-pwd.mny");
         headerPage = new HeaderPage(dbFile);
         Assert.assertEquals(true, headerPage.isNewEncryption());

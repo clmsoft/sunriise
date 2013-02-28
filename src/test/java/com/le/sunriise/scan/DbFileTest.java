@@ -14,11 +14,11 @@ public class DbFileTest {
 
     @Test
     public void test() throws IOException {
-        for(MnyTestFile testFile: MnyTestFile.SAMPLE_FILES) {
+        for (MnyTestFile testFile : MnyTestFile.SAMPLE_FILES) {
             if (testFile.isBackup()) {
                 continue;
             }
-            
+
             DbFile dbFile = new DbFile(testFile.getFileName(), testFile.getPassword());
             log.info("dbFileName=" + testFile.getFileName());
             Assert.assertNotNull(dbFile);

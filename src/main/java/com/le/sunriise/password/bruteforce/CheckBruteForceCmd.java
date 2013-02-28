@@ -23,7 +23,6 @@ import java.io.IOException;
 
 import org.apache.log4j.Logger;
 
-
 public class CheckBruteForceCmd {
     private static final Logger log = Logger.getLogger(CheckBruteForceUtils.class);
 
@@ -34,7 +33,7 @@ public class CheckBruteForceCmd {
         File dbFile = null;
         int passwordLength = 5;
         String password = null;
-    
+
         if (args.length == 2) {
             dbFile = new File(args[0]);
             passwordLength = Integer.valueOf(args[1]);
@@ -45,14 +44,14 @@ public class CheckBruteForceCmd {
         }
         char[] mask = null;
         mask = new String("*****!").toCharArray();
-    
+
         char[] alphabets = CheckBruteForceUtils.createAlphabets();
-    
+
         log.info("dbFile=" + dbFile);
         log.info("passwordLength=" + passwordLength);
         log.info("mask=" + ((mask == null) ? null : new String(mask)));
         log.info("alphabets=" + new String(alphabets));
-    
+
         try {
             password = CheckBruteForceUtils.checkUsingMask(dbFile, passwordLength, mask, alphabets);
         } catch (IOException e) {

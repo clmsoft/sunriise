@@ -50,9 +50,8 @@ public class EncryptionUtils {
     private static final int CRYPT_CHECK_START = 0x2e9;
     private static final int ENCRYPTION_FLAGS_OFFSET = 0x298;
 
-    public static final String CHARSET_PROPERTY_PREFIX =
-        "com.le.sunriise.charset.";
-    
+    public static final String CHARSET_PROPERTY_PREFIX = "com.le.sunriise.charset.";
+
     private static byte[] createPasswordDigest(ByteBuffer buffer, String password, Charset charset) {
         Digest digest = (((buffer.get(ENCRYPTION_FLAGS_OFFSET) & USE_SHA1) != 0) ? new SHA1Digest() : new MD5Digest());
 
@@ -175,7 +174,7 @@ public class EncryptionUtils {
 
                 sb.append("charset=" + charset);
                 sb.append("\n");
-                
+
                 if (format.CODEC_TYPE == CodecType.MSISAM) {
                     EncryptionUtils.appendMSISAMInfo(buffer, password, charset, sb);
                 }
@@ -186,7 +185,7 @@ public class EncryptionUtils {
                     pageChannel = null;
                 }
             }
-            
+
         } finally {
             if (channel != null) {
                 try {

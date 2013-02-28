@@ -18,19 +18,19 @@
  *******************************************************************************/
 package com.le.sunriise.mnyobject.impl;
 
-
 import com.le.sunriise.mnyobject.MnyObject;
 import com.le.sunriise.mnyobject.Payee;
 
-
-public class PayeeImpl extends MnyObject implements Comparable<PayeeImpl>, Payee{
+public class PayeeImpl extends MnyObject implements Comparable<PayeeImpl>, Payee {
     private Integer id;
 
     private Integer parent;
 
     private String name;
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.Payee#getId()
      */
     @Override
@@ -38,7 +38,9 @@ public class PayeeImpl extends MnyObject implements Comparable<PayeeImpl>, Payee
         return id;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.Payee#setId(java.lang.Integer)
      */
     @Override
@@ -46,7 +48,9 @@ public class PayeeImpl extends MnyObject implements Comparable<PayeeImpl>, Payee
         this.id = id;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.Payee#getParent()
      */
     @Override
@@ -54,7 +58,9 @@ public class PayeeImpl extends MnyObject implements Comparable<PayeeImpl>, Payee
         return parent;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.Payee#setParent(java.lang.Integer)
      */
     @Override
@@ -62,7 +68,9 @@ public class PayeeImpl extends MnyObject implements Comparable<PayeeImpl>, Payee
         this.parent = parent;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.Payee#getName()
      */
     @Override
@@ -70,7 +78,9 @@ public class PayeeImpl extends MnyObject implements Comparable<PayeeImpl>, Payee
         return name;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.Payee#setName(java.lang.String)
      */
     @Override
@@ -78,7 +88,6 @@ public class PayeeImpl extends MnyObject implements Comparable<PayeeImpl>, Payee
         this.name = name;
     }
 
-    
     @Override
     public int compareTo(PayeeImpl o) {
         return id.compareTo(o.getId());

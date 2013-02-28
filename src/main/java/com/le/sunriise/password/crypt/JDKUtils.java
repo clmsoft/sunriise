@@ -67,25 +67,25 @@ public class JDKUtils {
     }
 
     public static byte[] createDigestBytes(byte[] passwordBytes, boolean useSha1) {
-            byte[] digestBytes = null;
-    //        boolean useSha1 = headerPage.isUseSha1();
-    
-            MessageDigest digest = null;
-    
-            try {
-                if (useSha1) {
-                    digest = MessageDigest.getInstance("SHA-1");
-                } else {
-                    digest = MessageDigest.getInstance("MD5");
-                }
-                digest.update(passwordBytes, 0, passwordBytes.length);
-                digestBytes = digest.digest();
-            } catch (NoSuchAlgorithmException e) {
-                log.error(e, e);
-                throw new RuntimeException(e);
+        byte[] digestBytes = null;
+        // boolean useSha1 = headerPage.isUseSha1();
+
+        MessageDigest digest = null;
+
+        try {
+            if (useSha1) {
+                digest = MessageDigest.getInstance("SHA-1");
+            } else {
+                digest = MessageDigest.getInstance("MD5");
             }
-    
-            return digestBytes;
+            digest.update(passwordBytes, 0, passwordBytes.length);
+            digestBytes = digest.digest();
+        } catch (NoSuchAlgorithmException e) {
+            log.error(e, e);
+            throw new RuntimeException(e);
         }
+
+        return digestBytes;
+    }
 
 }

@@ -1,6 +1,7 @@
 package com.le.sunriise.scan;
 
 import java.nio.ByteBuffer;
+
 import org.apache.log4j.Logger;
 
 import com.le.sunriise.header.HeaderPage;
@@ -44,12 +45,12 @@ public class TableDefPage {
     public HeaderPage getHeaderPage() {
         return headerPage;
     }
-    
+
     public boolean isParent() {
-        return previousPageNumber <= 0;    
+        return previousPageNumber <= 0;
     }
-    
+
     public boolean isChild() {
-        return ! isParent();
+        return !isParent();
     }
 }

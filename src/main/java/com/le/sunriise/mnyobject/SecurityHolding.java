@@ -23,7 +23,7 @@ import java.math.BigDecimal;
 
 public interface SecurityHolding {
     public abstract Security getSecurity();
-    
+
     public abstract void setSecurity(Security security);
 
     public abstract Double getQuantity();

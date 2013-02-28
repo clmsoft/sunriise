@@ -20,7 +20,6 @@ package com.le.sunriise.password.bruteforce;
 
 import java.util.Arrays;
 
-
 public class GenBruteForceContext {
     private static final char[] DEFAULT_ALPHABETS = GenBruteForce.ALPHABET_US_KEYBOARD_MNY;
     private static final char[] DEFAULT_MASK = "********".toCharArray();

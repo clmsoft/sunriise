@@ -40,7 +40,7 @@ public class UpdateStockPrices {
     private static final Logger log = Logger.getLogger(UpdateStockPrices.class);
 
     private final class RowByDateComparator implements Comparator<Map<String, Object>> {
-        
+
         @Override
         public int compare(Map<String, Object> row1, Map<String, Object> row2) {
             Date dt1 = (Date) row1.get("dt");
@@ -70,7 +70,7 @@ public class UpdateStockPrices {
         List<PriceInfo> newPrices = PriceInfo.parse(quotesFile);
         log.info("Got " + newPrices.size() + " new prices ...");
         boolean skipUpdate = false;
-        if (! skipUpdate) {
+        if (!skipUpdate) {
             update(newPrices, inFile, password);
         }
     }
@@ -305,7 +305,8 @@ public class UpdateStockPrices {
             return null;
         }
 
-        log.info("Found row that we can duplicate from, dt=" + row.get("dt") + ", hsec=" + row.get("hsec") + ", src=" + row.get("src"));
+        log.info("Found row that we can duplicate from, dt=" + row.get("dt") + ", hsec=" + row.get("hsec") + ", src="
+                + row.get("src"));
 
         return latestMatchedRow;
     }

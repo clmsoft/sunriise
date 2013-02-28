@@ -69,13 +69,13 @@ final class StartBruteForceSearchAction extends AbstractBackgroundCommand {
                         @Override
                         public void run() {
                             toIdleState();
-                            
+
                             setStatus("DONE - last result " + lastResult);
                         }
                     };
                     SwingUtilities.invokeLater(doRun);
                 }
-                
+
                 updateScoreboardsUI(true);
             }
         }

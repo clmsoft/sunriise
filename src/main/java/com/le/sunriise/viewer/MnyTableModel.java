@@ -49,13 +49,13 @@ public class MnyTableModel extends AbstractTableModel {
     private static final Logger log = Logger.getLogger(MnyTableModel.class);
 
     private final Table table;
-    
+
     private int currentRow = 0;
-    
+
     private final Cursor cursor;
 
     private boolean dbReadOnly = false;
-    
+
     private final IndexLookup indexLookup = new IndexLookup();
 
     private final List<Column> columns;
@@ -94,8 +94,7 @@ public class MnyTableModel extends AbstractTableModel {
         Object value = null;
         String cachedKey = createCachedKey(rowIndex, columnIndex);
         Object cachedValue = null;
-        
-        
+
         if (cellValueCache != null) {
             cachedValue = cellValueCache.getIfPresent(cachedKey);
             if (cachedValue != null) {
@@ -159,7 +158,7 @@ public class MnyTableModel extends AbstractTableModel {
             log.warn("Try to setValueAt when dbReadOnly=" + dbReadOnly);
             return;
         }
-        
+
         try {
             moveCursorToRow(rowIndex);
 

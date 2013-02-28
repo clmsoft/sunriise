@@ -40,7 +40,8 @@ import com.le.sunriise.viewer.OpenedDb;
 public class QifTransactionUtilCmd {
     private static final Logger log = Logger.getLogger(Logger.class);
 
-    private static final char[] ILLEGAL_CHARACTERS = { '/', '\n', '\r', '\t', '\0', '\f', '`', '?', '*', '\\', '<', '>', '|', '\"', ':' };
+    private static final char[] ILLEGAL_CHARACTERS = { '/', '\n', '\r', '\t', '\0', '\f', '`', '?', '*', '\\', '<', '>', '|', '\"',
+            ':' };
 
     /**
      * @param args

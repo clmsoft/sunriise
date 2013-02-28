@@ -39,7 +39,7 @@ public class GetRelationships {
     public static void main(String[] args) {
         OpenedDb openedDb = null;
         String dbFileName = null;
-        
+
         if (args.length == 1) {
             dbFileName = args[0];
         } else {
@@ -47,7 +47,7 @@ public class GetRelationships {
             System.out.println("Usage: java " + clz.getName() + " file.mny");
             System.exit(1);
         }
-        
+
         File dbFile = new File(dbFileName);
         String password = null;
         log.info("dbFile=" + dbFile);

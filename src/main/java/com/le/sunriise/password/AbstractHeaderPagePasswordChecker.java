@@ -37,7 +37,7 @@ public abstract class AbstractHeaderPagePasswordChecker {
     private static final int PASSWORD_LENGTH = 0x28;
     private static final int PASSWORD_DIGEST_LENGTH = 0x10;
 
-    protected final HeaderPage headerPage;
+    private final HeaderPage headerPage;
 
     private byte[] encodingKey;
 

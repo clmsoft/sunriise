@@ -31,13 +31,13 @@ public class GenBruteForceCmd {
         mask = new String("*****").toCharArray();
         char[] alphabets = GenBruteForce.genChars('a', 'c');
         GenBruteForce gen = new GenBruteForce(passwordLength, mask, alphabets);
-    
+
         long actual = gen.generate();
-    
+
         BigInteger expected = GenBruteForce.calculateExpected(passwordLength, alphabets.length);
-    
+
         log.info("actual=" + actual + ", expected=" + expected);
-    
+
     }
 
 }

@@ -10,20 +10,21 @@ public class PasswordWorkerContext {
     private final File dbFile;
 
     private final HeaderPage headerPage;
-    
+
     private final AtomicLong counter;
 
     private final AtomicBoolean quit;
-    
+
     private final ResultCollector resultCollector;
-    
-    public PasswordWorkerContext(File dbFile, HeaderPage headerPage, AtomicLong counter, AtomicBoolean quit, ResultCollector resultCollector) {
+
+    public PasswordWorkerContext(File dbFile, HeaderPage headerPage, AtomicLong counter, AtomicBoolean quit,
+            ResultCollector resultCollector) {
         super();
         this.dbFile = dbFile;
         this.headerPage = headerPage;
         this.counter = counter;
         this.quit = quit;
-        this.resultCollector= resultCollector; 
+        this.resultCollector = resultCollector;
     }
 
     public File getDbFile() {

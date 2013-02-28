@@ -40,17 +40,17 @@ public class InvestmentActivityImpl {
     public static final int REINVEST_DIVIDEND = 9;
 
     public static final int RETURN_OF_CAPITAL = 8;
-    
+
     public static final int INTEREST = 4;
-    
+
     public static final int DIVIDEND = 3;
-    
+
     public static final int SELL = 2;
-    
+
     public static final int BUY = 1;
-    
+
     private final Integer flag;
-    
+
     private String string;
 
     // Buy: act=1, grftt=18, grftf=0
@@ -81,7 +81,6 @@ public class InvestmentActivityImpl {
         return flag;
     }
 
-    
     @Override
     public String toString() {
         return string;

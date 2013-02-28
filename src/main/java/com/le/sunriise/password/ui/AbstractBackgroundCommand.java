@@ -57,8 +57,7 @@ public abstract class AbstractBackgroundCommand implements ActionListener {
         } else {
             log.info("CLICK to STOP");
             if (JOptionPane.showConfirmDialog(parentComponent, "Stop current search?", "Request confirmation",
-                    JOptionPane.YES_NO_OPTION
-                    ) == JOptionPane.YES_OPTION) {
+                    JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
                 notifyBackgroundToStop();
             }
 

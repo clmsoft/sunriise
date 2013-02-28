@@ -23,7 +23,6 @@ import java.util.Map;
 import com.le.sunriise.mnyobject.Category;
 import com.le.sunriise.mnyobject.MnyObject;
 
-
 public class CategoryImpl extends MnyObject implements Comparable<CategoryImpl>, Category {
     private Integer id;
     private Integer parentId;
@@ -31,7 +30,9 @@ public class CategoryImpl extends MnyObject implements Comparable<CategoryImpl>,
     private Integer classificationId;
     private Integer level;
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.Category#getId()
      */
     @Override
@@ -39,7 +40,9 @@ public class CategoryImpl extends MnyObject implements Comparable<CategoryImpl>,
         return id;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.Category#setId(java.lang.Integer)
      */
     @Override
@@ -47,7 +50,9 @@ public class CategoryImpl extends MnyObject implements Comparable<CategoryImpl>,
         this.id = id;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.Category#getParentId()
      */
     @Override
@@ -55,7 +60,9 @@ public class CategoryImpl extends MnyObject implements Comparable<CategoryImpl>,
         return parentId;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.Category#setParentId(java.lang.Integer)
      */
     @Override
@@ -63,7 +70,9 @@ public class CategoryImpl extends MnyObject implements Comparable<CategoryImpl>,
         this.parentId = parent;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.Category#getName()
      */
     @Override
@@ -71,7 +80,9 @@ public class CategoryImpl extends MnyObject implements Comparable<CategoryImpl>,
         return name;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.Category#setName(java.lang.String)
      */
     @Override
@@ -79,13 +90,14 @@ public class CategoryImpl extends MnyObject implements Comparable<CategoryImpl>,
         this.name = name;
     }
 
-    
     @Override
     public int compareTo(CategoryImpl o) {
         return getId().compareTo(o.getId());
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.Category#getClassificationId()
      */
     @Override
@@ -93,8 +105,11 @@ public class CategoryImpl extends MnyObject implements Comparable<CategoryImpl>,
         return classificationId;
     }
 
-    /* (non-Javadoc)
-     * @see com.le.sunriise.mnyobject.Category#setClassificationId(java.lang.Integer)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.le.sunriise.mnyobject.Category#setClassificationId(java.lang.Integer)
      */
     @Override
     public void setClassificationId(Integer classificationId) {
@@ -122,7 +137,9 @@ public class CategoryImpl extends MnyObject implements Comparable<CategoryImpl>,
         return categoryName;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.Category#getLevel()
      */
     @Override
@@ -130,7 +147,9 @@ public class CategoryImpl extends MnyObject implements Comparable<CategoryImpl>,
         return level;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.Category#setLevel(java.lang.Integer)
      */
     @Override

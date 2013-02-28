@@ -185,18 +185,18 @@ public class OpenDbDialog extends JDialog {
     protected void dbOpenedCallback() {
         log.info("Opened dbFile=" + openedDb.getDbFile());
         log.info("    isMemoryMapped=" + openedDb.isMemoryMapped());
-        
-      Database db = openedDb.getDb();
-      if (db.getSystemCatalog() == null) {
-          // go into scanvenger mode
-          try {
-            HeaderPage headerPage = new HeaderPage(openedDb.getDbFile());
-            int pageSize = headerPage.getJetFormat().PAGE_SIZE;
-            
-        } catch (IOException e) {
-            
+
+        Database db = openedDb.getDb();
+        if ((db != null) && (db.getSystemCatalog() == null)) {
+            // go into scanvenger mode
+            try {
+                HeaderPage headerPage = new HeaderPage(openedDb.getDbFile());
+                int pageSize = headerPage.getJetFormat().PAGE_SIZE;
+
+            } catch (IOException e) {
+
+            }
         }
-      }
     }
 
     protected boolean preHideDialog() {

@@ -82,7 +82,8 @@ public class WalkIndexes {
         List<ColumnDescriptor> columns = index.getColumns();
 
         log.info(table.getName() + ", " + indexName + " (" + columns.size() + ")");
-        log.info("  isPrimaryKey=" + index.isPrimaryKey() + ",  isForeignKey=" + index.isForeignKey() + ",  isUnique=" + index.isUnique());
+        log.info("  isPrimaryKey=" + index.isPrimaryKey() + ",  isForeignKey=" + index.isForeignKey() + ",  isUnique="
+                + index.isUnique());
         for (ColumnDescriptor column : columns) {
             Column col = column.getColumn();
             log.info("  column=" + col.getName() + ", isAutoNumber=" + col.isAutoNumber());

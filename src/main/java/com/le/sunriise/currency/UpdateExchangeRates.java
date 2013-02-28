@@ -177,18 +177,22 @@ public class UpdateExchangeRates {
         }
     }
 
-    protected void notifyUpdateExistingRate(Double rate, String hcrncFromStr, String hcrncFromName, String hcrncToStr, String hcrncToName, Double newRate) {
+    protected void notifyUpdateExistingRate(Double rate, String hcrncFromStr, String hcrncFromName, String hcrncToStr,
+            String hcrncToName, Double newRate) {
         log.info("");
         log.info("# YES NEW FX RATE");
-        log.info("  CURRENT: " + hcrncFromStr + " -> " + hcrncToStr + ", " + rate + ", (" + hcrncFromName + " -> " + hcrncToName + ")");
+        log.info("  CURRENT: " + hcrncFromStr + " -> " + hcrncToStr + ", " + rate + ", (" + hcrncFromName + " -> " + hcrncToName
+                + ")");
         log.info("  NEW: " + hcrncFromStr + " -> " + hcrncToStr + ", " + newRate);
     }
 
-    protected void notifyNoExistingRate(Double rate, String hcrncFromStr, String hcrncFromName, String hcrncToStr, String hcrncToName, Double newRate) {
+    protected void notifyNoExistingRate(Double rate, String hcrncFromStr, String hcrncFromName, String hcrncToStr,
+            String hcrncToName, Double newRate) {
         if (log.isDebugEnabled()) {
             log.debug("");
             log.debug("# NO NEW FX RATE");
-            log.debug("  CURRENT: " + hcrncFromStr + " -> " + hcrncToStr + ", " + rate + ", (" + hcrncFromName + " -> " + hcrncToName + ")");
+            log.debug("  CURRENT: " + hcrncFromStr + " -> " + hcrncToStr + ", " + rate + ", (" + hcrncFromName + " -> "
+                    + hcrncToName + ")");
             log.debug("  NEW: " + hcrncFromStr + " -> " + hcrncToStr + ", " + newRate);
         }
     }

@@ -95,25 +95,25 @@ public class JackcessFileChannelAdapter extends FileChannel {
     @Override
     public long size() throws IOException {
         throw new UnsupportedOperationException();
-//        return 0;
+        // return 0;
     }
 
     @Override
     public void force(boolean metaData) throws IOException {
         throw new UnsupportedOperationException();
-        
+
     }
 
     @Override
     public int read(ByteBuffer dst, long position) throws IOException {
         throw new UnsupportedOperationException();
-//        return 0;
+        // return 0;
     }
 
     @Override
     protected void implCloseChannel() throws IOException {
         throw new UnsupportedOperationException();
-        
+
     }
 
 }

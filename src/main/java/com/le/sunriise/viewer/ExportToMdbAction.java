@@ -36,7 +36,7 @@ import com.le.sunriise.export.ExportToMdb;
 
 public class ExportToMdbAction implements ActionListener {
     private static final Logger log = Logger.getLogger(ExportToMdbAction.class);
-    
+
     /**
      * 
      */
@@ -62,7 +62,6 @@ public class ExportToMdbAction implements ActionListener {
             this.source = source;
         }
 
-        
         @Override
         public void run() {
             OpenedDb srcDb = null;
@@ -77,7 +76,6 @@ public class ExportToMdbAction implements ActionListener {
                     private String currentTable = null;
                     private int maxRows;
 
-                    
                     @Override
                     protected void startCopyTables(int maxCount) {
                         if (progressMonitor.isCanceled()) {
@@ -85,7 +83,7 @@ public class ExportToMdbAction implements ActionListener {
                         }
                         this.maxCount = maxCount;
                         Runnable doRun = new Runnable() {
-                            
+
                             @Override
                             public void run() {
                                 progressMonitor.setProgress(0);
@@ -94,11 +92,10 @@ public class ExportToMdbAction implements ActionListener {
                         SwingUtilities.invokeLater(doRun);
                     }
 
-                    
                     @Override
                     protected void endCopyTables(int count) {
                         Runnable doRun = new Runnable() {
-                            
+
                             @Override
                             public void run() {
                                 progressMonitor.setProgress(100);
@@ -107,7 +104,6 @@ public class ExportToMdbAction implements ActionListener {
                         SwingUtilities.invokeLater(doRun);
                     }
 
-                    
                     @Override
                     protected boolean startCopyTable(String name) {
                         super.startCopyTable(name);
@@ -117,7 +113,7 @@ public class ExportToMdbAction implements ActionListener {
                         }
                         this.currentTable = name;
                         Runnable doRun = new Runnable() {
-                            
+
                             @Override
                             public void run() {
                                 progressMonitor.setNote("Table: " + currentTable);
@@ -127,12 +123,11 @@ public class ExportToMdbAction implements ActionListener {
                         return true;
                     }
 
-                    
                     @Override
                     protected void endCopyTable(String name) {
                         progressCount++;
                         Runnable doRun = new Runnable() {
-                            
+
                             @Override
                             public void run() {
                                 progressMonitor.setProgress((progressCount * 100) / maxCount);
@@ -141,7 +136,6 @@ public class ExportToMdbAction implements ActionListener {
                         SwingUtilities.invokeLater(doRun);
                     }
 
-                    
                     @Override
                     protected boolean startAddingRows(int max) {
                         if (progressMonitor.isCanceled()) {
@@ -151,7 +145,6 @@ public class ExportToMdbAction implements ActionListener {
                         return true;
                     }
 
-                    
                     @Override
                     protected boolean addedRow(int count) {
                         if (progressMonitor.isCanceled()) {
@@ -159,7 +152,7 @@ public class ExportToMdbAction implements ActionListener {
                         }
                         final String str = " (Copying rows: " + ((count * 100) / this.maxRows) + "%" + ")";
                         Runnable doRun = new Runnable() {
-                            
+
                             @Override
                             public void run() {
                                 progressMonitor.setNote("Table: " + currentTable + str);
@@ -169,7 +162,6 @@ public class ExportToMdbAction implements ActionListener {
                         return true;
                     }
 
-                    
                     @Override
                     protected void endAddingRows(int count, long delta) {
                         super.endAddingRows(count, delta);
@@ -193,7 +185,7 @@ public class ExportToMdbAction implements ActionListener {
                 log.info("< DONE, exported to file=" + destFile);
                 final Exception exception2 = exception;
                 Runnable doRun = new Runnable() {
-                    
+
                     @Override
                     public void run() {
                         if (exception2 != null) {
@@ -212,7 +204,6 @@ public class ExportToMdbAction implements ActionListener {
         }
     }
 
-    
     @Override
     public void actionPerformed(ActionEvent event) {
         final Component source = (Component) event.getSource();

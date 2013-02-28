@@ -100,7 +100,7 @@ public class TestJoiner {
             log.warn("Cannot find toTableName=" + toTableName);
             return;
         }
-        
+
         Joiner join = Joiner.create(fromTable, toTable);
         printJoinInfo(join);
 

@@ -20,7 +20,7 @@ public class JTextAreaWriter extends Writer {
     public JTextAreaWriter(JTextArea textArea) {
         this(textArea, -1L);
     }
-    
+
     @Override
     public void write(char[] cbuf, int off, int len) throws IOException {
         if (textArea == null) {

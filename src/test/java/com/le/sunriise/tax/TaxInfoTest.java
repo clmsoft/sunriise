@@ -10,7 +10,7 @@ import org.junit.Test;
 public class TaxInfoTest {
     @Test
     public void testSunset() throws IOException {
-        File dbFile  = new File("src/test/data/mny/sunset-sample-pwd.mny");
+        File dbFile = new File("src/test/data/mny/sunset-sample-pwd.mny");
         String password = "123@abc!";
         List<TaxInfo> taxInfoList = TaxInfo.parse(dbFile, password);
         Assert.assertNotNull(taxInfoList);

@@ -35,7 +35,7 @@ public class PageInfo {
             return "PageTypes.UNKNOWN";
         }
     }
-    
+
     @Override
     public String toString() {
         return pageNumber + ", " + pageTypeToString(pageType);

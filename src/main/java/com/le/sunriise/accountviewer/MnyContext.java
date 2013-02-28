@@ -40,7 +40,7 @@ public class MnyContext {
     private Map<Integer, Security> securities;
 
     private Database db;
-    
+
     public List<Account> getAccounts() {
         return accounts;
     }

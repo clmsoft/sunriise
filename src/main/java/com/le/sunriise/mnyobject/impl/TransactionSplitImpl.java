@@ -22,15 +22,16 @@ import com.le.sunriise.mnyobject.MnyObject;
 import com.le.sunriise.mnyobject.Transaction;
 import com.le.sunriise.mnyobject.TransactionSplit;
 
-
 public class TransactionSplitImpl extends MnyObject implements TransactionSplit {
     private Integer parentId;
 
     private Integer rowId;
 
     private Transaction transaction;
-    
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.TransactionSplit#getParentId()
      */
     @Override
@@ -38,15 +39,20 @@ public class TransactionSplitImpl extends MnyObject implements TransactionSplit 
         return parentId;
     }
 
-    /* (non-Javadoc)
-     * @see com.le.sunriise.mnyobject.TransactionSplit#setParentId(java.lang.Integer)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.le.sunriise.mnyobject.TransactionSplit#setParentId(java.lang.Integer)
      */
     @Override
     public void setParentId(Integer parentId) {
         this.parentId = parentId;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.TransactionSplit#getRowId()
      */
     @Override
@@ -54,15 +60,20 @@ public class TransactionSplitImpl extends MnyObject implements TransactionSplit 
         return rowId;
     }
 
-    /* (non-Javadoc)
-     * @see com.le.sunriise.mnyobject.TransactionSplit#setRowId(java.lang.Integer)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.le.sunriise.mnyobject.TransactionSplit#setRowId(java.lang.Integer)
      */
     @Override
     public void setRowId(Integer rowId) {
         this.rowId = rowId;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.le.sunriise.mnyobject.TransactionSplit#getTransaction()
      */
     @Override
@@ -70,8 +81,12 @@ public class TransactionSplitImpl extends MnyObject implements TransactionSplit 
         return transaction;
     }
 
-    /* (non-Javadoc)
-     * @see com.le.sunriise.mnyobject.TransactionSplit#setTransaction(com.le.sunriise.mnyobject.TransactionImpl)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.le.sunriise.mnyobject.TransactionSplit#setTransaction(com.le.sunriise
+     * .mnyobject.TransactionImpl)
      */
     @Override
     public void setTransaction(Transaction transaction) {

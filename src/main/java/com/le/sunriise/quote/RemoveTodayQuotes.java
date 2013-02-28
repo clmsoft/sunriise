@@ -65,7 +65,7 @@ public class RemoveTodayQuotes {
 
         Date date = QuoteUtils.getTimestamp(dayOffset, true);
 
-//        List<Integer> hsps = new ArrayList<Integer>();
+        // List<Integer> hsps = new ArrayList<Integer>();
         Integer[] srcs = {
         // manual update
         new Integer(5),
@@ -84,25 +84,26 @@ public class RemoveTodayQuotes {
                 if (cursor.currentRowMatches(rowPattern)) {
                     Map<String, Object> row = cursor.getCurrentRow();
                     Integer hsec = (Integer) row.get("hsec");
-                    log.info("Found" + " hsec=" + hsec + ", symbol=" + QuoteUtils.getSymbol(hsec, db) + ", src=" + row.get("src") + ", dt=" + row.get("dt"));
+                    log.info("Found" + " hsec=" + hsec + ", symbol=" + QuoteUtils.getSymbol(hsec, db) + ", src=" + row.get("src")
+                            + ", dt=" + row.get("dt"));
                     cursor.deleteCurrentRow();
-//                    hsps.add((Integer) row.get("hsp"));
+                    // hsps.add((Integer) row.get("hsp"));
                 }
             }
         }
-        
-//        for(Integer hsp: hsps) {
-//            log.info("hsp=" + hsp);
-//            rowPattern.clear();
-//            rowPattern.put("hsp", hsp);
-//            log.info("Looking for row hsp=" + hsp);
-//            if (cursor.findFirstRow(rowPattern)) {
-//                log.info("   FOUND. Deleting");
-//                cursor.deleteCurrentRow();
-//            } else {
-//                log.info("   NOT FOUND");
-//            }
-//        }
+
+        // for(Integer hsp: hsps) {
+        // log.info("hsp=" + hsp);
+        // rowPattern.clear();
+        // rowPattern.put("hsp", hsp);
+        // log.info("Looking for row hsp=" + hsp);
+        // if (cursor.findFirstRow(rowPattern)) {
+        // log.info("   FOUND. Deleting");
+        // cursor.deleteCurrentRow();
+        // } else {
+        // log.info("   NOT FOUND");
+        // }
+        // }
     }
 
     /**

@@ -31,7 +31,6 @@ public class TableListItem {
         this.table = table;
     }
 
-    
     @Override
     public String toString() {
         return table.getName() + " (" + table.getRowCount() + ")";

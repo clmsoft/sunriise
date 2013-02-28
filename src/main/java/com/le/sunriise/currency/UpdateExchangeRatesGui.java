@@ -20,7 +20,6 @@ package com.le.sunriise.currency;
 
 import java.util.prefs.Preferences;
 
-
 public class UpdateExchangeRatesGui {
     private static final Preferences prefs = Preferences.userNodeForPackage(UpdateExchangeRatesGui.class);
 

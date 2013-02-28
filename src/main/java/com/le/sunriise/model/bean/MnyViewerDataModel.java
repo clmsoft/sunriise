@@ -37,9 +37,9 @@ public class MnyViewerDataModel {
     private String tableMetaData;
 
     private String headerInfo;
-    
+
     private String keyInfo;
-    
+
     private String indexInfo;
 
     public List<TableListItem> getTables() {

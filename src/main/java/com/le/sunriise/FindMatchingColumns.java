@@ -47,7 +47,7 @@ public class FindMatchingColumns {
     public static void main(String[] args) {
         Database db = null;
         String dbFileName = null;
-        
+
         if (args.length == 1) {
             dbFileName = args[0];
         } else {
@@ -55,7 +55,7 @@ public class FindMatchingColumns {
             System.out.println("Usage: java " + clz.getName() + " file.mny");
             System.exit(1);
         }
-        
+
         File dbFile = new File(dbFileName);
         String password = null;
         log.info("dbFile=" + dbFile);
@@ -71,7 +71,8 @@ public class FindMatchingColumns {
                             List<Table> matchedTables = matchedColumns.get(column);
                             log.info("### " + tableName + ", " + column.getName() + ", " + matchedTables.size());
                             for (Table matchedTable : matchedTables) {
-                                log.info(tableName + ", " + matchedTable.getName() + ", " + column.getName() + ", " + column.getType());
+                                log.info(tableName + ", " + matchedTable.getName() + ", " + column.getName() + ", "
+                                        + column.getType());
                             }
                         }
                         log.info("");
@@ -151,7 +152,7 @@ public class FindMatchingColumns {
                 continue;
             }
             Table table = db.getTable(tableName);
-            if (! accept(table)) {
+            if (!accept(table)) {
                 continue;
             }
             matchedColumns = find(table, targetTable, targetColumn);
@@ -170,7 +171,7 @@ public class FindMatchingColumns {
         List<Column> matched = new ArrayList<Column>();
         List<Column> columns = table.getColumns();
         for (Column column : columns) {
-            if (! accept(column)) {
+            if (!accept(column)) {
                 continue;
             }
             if (column.getName().compareToIgnoreCase(targetColumn.getName()) != 0) {

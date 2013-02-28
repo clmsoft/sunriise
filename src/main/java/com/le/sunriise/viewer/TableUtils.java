@@ -47,7 +47,7 @@ import com.le.sunriise.mnyobject.Transaction;
 
 public class TableUtils {
     private static final Logger log = Logger.getLogger(TableUtils.class);
-    
+
     public static String parseIndexInfo(Table table) throws IOException {
         StringBuilder sb = new StringBuilder();
 
@@ -67,7 +67,7 @@ public class TableUtils {
             List<ColumnDescriptor> columns = index.getColumns();
             sb.append("    > " + index.getName() + " (" + columns.size() + ")");
             sb.append("\n");
-            
+
             IndexData indexData = index.getIndexData();
             sb.append("    type=" + indexData.getClass().getName());
             sb.append("\n");
@@ -97,15 +97,15 @@ public class TableUtils {
 
     public static String parseKeyInfo(Table table) throws IOException {
         StringBuilder sb = new StringBuilder();
-    
+
         sb.append("Key info");
         sb.append("\n");
         sb.append("\n");
-    
+
         sb.append("Table: " + table.getName());
         sb.append("\n");
         sb.append("\n");
-    
+
         sb.append("# Primary keys:");
         sb.append("\n");
         IndexLookup indexLookup = new IndexLookup();
@@ -113,7 +113,7 @@ public class TableUtils {
             if (indexLookup.isPrimaryKeyColumn(column)) {
                 sb.append("(PK) " + table.getName() + "." + column.getName() + ", " + indexLookup.getMax(column));
                 sb.append("\n");
-    
+
                 List<Column> referencing = indexLookup.getReferencing(column);
                 for (Column col : referencing) {
                     sb.append("    (referencing-FK) " + col.getTable().getName() + "." + col.getName());
@@ -122,66 +122,67 @@ public class TableUtils {
             }
         }
         sb.append("\n");
-    
+
         sb.append("# Foreign keys:");
         sb.append("\n");
         for (Column column : table.getColumns()) {
             List<Column> referenced = indexLookup.getReferencedColumns(column);
             for (Column col : referenced) {
-                sb.append("(FK) " + table.getName() + "." + column.getName() + " -> " + col.getTable().getName() + "." + col.getName());
+                sb.append("(FK) " + table.getName() + "." + column.getName() + " -> " + col.getTable().getName() + "."
+                        + col.getName());
                 sb.append("\n");
             }
         }
         sb.append("\n");
-    
+
         return sb.toString();
     }
 
     public static String parseTableMetaData(Table table) {
         StringBuilder sb = new StringBuilder();
-    
+
         int pageCount = table.getApproximateOwnedPageCount();
-    
+
         sb.append("pageCount=" + pageCount);
         sb.append("\n");
-    
+
         sb.append(table.toString());
-    
+
         return sb.toString();
     }
 
     public static String parseHeaderInfo(Table table, OpenedDb openedDb) throws IOException {
         StringBuilder sb = new StringBuilder();
-    
+
         sb.append("Header info");
         sb.append("\n");
         sb.append("\n");
-    
+
         sb.append("Table: " + table.getName());
         sb.append("\n");
         sb.append("\n");
-    
+
         Database db = table.getDatabase();
-    
+
         PageChannel pageChannel = db.getPageChannel();
         ByteBuffer buffer = pageChannel.createPageBuffer();
         pageChannel.readPage(buffer, 0);
-    
+
         JetFormat format = pageChannel.getFormat();
         sb.append("format=" + format.toString());
         sb.append("\n");
-    
+
         CodecType msisam = CodecType.MSISAM;
         if (format.CODEC_TYPE == msisam) {
             EncryptionUtils.appendMSISAMInfo(buffer, openedDb.getPassword(), openedDb.getDb().getCharset(), sb);
         }
-    
+
         // 0x00 4
         // ENGINE_NAME_OFFSET 0x04 15
         // OFFSET_VERSION 20 1
         // SALT_OFFSET 0x72 4
         // ENCRYPTION_FLAGS_OFFSET 0x298 1
-    
+
         return sb.toString();
     }
 
@@ -189,7 +190,7 @@ public class TableUtils {
         if (table == null) {
             return;
         }
-    
+
         Cursor cursor = Cursor.createCursor(table);
         while (cursor.moveToNextRow()) {
             Map<String, Object> row = cursor.getCurrentRow();
@@ -203,9 +204,9 @@ public class TableUtils {
         List<Transaction> transactions = account.getTransactions();
         Date previousDate = null;
         SimpleDateFormat dateFormatter = new SimpleDateFormat("MM/dd/yyyy");
-    
+
         int rowIndex = 0;
-    
+
         int entries = 0;
         BigDecimal monthlyBalance = new BigDecimal(0);
         for (Transaction transaction : transactions) {
@@ -218,26 +219,26 @@ public class TableUtils {
                 continue;
             }
             entries++;
-    
+
             Date date = transaction.getDate();
             if (previousDate != null) {
                 Calendar cal = Calendar.getInstance();
-    
+
                 cal.setTime(previousDate);
                 int previousMonth = cal.get(Calendar.MONTH);
-    
+
                 cal.setTime(date);
                 int month = cal.get(Calendar.MONTH);
-    
+
                 if (month != previousMonth) {
-                    log.info(dateFormatter.format(previousDate) + ", entries=" + entries + ", monthlyBalance=" + monthlyBalance + ", balance="
-                            + AccountUtil.getRunningBalance(rowIndex - 1, account));
+                    log.info(dateFormatter.format(previousDate) + ", entries=" + entries + ", monthlyBalance=" + monthlyBalance
+                            + ", balance=" + AccountUtil.getRunningBalance(rowIndex - 1, account));
                     entries = 0;
                     monthlyBalance = new BigDecimal(0);
                 }
             }
             previousDate = date;
-    
+
             BigDecimal amount = transaction.getAmount();
             if (transaction.isVoid()) {
                 amount = new BigDecimal(0);
@@ -246,7 +247,7 @@ public class TableUtils {
                 amount = new BigDecimal(0);
             }
             monthlyBalance = monthlyBalance.add(amount);
-    
+
             rowIndex++;
         }
     }

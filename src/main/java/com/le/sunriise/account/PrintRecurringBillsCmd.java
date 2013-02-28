@@ -77,7 +77,7 @@ public class PrintRecurringBillsCmd extends DefaultAccountVisitor {
         System.out.println("> RECURRING");
         try {
             System.out.println(transaction.getId());
-            
+
             System.out.println(transaction.getFrequency().getFrequencyString());
         } finally {
             System.out.println("< RECURRING");

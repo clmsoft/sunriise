@@ -44,7 +44,7 @@ public class FilteredAccountVisitor extends DefaultAccountVisitor {
         // +includePattern
         // -excludePattern
         // @AccountFilterImpl
-        
+
     }
 
     public FilteredAccountVisitor() {

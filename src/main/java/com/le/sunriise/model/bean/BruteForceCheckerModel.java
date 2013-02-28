@@ -24,13 +24,13 @@ public class BruteForceCheckerModel {
     private String alphabets;
 
     private String mask;
-    
+
     private String status;
 
     public BruteForceCheckerModel() {
         this.mask = "*****";
     }
-    
+
     public String getMnyFileName() {
         return mnyFileName;
     }

@@ -23,18 +23,17 @@ import org.python.util.PythonInterpreter;
 
 public class JythonTransactionFiltersFactory {
 
-
     private PyObject pythonInstance;
 
     public JythonTransactionFiltersFactory() {
         PythonInterpreter interpreter = new PythonInterpreter();
-//        String packageName = "filters.MyTransactionFilters";
+        // String packageName = "filters.MyTransactionFilters";
         String moduleName = "RecurringFilter";
         String packageName = "com.le.sunriise.python";
-        
-        interpreter.exec("from " + packageName +"." + moduleName + " import *");
 
-//        String className = "NoRecurringFilter";
+        interpreter.exec("from " + packageName + "." + moduleName + " import *");
+
+        // String className = "NoRecurringFilter";
         String className = moduleName;
         pythonInstance = interpreter.get(className);
     }

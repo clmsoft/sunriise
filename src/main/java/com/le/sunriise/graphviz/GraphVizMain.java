@@ -52,7 +52,7 @@ public class GraphVizMain {
         }
         outDir.mkdirs();
         log.info("outDir=" + outDir);
-        
+
         File dbFile = new File(dbFileName);
         String password = null;
         log.info("dbFile=" + dbFile);

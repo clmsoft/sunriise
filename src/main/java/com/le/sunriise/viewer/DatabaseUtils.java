@@ -44,13 +44,13 @@ public class DatabaseUtils {
                 table = db.getSystemTable(systemTableName);
                 label = "systemTable." + systemTableName;
                 logSystemTable(label, table);
-                
+
                 i++;
             }
 
             // log.info("  columnOrder=" + db.getColumnOrder());
 
-//            logPropertyMaps(db);
+            // logPropertyMaps(db);
 
         } catch (IOException e) {
             log.warn(e);

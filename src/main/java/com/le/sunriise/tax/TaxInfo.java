@@ -147,7 +147,7 @@ public class TaxInfo {
             incomeRate.setAmountHigh(damtHigh);
 
             incomeRates.add(incomeRate);
-            
+
             index++;
         }
         taxInfo.setIncomeRates(incomeRates);

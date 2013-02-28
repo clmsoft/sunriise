@@ -1,7 +1,6 @@
 package com.le.sunriise.header;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.EventQueue;
@@ -27,9 +26,6 @@ import org.fife.ui.rtextarea.RTextScrollPane;
 import com.le.sunriise.Launcher;
 import com.le.sunriise.SunriiseBuildNumber;
 import com.le.sunriise.password.HeaderPagePasswordChecker;
-import com.le.sunriise.viewer.CreateOpenedDbPlugin;
-import com.le.sunriise.viewer.OpenDbAction;
-import com.le.sunriise.viewer.OpenDbDialog;
 import com.le.sunriise.viewer.OpenedDb;
 
 public class HeaderPageViewer {
@@ -44,115 +40,6 @@ public class HeaderPageViewer {
     private RSyntaxTextArea headerPageInfoTextArea;
 
     private HeaderPage headerPage;
-
-    private final class MyOpenDbAction extends OpenDbAction {
-
-        private MyOpenDbAction(Component locationRelativeTo, Preferences prefs, OpenedDb openedDb) {
-            super(locationRelativeTo, prefs, openedDb);
-            setDisableReadOnlyCheckBox(true);
-            setPlugin(createPlugin());
-        }
-
-        private CreateOpenedDbPlugin createPlugin() {
-            return new CreateOpenedDbPlugin() {
-                @Override
-                public OpenedDb openDb(String dbFileName, char[] passwordChars, boolean readOnly, boolean encrypted) {
-                    OpenedDb openedDb = null;
-
-                    openedDb = new OpenedDb();
-                    openedDb.setDbFile(new File(dbFileName));
-                    String password = null;
-                    if ((passwordChars != null) && (passwordChars.length > 0)) {
-                        password = new String(passwordChars);
-                    }
-                    openedDb.setPassword(password);
-
-                    return openedDb;
-                }
-            };
-        }
-
-        @Override
-        public void dbFileOpened(OpenedDb newOpenedDb, OpenDbDialog dialog) {
-            if (newOpenedDb != null) {
-                HeaderPageViewer.this.openedDb = newOpenedDb;
-            }
-
-            File dbFile = openedDb.getDbFile();
-            try {
-                headerPage = new HeaderPage(dbFile);
-                HeaderPagePasswordChecker checker = new HeaderPagePasswordChecker(headerPage);
-                String password = openedDb.getPassword();
-                boolean passwordIsValid = checker.check(password);
-                if (!passwordIsValid) {
-                    log.warn("Invalid password.");
-                }
-
-                RSyntaxTextArea textArea = headerPageInfoTextArea;
-
-                textArea.append("# *.mny fileName.\n");
-                textArea.append("dbFile: " + openedDb.getDbFile().getAbsolutePath());
-                textArea.append("\n");
-
-                textArea.append("# If true, the specified password is valid.\n");
-                textArea.append("passwordIsValid: " + passwordIsValid);
-                textArea.append("\n");
-                
-                textArea.append("# Database format.\n");
-                textArea.append("getJetFormat: " + headerPage.getJetFormat());
-                textArea.append("\n");
-
-                textArea.append("# Database page size.\n");
-                textArea.append("getJetFormat.PAGE_SIZE: " + headerPage.getJetFormat().PAGE_SIZE);
-                textArea.append("\n");
-
-                textArea.append("# Database character set.\n");
-                textArea.append("getCharset: " + headerPage.getCharset());
-                textArea.append("\n");
-
-                textArea.append("# 2001 should have oldEncrytion, 2002 on should have newEncryption.\n");
-                textArea.append("isNewEncryption: " + headerPage.isNewEncryption());
-                textArea.append("\n");
-
-                if (!headerPage.isNewEncryption()) {
-                    textArea.append("# For old encrytion, we can retrieve the embedded password directly.\n");
-                    textArea.append("getEmbeddedDatabasePassword: " + headerPage.getEmbeddedDatabasePassword());
-                    textArea.append("\n");
-                }
-
-                textArea.append("# Hash algo.\n");
-                textArea.append("isUseSha1: " + headerPage.isUseSha1());
-                textArea.append("\n");
-
-                textArea.append("# Embedded salt value.\n");
-                textArea.append("getSalt: " + HeaderPage.toHexString(headerPage.getSalt()));
-                textArea.append("\n");
-
-                textArea.append("getBaseSalt: " + HeaderPage.toHexString(headerPage.getBaseSalt()));
-                textArea.append("\n");
-
-                textArea.append("encrypted4BytesCheck: " + HeaderPage.toHexString(headerPage.getEncrypted4BytesCheck()));
-                textArea.append("\n");
-
-                textArea.append("testKey: " + HeaderPage.toHexString(checker.getTestKey()));
-                textArea.append("\n");
-
-                textArea.append("testBytes: " + HeaderPage.toHexString(checker.getTestBytes()));
-                textArea.append("\n");
-
-                textArea.append("decrypted4BytesCheck: " + HeaderPage.toHexString(checker.getDecrypted4BytesCheck()));
-                textArea.append("\n");
-
-                textArea.append("encodingKey: " + HeaderPage.toHexString(checker.getEncodingKey()));
-                textArea.append("\n");
-
-                textArea.setCaretPosition(0);
-            } catch (IOException e) {
-                log.error(e, e);
-            }
-        }
-
-    }
 
     /**
      * Launch the application.
@@ -272,8 +159,12 @@ public class HeaderPageViewer {
         });
 
         JMenuItem fileOpenMenuItem = new JMenuItem("Open");
-        fileOpenMenuItem.addActionListener(new MyOpenDbAction(HeaderPageViewer.this.frame, prefs, openedDb));
-
+        fileOpenMenuItem.addActionListener(new AbstractPluginOpenDbAction(HeaderPageViewer.this.frame, prefs, openedDb) {
+            @Override
+            protected void dbFileOpened(OpenedDb newOpenedDb) {
+                showHeader(newOpenedDb);
+            }
+        });
         fileMenu.add(fileOpenMenuItem);
 
         fileMenu.addSeparator();
@@ -288,6 +179,85 @@ public class HeaderPageViewer {
 
     private void setFrame(JFrame frame) {
         this.frame = frame;
+    }
+
+    protected void showHeader(OpenedDb newOpenedDb) {
+        if (newOpenedDb != null) {
+            HeaderPageViewer.this.openedDb = newOpenedDb;
+        }
+
+        File dbFile = openedDb.getDbFile();
+        try {
+            headerPage = new HeaderPage(dbFile);
+            HeaderPagePasswordChecker checker = new HeaderPagePasswordChecker(headerPage);
+            String password = openedDb.getPassword();
+            boolean passwordIsValid = checker.check(password);
+            if (!passwordIsValid) {
+                log.warn("Invalid password.");
+            }
+
+            RSyntaxTextArea textArea = headerPageInfoTextArea;
+
+            textArea.append("# *.mny fileName.\n");
+            textArea.append("dbFile: " + openedDb.getDbFile().getAbsolutePath());
+            textArea.append("\n");
+
+            textArea.append("# If true, the specified password is valid.\n");
+            textArea.append("passwordIsValid: " + passwordIsValid);
+            textArea.append("\n");
+
+            textArea.append("# Database format.\n");
+            textArea.append("getJetFormat: " + headerPage.getJetFormat());
+            textArea.append("\n");
+
+            textArea.append("# Database page size.\n");
+            textArea.append("getJetFormat.PAGE_SIZE: " + headerPage.getJetFormat().PAGE_SIZE);
+            textArea.append("\n");
+
+            textArea.append("# Database character set.\n");
+            textArea.append("getCharset: " + headerPage.getCharset());
+            textArea.append("\n");
+
+            textArea.append("# 2001 should have oldEncrytion, 2002 on should have newEncryption.\n");
+            textArea.append("isNewEncryption: " + headerPage.isNewEncryption());
+            textArea.append("\n");
+
+            if (!headerPage.isNewEncryption()) {
+                textArea.append("# For old encrytion, we can retrieve the embedded password directly.\n");
+                textArea.append("getEmbeddedDatabasePassword: " + headerPage.getEmbeddedDatabasePassword());
+                textArea.append("\n");
+            }
+
+            textArea.append("# Hash algo.\n");
+            textArea.append("isUseSha1: " + headerPage.isUseSha1());
+            textArea.append("\n");
+
+            textArea.append("# Embedded salt value.\n");
+            textArea.append("getSalt: " + HeaderPage.toHexString(headerPage.getSalt()));
+            textArea.append("\n");
+
+            textArea.append("getBaseSalt: " + HeaderPage.toHexString(headerPage.getBaseSalt()));
+            textArea.append("\n");
+
+            textArea.append("encrypted4BytesCheck: " + HeaderPage.toHexString(headerPage.getEncrypted4BytesCheck()));
+            textArea.append("\n");
+
+            textArea.append("testKey: " + HeaderPage.toHexString(checker.getTestKey()));
+            textArea.append("\n");
+
+            textArea.append("testBytes: " + HeaderPage.toHexString(checker.getTestBytes()));
+            textArea.append("\n");
+
+            textArea.append("decrypted4BytesCheck: " + HeaderPage.toHexString(checker.getDecrypted4BytesCheck()));
+            textArea.append("\n");
+
+            textArea.append("encodingKey: " + HeaderPage.toHexString(checker.getEncodingKey()));
+            textArea.append("\n");
+
+            textArea.setCaretPosition(0);
+        } catch (IOException e) {
+            log.error(e, e);
+        }
     }
 
 }

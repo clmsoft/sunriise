@@ -80,7 +80,7 @@ public abstract class AbstractAccountVisitor {
     }
 
     private void _visitAccount(Account account) throws IOException {
-        if (! acceptAccount(account)) {
+        if (!acceptAccount(account)) {
             return;
         }
         this.currentAccount = account;

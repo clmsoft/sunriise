@@ -57,11 +57,11 @@ public class BusyJFrame extends JFrame {
      * Do common constructor initialization
      */
     protected void initBusyJFrame() {
-//        setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
+        // setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
         // Create our own glass pane which says it manages focus. This is
         // part of the key to capturing keyboard events.
         glass_pane = new JPanel() {
-            
+
             @Override
             public boolean isManagingFocus() {
                 return true;
@@ -72,7 +72,7 @@ public class BusyJFrame extends JFrame {
         });
         // Eat keystrokes so they don't go to other components
         glass_pane.addKeyListener(new KeyAdapter() {
-            
+
             @Override
             public void keyPressed(KeyEvent e) {
                 e.consume();
@@ -97,13 +97,13 @@ public class BusyJFrame extends JFrame {
             glass_pane.requestFocus();
             glass_pane.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
             // Turn off the close button
-//            setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+            // setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         } else {
             glass_pane.setCursor(Cursor.getDefaultCursor());
             glass_pane.setVisible(false);
             this.requestFocus();
             this.setCursor(Cursor.getDefaultCursor());
-//            setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
+            // setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
         }
     }
 }

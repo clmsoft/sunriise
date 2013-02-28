@@ -32,7 +32,7 @@ import org.apache.log4j.Logger;
 
 public class WaitCursorEventQueue extends EventQueue {
     private static final Logger log = Logger.getLogger(WaitCursorEventQueue.class);
-    
+
     public WaitCursorEventQueue(int delay) {
         this.delay = delay;
         waitTimer = new WaitCursorTimer();
@@ -40,7 +40,6 @@ public class WaitCursorEventQueue extends EventQueue {
         waitTimer.start();
     }
 
-    
     @Override
     protected void dispatchEvent(AWTEvent event) {
         MouseEvent mouseEvent = null;
@@ -81,7 +80,6 @@ public class WaitCursorEventQueue extends EventQueue {
             }
         }
 
-        
         @Override
         public synchronized void run() {
             while (true) {
@@ -93,7 +91,7 @@ public class WaitCursorEventQueue extends EventQueue {
                     // interruption from stopTimer()
                     wait(delay);
                     log.info(" timer exceeds ...");
-                    
+
                     if (source instanceof Component)
                         parent = SwingUtilities.getRoot((Component) source);
                     else if (source instanceof MenuComponent) {

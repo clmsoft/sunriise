@@ -282,7 +282,7 @@ public class AccountViewer {
         mnNewMenu.add(mntmNewMenuItem);
         fileMenu.addSeparator();
         fileMenu.add(exitMenuItem);
-        
+
         Launcher.addHelpMenu(frame, menuBar);
     }
 
@@ -953,39 +953,40 @@ public class AccountViewer {
         // log.error(e1);
         // System.exit(1);
         // }
-    
+
         EventQueue.invokeLater(new Runnable() {
-    
+
             @Override
             public void run() {
                 try {
                     JavaInfo.logInfo();
-    
+
                     log.info("> Starting AccountViewer");
+
                     AccountViewer window = new AccountViewer();
                     showMainFrame(window);
-    
+
                     String buildNumber = SunriiseBuildNumber.getBuildnumber();
                     log.info("BuildNumber: " + buildNumber);
-                    
+
                 } catch (Exception e) {
                     log.error(e, e);
                 }
             }
-    
+
             protected void showMainFrame(AccountViewer window) {
                 JFrame mainFrame = window.getFrame();
-    
+
                 String title = com.le.sunriise.viewer.MynViewer.TITLE_NO_OPENED_DB;
                 mainFrame.setTitle(title);
-    
+
                 Dimension preferredSize = new Dimension(900, 700);
                 mainFrame.setPreferredSize(preferredSize);
-    
+
                 mainFrame.pack();
-    
+
                 mainFrame.setLocationRelativeTo(null);
-    
+
                 mainFrame.setVisible(true);
                 log.info(" setVisible to true");
             }

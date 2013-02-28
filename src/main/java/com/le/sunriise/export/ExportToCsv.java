@@ -183,7 +183,8 @@ public class ExportToCsv {
         try {
             writer = new BufferedWriter(new FileWriter(file));
             ExportFilter filter = SimpleExportFilter.INSTANCE;
-            ExportUtil.exportWriter(db, table.getName(), writer, true, ExportUtil.DEFAULT_DELIMITER, ExportUtil.DEFAULT_QUOTE_CHAR, filter);
+            ExportUtil.exportWriter(db, table.getName(), writer, true, ExportUtil.DEFAULT_DELIMITER, ExportUtil.DEFAULT_QUOTE_CHAR,
+                    filter);
         } finally {
             if (writer != null) {
                 writer.close();

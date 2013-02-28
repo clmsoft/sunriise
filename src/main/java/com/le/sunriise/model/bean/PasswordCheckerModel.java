@@ -22,13 +22,13 @@ import org.apache.log4j.Logger;
 
 public class PasswordCheckerModel {
     private static final Logger log = Logger.getLogger(PasswordCheckerModel.class);
-    
+
     private String mnyFileName;
     private String wordListPath;
     private Integer threads = new Integer(1);
     private String status = "Idle";
-    
-    public PasswordCheckerModel() {        
+
+    public PasswordCheckerModel() {
         super();
         log.info("> PasswordCheckerModel");
     }

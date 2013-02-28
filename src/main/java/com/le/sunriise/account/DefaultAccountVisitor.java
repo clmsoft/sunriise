@@ -30,7 +30,7 @@ public class DefaultAccountVisitor extends AbstractAccountVisitor {
     @Override
     public void preVisit(OpenedDb openedDb) throws IOException {
         // TODO Auto-generated method stub
-    
+
     }
 
     @Override
@@ -42,7 +42,7 @@ public class DefaultAccountVisitor extends AbstractAccountVisitor {
     @Override
     public void visitAccounts(List<Account> accounts) throws IOException {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
@@ -66,7 +66,7 @@ public class DefaultAccountVisitor extends AbstractAccountVisitor {
     @Override
     public void visitFilteredTransaction(Transaction transaction) throws IOException {
         // TODO Auto-generated method stub
-        
+
     }
 
 }

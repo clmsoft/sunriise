@@ -20,7 +20,6 @@ package com.le.sunriise.password.bruteforce;
 
 import org.apache.log4j.Logger;
 
-
 public class GenBruteForce2Chars {
     private static final Logger log = Logger.getLogger(GenBruteForce2Chars.class);
 
@@ -30,7 +29,7 @@ public class GenBruteForce2Chars {
     public static void main(String[] args) {
         char[] mask = "***".toCharArray();
         char[] alphabets = GenBruteForce.genChars('a', 'd');
-        
+
         log.info("> START GenBruteForce2Chars");
         GenBruteForceContext context = new GenBruteForceContext(mask, alphabets);
         GenBruteForce gen = new GenBruteForce(context);

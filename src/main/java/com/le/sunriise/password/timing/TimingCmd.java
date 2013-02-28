@@ -45,14 +45,14 @@ public class TimingCmd {
         log.info("rc4Delta=" + rc4Delta);
         long sum = (digestDelta + rc4Delta);
         log.info("sum=" + sum);
-        
-        long rate1 = maxIteration/(sum/1000L);
+
+        long rate1 = maxIteration / (sum / 1000L);
         log.info("  rate=" + rate1 + "/sec");
 
         log.info("checkerDelta=" + checkerDelta);
-        long rate2 = maxIteration/(checkerDelta/1000L);
+        long rate2 = maxIteration / (checkerDelta / 1000L);
         log.info("  rate=" + rate2 + "/sec");
-        
+
         long percentage = ((rate1 - rate2) * 100) / rate1;
         log.info("  percentage=" + percentage + "%");
     }

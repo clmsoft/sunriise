@@ -41,7 +41,7 @@ public class BruteForceTime {
             ratePerSecond = CalculateRateCmd.calculateRate(dbFileName);
         }
         ratePerSecond = 240000;
-        
+
         log.info("ratePerSecond=" + ratePerSecond);
 
         alphabetsLen = 26;
@@ -63,7 +63,7 @@ public class BruteForceTime {
         alphabetsLen = GenBruteForce.ALPHABET_US_KEYBOARD_MNY.length;
         message = "Just lower OR upper case + the rest of US keyboard ... alphabetsLen=" + alphabetsLen;
         calc(alphabetsLen, message, ratePerSecond);
-        
+
         alphabetsLen = (26 * 2) + 10;
         message = "Both lower AND upper case + digits ... alphabetsLen=" + alphabetsLen;
         calc(alphabetsLen, message, ratePerSecond);

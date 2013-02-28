@@ -1,6 +1,5 @@
 package com.le.sunriise.checker;
 
-
 public class MnyChecker {
     /**
      * @param args

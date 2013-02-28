@@ -45,7 +45,7 @@ public class CalcDistributedJobs {
             if (count >= maxJobs) {
                 char c = string.charAt(string.length() - 1);
                 if (c == lastAlphabetsChar) {
-//                    setTerminate(true);
+                    // setTerminate(true);
                 }
             }
         }

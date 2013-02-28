@@ -154,9 +154,9 @@ public class CheckPasswordHeaderCmd {
 
     private boolean checkJetFormat(JetFormat jetFormat, JetFormat jetFormat2) {
         boolean rv = true;
-    
+
         rv = jetFormat.toString().compareToIgnoreCase(jetFormat2.toString()) == 0;
-    
+
         return rv;
     }
 
@@ -169,7 +169,7 @@ public class CheckPasswordHeaderCmd {
             System.out.println("Usage: java " + clz.getName() + " file1.mny file1.mny ...");
             System.exit(1);
         }
-    
+
         try {
             CheckPasswordHeaderCmd checkPasswordHeader = new CheckPasswordHeaderCmd(new File(args[0]));
             checkPasswordHeader.checkPaths(args);

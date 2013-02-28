@@ -45,10 +45,10 @@ public class ExportToJSONAction implements ActionListener {
      * 
      */
     // private final MynViewer mnyViewer;
-//    private Component parentComponent = null;
-//    private OpenedDb srcDb = null;
+    // private Component parentComponent = null;
+    // private OpenedDb srcDb = null;
     private ExportToContext exportToContext = null;
-    
+
     private JFileChooser fc = null;
 
     private final class ExportToJSONTask implements Runnable {

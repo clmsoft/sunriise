@@ -83,7 +83,7 @@ public class EmbeddedPassword {
     }
 
     private void setPassword(String newPassword) {
-        log.warn("Not yet implemented"); 
+        log.warn("Not yet implemented");
     }
 
     private String getPassword() throws IOException {

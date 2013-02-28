@@ -40,6 +40,7 @@ import com.le.sunriise.viewer.OpenedDb;
 
 public class ExportToMdb {
     private static final Logger log = Logger.getLogger(ExportToMdb.class);
+
     /**
      * @param args
      */
@@ -218,7 +219,8 @@ public class ExportToMdb {
         log.info("Added rows=" + count + ", ms=" + delta);
     }
 
-    private static void importColumns(List<Column> srcColumns, Database db, String tableName, boolean useExistingTable) throws SQLException, IOException {
+    private static void importColumns(List<Column> srcColumns, Database db, String tableName, boolean useExistingTable)
+            throws SQLException, IOException {
         tableName = Database.escapeIdentifier(tableName);
         Table table = null;
         if (!useExistingTable || ((table = db.getTable(tableName)) == null)) {

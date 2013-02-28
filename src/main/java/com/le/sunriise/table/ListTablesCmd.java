@@ -39,7 +39,7 @@ public class ListTablesCmd {
             Database db = openedDb.getDb();
             Set<String> tableNames = db.getTableNames();
 
-//            printRowColumns(db.getSystemCatalog());
+            // printRowColumns(db.getSystemCatalog());
             tableNames = db.getSystemTableNames();
             for (String tableName : tableNames) {
                 Table table = db.getSystemTable(tableName);

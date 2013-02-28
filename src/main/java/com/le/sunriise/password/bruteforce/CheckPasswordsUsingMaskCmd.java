@@ -23,7 +23,6 @@ import java.io.IOException;
 
 import org.apache.log4j.Logger;
 
-
 public class CheckPasswordsUsingMaskCmd {
     private static final Logger log = Logger.getLogger(CheckPasswordsUsingMaskCmd.class);
 
@@ -72,9 +71,9 @@ public class CheckPasswordsUsingMaskCmd {
 
         log.info("dbFile=" + dbFile.getAbsolutePath());
         log.info("passwordLength=" + passwordLength);
-        log.info("mask=" + ((mask == null)? mask : new String(mask)));
-        log.info("alphabets=" + ((alphabets == null)? alphabets : new String(alphabets)));
-        
+        log.info("mask=" + ((mask == null) ? mask : new String(mask)));
+        log.info("alphabets=" + ((alphabets == null) ? alphabets : new String(alphabets)));
+
         String password = null;
         try {
             password = CheckBruteForceUtils.checkUsingMask(dbFile, passwordLength, mask, alphabets);

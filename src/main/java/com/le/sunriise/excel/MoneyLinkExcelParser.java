@@ -167,7 +167,7 @@ public class MoneyLinkExcelParser {
 
     private static void readInvestmentLots(HSSFWorkbook workBook) {
         List<InvestmentLot> investmentLots = new ArrayList<InvestmentLot>();
-        
+
         String sheetName = "Investment_Lots";
         int max = 10;
         List<HSSFSheet> sheets = getSheets(workBook, sheetName, max);
@@ -182,7 +182,7 @@ public class MoneyLinkExcelParser {
 
     private static void readInvestmentPrices(HSSFWorkbook workBook) {
         List<InvestmentPrice> investmentPrices = new ArrayList<InvestmentPrice>();
-        
+
         String sheetName = "Investment_Prices";
         int max = 10;
         List<HSSFSheet> sheets = getSheets(workBook, sheetName, max);
@@ -194,6 +194,6 @@ public class MoneyLinkExcelParser {
             }
         }
         log.info("Parsed " + investmentPrices.size() + " investment prices.");
-    
+
     }
 }
