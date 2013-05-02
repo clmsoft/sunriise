@@ -62,6 +62,7 @@
 					</includes>
 				</configuration>
 				<executions>
+				    <!-- Eclipse: m2eclipse http://dist.springsource.org/release/AJDT/configurator/ -->
 					<execution>
 						<goals>
 							<goal>compile</goal>       <!-- use this goal to weave all your main classes -->
