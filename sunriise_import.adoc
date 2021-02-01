@@ -253,7 +253,7 @@ When all the changes are completed on the working branch and all tests are
 green, commit your changes on the branch, (optionally) push it upstream,
 then checkout the main branch and merge the working branch back in.
 
-[source, bash]
+[source,bash,subs="attributes"]
 ----
 git branch --set-upstream-to=origin/{branchname} {branchname}
 
