@@ -20,6 +20,7 @@ endif::[]
 :svnrepo: svn://svn.code.sf.net/p/sunriise/code
 :usersfilename: sunriise_users.txt
 :userslist: {workdir}/{usersfilename}
+:branchname: Java11_build_updates
 
 == Importing this project from SourceForge to GitHub
 
@@ -63,7 +64,7 @@ cd sunriise-svn
 svn log --xml --quiet | grep author | sort -u | perl -pe 's/.*>(.*?)<.*/$1 = /' > {userslist}
 ----
 
-The resulting file should loo something like:
+The resulting file should look something like:
 
 .{usersfilename} (before editing)
 ----
@@ -95,7 +96,7 @@ NOTE: The SourceForge svn repo includes directories containing
       Testing of areas I am interested in show that I can
       exclude these modifications by using later release
       versions of these libraries, so the commands below
-      exclude their import into this new repository.
+      exclude them from being imported into this new repository.
 
 ==== Convert using `git svn`
 
@@ -151,7 +152,7 @@ git clone sunriise-gitsvn sunriise-clean
 
 I like to diff the source directory trees from the imported versions against the final
 "clean" version just to be sure we didn't miss anything. Here I test the clean version
-against bot imports, ignoring the .git subdirectories which we know to be different:
+against both imports, ignoring the .git subdirectories which we know to be different:
 
 [source,bash,subs="attributes"]
 ----
@@ -161,46 +162,80 @@ diff -rq --exclude '.git' sunriise-clean/ sunriise-gitsvn/
 diff -rq --exclude '.git' sunriise-clean/ sunriise-svn2git/
 ----
 
-In both cases I see that two empty directories from the conversions,
+In both cases I see that there are two directories missing from the final "clean" repo:
 
 ----
 src/main/java/com/le/sunriise/model/converter
 src/test/data/dict/dir03
 ----
 
-are missing. When we look we see both of them are empty.
+When we look inside the checked out repos we see both of these directories are empty.
 I consider this a positive result of the cleanup process.
 
 == Create a new repository in GitHub
 
-NOTE: When using GitLab I do this from the command line.
+Use the GitHub web site to add a new repository. When that is complete it
+displays the URL to the new location.
+
+NOTE: With GitLab I do this from the command line.
       I have not figured out the right incantation
       to do this with GitHub ... yet.
 
+Using this new location, add the contents of the checkout to the new repo in GitHub:
 
+[source,bash,subs="attributes"]
+----
+cd {workdir}
+cd sunriise-clean
 
-=== Create a new branch Java11_build_updates
+# remove the old origin and replace it with the new repo URL
+git remote rm origin
+git remote add origin git@github.com:clmsoft/sunriise
+git push --set-upstream origin master
+----
+
+Now check out the repo in a new location to make sure you have exactly what is
+in GitHub, and make the changes needed.
+
+[source,bash,subs="attributes"]
+----
+cd {workdir}
+
+git clone git@github.com:clmsoft/sunriise
+----
+
+=== Create a new branch {branchname}
+
+[source,bash,subs="attributes"]
+----
+cd {workdir}
+cd sunriise
+
+git checkout -b {branchname}
+----
 
 In the new branch, modify pom.xml with the following minimal changes:
 
-.chckin comment
-----
-Upgrade maven pom.xml to work with Java 11.
+*Upgrade maven pom.xml to work with Java 11.*
 
-Specifically: Upgrade maven-compiler-plugin from 2.3.2 to 3.8.0 and change Java version from 1.6 to 9;
+Specifically:
 
-Upgrade and use aspectj-maven-plugin, from org.codehaus.mojo version 1.3.1 to com.nickwongdev version 1.12.6 (supporting Java 11+) and change its Java compliance version from 1.6 to 1.9;
+* Upgrade maven-compiler-plugin from 2.3.2 to 3.8.0 and change Java version from 1.6 to 9;
 
-Ugrade jackcess-encrypt from 1.0.4-SNAPSHOT to 1.0.4 (Production release, not internally modified version)
+* Upgrade the aspectj-maven-plugin from org.codehaus.mojo version 1.3.1 to com.nickwongdev version 1.12.6 (supporting Java 11+) and change its Java compliance version from 1.6 to 1.9;
 
-Upgrade jackcess from 1.2.9-SNAPSHOT to 1.2.14.3 (Production release, not internally modified version).
-----
+* Upgrade jackcess-encrypt from 1.0.4-SNAPSHOT to 1.0.4 (Production release, not internally modified version)
 
-I was also tempted to add the default
-Maven Central Repository
-since the configured repos did not have as large a selection
-of availablr versions, but the ones I needed resolved
-correctly. If needed, it can be added as
+* Upgrade jackcess from 1.2.9-SNAPSHOT to 1.2.14.3 (Production release, not internally modified version).
+
+
+NOTE: I was also tempted to add the default
+      Maven Central Repository
+      since the configured repos did not have as large a selection
+      of available versions, but I found versions that worked and
+      existed in the configured repos.
+
+If needed in the future, the Maven Central Repository can be added as
 
 [source,xml]
 ----
@@ -212,13 +247,18 @@ correctly. If needed, it can be added as
 </repository>
 ----
 
-
 === Merge the branch into master
+
+When all the changes are completed on the working branch and all tests are
+green, commit your changes on the branch, (optionally) push it upstream,
+then checkout the main branch and merge the working branch back in.
 
 [source, bash]
 ----
+git branch --set-upstream-to=origin/{branchname} {branchname}
+
 git checkout master
 git fetch
 git pull
-git merge Java11_build_updates
+git merge {branchname}
 ----

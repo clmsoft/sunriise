@@ -2,6 +2,11 @@ This project is an import (fork) of the
 https://sourceforge.net/projects/sunriise/[Sunriise]
 project at SourceForge.
 
+Per the description on the
+http://sunriise.sourceforge.net/[sunriise overview page]:
+
+*sunriise* goal is to provide read/write support for Microsoft Money *.mny file.
+
 For specifics of how I pulled and updated this project
 to run with a more recent toolset, see
 xref:sunriise_import.adoc[sunriise_import.adoc].
