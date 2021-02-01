@@ -1,0 +1,9 @@
+# maven build target directory
+target/
+
+# JetBrains configuration directory
+.idea/
+
+# Files left around when the application runs
+sunriise-log.txt
+sunriise.iml
