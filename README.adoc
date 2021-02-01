@@ -1,0 +1,7 @@
+This project is an import (fork) of the
+https://sourceforge.net/projects/sunriise/[Sunriise]
+project at SourceForge.
+
+For specifics of how I pulled and updated this project
+to run with a more recent toolset, see
+xref:sunriise_import.adoc[sunriise_import.adoc].
